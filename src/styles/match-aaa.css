@@ -1,0 +1,182 @@
+/* Match discover — AAA premium (pairs with home-hero-aaa) */
+
+.pm-match-hero-card--aaa {
+  isolation: isolate;
+  border: none;
+  background: linear-gradient(
+    165deg,
+    rgba(12, 18, 48, 0.94) 0%,
+    rgba(6, 10, 32, 0.9) 50%,
+    rgba(16, 8, 38, 0.92) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(120, 180, 255, 0.28),
+    0 28px 64px rgba(0, 0, 0, 0.52),
+    0 0 56px rgba(255, 60, 180, 0.2),
+    0 0 72px rgba(60, 130, 255, 0.22);
+}
+
+.pm-match-hero-card--aaa::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 90, 200, 0.85),
+    rgba(90, 160, 255, 0.8),
+    rgba(0, 241, 164, 0.55),
+    rgba(255, 90, 200, 0.85)
+  );
+  background-size: 280% 280%;
+  animation: pm-match-aaa-border-flow 6s ease infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 6;
+}
+
+@keyframes pm-match-aaa-border-flow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* CTA — Fotoğrafları gör (sabit konum, animasyon yok) */
+.pm-match-photos-btn--aaa {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  background: rgba(10, 14, 42, 0.9);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* Photo viewer chrome */
+.pm-match-photo-ui--aaa .pm-match-photo-ui__count {
+  padding: 6px 12px;
+  border-radius: 99px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(6, 10, 36, 0.92);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.pm-match-photo-ui--aaa .pm-match-photo-ui__close,
+.pm-match-photo-ui--aaa .pm-match-photo-ui__nav {
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(
+    145deg,
+    rgba(22, 28, 62, 0.9) 0%,
+    rgba(8, 12, 38, 0.85) 100%
+  );
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.pm-match-photo-area--aaa.is-photos-open .pm-match-photo-dots span.is-active {
+  background: #fff;
+}
+
+.pm-match-card-wrap.is-photos-mode .pm-match-profile-extra--aaa {
+  opacity: 0.5;
+}
+
+/* Extra panels */
+.pm-match-games-panel--aaa,
+.pm-match-about-bar--aaa {
+  position: relative;
+  overflow: hidden;
+}
+
+.pm-match-games-panel--aaa::before,
+.pm-match-about-bar--aaa::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(100, 200, 255, 0.55),
+    rgba(180, 120, 255, 0.4),
+    rgba(255, 100, 200, 0.45)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.pm-match-games-panel--aaa {
+  background: linear-gradient(
+    160deg,
+    rgba(8, 14, 42, 0.92) 0%,
+    rgba(4, 8, 28, 0.88) 100%
+  );
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.35),
+    0 0 32px rgba(60, 140, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.pm-match-about-bar--aaa {
+  background: linear-gradient(
+    165deg,
+    rgba(6, 12, 38, 0.94) 0%,
+    rgba(3, 6, 22, 0.9) 100%
+  );
+  box-shadow:
+    0 12px 36px rgba(0, 0, 0, 0.32),
+    0 0 28px rgba(80, 160, 255, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.pm-match-games-panel--aaa .pm-match-game {
+  border: 1px solid rgba(255, 120, 200, 0.45);
+  background: linear-gradient(
+    145deg,
+    rgba(14, 18, 48, 0.95) 0%,
+    rgba(8, 10, 32, 0.9) 100%
+  );
+  box-shadow:
+    0 0 16px rgba(255, 90, 180, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pm-match-games-panel--aaa .pm-match-game:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 22px rgba(255, 90, 180, 0.22);
+}
+
+.pm-match-badge--aaa.pm-match-badge--compat {
+  box-shadow:
+    0 0 28px rgba(255, 60, 180, 0.45),
+    inset 0 0 12px rgba(255, 255, 255, 0.08);
+}
+
+.pm-match-badge--aaa.pm-match-badge--online {
+  box-shadow:
+    0 0 24px rgba(0, 255, 180, 0.35),
+    inset 0 0 10px rgba(255, 255, 255, 0.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-match-hero-card--aaa::before {
+    animation: none !important;
+  }
+}

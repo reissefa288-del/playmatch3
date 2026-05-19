@@ -1,9 +1,10 @@
-import { FiHeart, FiMapPin } from 'react-icons/fi'
+import { useCallback, useState } from 'react'
+import { FiChevronLeft, FiChevronRight, FiHeart, FiMapPin, FiX } from 'react-icons/fi'
 import { LuGamepad2, LuTarget, LuTrophy } from 'react-icons/lu'
 import { MdVerified } from 'react-icons/md'
 import { motion } from 'framer-motion'
-import type { MatchGameChip, MatchStyleTag } from '../data'
-import { matchPeekCards, matchProfile } from '../data'
+import type { MatchProfile, MatchStyleTag } from '../data'
+import { MatchPortraitCarousel } from './MatchPortraitCarousel'
 
 const tagIcons = {
   gamepad: LuGamepad2,
@@ -17,60 +18,171 @@ function TagIcon({ tag }: { tag: MatchStyleTag }) {
 }
 
 type MatchProfileCardProps = {
+  profile: MatchProfile
   portraitUrl: string
+  peekLeftName?: string
+  peekRightName?: string
 }
 
-export function MatchProfileCard({ portraitUrl }: MatchProfileCardProps) {
-  const p = matchProfile
+export function MatchProfileCard({
+  profile: p,
+  portraitUrl,
+  peekLeftName,
+  peekRightName,
+}: MatchProfileCardProps) {
+  const count = p.photos.length
+  const [photoIndex, setPhotoIndex] = useState(0)
+  const [photosOpen, setPhotosOpen] = useState(false)
+
+  const go = useCallback(
+    (delta: number) => {
+      if (count < 2) return
+      setPhotoIndex((i) => {
+        const next = i + delta
+        if (next < 0 || next >= count) return i
+        return next
+      })
+    },
+    [count],
+  )
+
+  const openPhotos = useCallback(() => {
+    setPhotoIndex(0)
+    setPhotosOpen(true)
+  }, [])
+
+  const closePhotos = useCallback(() => {
+    setPhotosOpen(false)
+  }, [])
+
+  const canPrev = photosOpen && photoIndex > 0
+  const canNext = photosOpen && photoIndex < count - 1
 
   return (
     <motion.div
-      className="pm-match-card-wrap"
+      className={`pm-match-card-wrap${photosOpen ? ' is-photos-mode' : ''}`}
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="pm-match-peek pm-match-peek--left" aria-hidden>
         <div className="pm-match-peek__card" />
-        <span className="pm-match-peek__name">{matchPeekCards.left.name}</span>
+        <span className="pm-match-peek__name">{peekLeftName ?? '···'}</span>
       </div>
       <div className="pm-match-peek pm-match-peek--right" aria-hidden>
         <div className="pm-match-peek__card" />
-        <span className="pm-match-peek__name">{matchPeekCards.right.name}</span>
+        <span className="pm-match-peek__name">{peekRightName ?? '···'}</span>
       </div>
 
       <div className="pm-match-card-stack pm-match-card-stack--a" aria-hidden />
       <div className="pm-match-card-stack pm-match-card-stack--b" aria-hidden />
 
-      <article className="pm-match-hero-card">
+      <article className="pm-match-hero-card pm-match-hero-card--aaa">
         <div className="pm-match-hero-card__glow" aria-hidden />
         <div className="pm-match-hero-card__ring" aria-hidden />
 
         <div className="pm-match-portrait-stage">
-          <img src={portraitUrl} alt="" className="pm-match-portrait-img" draggable={false} />
-          <div className="pm-match-portrait-bloom" aria-hidden />
-          <div className="pm-match-portrait-vignette" aria-hidden />
-          <div className="pm-match-portrait-shade" aria-hidden />
+          <div
+            className={`pm-match-photo-area pm-match-photo-area--aaa${photosOpen ? ' is-photos-open' : ''}`}
+          >
+            {photosOpen ? (
+              <MatchPortraitCarousel
+                photos={p.photos}
+                imageSrc={portraitUrl}
+                index={photoIndex}
+              />
+            ) : (
+              <img
+                src={portraitUrl}
+                alt=""
+                className="pm-match-portrait-img"
+                style={{ objectPosition: p.photos[0]?.objectPosition ?? '50% 8%' }}
+                draggable={false}
+              />
+            )}
 
-          <div className="pm-match-badge pm-match-badge--online">
-            <span className="pm-match-online-dot" />
-            Online
+            <div className="pm-match-portrait-bloom" aria-hidden />
+            <div className="pm-match-portrait-vignette" aria-hidden />
+            <div className="pm-match-portrait-shade" aria-hidden />
+
+            <div className="pm-match-badge pm-match-badge--online pm-match-badge--aaa">
+              <span className="pm-match-online-dot" />
+              Online
+            </div>
+
+            <div className="pm-match-badge pm-match-badge--compat pm-match-badge--aaa">
+              <FiHeart aria-hidden />
+              %{p.compatibility} Uyumluluk
+            </div>
+
+            {photosOpen ? (
+              <div
+                className="pm-match-photo-ui pm-match-photo-ui--aaa"
+                role="dialog"
+                aria-modal="true"
+                aria-label="Profil fotoğrafları"
+              >
+                <div className="pm-match-photo-ui__top">
+                  <span className="pm-match-photo-ui__count">
+                    {photoIndex + 1} / {count}
+                  </span>
+                  <button
+                    type="button"
+                    className="pm-match-photo-ui__close"
+                    onClick={closePhotos}
+                    aria-label="Fotoğrafları kapat"
+                  >
+                    <FiX aria-hidden />
+                  </button>
+                </div>
+
+                <div className="pm-match-photo-dots" aria-hidden>
+                  {p.photos.map((photo, i) => (
+                    <span key={photo.id} className={i === photoIndex ? 'is-active' : ''} />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  className="pm-match-photo-ui__nav pm-match-photo-ui__nav--prev"
+                  onClick={() => go(-1)}
+                  disabled={!canPrev}
+                  aria-label="Önceki fotoğraf"
+                >
+                  <FiChevronLeft aria-hidden />
+                </button>
+
+                <button
+                  type="button"
+                  className="pm-match-photo-ui__nav pm-match-photo-ui__nav--next"
+                  onClick={() => go(1)}
+                  disabled={!canNext}
+                  aria-label="Sonraki fotoğraf"
+                >
+                  <FiChevronRight aria-hidden />
+                </button>
+              </div>
+            ) : null}
+
+            <div className="pm-match-photo-footer">
+              {!photosOpen ? (
+                <button
+                  type="button"
+                  className="pm-match-photos-btn pm-match-photos-btn--aaa"
+                  onClick={openPhotos}
+                  aria-expanded={false}
+                >
+                  FOTOĞRAFLARI GÖR
+                </button>
+              ) : null}
+            </div>
           </div>
 
-          <div className="pm-match-badge pm-match-badge--compat">
-            <FiHeart aria-hidden />
-            %{p.compatibility} Uyumluluk
-          </div>
-
-          <button type="button" className="pm-match-photos-btn">
-            FOTO�RAFLARI G�R
-          </button>
-
-          <div className="pm-match-card-overlay">
+          <div className="pm-match-card-summary">
             <div className="pm-match-name-row">
               <h2>{p.name}</h2>
               {p.verified ? (
-                <MdVerified className="pm-match-verified" aria-label="Do�rulanm��" />
+                <MdVerified className="pm-match-verified" aria-label="Doğrulanmış" />
               ) : null}
               <span className="pm-match-age">{p.age}</span>
             </div>
@@ -90,24 +202,16 @@ export function MatchProfileCard({ portraitUrl }: MatchProfileCardProps) {
                 </span>
               ))}
             </div>
-
-            <p className="pm-match-games-label">Favori oyunlar�</p>
-            <div className="pm-match-games">
-              {p.favoriteGames.map((g: MatchGameChip) => (
-                <span
-                  key={g.id}
-                  className={`pm-match-game${g.more ? ' is-more' : ''}`}
-                  title={g.label}
-                >
-                  <span className="sr-only">{g.label}</span>
-                  <span aria-hidden>{g.emoji}</span>
-                </span>
-              ))}
-            </div>
-
-            <p className="pm-match-bio">{p.bio}</p>
           </div>
         </div>
-      </article>`n    </motion.div>
+      </article>
+
+      <aside className="pm-match-profile-extra pm-match-profile-extra--aaa">
+        <div className="pm-match-about-bar pm-match-about-bar--aaa">
+          <p className="pm-match-about-label">Hakkımda</p>
+          <p className="pm-match-about-text">{p.bio}</p>
+        </div>
+      </aside>
+    </motion.div>
   )
 }

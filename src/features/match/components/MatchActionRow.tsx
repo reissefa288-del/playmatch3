@@ -2,39 +2,86 @@ import type { ReactNode } from 'react'
 import { FiHeart, FiStar, FiX } from 'react-icons/fi'
 import { LuGamepad2, LuRotateCcw } from 'react-icons/lu'
 import { motion } from 'framer-motion'
+import { DAILY_LIKES_LIMIT } from '../data'
+import { MatchLikesQuota } from './MatchLikesQuota'
 
-export function MatchActionRow() {
+type MatchActionRowProps = {
+  onUndo: () => void
+  onPass: () => void
+  onLike: () => void
+  onInvite: () => void
+  onSuperLike: () => void
+  canUndo: boolean
+  canLike: boolean
+  canAct: boolean
+  likesRemaining: number
+  dailyLimit?: number
+}
+
+export function MatchActionRow({
+  onUndo,
+  onPass,
+  onLike,
+  onInvite,
+  onSuperLike,
+  canUndo,
+  canLike,
+  canAct,
+  likesRemaining,
+  dailyLimit = DAILY_LIKES_LIMIT,
+}: MatchActionRowProps) {
   return (
     <motion.div
-      className="pm-match-actions"
+      className="pm-match-actions-block"
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.45 }}
     >
+      <MatchLikesQuota remaining={likesRemaining} limit={dailyLimit} />
+      <motion.div className="pm-match-actions">
       <ActionCircle
         label="Geri Al"
         variant="muted"
-        badge={1}
-        icon={<LuRotateCcw className="text-xl text-[#c4c0e4]" />}
+        icon={<LuRotateCcw />}
+        onClick={onUndo}
+        disabled={!canUndo}
       />
-      <ActionCircle label="Geç" variant="pass" icon={<FiX className="text-2xl text-[#e8d8ff]" />} />
       <ActionCircle
-        label="Eşleşme isteği gönder"
-        variant="match"
-        large
-        icon={<FiHeart className="text-[2rem] text-[#ff3db8]" />}
+        label="Geç"
+        variant="pass"
+        icon={<FiX />}
+        onClick={onPass}
+        disabled={!canAct}
       />
+      <div className="pm-match-action-like-slot">
+        <ActionCircle
+          label={
+            canLike
+              ? `Eşleşme isteği gönder (${likesRemaining}/${dailyLimit})`
+              : 'Beğeni hakkın bitti'
+          }
+          variant="match"
+          large
+          icon={<FiHeart />}
+          onClick={onLike}
+          disabled={!canAct || !canLike}
+        />
+      </div>
       <ActionCircle
         label="Oyuna davet et"
         variant="invite"
-        icon={<LuGamepad2 className="text-2xl text-[#7ed4ff]" />}
+        icon={<LuGamepad2 />}
+        onClick={onInvite}
+        disabled={!canAct}
       />
       <ActionCircle
         label="Süper beğeni"
         variant="muted"
-        badge={1}
-        icon={<FiStar className="text-xl text-[#ddd0ff]" />}
+        icon={<FiStar />}
+        onClick={onSuperLike}
+        disabled={!canAct}
       />
+      </motion.div>
     </motion.div>
   )
 }
@@ -43,11 +90,19 @@ type ActionCircleProps = {
   label: string
   icon: ReactNode
   variant: 'muted' | 'pass' | 'match' | 'invite'
-  badge?: number
   large?: boolean
+  disabled?: boolean
+  onClick: () => void
 }
 
-function ActionCircle({ label, icon, variant, badge, large }: ActionCircleProps) {
+function ActionCircle({
+  label,
+  icon,
+  variant,
+  large,
+  disabled,
+  onClick,
+}: ActionCircleProps) {
   const isLarge = large || variant === 'match'
   const variantClass =
     variant === 'pass'
@@ -62,12 +117,17 @@ function ActionCircle({ label, icon, variant, badge, large }: ActionCircleProps)
     <motion.button
       type="button"
       aria-label={label}
-      className={`pm-match-action ${isLarge ? 'pm-match-action--lg' : 'pm-match-action--sm'} ${variantClass}`}
-      whileHover={{ scale: large ? 1.06 : 1.05, y: -2 }}
-      whileTap={{ scale: 0.92 }}
+      aria-disabled={disabled}
+      disabled={disabled}
+      onClick={onClick}
+      className={`pm-match-action ${isLarge ? 'pm-match-action--lg' : 'pm-match-action--sm'} ${variantClass}${disabled ? ' is-disabled' : ''}`}
+      whileHover={disabled ? undefined : { scale: large ? 1.07 : 1.055, y: -2 }}
+      whileTap={disabled ? undefined : { scale: 0.94 }}
+      transition={{ type: 'spring', stiffness: 380, damping: 26 }}
     >
-      {badge != null ? <span className="pm-match-action__badge">{badge}</span> : null}
-      {icon}
+      <span className="pm-match-action__icon" aria-hidden>
+        {icon}
+      </span>
     </motion.button>
   )
 }
