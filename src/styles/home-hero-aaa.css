@@ -1,0 +1,151 @@
+/* AAA premium glow on discovery hero card */
+
+.pm-hero-card--aaa {
+  isolation: isolate;
+  border: none;
+  background: linear-gradient(
+    155deg,
+    rgba(14, 22, 52, 0.92) 0%,
+    rgba(8, 12, 36, 0.88) 55%,
+    rgba(18, 10, 40, 0.9) 100%
+  );
+  box-shadow:
+    0 0 0 1px rgba(120, 180, 255, 0.35),
+    0 20px 50px rgba(0, 0, 0, 0.45),
+    0 0 48px rgba(255, 60, 180, 0.22),
+    0 0 64px rgba(60, 130, 255, 0.28);
+}
+
+.pm-hero-card--aaa::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 90, 200, 0.9),
+    rgba(90, 160, 255, 0.85),
+    rgba(0, 241, 164, 0.7),
+    rgba(255, 90, 200, 0.9)
+  );
+  background-size: 300% 300%;
+  animation: pm-hero-border-flow 5s ease infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes pm-hero-border-flow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.pm-hero-card__border-glow {
+  position: absolute;
+  inset: -20%;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 55% 45% at 30% 20%,
+    rgba(255, 60, 180, 0.35),
+    transparent 65%
+  );
+  filter: blur(24px);
+  opacity: 0.75;
+  pointer-events: none;
+  animation: pm-hero-glow-pulse 3.5s ease-in-out infinite;
+}
+
+.pm-hero-card__shine {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.07) 48%,
+    transparent 58%
+  );
+  background-size: 220% 100%;
+  animation: pm-hero-shine-sweep 4.2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pm-hero-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes pm-hero-shine-sweep {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -40% 0;
+  }
+}
+
+.pm-hero-card--aaa .pm-hero-card__portrait-col {
+  overflow: hidden;
+  border-radius: 20px 0 0 20px;
+}
+
+.pm-hero-card--aaa .pm-hero-card__content-col {
+  padding: 8px 10px 10px 4px;
+}
+
+.pm-hero-card--aaa .pm-hero-card__details-bottom {
+  margin-top: auto;
+}
+
+.pm-hero-card--aaa .pm-hero-card__portrait::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 55%, rgba(4, 8, 24, 0.75) 100%);
+  pointer-events: none;
+}
+
+.pm-hero-card--aaa .pm-hero-card__compat-float {
+  z-index: 6;
+  top: 12px;
+  right: 12px;
+  left: auto;
+  bottom: auto;
+  box-shadow:
+    0 0 28px rgba(255, 60, 180, 0.45),
+    inset 0 0 12px rgba(255, 255, 255, 0.08);
+}
+
+.pm-hero-card--aaa .pm-hero-card__details {
+  overflow: visible;
+  scrollbar-width: none;
+}
+
+.pm-hero-card--aaa .pm-hero-card__details::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+.pm-hero-stack__stage {
+  overflow: hidden;
+  border-radius: 22px;
+}

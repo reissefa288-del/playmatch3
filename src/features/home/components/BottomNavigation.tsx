@@ -26,12 +26,7 @@ export function BottomNavigation({ items, activeTabId }: BottomNavigationProps) 
   const { pathname } = useLocation()
 
   return (
-    <motion.nav
-      className="pm-bottom-nav"
-      aria-label="Alt Menü"
-      layout
-      transition={{ type: 'spring', stiffness: 520, damping: 38 }}
-    >
+    <nav className="pm-bottom-nav" aria-label="Alt Menü">
       {items.map((item) => {
         const labelClass = `pm-bottom-nav__label ${item.variant === 'premium' ? 'is-premium-label' : ''}`
         const active = isItemActive(item, pathname, activeTabId)
@@ -82,6 +77,6 @@ export function BottomNavigation({ items, activeTabId }: BottomNavigationProps) 
           </button>
         )
       })}
-    </motion.nav>
+    </nav>
   )
 }

@@ -42,7 +42,7 @@ export function resolveTabId(pathname: string): TabId | null {
     return 'chat'
   }
 
-  if (path === '/') {
+  if (path === '/' || path === '/nearby') {
     return 'home'
   }
 

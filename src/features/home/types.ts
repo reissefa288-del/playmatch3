@@ -15,6 +15,7 @@ export type HomeFilters = {
 export type FilterItem = {
   id: string
   label: string
+  prefix?: string
   icon?: IconType
   active?: boolean
 }
@@ -65,6 +66,7 @@ export type NearbyPlayer = {
   isOnline?: boolean
   verified?: boolean
   portraitPosition: string
+  recentActivity?: string
 }
 
 export type BottomNavItem = {

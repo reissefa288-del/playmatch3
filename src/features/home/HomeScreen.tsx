@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { FiChevronDown, FiMapPin, FiSliders } from 'react-icons/fi'
+import { useNavigate } from 'react-router-dom'
 import homeReference from '../../reference/home-final.png'
 import { AmbientParticles } from './components/AmbientParticles'
 import { FilterBar } from './components/FilterBar'
@@ -8,16 +9,18 @@ import { HeroDiscoveryStack } from './components/HeroDiscoveryStack'
 import { HomeFiltersSheet } from './components/HomeFiltersSheet'
 import { LiveSocialStrip } from './components/LiveSocialStrip'
 import { Navbar } from './components/Navbar'
-import { NearbyPlayerCard } from './components/NearbyPlayerCard'
-import { QuestCard } from './components/QuestCard'
-import { QuickStartSection } from './components/QuickStartSection'
+import { NearbyPlayersRow } from './components/NearbyPlayersRow'
+import { PremiumUnlockCard } from './components/PremiumUnlockCard'
 import { buildFilterChips } from './buildFilterChips'
 import { filterNearbyPlayers } from './filterDiscovery'
-import { nearbyPlayers, questMeta, quickStartActions } from './data'
+import { nearbyListLiveCaption, nearbyPlayers } from './data'
 import { useHomeFilters } from './useHomeFilters'
+import { useHomeScrollEnd } from './useHomeScrollEnd'
 import { useLiveSocialStats } from './useLiveSocialStats'
 
 export function HomeScreen() {
+  useHomeScrollEnd()
+  const navigate = useNavigate()
   const live = useLiveSocialStats()
   const {
     applied,
@@ -53,7 +56,7 @@ export function HomeScreen() {
       : null
 
   return (
-    <div className="pm-app-shell">
+    <div className="pm-app-shell pm-app-shell--home">
       <div className="pm-artboard">
         <AmbientParticles />
         <main className="pm-home">
@@ -98,21 +101,23 @@ export function HomeScreen() {
 
           <section className="pm-nearby-list">
             <header>
-              <h3>
-                <FiMapPin /> Yakınındaki Diğer Oyuncular
-              </h3>
-              <button type="button">Tümünü Gör</button>
+              <div>
+                <h3>
+                  <FiMapPin /> Yakınındaki Diğer Oyuncular
+                </h3>
+                {nearbyListLiveCaption.sectionEyebrow ? (
+                  <p className="pm-nearby-list__eyebrow">{nearbyListLiveCaption.sectionEyebrow}</p>
+                ) : null}
+              </div>
+              <button type="button" onClick={() => navigate('/nearby')}>
+                Tümünü Gör
+              </button>
             </header>
 
-            <div className="pm-nearby-list__scroll">
-              {visibleNearby.map((player) => (
-                <NearbyPlayerCard key={player.id} player={player} portraitImage={homeReference} />
-              ))}
-            </div>
+            <NearbyPlayersRow players={visibleNearby} portraitImage={homeReference} />
           </section>
 
-          <QuestCard {...questMeta} />
-          <QuickStartSection actions={quickStartActions} />
+          <PremiumUnlockCard />
         </main>
       </div>
       {filtersPortal}

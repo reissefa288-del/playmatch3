@@ -19,13 +19,19 @@ export const matchTabs: { id: MatchTabId; label: string; badge?: number }[] = [
   { id: 'matches', label: 'Eşleşmelerim', badge: 12 },
 ]
 
+export const matchPeekCards = {
+  left: { name: 'Ali' },
+  right: { name: 'Damla' },
+}
+
 export const matchProfile = {
   name: 'Zeynep',
   age: 21,
   verified: true,
   online: true,
   compatibility: 89,
-  locationLine: '1.8 km uzaklıkta, İstanbul, Türkiye',
+  distance: '1.8 km uzaklıkta',
+  location: 'İstanbul, Türkiye',
   tags: [
     { id: 'fps', label: 'FPS', icon: 'gamepad' as const },
     { id: 'ranked', label: 'Rekabetçi', icon: 'target' as const },
@@ -35,7 +41,8 @@ export const matchProfile = {
     { id: 'bd', label: 'Block Duel', emoji: '🧱' },
     { id: 'puz', label: 'Puzzle', emoji: '🧩' },
     { id: 'pool', label: '8 Ball', emoji: '🎱' },
-    { id: 'plus', label: '+2', emoji: '✨', more: true },
+    { id: 'ps', label: 'PlayStation', emoji: '🎮' },
+    { id: 'plus', label: '+2', emoji: '+2', more: true },
   ] satisfies MatchGameChip[],
-  bio: "Valorant & Block Duel oyuncusu. Gece kuşuyum — ranked'a gel! 🎮💜",
+  bio: 'Rekabeti severim, kazanmak için oynarım. Yeni insanlarla tanışıp takım olmak isterim! 🎮💜',
 }

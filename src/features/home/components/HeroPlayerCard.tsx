@@ -52,7 +52,9 @@ export function HeroPlayerCard({
   }
 
   return (
-    <article className={`pm-hero-card${isPeek ? ' is-peek' : ''}`}>
+    <article className={`pm-hero-card pm-hero-card--aaa${isPeek ? ' is-peek' : ''}`}>
+      <span className="pm-hero-card__border-glow" aria-hidden />
+      <span className="pm-hero-card__shine" aria-hidden />
       {showSentOverlay ? (
         <motion.div className="pm-hero-card__sent-overlay" role="status">
           <span className="pm-hero-card__sent-aurora" aria-hidden />
@@ -120,42 +122,55 @@ export function HeroPlayerCard({
 
         <div className="pm-hero-card__content-col">
           <div className="pm-hero-card__details">
-            <h2>
-              {player.name}{' '}
-              {player.verified ? <IoShieldCheckmark aria-label="Doğrulanmış" /> : null}
-              <span>{player.age}</span>
-            </h2>
-            <p>
-              <FiMapPin /> {player.distance}
-            </p>
-            <p>
-              <LuGamepad2 /> {player.location}
-            </p>
-            <p className="pm-hero-card__last-game">{player.social.lastGame}</p>
+            <div className="pm-hero-card__details-top">
+              <h2>
+                {player.name}{' '}
+                {player.verified ? <IoShieldCheckmark aria-label="Doğrulanmış" /> : null}
+                <span>{player.age}</span>
+              </h2>
 
-            <ul className="pm-hero-card__stats">
-              <li>{player.social.today}</li>
-              <li>{player.social.matches}</li>
-              <li>{player.social.mutuals}</li>
-              <li>{player.social.voice}</li>
-            </ul>
-
-            <div className="pm-tags">
-              {player.tags.map((tag) => (
-                <span key={tag.label}>
-                  <TagIcon tag={tag} /> {tag.label}
-                </span>
-              ))}
+              <ul className="pm-hero-card__meta">
+                <li>
+                  <FiMapPin aria-hidden />
+                  <span>{player.distance}</span>
+                </li>
+                <li>
+                  <LuGamepad2 aria-hidden />
+                  <span>{player.location}</span>
+                </li>
+                <li>
+                  <span>{player.social.today}</span>
+                </li>
+                <li>
+                  <span>{player.social.matches}</span>
+                </li>
+                <li>
+                  <span>{player.social.mutuals}</span>
+                </li>
+                <li>
+                  <span>{player.social.voice}</span>
+                </li>
+              </ul>
             </div>
 
-            <h3>Favori Oyunlar</h3>
-            <div className="pm-favorites">
-              {player.favoriteGames.map((game) => (
-                <div key={game.id} className="pm-mini-game">
-                  {game.label}
-                </div>
-              ))}
-              <div className="pm-mini-game muted">+3</div>
+            <div className="pm-hero-card__details-bottom">
+              <div className="pm-tags">
+                {player.tags.map((tag) => (
+                  <span key={tag.label}>
+                    <TagIcon tag={tag} /> {tag.label}
+                  </span>
+                ))}
+              </div>
+
+              <h3>Favori Oyunlar</h3>
+              <div className="pm-favorites">
+                {player.favoriteGames.map((game) => (
+                  <div key={game.id} className="pm-mini-game">
+                    {game.label}
+                  </div>
+                ))}
+                <div className="pm-mini-game muted">+3</div>
+              </div>
             </div>
           </div>
         </div>

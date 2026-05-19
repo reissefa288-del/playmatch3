@@ -6,7 +6,11 @@ import { CurrencyNavPills } from '../../currency/CurrencyNavPills'
 import { NotificationsSheet } from '../../notifications/NotificationsSheet'
 import { useNotifications } from '../../notifications/useNotifications'
 
-export function Navbar() {
+type NavbarProps = {
+  currencyVariant?: 'default' | 'match'
+}
+
+export function Navbar({ currencyVariant = 'default' }: NavbarProps) {
   const {
     items,
     open,
@@ -45,7 +49,7 @@ export function Navbar() {
         </div>
 
         <div className="pm-navbar__right">
-          <CurrencyNavPills />
+          <CurrencyNavPills variant={currencyVariant} />
 
           <button
             className={`pm-icon-button pm-icon-button--bell${open ? ' is-open' : ''}`}

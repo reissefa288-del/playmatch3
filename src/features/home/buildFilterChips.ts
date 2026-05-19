@@ -9,7 +9,7 @@ export function buildFilterChips(filters: HomeFilters): FilterItem[] {
       : (HOME_GENDER_OPTIONS.find((o) => o.id === filters.gender)?.label ?? 'Cinsiyet')
 
   return [
-    { id: 'distance', label: `Mesafe: 0 - ${filters.maxDistanceKm} km` },
+    { id: 'distance', label: `Mesafe · 0–${filters.maxDistanceKm} km` },
     { id: 'online', label: 'Online', active: filters.onlineOnly },
     { id: 'gender', label: genderLabel, icon: FiUsers },
   ]

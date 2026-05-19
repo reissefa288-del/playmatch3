@@ -1,16 +1,9 @@
-import { motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
-import { BottomNavigation } from '../features/home/components/BottomNavigation'
-import { bottomNavigation } from '../features/home/data'
 import { TabPanel } from './TabPanel'
 import { getTabDirection, MAIN_TABS, PREMIUM_TAB, resolveTabId, type TabId } from './tabConfig'
 
-type MainTabLayoutProps = {
-  hideDock?: boolean
-}
-
-export function MainTabLayout({ hideDock = false }: MainTabLayoutProps) {
+export function MainTabLayout() {
   const location = useLocation()
   const activeTabId = resolveTabId(location.pathname)
   const [mountedTabs, setMountedTabs] = useState<Set<TabId>>(() =>
@@ -43,11 +36,8 @@ export function MainTabLayout({ hideDock = false }: MainTabLayoutProps) {
     return <Navigate to="/" replace />
   }
 
-  const navContextClass =
-    activeTabId === 'home' ? 'pm-nav-dock' : `pm-nav-dock pm-app-shell--${activeTabId}`
-
   return (
-    <motion.div className="pm-main-layout" layout>
+    <div className="pm-main-layout">
       <div className="pm-tab-viewport" role="presentation">
         {[...MAIN_TABS, PREMIUM_TAB].map((tab) => {
           if (!mountedTabs.has(tab.id)) return null
@@ -66,12 +56,6 @@ export function MainTabLayout({ hideDock = false }: MainTabLayoutProps) {
           )
         })}
       </div>
-
-      {!hideDock ? (
-        <motion.div className={navContextClass} layout="position">
-          <BottomNavigation items={bottomNavigation} activeTabId={activeTabId} />
-        </motion.div>
-      ) : null}
-    </motion.div>
+    </div>
   )
 }
