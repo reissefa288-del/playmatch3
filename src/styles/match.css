@@ -1,0 +1,379 @@
+/* -------------------------------------------------------------------------- */
+/* PlayMeet Match — cinematic matchmaking (pairs with Tailwind in components) */
+/* -------------------------------------------------------------------------- */
+
+.pm-match {
+  width: 100%;
+  flex: 1 0 auto;
+  padding: 14px 14px 128px;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  color: #fff;
+  --pm-match-rx: 0deg;
+  --pm-match-ry: 0deg;
+  --pm-ease-luxe: cubic-bezier(0.23, 1, 0.32, 1);
+  isolation: isolate;
+  gap: 1.5rem;
+}
+
+.pm-match::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 1;
+  background:
+    radial-gradient(ellipse 110% 75% at 50% -8%, rgba(170, 90, 255, 0.2), transparent 52%),
+    radial-gradient(ellipse 85% 60% at 100% 32%, rgba(45, 130, 255, 0.18), transparent 54%),
+    radial-gradient(ellipse 75% 55% at 0% 58%, rgba(255, 60, 160, 0.12), transparent 50%),
+    radial-gradient(ellipse 95% 50% at 50% 108%, rgba(70, 100, 220, 0.14), transparent 56%);
+  animation: pm-match-atmosphere 22s ease-in-out infinite alternate;
+}
+
+.pm-match::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 90% 65% at 50% 100%, rgba(0, 2, 14, 0.78), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 50% 0%, rgba(120, 60, 200, 0.06), transparent 55%);
+  opacity: 0.95;
+}
+
+.pm-match > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pm-match-discover {
+  display: flex;
+  flex-direction: column;
+  gap: 1.375rem;
+}
+
+.pm-match-filter-btn:hover {
+  border-color: rgba(255, 130, 200, 0.5);
+  box-shadow:
+    0 0 28px rgba(255, 90, 180, 0.24),
+    0 0 32px rgba(80, 140, 255, 0.16);
+}
+
+.pm-match-card-stack--a {
+  animation: pm-match-stack-drift-a 14s ease-in-out infinite alternate;
+}
+
+.pm-match-card-stack--b {
+  animation: pm-match-stack-drift-b 16s ease-in-out infinite alternate;
+}
+
+.pm-match-hero-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  animation: pm-match-card-float 9s var(--pm-ease-luxe) infinite alternate;
+}
+
+.pm-match-hero-card__ring {
+  background:
+    conic-gradient(
+      from 200deg,
+      rgba(80, 210, 255, 1),
+      rgba(210, 110, 255, 0.9),
+      rgba(255, 90, 190, 1),
+      rgba(130, 170, 255, 0.95),
+      rgba(80, 210, 255, 1)
+    );
+  opacity: 0.72;
+  filter: blur(0.15px);
+  animation: pm-match-ring-pulse 5s ease-in-out infinite alternate;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  padding: 3px;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+}
+
+.pm-match-hero-card__glow {
+  pointer-events: none;
+  position: absolute;
+  inset: -12%;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 30%, rgba(255, 80, 180, 0.18), transparent 58%),
+    radial-gradient(ellipse 60% 50% at 20% 80%, rgba(80, 160, 255, 0.14), transparent 55%);
+  opacity: 0.85;
+  animation: pm-match-card-glow 8s ease-in-out infinite alternate;
+}
+
+.pm-match-portrait-stage {
+  position: relative;
+  overflow: hidden;
+}
+
+.pm-match-portrait-img {
+  object-position: 50% 12%;
+  transform: scale(1.12);
+  filter: saturate(1.12) contrast(1.06) brightness(1.02);
+}
+
+.pm-match-portrait-bloom {
+  pointer-events: none;
+  position: absolute;
+  inset: -8%;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 35%, rgba(255, 100, 200, 0.12), transparent 62%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(40, 80, 200, 0.2), transparent 55%);
+  mix-blend-mode: screen;
+  opacity: 0.7;
+}
+
+.pm-match-portrait-vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-shadow:
+    inset 0 0 100px rgba(0, 0, 0, 0.45),
+    inset 0 -120px 80px rgba(4, 6, 22, 0.85);
+}
+
+.pm-match-online-dot {
+  animation: pm-match-online-pulse 1.9s ease-in-out infinite;
+}
+
+.pm-match-tag-chip {
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.12, 0.32, 1),
+    box-shadow 0.32s var(--pm-ease-luxe),
+    border-color 0.28s ease;
+}
+
+.pm-match-tag-chip:hover {
+  transform: translateY(-2px);
+  border-color: rgba(180, 200, 255, 0.55);
+  box-shadow:
+    0 0 22px rgba(120, 160, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.pm-match-game-chip {
+  transition:
+    transform 0.28s cubic-bezier(0.34, 1.12, 0.32, 1),
+    box-shadow 0.32s var(--pm-ease-luxe);
+}
+
+.pm-match-bio {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -20px 40px rgba(0, 0, 0, 0.15),
+    0 0 32px rgba(80, 120, 255, 0.1);
+}
+
+.pm-match-actions {
+  padding: 0.25rem 0 0.5rem;
+}
+
+.pm-match-action-btn--match {
+  animation: pm-match-heart-glow 3.2s ease-in-out infinite alternate;
+}
+
+.pm-match-action-btn--invite {
+  animation: pm-match-invite-glow 3.6s ease-in-out infinite alternate;
+}
+
+.pm-match-boost-shimmer {
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.14) 48%,
+    transparent 62%
+  );
+  background-size: 200% 100%;
+  animation: pm-match-boost-shimmer 7s var(--pm-ease-luxe) infinite;
+}
+
+.pm-app-shell--match .pm-navbar {
+  padding: 4px 0 6px;
+}
+
+
+.pm-app-shell--match .pm-pill {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 6px 20px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(90, 130, 255, 0.08);
+}
+
+.pm-app-shell--match .pm-bottom-nav {
+  background:
+    radial-gradient(ellipse 105% 85% at 50% 0%, rgba(255, 96, 194, 0.12), transparent 54%),
+    radial-gradient(ellipse 100% 80% at 50% 100%, rgba(70, 152, 255, 0.15), transparent 58%),
+    rgba(3, 6, 22, 0.95);
+  backdrop-filter: blur(32px) saturate(1.28);
+  -webkit-backdrop-filter: blur(32px) saturate(1.28);
+  box-shadow:
+    0 -24px 80px rgba(92, 62, 208, 0.32),
+    0 -14px 50px rgba(44, 128, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.pm-app-shell--match .pm-bottom-nav__item.is-active:not(.is-premium) {
+  color: #ff9ce7;
+}
+
+.pm-app-shell--match .pm-bottom-nav__item.is-active:not(.is-premium) .pm-bottom-nav__icon {
+  transform: translateY(-4px) scale(1.14);
+  filter:
+    drop-shadow(0 0 30px rgba(255, 124, 214, 0.72))
+    drop-shadow(0 0 42px rgba(84, 180, 255, 0.38));
+  animation: pm-match-nav-active-pulse 2.8s ease-in-out infinite alternate;
+}
+
+.pm-app-shell--match .pm-bottom-nav__item.is-active:not(.is-premium) .pm-bottom-nav__label {
+  color: #ffdffd;
+  text-shadow: 0 0 16px rgba(255, 120, 200, 0.35);
+}
+
+@keyframes pm-match-atmosphere {
+  0% {
+    transform: translate3d(-1.2%, -0.6%, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(1.4%, 0.8%, 0) scale(1.04);
+  }
+}
+
+@keyframes pm-match-card-float {
+  0% {
+    transform: perspective(900px) rotateX(var(--pm-match-rx, 0deg)) rotateY(var(--pm-match-ry, 0deg))
+      translateY(0);
+  }
+  100% {
+    transform: perspective(900px) rotateX(var(--pm-match-rx, 0deg)) rotateY(var(--pm-match-ry, 0deg))
+      translateY(-6px);
+  }
+}
+
+@keyframes pm-match-card-glow {
+  0% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0.95;
+  }
+}
+
+@keyframes pm-match-stack-drift-a {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-0.35deg);
+  }
+  100% {
+    transform: translate3d(3px, -4px, 0) rotate(0.55deg);
+  }
+}
+
+@keyframes pm-match-stack-drift-b {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0.3deg);
+  }
+  100% {
+    transform: translate3d(-4px, 3px, 0) rotate(-0.5deg);
+  }
+}
+
+@keyframes pm-match-ring-pulse {
+  0% {
+    opacity: 0.55;
+    filter: blur(0.4px) hue-rotate(0deg);
+  }
+  100% {
+    opacity: 0.82;
+    filter: blur(0.1px) hue-rotate(22deg);
+  }
+}
+
+@keyframes pm-match-online-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(0, 241, 164, 0.5);
+  }
+  50% {
+    transform: scale(1.14);
+    box-shadow: 0 0 22px rgba(0, 241, 164, 0.75);
+  }
+}
+
+@keyframes pm-match-heart-glow {
+  0% {
+    box-shadow:
+      0 0 36px rgba(255, 60, 170, 0.5),
+      0 0 70px rgba(255, 80, 190, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 52px rgba(255, 60, 170, 0.68),
+      0 0 100px rgba(255, 80, 190, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.24);
+  }
+}
+
+@keyframes pm-match-invite-glow {
+  0% {
+    box-shadow:
+      0 0 28px rgba(60, 160, 255, 0.45),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+  100% {
+    box-shadow:
+      0 0 44px rgba(60, 180, 255, 0.62),
+      0 0 60px rgba(80, 140, 255, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  }
+}
+
+@keyframes pm-match-nav-active-pulse {
+  0% {
+    filter:
+      drop-shadow(0 0 24px rgba(255, 124, 214, 0.58))
+      drop-shadow(0 0 34px rgba(84, 180, 255, 0.28));
+  }
+  100% {
+    filter:
+      drop-shadow(0 0 34px rgba(255, 124, 214, 0.78))
+      drop-shadow(0 0 48px rgba(84, 180, 255, 0.42));
+  }
+}
+
+@keyframes pm-match-boost-shimmer {
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-match::before,
+  .pm-match-card-stack--a,
+  .pm-match-card-stack--b,
+  .pm-match-hero-card,
+  .pm-match-hero-card__glow,
+  .pm-match-hero-card__ring,
+  .pm-match-online-dot,
+  .pm-match-boost-shimmer,
+  .pm-match-action-btn--match,
+  .pm-match-action-btn--invite,
+  .pm-app-shell--match .pm-bottom-nav__item.is-active:not(.is-premium) .pm-bottom-nav__icon {
+    animation: none !important;
+  }
+}

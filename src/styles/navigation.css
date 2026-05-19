@@ -1,0 +1,125 @@
+/* PlayMeet — app shell navigation (tabs, stack, transitions) */
+
+.pm-app-frame {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  isolation: isolate;
+}
+
+.pm-main-layout {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+}
+
+.pm-tab-viewport {
+  position: relative;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+}
+
+.pm-tab-panel {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  min-height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  will-change: opacity, transform;
+}
+
+.pm-tab-panel:not(.is-active) {
+  visibility: hidden;
+}
+
+.pm-tab-panel.is-active {
+  visibility: visible;
+}
+
+.pm-stack-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  width: 100%;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #01030b;
+  will-change: opacity, transform;
+}
+
+.pm-stack-overlay .pm-app-shell {
+  min-height: 100svh;
+}
+
+/* Dock wrapper — tab-specific nav chrome without duplicating the bar per screen */
+.pm-nav-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.pm-nav-dock .pm-bottom-nav {
+  pointer-events: auto;
+}
+
+/* Bottom nav — sliding active indicator */
+.pm-bottom-nav {
+  transform: translateX(-50%);
+}
+
+.pm-bottom-nav__indicator {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  width: 34px;
+  height: 34px;
+  margin-left: -17px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(255, 120, 200, 0.22), rgba(80, 120, 255, 0.1) 58%, transparent 72%);
+  box-shadow:
+    0 0 28px rgba(255, 90, 180, 0.2),
+    0 0 40px rgba(70, 130, 255, 0.12),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  opacity: 0.92;
+}
+
+.pm-bottom-nav__item.is-premium .pm-bottom-nav__indicator {
+  width: 38px;
+  height: 38px;
+  margin-left: -19px;
+  top: 2px;
+  background: radial-gradient(circle at 50% 38%, rgba(255, 220, 150, 0.32), rgba(255, 90, 160, 0.14) 55%, transparent 72%);
+  box-shadow:
+    0 0 32px rgba(255, 200, 120, 0.28),
+    0 0 44px rgba(255, 80, 160, 0.14),
+    inset 0 0 0 1px rgba(255, 240, 200, 0.12);
+}
+
+.pm-bottom-nav__item {
+  position: relative;
+  z-index: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-tab-panel {
+    transition: none !important;
+    will-change: auto !important;
+  }
+
+  .pm-stack-overlay {
+    will-change: auto !important;
+  }
+
+  .pm-bottom-nav__indicator {
+    transition: none !important;
+  }
+}
