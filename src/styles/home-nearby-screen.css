@@ -6,11 +6,13 @@
 }
 
 .pm-nearby-screen {
+  --pm-layout-pad: 14px;
   display: flex;
   flex-direction: column;
   min-height: 100%;
   gap: 12px;
-  padding-bottom: 24px;
+  padding: var(--pm-layout-pad) var(--pm-layout-pad) 24px;
+  box-sizing: border-box;
 }
 
 .pm-nearby-screen__hero {
@@ -18,7 +20,7 @@
   grid-template-columns: auto 1fr auto;
   gap: 12px;
   align-items: start;
-  padding: 8px 14px 4px;
+  padding: 8px 0 4px;
 }
 
 .pm-nearby-screen__back {
@@ -108,7 +110,7 @@
 .pm-nearby-players-list {
   list-style: none;
   margin: 0;
-  padding: 0 14px 20px;
+  padding: 0 0 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;

@@ -106,14 +106,6 @@ export const premiumTrust = {
   text: 'Güvenli ödeme • İstediğin zaman iptal et • %100 gizlilik',
 }
 
-export const premiumFloatingIcons: { id: string; icon: IconType; className: string }[] = [
-  { id: 'heart', icon: FiHeart, className: 'is-a' },
-  { id: 'zap', icon: FiZap, className: 'is-b' },
-  { id: 'eye', icon: FiEye, className: 'is-c' },
-  { id: 'chat', icon: FiMessageCircle, className: 'is-d' },
-  { id: 'crown', icon: LuCrown, className: 'is-e' },
-]
-
 export const premiumGiftCta = {
   label: 'Premium Hediye Et',
   icon: FiGift,

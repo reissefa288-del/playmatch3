@@ -20,6 +20,7 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     id: 'zeynep',
     name: 'Zeynep',
     age: 21,
+    gender: 'female',
     verified: true,
     isOnline: true,
     distance: '1.2 km',
@@ -42,6 +43,7 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     id: 'mert',
     name: 'Mert',
     age: 24,
+    gender: 'male',
     isOnline: true,
     distance: '3.2 km',
     location: 'İstanbul, Türkiye',
@@ -61,6 +63,7 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     id: 'damla',
     name: 'Damla',
     age: 20,
+    gender: 'female',
     verified: true,
     isOnline: true,
     distance: '4.1 km',
@@ -81,6 +84,7 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     id: 'ali',
     name: 'Ali',
     age: 23,
+    gender: 'male',
     isOnline: true,
     distance: '2.4 km',
     location: 'Beşiktaş, İstanbul',
@@ -100,6 +104,7 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     id: 'emir',
     name: 'Emir',
     age: 25,
+    gender: 'male',
     isOnline: true,
     distance: '5.0 km',
     location: 'Üsküdar, İstanbul',
@@ -124,8 +129,7 @@ export const heroPlayerMeta = {
   stats: ['Bugün aktif', '4 maç', '5 ortak arkadaş', 'İng. açık'],
 }
 
-/** Sprite crop on home-final.png for hero portrait (Zeynep) */
-export const heroPortraitPosition = '14% 38%'
+export const heroPortraitPosition = '50% 12%'
 
 export const heroGames: FavoriteGame[] = [
   { id: 'lol', label: 'LOL' },

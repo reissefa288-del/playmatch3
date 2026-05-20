@@ -2,12 +2,12 @@ import { useState } from 'react'
 import { FiCheck, FiHeart, FiMapPin } from 'react-icons/fi'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { NearbyPlayer } from '../types'
 import { useNearbyLikes } from '../useNearbyLikes'
 
 type NearbyPlayerListCardProps = {
   player: NearbyPlayer
-  portraitImage: string
   index?: number
   onDismissed?: () => void
 }
@@ -18,7 +18,6 @@ const BURST_MS = 720
 
 export function NearbyPlayerListCard({
   player,
-  portraitImage,
   index = 0,
   onDismissed,
 }: NearbyPlayerListCardProps) {
@@ -77,7 +76,7 @@ export function NearbyPlayerListCard({
       <div
         className="pm-nearby-list-card__portrait"
         style={{
-          backgroundImage: `url(${portraitImage})`,
+          backgroundImage: `url(${fakePortraitForProfile(player.id, player.gender)})`,
           backgroundPosition: player.portraitPosition,
         }}
       >

@@ -1,9 +1,7 @@
 import { useMemo } from 'react'
-import type { CSSProperties } from 'react'
 import { FiArrowLeft, FiMapPin, FiUsers } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import homeReference from '../../reference/home-final.png'
 import { AmbientParticles } from './components/AmbientParticles'
 import { Navbar } from './components/Navbar'
 import { NearbyPlayersList } from './components/NearbyPlayersList'
@@ -23,12 +21,8 @@ export function NearbyPlayersScreen() {
     [applied],
   )
 
-  const screenVars = {
-    '--pm-nearby-reference': `url(${homeReference})`,
-  } as CSSProperties
-
   return (
-    <div className="pm-app-shell pm-app-shell--nearby" style={screenVars}>
+    <motion.div className="pm-app-shell pm-app-shell--nearby">
       <div className="pm-artboard">
         <AmbientParticles />
         <main className="pm-nearby-screen">
@@ -49,7 +43,7 @@ export function NearbyPlayersScreen() {
               <FiArrowLeft />
             </button>
 
-            <div className="pm-nearby-screen__hero-copy">
+            <motion.div className="pm-nearby-screen__hero-copy">
               <span className="pm-nearby-screen__badge">CANLI LOBİ</span>
               <h1>
                 <FiMapPin aria-hidden /> Yakındaki Oyuncular
@@ -60,7 +54,7 @@ export function NearbyPlayersScreen() {
                 <span>·</span>
                 <span>{live.waitLabel}</span>
               </motion.div>
-            </div>
+            </motion.div>
 
             <div className="pm-nearby-screen__count" aria-label={`${visibleNearby.length} oyuncu`}>
               <FiUsers aria-hidden />
@@ -68,9 +62,9 @@ export function NearbyPlayersScreen() {
             </div>
           </motion.header>
 
-          <NearbyPlayersList players={visibleNearby} portraitImage={homeReference} />
+          <NearbyPlayersList players={visibleNearby} />
         </main>
       </div>
-    </div>
+    </motion.div>
   )
 }

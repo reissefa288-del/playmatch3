@@ -2,7 +2,6 @@ import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { FiChevronDown, FiMapPin, FiSliders } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import homeReference from '../../reference/home-final.png'
 import { AmbientParticles } from './components/AmbientParticles'
 import { FilterBar } from './components/FilterBar'
 import { HeroDiscoveryStack } from './components/HeroDiscoveryStack'
@@ -90,7 +89,7 @@ export function HomeScreen() {
 
           <FilterBar filters={filterChips} onToggleOnline={toggleOnlineQuick} />
 
-          <HeroDiscoveryStack portraitImage={homeReference} />
+          <HeroDiscoveryStack />
 
           <div className="pm-carousel-dots">
             <span className="is-active" />
@@ -114,7 +113,7 @@ export function HomeScreen() {
               </button>
             </header>
 
-            <NearbyPlayersRow players={visibleNearby} portraitImage={homeReference} />
+            <NearbyPlayersRow players={visibleNearby} />
           </section>
 
           <PremiumUnlockCard />

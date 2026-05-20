@@ -1,13 +1,13 @@
 import { FiPlus } from 'react-icons/fi'
 import { motion } from 'framer-motion'
+import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { OnlineUser } from '../data'
 
 type OnlineUsersRowProps = {
   users: OnlineUser[]
-  portraitUrl: string
 }
 
-export function OnlineUsersRow({ users, portraitUrl }: OnlineUsersRowProps) {
+export function OnlineUsersRow({ users }: OnlineUsersRowProps) {
   return (
     <motion.section
       className="pm-chat-online"
@@ -40,7 +40,7 @@ export function OnlineUsersRow({ users, portraitUrl }: OnlineUsersRowProps) {
           <span
             className="pm-chat-online__avatar"
             style={{
-              backgroundImage: `url(${portraitUrl})`,
+              backgroundImage: `url(${fakePortraitForProfile(user.id)})`,
               backgroundPosition: user.portraitPosition,
             }}
           />

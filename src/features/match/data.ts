@@ -1,3 +1,8 @@
+import {
+  fakePortraitForGender,
+  type FakePortraitGender,
+} from '../../shared/fakePortraits'
+
 export type MatchTabId = 'discover' | 'likers' | 'matches'
 
 export type MatchGameChip = {
@@ -22,6 +27,8 @@ export type MatchProfile = {
   id: string
   name: string
   age: number
+  gender: FakePortraitGender
+  portraitSrc: string
   verified?: boolean
   online: boolean
   compatibility: number
@@ -41,20 +48,30 @@ export const matchTabs: { id: MatchTabId; label: string; badge?: number }[] = [
   { id: 'matches', label: 'Eşleşmelerim', badge: 12 },
 ]
 
-function photos(base: string, id: string): MatchPhoto[] {
-  const [x = '50%', y = '40%'] = base.split(/\s+/)
+function photos(id: string): MatchPhoto[] {
   return [
-    { id: `${id}-1`, objectPosition: base },
-    { id: `${id}-2`, objectPosition: `${x} 22%` },
-    { id: `${id}-3`, objectPosition: `72% ${y}` },
+    { id: `${id}-1`, objectPosition: '50% 10%' },
+    { id: `${id}-2`, objectPosition: '50% 38%' },
+    { id: `${id}-3`, objectPosition: '50% 68%' },
   ]
 }
 
+type ProfileSeed = Omit<MatchProfile, 'photos' | 'portraitSrc'> & { gender: FakePortraitGender }
+
+function profile(seed: ProfileSeed): MatchProfile {
+  return {
+    ...seed,
+    portraitSrc: fakePortraitForGender(seed.gender),
+    photos: photos(seed.id),
+  }
+}
+
 export const matchDiscoverProfiles: MatchProfile[] = [
-  {
+  profile({
     id: 'zeynep',
     name: 'Zeynep',
     age: 21,
+    gender: 'female',
     verified: true,
     online: true,
     compatibility: 92,
@@ -72,12 +89,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'plus', label: '+2', emoji: '+2', more: true },
     ],
     bio: 'Rekabeti severim, kazanmak için oynarım. Yeni insanlarla tanışıp takım olmak isterim! 🎮💜',
-    photos: photos('14% 38%', 'zeynep'),
-  },
-  {
+  }),
+  profile({
     id: 'mert',
     name: 'Mert',
     age: 24,
+    gender: 'male',
     online: true,
     compatibility: 87,
     distance: '3.2 km uzaklıkta',
@@ -92,12 +109,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: '8top', label: '8 Top', emoji: '🎱' },
     ],
     bio: 'Strateji oyunlarında sabırlıyım; iyi bir duo arıyorum. Akşamları ranked açığım.',
-    photos: photos('32% 56%', 'mert'),
-  },
-  {
+  }),
+  profile({
     id: 'damla',
     name: 'Damla',
     age: 20,
+    gender: 'female',
     verified: true,
     online: true,
     compatibility: 84,
@@ -113,12 +130,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'puz', label: 'Puzzle', emoji: '🧩' },
     ],
     bio: 'Eğlence önceliğim; toxic olmayan lobilerde takılırım. Birlikte puzzle çözelim mi?',
-    photos: photos('54% 54%', 'damla'),
-  },
-  {
+  }),
+  profile({
     id: 'ali',
     name: 'Ali',
     age: 23,
+    gender: 'male',
     online: true,
     compatibility: 79,
     distance: '2.4 km uzaklıkta',
@@ -132,12 +149,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'block', label: 'Block Duel', emoji: '🧱' },
     ],
     bio: '8 Top ve Block Duel ana oyunlarım. Hızlı maç, net iletişim — hazırım.',
-    photos: photos('8% 58%', 'ali'),
-  },
-  {
+  }),
+  profile({
     id: 'emir',
     name: 'Emir',
     age: 25,
+    gender: 'male',
     online: true,
     compatibility: 76,
     distance: '5.0 km uzaklıkta',
@@ -151,12 +168,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'duel', label: 'Duel', emoji: '⚔️' },
     ],
     bio: 'Puzzle Rush tutkunu. Yeni modları dener, skor tablosunda yükselmeyi severim.',
-    photos: photos('80% 55%', 'emir'),
-  },
-  {
+  }),
+  profile({
     id: 'ece',
     name: 'Ece',
     age: 22,
+    gender: 'female',
     verified: true,
     online: true,
     compatibility: 88,
@@ -172,12 +189,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'ps', label: 'PlayStation', emoji: '🎮' },
     ],
     bio: 'Ranked arıyorum; iletişim güçlü, tilt az. Duo için uygun saatlerde online.',
-    photos: photos('20% 42%', 'ece'),
-  },
-  {
+  }),
+  profile({
     id: 'azra',
     name: 'Azra',
     age: 19,
+    gender: 'female',
     online: true,
     compatibility: 81,
     distance: '2.9 km uzaklıkta',
@@ -191,12 +208,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'xox', label: 'XOX', emoji: '❌' },
     ],
     bio: 'Yeni başladım ama öğrenmeye açığım. Sakin ve eğlenceli maçlar arıyorum.',
-    photos: photos('45% 48%', 'azra'),
-  },
-  {
+  }),
+  profile({
     id: 'can',
     name: 'Can',
     age: 26,
+    gender: 'male',
     online: true,
     compatibility: 83,
     distance: '3.6 km uzaklıkta',
@@ -211,12 +228,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'plus', label: '+1', emoji: '+1', more: true },
     ],
     bio: 'Duo partneri arıyorum; maç sonrası kısa sohbet, uzun vadede sabit takım.',
-    photos: photos('68% 52%', 'can'),
-  },
-  {
+  }),
+  profile({
     id: 'selin',
     name: 'Selin',
     age: 21,
+    gender: 'female',
     verified: true,
     online: false,
     compatibility: 77,
@@ -231,12 +248,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'block', label: 'Block', emoji: '🧱' },
     ],
     bio: 'Akşamları puzzle ve block; hafta sonu daha uzun oturumlar. Mesaj atın.',
-    photos: photos('12% 62%', 'selin'),
-  },
-  {
+  }),
+  profile({
     id: 'berk',
     name: 'Berk',
     age: 24,
+    gender: 'male',
     online: true,
     compatibility: 90,
     distance: '5.2 km uzaklıkta',
@@ -250,8 +267,7 @@ export const matchDiscoverProfiles: MatchProfile[] = [
       { id: 'val', label: 'Valorant', emoji: '🎯' },
     ],
     bio: 'Yüksek elo maçları; analitik oyun tarzı. Ciddi ama saygılı takım arkadaşı.',
-    photos: photos('38% 60%', 'berk'),
-  },
+  }),
 ]
 
 /** @deprecated use matchDiscoverProfiles */

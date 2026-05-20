@@ -1,0 +1,89 @@
+/* PlayMeet marka — sol kenara yaslı, kırpılmış ikon + wordmark */
+
+.pm-navbar {
+  width: 100%;
+  align-self: stretch;
+  box-sizing: border-box;
+}
+
+.pm-brand--aaa {
+  position: relative;
+  isolation: isolate;
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-left: calc(-1 * var(--pm-layout-pad, 14px));
+}
+
+.pm-brand__backdrop {
+  position: absolute;
+  inset: -4px -14px -4px 0;
+  z-index: 0;
+  border-radius: 0 var(--pm-nav-chip-radius, 14px) var(--pm-nav-chip-radius, 14px) 0;
+  border-left: none;
+  pointer-events: none;
+}
+
+.pm-brand__mark {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 14px 0 2px;
+  box-sizing: border-box;
+}
+
+/* Kare PNG — üstteki kalp ikonu; alttaki gömülü yazı wordmark ile değişir */
+.pm-brand__logo-wrap {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.pm-brand--aaa .pm-brand__logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 14%;
+  transform: scale(1.28);
+  transform-origin: 50% 18%;
+  animation: pm-logo-neon-breathe 3.6s ease-in-out infinite;
+}
+
+@keyframes pm-logo-neon-breathe {
+  0%,
+  100% {
+    filter:
+      drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 0 6px rgba(255, 70, 180, 0.35))
+      drop-shadow(0 0 5px rgba(70, 160, 255, 0.25));
+  }
+  50% {
+    filter:
+      drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45))
+      drop-shadow(0 0 13px rgba(255, 90, 200, 0.55))
+      drop-shadow(0 0 11px rgba(80, 180, 255, 0.45));
+  }
+}
+
+.pm-brand--aaa .pm-brand__wordmark {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1;
+  white-space: nowrap;
+  background: linear-gradient(180deg, #ffffff 0%, #e8eaf4 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-brand--aaa .pm-brand__logo {
+    animation: none;
+  }
+}

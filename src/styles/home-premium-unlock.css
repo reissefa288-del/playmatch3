@@ -6,8 +6,8 @@
   align-items: center;
   text-align: center;
   gap: 10px;
-  min-height: 248px;
-  padding: 14px 16px 16px;
+  min-height: 0;
+  padding: 14px 16px 18px;
   border-radius: 22px;
   overflow: hidden;
   border: 1px solid rgba(80, 160, 255, 0.45);
@@ -183,7 +183,8 @@
   align-items: center;
   justify-content: center;
   height: 48px;
-  margin-top: 2px;
+  margin-top: 4px;
+  flex-shrink: 0;
   border-radius: 16px;
   text-decoration: none;
   overflow: hidden;

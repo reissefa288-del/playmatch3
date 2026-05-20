@@ -1,9 +1,10 @@
 /* Match screen — match-final.png layout */
 
 .pm-match {
+  --pm-layout-pad: 14px;
   width: 100%;
   flex: 0 0 auto;
-  padding: 12px 14px 0;
+  padding: 12px var(--pm-layout-pad) 0;
   position: relative;
   z-index: 1;
   box-sizing: border-box;
@@ -1063,11 +1064,6 @@
 /* Match navbar currencies */
 .pm-currency-nav--match {
   gap: 8px;
-}
-
-.pm-currency-nav__item.is-gold {
-  border-color: rgba(255, 200, 100, 0.45);
-  background: rgba(28, 18, 8, 0.75);
 }
 
 .pm-match-empty {

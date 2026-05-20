@@ -1,4 +1,5 @@
-import type { CSSProperties } from 'react'
+import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
@@ -6,13 +7,38 @@ import { premiumFeatures, premiumPackages } from './data'
 import { PremiumFeaturesGrid } from './components/PremiumFeaturesGrid'
 import { PremiumHero } from './components/PremiumHero'
 import { PremiumPackages } from './components/PremiumPackages'
+import { PremiumSheet } from './components/PremiumSheet'
 import { PremiumTitleBar } from './components/PremiumTitleBar'
-import premiumReference from '../../reference/premium-final.png'
+import { PremiumToast } from './components/PremiumToast'
+import { usePremiumScreen } from './usePremiumScreen'
 
 export function PremiumScreen() {
-  const premiumVars = {
-    '--pm-premium-reference': `url(${premiumReference})`,
-  } as CSSProperties
+  const premium = usePremiumScreen()
+
+  useEffect(() => {
+    if (!premium.sheet) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [premium.sheet])
+
+  const sheetPortal =
+    typeof document !== 'undefined'
+      ? createPortal(
+          <PremiumSheet
+            kind={premium.sheet}
+            selectedPackage={premium.selectedPackage}
+            selectedPackageId={premium.selectedPackageId}
+            onSelectPackage={premium.setSelectedPackageId}
+            onClose={premium.closeSheet}
+            onConfirmUpgrade={premium.confirmUpgrade}
+            onConfirmGift={premium.confirmGift}
+          />,
+          document.body,
+        )
+      : null
 
   return (
     <motion.div
@@ -21,16 +47,23 @@ export function PremiumScreen() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35 }}
     >
-      <div className="pm-artboard">
+      <motion.div className="pm-artboard">
         <AmbientParticles />
-        <main className="pm-premium" style={premiumVars}>
+        <main className="pm-premium">
           <Navbar />
-          <PremiumTitleBar />
-          <PremiumHero />
+          <PremiumTitleBar onGift={premium.openGift} />
+          <PremiumHero onUpgrade={premium.openUpgrade} />
           <PremiumFeaturesGrid features={premiumFeatures} />
-          <PremiumPackages packages={premiumPackages} />
+          <PremiumPackages
+            packages={premiumPackages}
+            selectedId={premium.selectedPackageId}
+            onSelect={premium.setSelectedPackageId}
+            onUpgrade={premium.openUpgrade}
+          />
         </main>
-      </div>
+        <PremiumToast toast={premium.toast} onDismiss={premium.dismissToast} />
+      </motion.div>
+      {sheetPortal}
     </motion.div>
   )
 }

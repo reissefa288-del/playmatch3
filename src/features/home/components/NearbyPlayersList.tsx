@@ -5,15 +5,10 @@ import { NearbyPlayerListCard } from './NearbyPlayerListCard'
 
 type NearbyPlayersListProps = {
   players: NearbyPlayer[]
-  portraitImage: string
   layout?: 'grid' | 'list'
 }
 
-export function NearbyPlayersList({
-  players,
-  portraitImage,
-  layout = 'list',
-}: NearbyPlayersListProps) {
+export function NearbyPlayersList({ players, layout = 'list' }: NearbyPlayersListProps) {
   const [hidden, setHidden] = useState<Set<string>>(new Set())
   const visible = players.filter((p) => !hidden.has(p.id))
 
@@ -24,7 +19,6 @@ export function NearbyPlayersList({
           <li key={player.id}>
             <NearbyPlayerListCard
               player={player}
-              portraitImage={portraitImage}
               index={index}
               onDismissed={() => setHidden((prev) => new Set(prev).add(player.id))}
             />

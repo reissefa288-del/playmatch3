@@ -4,23 +4,23 @@ import {
   FiHeart,
   FiLock,
   FiMapPin,
-  FiMessageCircle,
   FiSend,
-  FiUserPlus,
+  FiX,
 } from 'react-icons/fi'
 import { motion } from 'framer-motion'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { LuGamepad2 } from 'react-icons/lu'
 import { MdEmojiEvents } from 'react-icons/md'
-import type { HeroConnectionStatus, HeroDiscoveryPlayer, HeroDiscoveryTag } from '../types'
+import { fakePortraitForGender } from '../../../shared/fakePortraits'
+import type { HeroDiscoveryPlayer, HeroDiscoveryTag } from '../types'
 
 export type HeroPlayerCardProps = {
   player: HeroDiscoveryPlayer
-  portraitImage: string
   showSentOverlay?: boolean
   matchBusy?: boolean
   isPeek?: boolean
   onMatchRequest?: () => void
+  onPass?: () => void
 }
 
 function TagIcon({ tag }: { tag: HeroDiscoveryTag }) {
@@ -30,25 +30,18 @@ function TagIcon({ tag }: { tag: HeroDiscoveryTag }) {
 
 export function HeroPlayerCard({
   player,
-  portraitImage,
   showSentOverlay = false,
   matchBusy = false,
   isPeek = false,
   onMatchRequest,
+  onPass,
 }: HeroPlayerCardProps) {
-  const [connectionStatus] = useState<HeroConnectionStatus>('none')
-  const [gateHint, setGateHint] = useState<string | null>(null)
-
-  const matched = connectionStatus === 'matched'
-  const canMessage = matched
-  const canInvite = matched
+  const [inviteHint, setInviteHint] = useState(false)
   const actionsLocked = showSentOverlay || matchBusy || isPeek
 
-  const showGateNote = !matched && !showSentOverlay && !isPeek
-
-  const onLockedAction = (label: string) => {
-    setGateHint(`${label} — eşleşme olunca açılır`)
-    window.setTimeout(() => setGateHint(null), 2200)
+  const onLockedInvite = () => {
+    setInviteHint(true)
+    window.setTimeout(() => setInviteHint(false), 3800)
   }
 
   return (
@@ -99,23 +92,15 @@ export function HeroPlayerCard({
         </motion.div>
       ) : null}
 
-      <div className="pm-hero-card__compat-float" aria-label={`${player.compatibility}% uyumluluk`}>
-        <FiHeart />
-        <span>%{player.compatibility}</span>
-        <small>Uyumluluk</small>
-      </div>
-
       <div className="pm-hero-card__body">
         <div className="pm-hero-card__portrait-col">
-          <div
-            className="pm-hero-card__portrait"
-            style={{
-              backgroundImage: `url(${portraitImage})`,
-              backgroundPosition: player.portraitPosition,
-            }}
-            role="img"
-            aria-label={player.name}
-          >
+          <div className="pm-hero-card__portrait" role="img" aria-label={player.name}>
+            <img
+              src={fakePortraitForGender(player.gender)}
+              alt=""
+              className="pm-hero-card__portrait-img"
+              draggable={false}
+            />
             {player.isOnline ? <span className="pm-status-pill">Online</span> : null}
           </div>
         </div>
@@ -176,56 +161,60 @@ export function HeroPlayerCard({
         </div>
       </div>
 
-      <div className="pm-hero-card__actions">
-        {gateHint ? (
-          <p className="pm-hero-card__gate-hint" role="status">
-            <FiLock aria-hidden /> {gateHint}
-          </p>
-        ) : showGateNote ? (
-          <p className="pm-hero-card__gate-note">
-            <FiLock aria-hidden /> Mesaj ve davet eşleşme olunca açılır
+      <div className="pm-hero-card__actions pm-hero-card__actions--spread">
+        {inviteHint ? (
+          <p className="pm-hero-card__invite-hint" role="status">
+            <FiLock aria-hidden />
+            <span>
+              Davet, eşleşme olunca açılır. <strong>Premium</strong> alarak istek
+              yollayabilirsiniz.
+            </span>
           </p>
         ) : null}
 
         <button
-          className={`pm-secondary${!canMessage ? ' is-locked' : ''}`}
           type="button"
+          className="pm-hero-btn pm-hero-btn--pass"
           disabled={actionsLocked}
-          onClick={() => (canMessage ? undefined : onLockedAction('Mesaj gönder'))}
-          aria-disabled={!canMessage}
+          onClick={onPass}
         >
-          {!canMessage ? <FiLock aria-hidden /> : <FiMessageCircle aria-hidden />}
-          Mesaj Gönder
+          <span className="pm-hero-btn__icon" aria-hidden>
+            <FiX />
+          </span>
+          <span className="pm-hero-btn__label">Geç</span>
         </button>
 
         <button
-          className={`pm-primary${showSentOverlay ? ' is-sent' : ''}`}
           type="button"
+          className={`pm-hero-btn pm-hero-btn--match${showSentOverlay ? ' is-sent' : ''}${matchBusy ? ' is-busy' : ''}`}
           disabled={actionsLocked || showSentOverlay}
           onClick={onMatchRequest}
         >
-          {matchBusy ? (
-            <>Gönderiliyor…</>
-          ) : showSentOverlay ? (
-            <>
-              <FiCheck aria-hidden /> Gönderildi
-            </>
-          ) : (
-            <>
-              <FiHeart aria-hidden /> Eşleşme isteği
-            </>
-          )}
+          <span className="pm-hero-btn__icon" aria-hidden>
+            {matchBusy ? (
+              <span className="pm-hero-btn__spinner" />
+            ) : showSentOverlay ? (
+              <FiCheck />
+            ) : (
+              <FiHeart />
+            )}
+          </span>
+          <span className="pm-hero-btn__label">
+            {matchBusy ? 'Gönderiliyor…' : showSentOverlay ? 'Gönderildi' : 'Eşleşme isteği'}
+          </span>
         </button>
 
         <button
-          className={`pm-secondary is-blue${!canInvite ? ' is-locked' : ''}`}
           type="button"
+          className="pm-hero-btn pm-hero-btn--invite is-locked"
           disabled={actionsLocked}
-          onClick={() => (canInvite ? undefined : onLockedAction('Oyuna davet et'))}
-          aria-disabled={!canInvite}
+          onClick={onLockedInvite}
         >
-          {!canInvite ? <FiLock aria-hidden /> : <FiUserPlus aria-hidden />}
-          Oyuna Davet Et
+          <span className="pm-hero-btn__icon" aria-hidden>
+            <LuGamepad2 />
+            <FiLock className="pm-hero-btn__lock" />
+          </span>
+          <span className="pm-hero-btn__label">Oyuna Davet Et</span>
         </button>
       </div>
     </article>

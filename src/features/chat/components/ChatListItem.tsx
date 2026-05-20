@@ -1,15 +1,15 @@
 import { Link } from 'react-router-dom'
 import { MdVerified } from 'react-icons/md'
 import { motion } from 'framer-motion'
+import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { ChatThread } from '../data'
 
 type ChatListItemProps = {
   thread: ChatThread
-  portraitUrl: string
   index: number
 }
 
-export function ChatListItem({ thread, portraitUrl, index }: ChatListItemProps) {
+export function ChatListItem({ thread, index }: ChatListItemProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -30,7 +30,7 @@ export function ChatListItem({ thread, portraitUrl, index }: ChatListItemProps) 
             style={
               thread.portraitPosition
                 ? {
-                    backgroundImage: `url(${portraitUrl})`,
+                    backgroundImage: `url(${fakePortraitForProfile(thread.id)})`,
                     backgroundPosition: thread.portraitPosition,
                   }
                 : undefined

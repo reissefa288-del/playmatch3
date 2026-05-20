@@ -43,9 +43,14 @@ export function Navbar({ currencyVariant = 'default' }: NavbarProps) {
   return (
     <>
       <header className="pm-navbar">
-        <div className="pm-brand">
-          <img src={logo} alt="" className="pm-brand__logo" aria-hidden />
-          <span className="pm-brand__wordmark">PlayMeet</span>
+        <div className="pm-brand pm-brand--aaa">
+          <span className="pm-brand__backdrop" aria-hidden />
+          <div className="pm-brand__mark">
+            <span className="pm-brand__logo-wrap" aria-hidden>
+              <img src={logo} alt="" className="pm-brand__logo" />
+            </span>
+            <span className="pm-brand__wordmark">PlayMeet</span>
+          </div>
         </div>
 
         <div className="pm-navbar__right">

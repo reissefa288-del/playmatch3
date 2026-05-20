@@ -42,6 +42,7 @@ export type HeroDiscoveryPlayer = {
   id: string
   name: string
   age: number
+  gender: PlayerGender
   verified?: boolean
   isOnline?: boolean
   distance: string

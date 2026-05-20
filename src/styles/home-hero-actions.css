@@ -1,0 +1,274 @@
+/* Keşif kartı — Geç · Eşleşme · Davet (3’lü şerit) */
+
+.pm-hero-card__actions {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 14px 12px 16px;
+  border-top: 1px solid rgba(100, 150, 255, 0.16);
+  background:
+    linear-gradient(180deg, rgba(10, 16, 42, 0.5) 0%, rgba(4, 8, 26, 0.98) 100%),
+    rgba(5, 7, 24, 0.95);
+  box-sizing: border-box;
+}
+
+.pm-hero-card__actions--spread {
+  align-items: stretch;
+}
+
+.pm-hero-card__invite-hint {
+  grid-column: 1 / -1;
+  margin: 0 0 2px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.45;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  text-align: left;
+  color: #e8d4ff;
+  background: rgba(36, 14, 48, 0.92);
+  border: 1px solid rgba(255, 140, 200, 0.4);
+  box-shadow:
+    0 0 20px rgba(255, 60, 180, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: pm-hero-invite-hint-in 0.28s ease;
+}
+
+.pm-hero-card__invite-hint svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  font-size: 14px;
+  color: #ff9ee0;
+}
+
+.pm-hero-card__invite-hint strong {
+  color: #ffd56a;
+  font-weight: 800;
+}
+
+@keyframes pm-hero-invite-hint-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* —— Base button —— */
+.pm-hero-card__actions--spread .pm-hero-btn {
+  width: 100%;
+}
+
+.pm-hero-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 56px;
+  padding: 10px 8px;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: #eef2ff;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    transform 0.22s var(--pm-ease-spring, cubic-bezier(0.34, 1.4, 0.64, 1)),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease,
+    opacity 0.2s ease;
+}
+
+.pm-hero-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 48%);
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.pm-hero-btn:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+.pm-hero-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.pm-hero-btn__icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  line-height: 1;
+}
+
+.pm-hero-btn__label {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 100%;
+  text-align: center;
+  line-height: 1.25;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+/* Geç */
+.pm-hero-btn--pass {
+  border-color: rgba(130, 150, 210, 0.38);
+  background:
+    linear-gradient(165deg, rgba(22, 28, 58, 0.95) 0%, rgba(12, 16, 40, 0.98) 100%);
+  color: #c8d4f8;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.28),
+    0 6px 16px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.pm-hero-btn--pass:not(:disabled):hover {
+  border-color: rgba(170, 190, 240, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.25),
+    0 8px 20px rgba(0, 0, 0, 0.32),
+    0 0 18px rgba(100, 130, 220, 0.12);
+}
+
+/* Eşleşme isteği */
+.pm-hero-btn--match {
+  min-height: 58px;
+  border-color: rgba(255, 100, 200, 0.55);
+  background:
+    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(255, 120, 220, 0.45), transparent 55%),
+    linear-gradient(155deg, rgba(255, 70, 180, 0.35) 0%, rgba(120, 50, 220, 0.28) 50%, rgba(40, 80, 200, 0.22) 100%),
+    linear-gradient(180deg, rgba(50, 12, 48, 0.95) 0%, rgba(28, 8, 42, 0.98) 100%);
+  color: #fff;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 28px rgba(255, 60, 180, 0.4),
+    0 0 40px rgba(90, 120, 255, 0.2),
+    0 8px 22px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+
+.pm-hero-btn--match .pm-hero-btn__icon {
+  font-size: 22px;
+  color: #ffe8f8;
+  filter: drop-shadow(0 0 8px rgba(255, 100, 200, 0.6));
+}
+
+.pm-hero-btn--match .pm-hero-btn__label {
+  font-size: 11px;
+  letter-spacing: 0.01em;
+}
+
+.pm-hero-btn--match:not(:disabled):hover {
+  border-color: rgba(255, 140, 220, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.14),
+    0 0 36px rgba(255, 70, 180, 0.55),
+    0 0 48px rgba(100, 140, 255, 0.28),
+    0 10px 26px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+.pm-hero-btn--match.is-sent {
+  border-color: rgba(0, 241, 164, 0.55);
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgba(0, 241, 164, 0.35), transparent 55%),
+    linear-gradient(165deg, rgba(8, 48, 42, 0.95) 0%, rgba(6, 28, 52, 0.98) 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 0 24px rgba(0, 241, 164, 0.35),
+    0 8px 20px rgba(0, 0, 0, 0.3);
+}
+
+.pm-hero-btn--match.is-sent .pm-hero-btn__icon {
+  color: #b8ffe8;
+  filter: drop-shadow(0 0 8px rgba(0, 241, 164, 0.5));
+}
+
+.pm-hero-btn__spinner {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #fff;
+  animation: pm-hero-btn-spin 0.65s linear infinite;
+}
+
+@keyframes pm-hero-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Oyuna davet */
+.pm-hero-btn--invite {
+  border-color: rgba(70, 150, 255, 0.45);
+  background:
+    linear-gradient(165deg, rgba(12, 32, 62, 0.95) 0%, rgba(8, 18, 48, 0.98) 100%);
+  color: #b8dcff;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.28),
+    0 6px 16px rgba(0, 0, 0, 0.28),
+    0 0 14px rgba(60, 140, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+.pm-hero-btn--invite .pm-hero-btn__icon {
+  position: relative;
+  font-size: 19px;
+  color: #7ec8ff;
+}
+
+.pm-hero-btn--invite.is-locked {
+  opacity: 0.82;
+}
+
+.pm-hero-btn--invite.is-locked:not(:disabled):hover {
+  border-color: rgba(100, 170, 255, 0.55);
+}
+
+.pm-hero-btn__lock {
+  position: absolute;
+  right: -5px;
+  bottom: -4px;
+  width: 14px;
+  height: 14px;
+  padding: 2px;
+  border-radius: 50%;
+  font-size: 8px;
+  color: #d0e4ff;
+  background: rgba(6, 12, 34, 0.95);
+  border: 1px solid rgba(120, 170, 255, 0.5);
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-hero-btn,
+  .pm-hero-btn__spinner {
+    transition: none;
+    animation: none;
+  }
+}

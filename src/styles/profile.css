@@ -11,9 +11,10 @@
 }
 
 .pm-profile {
+  --pm-layout-pad: 18px;
   width: 100%;
   flex: 1 0 auto;
-  padding: 18px 18px 136px;
+  padding: var(--pm-layout-pad) var(--pm-layout-pad) 136px;
   display: flex;
   flex-direction: column;
   gap: 28px;

@@ -19,14 +19,12 @@ function TagIcon({ tag }: { tag: MatchStyleTag }) {
 
 type MatchProfileCardProps = {
   profile: MatchProfile
-  portraitUrl: string
   peekLeftName?: string
   peekRightName?: string
 }
 
 export function MatchProfileCard({
   profile: p,
-  portraitUrl,
   peekLeftName,
   peekRightName,
 }: MatchProfileCardProps) {
@@ -88,15 +86,15 @@ export function MatchProfileCard({
             {photosOpen ? (
               <MatchPortraitCarousel
                 photos={p.photos}
-                imageSrc={portraitUrl}
+                imageSrc={p.portraitSrc}
                 index={photoIndex}
               />
             ) : (
               <img
-                src={portraitUrl}
+                src={p.portraitSrc}
                 alt=""
                 className="pm-match-portrait-img"
-                style={{ objectPosition: p.photos[0]?.objectPosition ?? '50% 8%' }}
+                style={{ objectPosition: p.photos[0]?.objectPosition ?? '50% 12%' }}
                 draggable={false}
               />
             )}

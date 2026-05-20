@@ -8,7 +8,6 @@ import { MessageHeader } from './components/MessageHeader'
 import { MessageInput } from './components/MessageInput'
 import { MessageThread } from './components/MessageThread'
 import messageReference from '../../reference/message-final.png'
-import chatReference from '../../reference/chat-final.png'
 
 export function MessageScreen() {
   const { chatId } = useParams<{ chatId: string }>()
@@ -28,11 +27,11 @@ export function MessageScreen() {
         <AmbientParticles />
         <main className="pm-message" style={messageVars}>
           <Navbar />
-          <MessageHeader chat={chat} portraitUrl={chatReference} />
+          <MessageHeader chat={chat} />
           <GameActivityCard lastGame={chat.lastGame} />
           <MessageThread
+            chatId={chat.id}
             messages={chat.messages}
-            portraitUrl={chatReference}
             portraitPosition={chat.portraitPosition}
           />
         </main>

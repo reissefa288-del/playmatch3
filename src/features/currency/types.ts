@@ -7,4 +7,5 @@ export type CurrencyPackage = {
   priceLabel: string
   badge?: string
   popular?: boolean
+  tagline?: string
 }

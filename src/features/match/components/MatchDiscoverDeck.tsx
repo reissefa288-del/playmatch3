@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion'
-import portraitReference from '../../../reference/home-final.png'
 import type { useMatchDiscover } from '../useMatchDiscover'
 import { MatchActionRow } from './MatchActionRow'
 import { MatchBoostPanel } from './MatchBoostPanel'
@@ -50,7 +49,6 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
       <MatchProfileCard
         key={discover.current.id}
         profile={discover.current}
-        portraitUrl={portraitReference}
         peekLeftName={discover.peekLeft?.name}
         peekRightName={discover.peekRight?.name}
       />

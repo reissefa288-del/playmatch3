@@ -29,9 +29,12 @@
 
 .pm-tab-panel {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: var(--pm-nav-dock-h);
   width: 100%;
-  height: 100%;
+  height: auto;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
@@ -51,6 +54,11 @@
 
 .pm-tab-panel#pm-tab-home {
   overflow-anchor: none;
+  scroll-padding-bottom: 16px;
+}
+
+.pm-tab-panel#pm-tab-premium {
+  scroll-padding-bottom: 20px;
 }
 
 .pm-tab-panel:not(.is-active) {

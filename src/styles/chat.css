@@ -4,9 +4,10 @@
 
 .pm-chat,
 .pm-message {
+  --pm-layout-pad: 16px;
   width: 100%;
   flex: 1 0 auto;
-  padding: 16px 16px 124px;
+  padding: var(--pm-layout-pad) var(--pm-layout-pad) 124px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -271,7 +272,7 @@
   width: 62px;
   height: 62px;
   border-radius: 50%;
-  background-size: 620px auto;
+  background-size: cover;
   background-repeat: no-repeat;
   border: 2.5px solid transparent;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -477,7 +478,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: rgba(20, 16, 48, 0.9) center / 620px auto no-repeat;
+  background: rgba(20, 16, 48, 0.9) center / cover no-repeat;
   border: 2px solid rgba(150, 175, 255, 0.42);
   box-shadow:
     0 0 22px rgba(100, 140, 255, 0.18),
@@ -605,7 +606,7 @@
   height: 50px;
   border-radius: 50%;
   flex-shrink: 0;
-  background: center / 620px auto no-repeat;
+  background: center / cover no-repeat;
   border: 2.5px solid rgba(190, 110, 255, 0.65);
   box-shadow:
     0 0 28px rgba(160, 80, 255, 0.4),
@@ -777,7 +778,7 @@
   height: 30px;
   flex-shrink: 0;
   border-radius: 50%;
-  background: center / 620px auto no-repeat;
+  background: center / cover no-repeat;
   border: 1px solid rgba(150, 175, 255, 0.35);
   box-shadow: 0 0 12px rgba(100, 140, 255, 0.15);
 }

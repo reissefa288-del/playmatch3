@@ -1,7 +1,11 @@
 import { motion, useReducedMotion } from 'framer-motion'
 import { premiumGiftCta } from '../data'
 
-export function PremiumTitleBar() {
+type PremiumTitleBarProps = {
+  onGift: () => void
+}
+
+export function PremiumTitleBar({ onGift }: PremiumTitleBarProps) {
   const reduceMotion = useReducedMotion()
   const GiftIcon = premiumGiftCta.icon
 
@@ -26,6 +30,7 @@ export function PremiumTitleBar() {
         transition={{ delay: 0.08, duration: 0.4 }}
         whileHover={reduceMotion ? undefined : { scale: 1.04, y: -2 }}
         whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+        onClick={onGift}
       >
         <GiftIcon aria-hidden />
         {premiumGiftCta.label}

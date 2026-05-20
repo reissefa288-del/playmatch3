@@ -1,14 +1,16 @@
 import { FiCheck } from 'react-icons/fi'
 import { motion } from 'framer-motion'
+import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { ChatMessage } from '../data'
 
 type MessageThreadProps = {
+  chatId: string
   messages: ChatMessage[]
-  portraitUrl: string
   portraitPosition: string
 }
 
-export function MessageThread({ messages, portraitUrl, portraitPosition }: MessageThreadProps) {
+export function MessageThread({ chatId, messages, portraitPosition }: MessageThreadProps) {
+  const portraitUrl = fakePortraitForProfile(chatId)
   return (
     <div className="pm-message-thread" role="log" aria-label="Mesajlar">
       {messages.map((message, index) => {

@@ -1,9 +1,14 @@
 import { FiCheck } from 'react-icons/fi'
 import { LuCrown } from 'react-icons/lu'
 import { motion, useReducedMotion } from 'framer-motion'
-import { premiumFloatingIcons, premiumHero } from '../data'
+import kasaIcon from '../../../reference/kasa.png'
+import { premiumHero } from '../data'
 
-export function PremiumHero() {
+type PremiumHeroProps = {
+  onUpgrade: () => void
+}
+
+export function PremiumHero({ onUpgrade }: PremiumHeroProps) {
   const reduceMotion = useReducedMotion()
 
   return (
@@ -33,6 +38,7 @@ export function PremiumHero() {
           className="pm-premium-hero__cta"
           whileHover={reduceMotion ? undefined : { scale: 1.05, y: -2 }}
           whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+          onClick={onUpgrade}
         >
           <span className="pm-premium-hero__cta-shine" aria-hidden />
           <LuCrown aria-hidden />
@@ -46,24 +52,21 @@ export function PremiumHero() {
         transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
       >
         <span className="pm-premium-hero__aura" aria-hidden />
-        <span className="pm-premium-hero__pedestal" aria-hidden />
-        <span className="pm-premium-hero__crown" aria-hidden />
-        {premiumFloatingIcons.map((item, index) => (
-          <motion.span
-            key={item.id}
-            className={`pm-premium-hero__float ${item.className}`}
-            animate={reduceMotion ? undefined : { y: [0, -5, 0], opacity: [0.85, 1, 0.85] }}
-            transition={{
-              duration: 3.5 + index * 0.4,
-              repeat: Infinity,
-              ease: 'easeInOut',
-              delay: index * 0.2,
-            }}
-            aria-hidden
-          >
-            <item.icon />
-          </motion.span>
-        ))}
+        <motion.div
+          className="pm-premium-hero__kasa-stage"
+          animate={
+            reduceMotion
+              ? undefined
+              : {
+                  y: [0, -8, -4, -10, 0],
+                  scale: [1, 1.03, 1.02, 1.04, 1],
+                }
+          }
+          transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+        >
+          <span className="pm-premium-hero__kasa-glow" aria-hidden />
+          <img src={kasaIcon} alt="" className="pm-premium-hero__kasa" />
+        </motion.div>
       </motion.div>
     </motion.section>
   )

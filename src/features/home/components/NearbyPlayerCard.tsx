@@ -3,12 +3,12 @@ import { FiCheck, FiHeart } from 'react-icons/fi'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { MdEmojiEvents } from 'react-icons/md'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { NearbyPlayer } from '../types'
 import { useNearbyLikes } from '../useNearbyLikes'
 
 type NearbyPlayerCardProps = {
   player: NearbyPlayer
-  portraitImage: string
   onDismissed?: () => void
 }
 
@@ -16,7 +16,7 @@ type LikePhase = 'idle' | 'burst' | 'exit'
 
 const BURST_MS = 720
 
-export function NearbyPlayerCard({ player, portraitImage, onDismissed }: NearbyPlayerCardProps) {
+export function NearbyPlayerCard({ player, onDismissed }: NearbyPlayerCardProps) {
   const reduceMotion = useReducedMotion()
   const { hasLiked, sendLike } = useNearbyLikes()
   const alreadyLiked = hasLiked(player.id)
@@ -70,7 +70,7 @@ export function NearbyPlayerCard({ player, portraitImage, onDismissed }: NearbyP
       <div
         className="pm-nearby-card__image"
         style={{
-          backgroundImage: `url(${portraitImage})`,
+          backgroundImage: `url(${fakePortraitForProfile(player.id, player.gender)})`,
           backgroundPosition: player.portraitPosition,
         }}
       >

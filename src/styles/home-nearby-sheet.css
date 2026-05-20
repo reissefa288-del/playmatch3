@@ -92,8 +92,9 @@
   width: 72px;
   height: 88px;
   border-radius: 12px;
-  background-size: 480%;
+  background-size: cover;
   background-repeat: no-repeat;
+  background-position: center 12%;
   position: relative;
   overflow: hidden;
 }

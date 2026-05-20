@@ -12,6 +12,7 @@
 }
 
 .pm-artboard {
+  --pm-layout-pad: 14px;
   width: var(--pm-w);
   max-width: min(430px, 100vw);
   flex: 1 0 auto;
@@ -30,16 +31,18 @@
   flex: 0 0 auto;
 }
 
-/* Scroll ends at premium card — only nav clearance below the frame */
+/* Premium kartı + alt içerik dock alanının üstünde kalsın */
 .pm-app-shell--home .pm-home {
-  padding-bottom: 0;
+  padding-bottom: 20px;
 }
 
 .pm-app-shell--home .pm-premium-unlock {
-  margin-bottom: 0;
+  margin-bottom: 8px;
+  scroll-margin-bottom: 16px;
 }
 
 .pm-home {
+  --pm-layout-pad: 14px;
   --glass-dark: rgba(6, 11, 34, 0.68);
   --glass-border: rgba(255, 255, 255, 0.13);
   --pink: #ff2fcf;
@@ -47,7 +50,7 @@
   --text-soft: #a8aed4;
   width: 100%;
   flex: 0 0 auto;
-  padding: 14px;
+  padding: var(--pm-layout-pad);
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -92,43 +95,16 @@
 }
 
 .pm-brand {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 18px;
   font-weight: 700;
-  flex-shrink: 0;
   min-width: 0;
 }
 
-.pm-brand__logo {
-  display: block;
-  height: 46px;
-  width: auto;
-  max-width: none;
-  object-fit: contain;
-  object-position: left center;
-  border: none;
-  border-radius: 0;
-  background: none;
-  box-shadow: none;
-  padding: 0;
-  filter: drop-shadow(0 2px 12px rgba(255, 80, 180, 0.35));
-}
-
-.pm-brand__wordmark {
-  font-size: 19px;
-  font-weight: 800;
-  letter-spacing: -0.4px;
-  white-space: nowrap;
-  background: linear-gradient(180deg, #ffffff 0%, #e8c8ff 55%, #b8d4ff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: none;
-  line-height: 1;
-}
+/* Brand AAA — brand-aaa.css */
 
 .pm-navbar__right {
   gap: 6px;
@@ -182,15 +158,7 @@
   cursor: pointer;
 }
 
-.pm-icon-button--bell {
-  border-color: rgba(120, 150, 255, 0.35);
-  background: rgba(8, 12, 34, 0.75);
-  color: #e8eeff;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.28),
-    0 4px 14px rgba(0, 0, 0, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
+/* Bell — navbar-tray.css */
 
 .pm-badge {
   position: absolute;
@@ -467,10 +435,7 @@
   text-overflow: ellipsis;
 }
 
-.pm-icon-button--bell.is-open {
-  border-color: rgba(255, 90, 200, 0.55);
-  box-shadow: 0 0 16px rgba(255, 60, 180, 0.25);
-}
+/* Bell open — navbar-tray.css */
 
 /* --- Hero card: left portrait | right content (fixed row, no shrink) ------- */
 
@@ -488,67 +453,39 @@
   position: relative;
 }
 
-.pm-hero-card__compat-float {
-  position: absolute;
-  z-index: 5;
-  top: 12px;
-  right: 12px;
-  left: auto;
-  bottom: auto;
-  width: 88px;
-  border-radius: 16px;
-  padding: 8px;
-  border: 1px solid rgba(255, 78, 185, 0.62);
-  background: rgba(11, 8, 30, 0.9);
-  color: #ffd1ef;
-  display: grid;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  gap: 2px 6px;
-  box-shadow: 0 0 24px rgba(255, 60, 180, 0.25);
-}
-
-.pm-hero-card__compat-float svg {
-  color: #ff58bf;
-}
-
-.pm-hero-card__compat-float span {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.pm-hero-card__compat-float small {
-  grid-column: 1 / span 2;
-  font-size: 10px;
-  color: #f2e8ff;
-}
-
 .pm-hero-card__body {
   display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: stretch;
-  gap: 0;
+  flex-direction: column;
   flex: 0 0 auto;
-  min-height: 368px;
+  position: relative;
+  z-index: 1;
+  background: rgba(6, 10, 32, 0.98);
 }
 
 .pm-hero-card__portrait-col {
-  flex: 0 0 172px;
-  width: 172px;
-  min-width: 172px;
-  max-width: 172px;
+  flex: 0 0 auto;
+  width: 100%;
   position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 20%, rgba(60, 100, 200, 0.12), transparent 70%),
+    #0a1028;
 }
 
 .pm-hero-card__portrait {
-  width: 100%;
-  height: 100%;
-  min-height: 100%;
-  background-size: 480%;
-  background-position: 14% 38%;
-  background-repeat: no-repeat;
   position: relative;
+  width: 100%;
+  line-height: 0;
+}
+
+.pm-hero-card__portrait-img {
+  width: 100%;
+  height: auto;
+  max-height: min(58vh, 440px);
+  object-fit: contain;
+  object-position: center center;
+  display: block;
+  margin: 0 auto;
 }
 
 .pm-status-pill {
@@ -582,14 +519,14 @@
 }
 
 .pm-hero-card__content-col {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
-  min-height: 368px;
   display: flex;
   flex-direction: column;
-  padding: 8px 8px 10px 6px;
+  padding: 14px 16px 12px;
   box-sizing: border-box;
-  overflow: visible;
+  background: linear-gradient(180deg, rgba(8, 12, 36, 0.98) 0%, rgba(6, 10, 30, 1) 100%);
+  border-top: 1px solid rgba(100, 140, 255, 0.12);
 }
 
 .pm-hero-card__last-game {
@@ -600,14 +537,14 @@
 .pm-hero-card__details-top {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
 .pm-hero-card__details-bottom {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: auto;
+  gap: 10px;
+  margin-top: 12px;
 }
 
 .pm-hero-card__premium {
@@ -652,9 +589,9 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
 }
 
 .pm-hero-card__meta li {
@@ -734,12 +671,9 @@
 }
 
 .pm-hero-card__details {
-  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 100%;
-  overflow: visible;
+  gap: 0;
 }
 
 .pm-hero-card__details .pm-tags {
@@ -748,8 +682,7 @@
 
 .pm-hero-card__details h2 {
   margin: 0;
-  padding-right: 84px;
-  font-size: 20px;
+  font-size: 22px;
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
@@ -851,56 +784,7 @@
   font-size: 14px;
 }
 
-.pm-hero-card__actions {
-  flex: 0 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: auto auto;
-  row-gap: 8px;
-  padding: 12px;
-  gap: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.11);
-  background: rgba(5, 7, 24, 0.9);
-  box-sizing: border-box;
-}
-
-.pm-hero-card__actions button {
-  flex: 1 1 0;
-  min-width: 0;
-  justify-content: center;
-  gap: 4px;
-  border-radius: 14px;
-  height: 52px;
-  min-height: 52px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #f4edff;
-  background: rgba(12, 14, 38, 0.65);
-  font-size: 10px;
-  line-height: 1.15;
-  white-space: normal;
-  text-align: center;
-  padding: 0 4px;
-  cursor: pointer;
-}
-
-.pm-hero-card__actions button svg {
-  flex-shrink: 0;
-}
-
-.pm-primary {
-  flex: 1.15 1 0;
-  border-color: rgba(255, 90, 187, 0.55) !important;
-  background:
-    radial-gradient(circle at 30% 40%, rgba(255, 46, 173, 0.5), transparent 65%),
-    rgba(45, 9, 43, 0.8) !important;
-  box-shadow: 0 0 20px rgba(255, 29, 166, 0.3);
-  font-size: 11px;
-}
-
-.pm-secondary.is-blue {
-  border-color: rgba(73, 148, 255, 0.65);
-  color: #d5e9ff;
-}
+/* Hero card actions — see home-hero-actions.css */
 
 /* --- Carousel dots -------------------------------------------------------- */
 
@@ -999,8 +883,10 @@
   width: 100%;
   height: 156px;
   min-height: 156px;
-  background-size: 480%;
-  padding: 6px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center 12%;
+  padding: 0;
   box-sizing: border-box;
 }
 

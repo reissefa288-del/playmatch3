@@ -2,14 +2,14 @@ import { Link } from 'react-router-dom'
 import { FiArrowLeft, FiMoreVertical, FiPhone, FiVideo } from 'react-icons/fi'
 import { MdVerified } from 'react-icons/md'
 import { motion } from 'framer-motion'
+import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { ChatDetail } from '../data'
 
 type MessageHeaderProps = {
   chat: ChatDetail
-  portraitUrl: string
 }
 
-export function MessageHeader({ chat, portraitUrl }: MessageHeaderProps) {
+export function MessageHeader({ chat }: MessageHeaderProps) {
   return (
     <motion.header
       className="pm-message-header"
@@ -24,7 +24,7 @@ export function MessageHeader({ chat, portraitUrl }: MessageHeaderProps) {
       <span
         className="pm-message-header__avatar"
         style={{
-          backgroundImage: `url(${portraitUrl})`,
+          backgroundImage: `url(${fakePortraitForProfile(chat.id)})`,
           backgroundPosition: chat.portraitPosition,
         }}
       />

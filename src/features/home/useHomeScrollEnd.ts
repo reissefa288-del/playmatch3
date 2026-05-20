@@ -6,19 +6,14 @@ export function useHomeScrollEnd() {
     const panel = document.getElementById('pm-tab-home')
     if (!panel) return
 
-    const getNavHeight = () => {
-      const nav = document.querySelector('.pm-bottom-nav')
-      return nav?.getBoundingClientRect().height ?? 84
-    }
-
     const clamp = () => {
       const premium = panel.querySelector('.pm-premium-unlock')
       if (!premium) return
 
-      const navH = getNavHeight()
+      const clearance = 20
       const premiumEl = premium as HTMLElement
       const premiumBottom = premiumEl.offsetTop + premiumEl.offsetHeight
-      const maxScroll = Math.max(0, premiumBottom + navH - panel.clientHeight)
+      const maxScroll = Math.max(0, premiumBottom + clearance - panel.clientHeight)
 
       if (panel.scrollTop > maxScroll) {
         panel.scrollTop = maxScroll

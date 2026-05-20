@@ -6,7 +6,6 @@ import { NearbyPlayerListCard } from './NearbyPlayerListCard'
 type NearbyPlayersSheetProps = {
   open: boolean
   players: NearbyPlayer[]
-  portraitImage: string
   liveCaption?: string
   onClose: () => void
 }
@@ -14,7 +13,6 @@ type NearbyPlayersSheetProps = {
 export function NearbyPlayersSheet({
   open,
   players,
-  portraitImage,
   liveCaption,
   onClose,
 }: NearbyPlayersSheetProps) {
@@ -59,7 +57,7 @@ export function NearbyPlayersSheet({
             <ul className="pm-nearby-sheet__list">
               {players.map((player) => (
                 <li key={player.id}>
-                  <NearbyPlayerListCard player={player} portraitImage={portraitImage} />
+                  <NearbyPlayerListCard player={player} />
                 </li>
               ))}
             </ul>

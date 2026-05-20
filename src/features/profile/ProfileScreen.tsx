@@ -15,6 +15,7 @@ import { ProfileHero } from './components/ProfileHero'
 import { ProfileStats } from './components/ProfileStats'
 import { RecentActivityList } from './components/RecentActivityList'
 import profileReference from '../../reference/profile-final.png'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 
 export function ProfileScreen() {
   const profileVars = {
@@ -32,7 +33,7 @@ export function ProfileScreen() {
         <AmbientParticles />
         <main className="pm-profile" style={profileVars}>
           <Navbar />
-          <ProfileHero portraitUrl={profileReference} />
+          <ProfileHero portraitUrl={FAKE_PORTRAIT_MALE} />
           <FavoriteGamesRow games={profileFavoriteGames} />
           <ProfileStats stats={profileStats} />
           <AchievementsRow achievements={profileAchievements} moreCount={profileAchievementMore} />

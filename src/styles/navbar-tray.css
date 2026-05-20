@@ -1,0 +1,258 @@
+/* Navbar üst şeridi — ortak chip yüzeyi + elmas parlaması + bildirim */
+
+.pm-navbar {
+  --pm-nav-chip-h: 40px;
+  --pm-nav-chip-radius: 14px;
+  --pm-nav-chip-border: 1px solid rgba(255, 255, 255, 0.045);
+  --pm-nav-chip-bg: linear-gradient(
+    168deg,
+    rgba(12, 14, 32, 0.96) 0%,
+    rgba(8, 10, 26, 0.94) 48%,
+    rgba(10, 8, 24, 0.92) 100%
+  );
+  --pm-nav-chip-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  --pm-nav-chip-accent: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(180, 110, 210, 0.2) 28%,
+    rgba(110, 150, 240, 0.22) 72%,
+    transparent 100%
+  );
+}
+
+.pm-navbar__right {
+  align-items: center;
+  gap: 8px;
+}
+
+/* Ortak yüzey: marka pill, elmas, zil */
+.pm-brand__backdrop,
+.pm-currency-nav__item.is-gems,
+.pm-icon-button--bell {
+  border: var(--pm-nav-chip-border);
+  background: var(--pm-nav-chip-bg);
+  box-shadow: var(--pm-nav-chip-shadow);
+}
+
+.pm-brand__backdrop,
+.pm-currency-nav__item.is-gems,
+.pm-icon-button--bell {
+  position: relative;
+}
+
+.pm-brand__backdrop::before,
+.pm-currency-nav__item.is-gems::before,
+.pm-icon-button--bell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 42%);
+}
+
+.pm-brand__backdrop::after,
+.pm-currency-nav__item.is-gems::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: 0;
+  height: 1px;
+  border-radius: 1px;
+  pointer-events: none;
+  background: var(--pm-nav-chip-accent);
+}
+
+/* —— Elmas —— */
+.pm-currency-nav__item.is-gems {
+  height: var(--pm-nav-chip-h);
+  padding: 0 8px 0 6px;
+  border-radius: var(--pm-nav-chip-radius);
+}
+
+.pm-currency-nav__item.is-gems:hover {
+  border-color: rgba(255, 255, 255, 0.065);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 18px rgba(100, 140, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.pm-currency-nav__gem {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pm-currency-nav__gem-aura {
+  position: absolute;
+  inset: -35%;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(160, 90, 255, 0.45) 0%,
+    rgba(100, 60, 200, 0.15) 45%,
+    transparent 70%
+  );
+  animation: pm-gem-aura 3.2s ease-in-out infinite;
+}
+
+@keyframes pm-gem-aura {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.92);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+.pm-currency-nav__gem-flare {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 2;
+  opacity: 0.75;
+  -webkit-mask-image: radial-gradient(circle, #000 42%, transparent 68%);
+  mask-image: radial-gradient(circle, #000 42%, transparent 68%);
+}
+
+.pm-currency-nav__gem-flare::after {
+  content: '';
+  position: absolute;
+  inset: -50%;
+  background: linear-gradient(
+    115deg,
+    transparent 42%,
+    rgba(255, 255, 255, 0.15) 46%,
+    rgba(220, 180, 255, 0.85) 50%,
+    rgba(255, 255, 255, 0.2) 54%,
+    transparent 58%
+  );
+  animation: pm-gem-flare-sweep 4.5s ease-in-out infinite;
+}
+
+@keyframes pm-gem-flare-sweep {
+  0% {
+    transform: translateX(-80%) translateY(10%);
+  }
+  45%,
+  100% {
+    transform: translateX(80%) translateY(-10%);
+  }
+}
+
+.pm-currency-nav__gem-img {
+  position: relative;
+  z-index: 1;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  animation: pm-gem-sparkle 2.8s ease-in-out infinite;
+}
+
+@keyframes pm-gem-sparkle {
+  0%,
+  100% {
+    filter: brightness(1) drop-shadow(0 0 3px rgba(140, 80, 255, 0.35));
+  }
+  50% {
+    filter: brightness(1.18) drop-shadow(0 0 10px rgba(200, 130, 255, 0.75));
+  }
+}
+
+.pm-currency-nav__amount {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.pm-currency-nav__plus {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.2s ease,
+    border-color 0.25s ease;
+}
+
+.pm-currency-nav__plus:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.pm-currency-nav__plus:active {
+  transform: scale(0.94);
+}
+
+/* —— Bildirim —— */
+.pm-icon-button--bell {
+  width: var(--pm-nav-chip-h);
+  height: var(--pm-nav-chip-h);
+  min-width: var(--pm-nav-chip-h);
+  min-height: var(--pm-nav-chip-h);
+  border-radius: var(--pm-nav-chip-radius);
+  color: #e8ecff;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    color 0.2s ease;
+}
+
+.pm-icon-button--bell:hover {
+  border-color: rgba(255, 255, 255, 0.065);
+  color: #fff;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 16px rgba(100, 140, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.pm-icon-button--bell.is-open {
+  border-color: rgba(255, 120, 200, 0.35);
+  color: #ffe8f8;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.38),
+    0 0 16px rgba(255, 60, 180, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.pm-icon-button--bell .pm-badge {
+  right: 3px;
+  top: 3px;
+  min-width: 17px;
+  height: 17px;
+  font-size: 9px;
+  border: 1.5px solid rgba(8, 10, 28, 0.95);
+  animation: pm-bell-badge-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes pm-bell-badge-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(255, 42, 133, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(255, 42, 133, 0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-currency-nav__gem-aura,
+  .pm-currency-nav__gem-flare::after,
+  .pm-currency-nav__gem-img,
+  .pm-icon-button--bell .pm-badge,
+  .pm-brand--aaa .pm-brand__logo {
+    animation: none;
+  }
+}

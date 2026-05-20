@@ -7,6 +7,7 @@ import { NearbyPlayersScreen } from '../features/home/NearbyPlayersScreen'
 import { MainTabLayout } from './MainTabLayout'
 import { resolveTabId } from './tabConfig'
 import { STACK_TRANSITION } from './transitions'
+import { useNavDockHeight } from './useNavDockHeight'
 
 const MESSAGE_PATH = /^\/chat\/[^/]+$/
 const NEARBY_PATH = /^\/nearby$/
@@ -17,6 +18,8 @@ export function AppRoutes() {
   const isNearby = NEARBY_PATH.test(location.pathname)
   const stackOpen = isMessage || isNearby
   const activeTabId = resolveTabId(location.pathname)
+
+  useNavDockHeight(!stackOpen && Boolean(activeTabId))
 
   return (
     <div className="pm-app-frame">
