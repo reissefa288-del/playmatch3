@@ -1,7 +1,6 @@
 import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { FiBell } from 'react-icons/fi'
-import logo from '../../../reference/logo.png'
 import { CurrencyNavPills } from '../../currency/CurrencyNavPills'
 import { NotificationsSheet } from '../../notifications/NotificationsSheet'
 import { useNotifications } from '../../notifications/useNotifications'
@@ -17,7 +16,6 @@ export function Navbar({ currencyVariant = 'default' }: NavbarProps) {
     unreadCount,
     openPanel,
     closePanel,
-    markAllRead,
     dismiss,
     onItemAction,
   } = useNotifications()
@@ -29,28 +27,25 @@ export function Navbar({ currencyVariant = 'default' }: NavbarProps) {
             <NotificationsSheet
               open={open}
               items={items}
+              unreadCount={unreadCount}
               onClose={closePanel}
-              onMarkAllRead={markAllRead}
               onDismiss={dismiss}
               onItemAction={onItemAction}
             />,
             document.body,
           )
         : null,
-    [open, items, closePanel, markAllRead, dismiss, onItemAction],
+    [open, items, unreadCount, closePanel, dismiss, onItemAction],
   )
 
   return (
     <>
       <header className="pm-navbar">
         <div className="pm-brand pm-brand--aaa">
-          <span className="pm-brand__backdrop" aria-hidden />
-          <div className="pm-brand__mark">
-            <span className="pm-brand__logo-wrap" aria-hidden>
-              <img src={logo} alt="" className="pm-brand__logo" />
-            </span>
-            <span className="pm-brand__wordmark">PlayMeet</span>
-          </div>
+          <h1 className="pm-brand__wordmark">
+            <span className="pm-brand__wordmark-play">Play</span>
+            <span className="pm-brand__wordmark-meet">Meet</span>
+          </h1>
         </div>
 
         <div className="pm-navbar__right">

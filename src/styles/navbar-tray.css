@@ -27,8 +27,7 @@
   gap: 8px;
 }
 
-/* Ortak yüzey: marka pill, elmas, zil */
-.pm-brand__backdrop,
+/* Ortak yüzey: elmas, zil */
 .pm-currency-nav__item.is-gems,
 .pm-icon-button--bell {
   border: var(--pm-nav-chip-border);
@@ -36,13 +35,11 @@
   box-shadow: var(--pm-nav-chip-shadow);
 }
 
-.pm-brand__backdrop,
 .pm-currency-nav__item.is-gems,
 .pm-icon-button--bell {
   position: relative;
 }
 
-.pm-brand__backdrop::before,
 .pm-currency-nav__item.is-gems::before,
 .pm-icon-button--bell::before {
   content: '';
@@ -53,8 +50,8 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 42%);
 }
 
-.pm-brand__backdrop::after,
-.pm-currency-nav__item.is-gems::after {
+.pm-currency-nav__item.is-gems::after,
+.pm-icon-button--bell::after {
   content: '';
   position: absolute;
   left: 10%;
@@ -195,35 +192,40 @@
   transform: scale(0.94);
 }
 
-/* —— Bildirim —— */
-.pm-icon-button--bell {
+/* —— Bildirim (elmas pill ile aynı koyu chip) —— */
+.pm-navbar__right .pm-icon-button.pm-icon-button--bell {
+  flex: 0 0 auto;
   width: var(--pm-nav-chip-h);
   height: var(--pm-nav-chip-h);
   min-width: var(--pm-nav-chip-h);
   min-height: var(--pm-nav-chip-h);
   border-radius: var(--pm-nav-chip-radius);
+  border: var(--pm-nav-chip-border);
+  background: var(--pm-nav-chip-bg);
+  box-shadow: var(--pm-nav-chip-shadow);
   color: #e8ecff;
+  font-size: 18px;
   transition:
     border-color 0.25s ease,
     box-shadow 0.25s ease,
     color 0.2s ease;
 }
 
-.pm-icon-button--bell:hover {
+.pm-navbar__right .pm-icon-button.pm-icon-button--bell:hover {
   border-color: rgba(255, 255, 255, 0.065);
   color: #fff;
   box-shadow:
     0 4px 20px rgba(0, 0, 0, 0.4),
-    0 0 16px rgba(100, 140, 255, 0.08),
+    0 0 18px rgba(100, 140, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.pm-icon-button--bell.is-open {
-  border-color: rgba(255, 120, 200, 0.35);
-  color: #ffe8f8;
+.pm-navbar__right .pm-icon-button.pm-icon-button--bell.is-open {
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
   box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.38),
-    0 0 16px rgba(255, 60, 180, 0.16),
+    0 4px 20px rgba(0, 0, 0, 0.4),
+    0 0 18px rgba(100, 140, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -251,8 +253,7 @@
   .pm-currency-nav__gem-aura,
   .pm-currency-nav__gem-flare::after,
   .pm-currency-nav__gem-img,
-  .pm-icon-button--bell .pm-badge,
-  .pm-brand--aaa .pm-brand__logo {
+  .pm-icon-button--bell .pm-badge {
     animation: none;
   }
 }

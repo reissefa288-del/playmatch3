@@ -1,6 +1,12 @@
 import altinIcon from '../../reference/altın.png'
 import elmasIcon from '../../reference/elmas.png'
+import morGemIcon from '../../reference/mor.png'
 import type { CurrencyKind, CurrencyPackage } from './types'
+
+/** Elmas paket — Satın Al butonunda mor elmas gösterilen paketler */
+export const GEM_MOR_PACKAGE_IDS = new Set(['g-40', 'g-120'])
+
+export { morGemIcon }
 
 export const currencyMeta: Record<
   CurrencyKind,

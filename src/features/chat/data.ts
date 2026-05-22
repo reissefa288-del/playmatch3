@@ -40,10 +40,9 @@ export type ChatMessage =
   | {
       id: string
       type: 'invite'
-      sender: 'them'
+      sender: 'them' | 'me'
       gameTitle: string
       gameEmoji: string
-      text: string
     }
   | { id: string; type: 'date'; label: string }
 
@@ -154,38 +153,22 @@ export const chatDetails: Record<string, ChatDetail> = {
         type: 'text',
         sender: 'them',
         text: 'Harika maçtı! Tekrar oynayalım mı? 🎮',
-        time: '14:20',
+        time: '14:32',
       },
       {
         id: 'm2',
         type: 'text',
         sender: 'me',
         text: 'Kesinlikle! Sen çok iyiydin 🔥',
-        time: '14:22',
-        read: true,
-      },
-      {
-        id: 'm3',
-        type: 'text',
-        sender: 'them',
-        text: 'Teşekkürler! 🙏 Bu akşam müsait misin?',
-        time: '14:28',
-      },
-      {
-        id: 'm4',
-        type: 'text',
-        sender: 'me',
-        text: 'Evet, 21:00 gibi olur mu?',
         time: '14:35',
         read: true,
       },
       {
-        id: 'm5',
+        id: 'm3',
         type: 'invite',
         sender: 'them',
         gameTitle: 'XOX',
         gameEmoji: '⭕',
-        text: 'XOX — Seni oyuna davet etti',
       },
     ],
   },

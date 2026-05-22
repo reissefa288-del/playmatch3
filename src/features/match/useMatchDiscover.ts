@@ -110,5 +110,6 @@ export function useMatchDiscover() {
     canUndo,
     canLike,
     canAct,
+    notify: showToast,
   }
 }

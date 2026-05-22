@@ -1,0 +1,64 @@
+/* Profile — tam ekran mavi / pembe atmosfer (home + match ile aynı) */
+
+.pm-tab-panel#pm-tab-profile {
+  background: #060818;
+}
+
+.pm-tab-panel#pm-tab-profile::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 140% 90% at 0% 0%, rgba(40, 148, 255, 0.5), transparent 52%),
+    radial-gradient(ellipse 130% 85% at 100% 8%, rgba(255, 60, 200, 0.45), transparent 50%),
+    radial-gradient(ellipse 120% 75% at 50% 100%, rgba(120, 80, 255, 0.35), transparent 48%),
+    radial-gradient(ellipse 100% 70% at 20% 55%, rgba(50, 130, 255, 0.22), transparent 45%),
+    radial-gradient(ellipse 90% 65% at 85% 65%, rgba(255, 90, 180, 0.2), transparent 42%),
+    linear-gradient(165deg, #0c1438 0%, #060818 38%, #140a22 72%, #060818 100%);
+  animation: pm-profile-bg-drift 18s ease-in-out infinite alternate;
+}
+
+.pm-app-shell--profile {
+  background: transparent;
+}
+
+.pm-app-shell--profile .pm-artboard {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  background: transparent;
+}
+
+.pm-app-shell--profile .pm-artboard::before {
+  display: none;
+}
+
+.pm-app-shell--profile .pm-ambient-wrap {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+@keyframes pm-profile-bg-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(2%, 3%, 0) scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-tab-panel#pm-tab-profile::before,
+  .pm-app-shell--profile .pm-ambient-orb,
+  .pm-app-shell--profile .pm-ambient-particle,
+  .pm-app-shell--profile .pm-ambient-streak {
+    animation: none;
+  }
+}

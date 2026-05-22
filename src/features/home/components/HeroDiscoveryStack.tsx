@@ -53,7 +53,7 @@ export function HeroDiscoveryStack() {
     setExitMode('match')
   }
 
-  const showSent = phase === 'sent' || phase === 'exiting'
+  const showSent = phase === 'sent' || (phase === 'exiting' && exitMode === 'match')
   const matchBusy = phase === 'busy'
   const showPeek = phase === 'idle' && Boolean(next)
 

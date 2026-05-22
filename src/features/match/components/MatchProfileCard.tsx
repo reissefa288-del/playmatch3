@@ -3,6 +3,7 @@ import { FiChevronLeft, FiChevronRight, FiHeart, FiMapPin, FiX } from 'react-ico
 import { LuGamepad2, LuTarget, LuTrophy } from 'react-icons/lu'
 import { MdVerified } from 'react-icons/md'
 import { motion } from 'framer-motion'
+import { PhotoLightbox } from '../../../shared/PhotoLightbox'
 import type { MatchProfile, MatchStyleTag } from '../data'
 import { MatchPortraitCarousel } from './MatchPortraitCarousel'
 
@@ -31,6 +32,7 @@ export function MatchProfileCard({
   const count = p.photos.length
   const [photoIndex, setPhotoIndex] = useState(0)
   const [photosOpen, setPhotosOpen] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const go = useCallback(
     (delta: number) => {
@@ -51,6 +53,7 @@ export function MatchProfileCard({
 
   const closePhotos = useCallback(() => {
     setPhotosOpen(false)
+    setLightboxOpen(false)
   }, [])
 
   const canPrev = photosOpen && photoIndex > 0
@@ -84,11 +87,19 @@ export function MatchProfileCard({
             className={`pm-match-photo-area pm-match-photo-area--aaa${photosOpen ? ' is-photos-open' : ''}`}
           >
             {photosOpen ? (
-              <MatchPortraitCarousel
-                photos={p.photos}
-                imageSrc={p.portraitSrc}
-                index={photoIndex}
-              />
+              <>
+                <MatchPortraitCarousel
+                  photos={p.photos}
+                  imageSrc={p.portraitSrc}
+                  index={photoIndex}
+                />
+                <button
+                  type="button"
+                  className="pm-portrait-zoom-hit"
+                  aria-label="Fotoğrafı büyüt"
+                  onClick={() => setLightboxOpen(true)}
+                />
+              </>
             ) : (
               <img
                 src={p.portraitSrc}
@@ -210,6 +221,15 @@ export function MatchProfileCard({
           <p className="pm-match-about-text">{p.bio}</p>
         </div>
       </aside>
+
+      <PhotoLightbox
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        imageSrc={p.portraitSrc}
+        photos={p.photos}
+        index={photoIndex}
+        onIndexChange={setPhotoIndex}
+      />
     </motion.div>
   )
 }

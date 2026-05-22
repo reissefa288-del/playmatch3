@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react'
 import { FiChevronRight } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
+import { useProfileLevel } from '../../profile/ProfileLevelProvider'
+import { XP_GAME_POPULAR } from '../../profile/profileLevel'
 import type { HubGame } from '../data'
 
 type PopularGamesGridProps = {
@@ -9,6 +11,7 @@ type PopularGamesGridProps = {
 
 export function PopularGamesGrid({ games }: PopularGamesGridProps) {
   const reduceMotion = useReducedMotion()
+  const { addXp } = useProfileLevel()
 
   return (
     <section className="pm-games-popular" aria-label="Popüler oyunlar">
@@ -39,6 +42,15 @@ export function PopularGamesGrid({ games }: PopularGamesGridProps) {
             }}
             whileHover={reduceMotion ? undefined : { y: -5, scale: 1.02 }}
             whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+            onClick={() => addXp(XP_GAME_POPULAR)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                addXp(XP_GAME_POPULAR)
+              }
+            }}
           >
             <span className="pm-game-card__glow" aria-hidden />
             <div className="pm-game-card__art">

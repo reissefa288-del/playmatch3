@@ -1,37 +1,27 @@
-import { useState } from 'react'
-import { FiCheck, FiHeart } from 'react-icons/fi'
+import { useEffect, useState } from 'react'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { MdEmojiEvents } from 'react-icons/md'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { NearbyPlayer } from '../types'
-import { useNearbyLikes } from '../useNearbyLikes'
+import { NearbyLikeBurst } from './NearbyLikeBurst'
+import { NearbyLikeButton, type NearbyLikePhase } from './NearbyLikeButton'
 
 type NearbyPlayerCardProps = {
   player: NearbyPlayer
   onDismissed?: () => void
 }
 
-type LikePhase = 'idle' | 'burst' | 'exit'
-
-const BURST_MS = 720
-
 export function NearbyPlayerCard({ player, onDismissed }: NearbyPlayerCardProps) {
   const reduceMotion = useReducedMotion()
-  const { hasLiked, sendLike } = useNearbyLikes()
-  const alreadyLiked = hasLiked(player.id)
-  const [phase, setPhase] = useState<LikePhase>('idle')
+  const [likePhase, setLikePhase] = useState<NearbyLikePhase>('idle')
 
-  const handleLike = () => {
-    if (phase !== 'idle' || alreadyLiked) return
-    sendLike(player.id)
-    setPhase('burst')
-    window.setTimeout(() => setPhase('exit'), BURST_MS)
-  }
-
-  const handleExitComplete = () => {
-    if (phase === 'exit') onDismissed?.()
-  }
+  useEffect(() => {
+    if (likePhase !== 'exit') return
+    const ms = reduceMotion ? 0 : 420
+    const id = window.setTimeout(() => onDismissed?.(), ms)
+    return () => window.clearTimeout(id)
+  }, [likePhase, reduceMotion, onDismissed])
 
   return (
     <motion.article
@@ -39,32 +29,17 @@ export function NearbyPlayerCard({ player, onDismissed }: NearbyPlayerCardProps)
       layout
       initial={false}
       animate={
-        phase === 'exit' && !reduceMotion
+        likePhase === 'exit' && !reduceMotion
           ? { opacity: 0, x: 140, scale: 0.88, rotate: 6 }
           : { opacity: 1, x: 0, scale: 1, rotate: 0 }
       }
       transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-      onAnimationComplete={handleExitComplete}
     >
       <span className="pm-nearby-card__glow" aria-hidden />
       <span className="pm-nearby-card__shine" aria-hidden />
 
       <AnimatePresence>
-        {phase === 'burst' ? (
-          <motion.div
-            className="pm-nearby-card__like-burst"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            role="status"
-          >
-            <span className="pm-nearby-card__like-burst-ring" aria-hidden />
-            <span className="pm-nearby-card__like-burst-icon" aria-hidden>
-              <FiCheck />
-            </span>
-            <strong>Beğenildi!</strong>
-          </motion.div>
-        ) : null}
+        {likePhase === 'burst' ? <NearbyLikeBurst /> : null}
       </AnimatePresence>
 
       <div
@@ -98,15 +73,12 @@ export function NearbyPlayerCard({ player, onDismissed }: NearbyPlayerCardProps)
             <span key={tag}>{tag}</span>
           ))}
         </div>
-        <button
-          type="button"
-          className={`pm-nearby-card__like-btn${alreadyLiked || phase !== 'idle' ? ' is-liked' : ''}`}
-          aria-label={alreadyLiked ? 'Beğenildi' : `${player.name} beğen`}
-          disabled={phase !== 'idle' || alreadyLiked}
-          onClick={handleLike}
-        >
-          <FiHeart aria-hidden />
-        </button>
+        <NearbyLikeButton
+          playerId={player.id}
+          playerName={player.name}
+          dismissAfterLike
+          onPhaseChange={setLikePhase}
+        />
       </div>
     </motion.article>
   )

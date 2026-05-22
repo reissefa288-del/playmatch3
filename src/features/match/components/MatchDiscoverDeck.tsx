@@ -31,7 +31,7 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
             Bugünkü 10 profili gördün. Yarın yeni oyuncular ve 15 beğeni hakkı seni bekliyor.
           </p>
         </motion.div>
-        <MatchBoostPanel />
+        <MatchBoostPanel onNotify={discover.notify} />
         <MatchToast toast={discover.toast} onDismiss={discover.dismissToast} />
       </motion.div>
     )
@@ -64,7 +64,7 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
         likesRemaining={discover.likesRemaining}
         dailyLimit={discover.dailyLimit}
       />
-      <MatchBoostPanel />
+      <MatchBoostPanel onNotify={discover.notify} />
       <MatchToast toast={discover.toast} onDismiss={discover.dismissToast} />
     </motion.div>
   )

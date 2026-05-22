@@ -76,7 +76,7 @@ export function MatchActionRow({
       />
       <ActionCircle
         label="Süper beğeni"
-        variant="muted"
+        variant="super"
         icon={<FiStar />}
         onClick={onSuperLike}
         disabled={!canAct}
@@ -89,7 +89,7 @@ export function MatchActionRow({
 type ActionCircleProps = {
   label: string
   icon: ReactNode
-  variant: 'muted' | 'pass' | 'match' | 'invite'
+  variant: 'muted' | 'pass' | 'match' | 'invite' | 'super'
   large?: boolean
   disabled?: boolean
   onClick: () => void
@@ -109,9 +109,11 @@ function ActionCircle({
       ? 'pm-match-action--pass'
       : variant === 'invite'
         ? 'pm-match-action--invite'
-        : variant === 'muted'
-          ? 'pm-match-action--muted'
-          : ''
+        : variant === 'super'
+          ? 'pm-match-action--super'
+          : variant === 'muted'
+            ? 'pm-match-action--muted'
+            : ''
 
   return (
     <motion.button

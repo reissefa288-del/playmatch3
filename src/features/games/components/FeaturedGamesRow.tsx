@@ -1,6 +1,8 @@
 import { useState, type CSSProperties, type UIEvent } from 'react'
 import { FiUsers } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
+import { useProfileLevel } from '../../profile/ProfileLevelProvider'
+import { XP_GAME_FEATURED } from '../../profile/profileLevel'
 import type { FeaturedGame } from '../data'
 
 const FEATURED_CARD_STEP = 262
@@ -11,6 +13,7 @@ type FeaturedGamesRowProps = {
 
 export function FeaturedGamesRow({ games }: FeaturedGamesRowProps) {
   const reduceMotion = useReducedMotion()
+  const { addXp } = useProfileLevel()
   const [activeIndex, setActiveIndex] = useState(0)
 
   function onTrackScroll(e: UIEvent<HTMLDivElement>) {
@@ -79,6 +82,7 @@ export function FeaturedGamesRow({ games }: FeaturedGamesRowProps) {
 
             <motion.button
               type="button"
+              onClick={() => addXp(XP_GAME_FEATURED)}
               whileHover={reduceMotion ? undefined : { scale: 1.03, y: -1 }}
               whileTap={reduceMotion ? undefined : { scale: 0.96 }}
             >

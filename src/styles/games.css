@@ -474,6 +474,10 @@
   gap: 10px;
 }
 
+.pm-game-card[role='button'] {
+  cursor: pointer;
+}
+
 .pm-game-card {
   border-radius: 14px;
   border: 1px solid rgba(102, 136, 245, 0.4);

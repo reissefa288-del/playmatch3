@@ -1,7 +1,7 @@
 .pm-app-shell--nearby {
   background:
     radial-gradient(ellipse 90% 60% at 50% -10%, rgba(90, 140, 255, 0.22), transparent 55%),
-    radial-gradient(ellipse 70% 50% at 100% 80%, rgba(255, 60, 200, 0.12), transparent 50%),
+    radial-gradient(ellipse 70% 50% at 100% 80%, rgba(50, 130, 255, 0.14), transparent 50%),
     #050816;
 }
 
@@ -24,6 +24,8 @@
 }
 
 .pm-nearby-screen__back {
+  position: relative;
+  z-index: 12;
   width: 42px;
   height: 42px;
   margin-top: 4px;
@@ -36,6 +38,16 @@
   font-size: 20px;
   cursor: pointer;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+}
+
+.pm-app-shell--nearby .pm-nearby-screen__hero {
+  position: relative;
+  z-index: 2;
+}
+
+.pm-app-shell--nearby .pm-ambient-wrap {
+  pointer-events: none;
 }
 
 .pm-nearby-screen__hero-copy {
@@ -95,16 +107,21 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  border: 1px solid rgba(255, 120, 200, 0.4);
-  background: linear-gradient(145deg, rgba(255, 60, 200, 0.2), rgba(80, 60, 255, 0.25));
-  box-shadow: 0 0 24px rgba(255, 60, 200, 0.2);
-  color: #ffd8f0;
+  border: 1px solid rgba(90, 160, 255, 0.5);
+  background: linear-gradient(145deg, rgba(40, 120, 255, 0.28), rgba(30, 70, 180, 0.35));
+  box-shadow: 0 0 24px rgba(50, 130, 255, 0.28);
+  color: #b8d8ff;
+}
+
+.pm-nearby-screen__count svg {
+  color: #8ec0ff;
 }
 
 .pm-nearby-screen__count strong {
   font-size: 18px;
   line-height: 1;
-  color: #fff;
+  color: #e8f2ff;
+  text-shadow: 0 0 12px rgba(100, 180, 255, 0.65);
 }
 
 .pm-nearby-players-list {

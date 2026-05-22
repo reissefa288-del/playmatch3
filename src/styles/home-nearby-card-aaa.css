@@ -2,6 +2,7 @@
 
 .pm-nearby-card--aaa {
   isolation: isolate;
+  overflow: visible;
   border: none;
   background: rgba(6, 12, 36, 0.9);
   min-height: 252px;
@@ -140,55 +141,146 @@
   min-height: 68px;
 }
 
-.pm-nearby-card__like-btn {
+.pm-nearby-card--aaa .pm-nearby-card__image {
+  overflow: hidden;
+  border-radius: 12px 12px 0 0;
+}
+
+.pm-nearby-card__like-wrap {
+  position: relative;
   flex: 0 0 auto;
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  min-height: 30px;
   margin-top: auto;
-  border-radius: 10px;
+  z-index: 5;
+}
+
+.pm-nearby-card__like-btn {
+  position: relative;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 11px;
   display: grid;
   place-items: center;
   padding: 0;
   cursor: pointer;
-  color: #ff6fd8;
-  font-size: 16px;
-  border: 1px solid rgba(255, 90, 200, 0.55);
-  background: linear-gradient(
-    145deg,
-    rgba(255, 60, 180, 0.28) 0%,
-    rgba(80, 60, 180, 0.35) 100%
-  );
-  box-shadow: 0 0 14px rgba(255, 60, 180, 0.35);
-  animation: pm-nearby-heart-pulse 2.2s ease-in-out infinite;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: visible;
+  border: 1px solid rgba(90, 160, 255, 0.65);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(180, 220, 255, 0.35), transparent 55%),
+    linear-gradient(155deg, rgba(40, 120, 255, 0.5) 0%, rgba(50, 90, 200, 0.45) 55%, rgba(12, 28, 72, 0.9) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 0 1px rgba(60, 140, 255, 0.2),
+    0 0 18px rgba(50, 130, 255, 0.45),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+  animation: pm-nearby-heart-pulse 2.4s ease-in-out infinite;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.pm-nearby-card__like-btn svg {
-  filter: drop-shadow(0 0 6px rgba(255, 100, 200, 0.8));
+.pm-nearby-card__like-btn-icon {
+  width: 17px;
+  height: 17px;
+  color: #e8f2ff;
+  filter: drop-shadow(0 0 8px rgba(100, 180, 255, 0.95));
+  transition: transform 0.2s ease, filter 0.2s ease;
 }
 
-.pm-nearby-card__like-btn.is-liked,
+.pm-nearby-card__like-btn:hover:not(:disabled) .pm-nearby-card__like-btn-icon {
+  transform: scale(1.08);
+  filter: drop-shadow(0 0 12px rgba(140, 200, 255, 1));
+}
+
 .pm-nearby-card__like-btn:disabled {
-  color: #fff;
-  border-color: rgba(255, 120, 220, 0.7);
-  background: rgba(255, 60, 180, 0.45);
+  border-color: rgba(120, 180, 255, 0.85);
+  background:
+    radial-gradient(circle at 35% 25%, rgba(200, 230, 255, 0.45), transparent 50%),
+    linear-gradient(155deg, #3d8cff 0%, #4a6dff 50%, #2a4fd4 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 22px rgba(60, 150, 255, 0.65);
   animation: none;
 }
 
-.pm-nearby-card__like-btn:active:not(:disabled) {
-  transform: scale(0.92);
+.pm-nearby-card__like-btn.is-liked,
+.pm-nearby-card__like-btn.is-liked:disabled {
+  border-color: rgba(120, 180, 255, 0.85);
+  background:
+    radial-gradient(circle at 35% 25%, rgba(200, 230, 255, 0.45), transparent 50%),
+    linear-gradient(155deg, #3d8cff 0%, #4a6dff 50%, #2a4fd4 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 0 22px rgba(60, 150, 255, 0.65);
+  animation: none;
+}
+
+.pm-nearby-card__like-btn.is-liked .pm-nearby-card__like-btn-icon {
+  transform: scale(1.05);
+  color: #fff;
+  filter: drop-shadow(0 0 10px rgba(180, 220, 255, 1));
+}
+
+.pm-nearby-list-card__like-slot {
+  align-self: center;
+}
+
+/* Tam liste — ana sayfa ile aynı kalp butonu */
+.pm-nearby-list-card--aaa .pm-nearby-card__like-btn,
+.pm-nearby-list-card--aaa .pm-nearby-list-card__like-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 11px;
+}
+
+.pm-nearby-list-card--aaa .pm-nearby-card__like-btn-icon {
+  width: 18px;
+  height: 18px;
+}
+
+.pm-nearby-list-card--aaa.is-liked-card {
+  border-color: rgba(80, 150, 255, 0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(60, 140, 255, 0.25),
+    0 8px 24px rgba(0, 0, 0, 0.35),
+    0 0 22px rgba(50, 130, 255, 0.2);
+}
+
+.pm-nearby-list-card__liked-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 3;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: #fff;
+  border: 1px solid rgba(100, 170, 255, 0.55);
+  background: linear-gradient(145deg, rgba(50, 130, 255, 0.65), rgba(40, 90, 220, 0.55));
+  box-shadow: 0 0 14px rgba(60, 150, 255, 0.4);
+  pointer-events: none;
 }
 
 @keyframes pm-nearby-heart-pulse {
   0%,
   100% {
-    box-shadow: 0 0 12px rgba(255, 60, 180, 0.3);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 0 0 1px rgba(60, 140, 255, 0.2),
+      0 0 12px rgba(50, 130, 255, 0.35),
+      0 4px 12px rgba(0, 0, 0, 0.35);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 20px rgba(255, 80, 200, 0.55);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 0 0 1px rgba(80, 160, 255, 0.3),
+      0 0 20px rgba(70, 150, 255, 0.55),
+      0 4px 12px rgba(0, 0, 0, 0.35);
     transform: scale(1.06);
   }
 }
@@ -203,15 +295,13 @@
     0 0 20px rgba(50, 130, 255, 0.15);
 }
 
-.pm-nearby-list-card__like-btn {
-  align-self: center;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pm-nearby-card--aaa::before,
   .pm-nearby-card__glow,
   .pm-nearby-card__shine,
-  .pm-nearby-card__like-btn {
+  .pm-nearby-card__like-btn,
+  .pm-nearby-card__like-burst::after,
+  .pm-nearby-card__heart-particle {
     animation: none;
   }
 }

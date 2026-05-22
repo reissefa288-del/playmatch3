@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import {
+  FiChevronLeft,
+  FiChevronRight,
   FiCheck,
   FiHeart,
   FiLock,
@@ -12,6 +14,7 @@ import { IoShieldCheckmark } from 'react-icons/io5'
 import { LuGamepad2 } from 'react-icons/lu'
 import { MdEmojiEvents } from 'react-icons/md'
 import { fakePortraitForGender } from '../../../shared/fakePortraits'
+import { PhotoLightbox, type LightboxPhoto } from '../../../shared/PhotoLightbox'
 import type { HeroDiscoveryPlayer, HeroDiscoveryTag } from '../types'
 
 export type HeroPlayerCardProps = {
@@ -28,6 +31,13 @@ function TagIcon({ tag }: { tag: HeroDiscoveryTag }) {
   return <LuGamepad2 aria-hidden />
 }
 
+const heroPhotoPositions = ['50% 12%', '50% 35%', '50% 68%']
+
+const heroLightboxPhotos: LightboxPhoto[] = heroPhotoPositions.map((objectPosition, index) => ({
+  id: `hero-photo-${index}`,
+  objectPosition,
+}))
+
 export function HeroPlayerCard({
   player,
   showSentOverlay = false,
@@ -37,12 +47,28 @@ export function HeroPlayerCard({
   onPass,
 }: HeroPlayerCardProps) {
   const [inviteHint, setInviteHint] = useState(false)
+  const [photosOpen, setPhotosOpen] = useState(false)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
+  const [photoIndex, setPhotoIndex] = useState(0)
+  const portraitSrc = fakePortraitForGender(player.gender)
   const actionsLocked = showSentOverlay || matchBusy || isPeek
 
   const onLockedInvite = () => {
     setInviteHint(true)
     window.setTimeout(() => setInviteHint(false), 3800)
   }
+
+  const openPhotos = () => {
+    setPhotoIndex(0)
+    setPhotosOpen(true)
+  }
+
+  const closePhotos = () => {
+    setPhotosOpen(false)
+    setLightboxOpen(false)
+  }
+  const canPrev = photoIndex > 0
+  const canNext = photoIndex < heroPhotoPositions.length - 1
 
   return (
     <article className={`pm-hero-card pm-hero-card--aaa${isPeek ? ' is-peek' : ''}`}>
@@ -94,14 +120,67 @@ export function HeroPlayerCard({
 
       <div className="pm-hero-card__body">
         <div className="pm-hero-card__portrait-col">
-          <div className="pm-hero-card__portrait" role="img" aria-label={player.name}>
+          <div
+            className={`pm-hero-card__portrait${photosOpen ? ' is-photos-mode' : ''}`}
+            role="img"
+            aria-label={player.name}
+          >
             <img
-              src={fakePortraitForGender(player.gender)}
+              src={portraitSrc}
               alt=""
               className="pm-hero-card__portrait-img"
+              style={{ objectPosition: heroPhotoPositions[photoIndex] }}
               draggable={false}
             />
+            {photosOpen ? (
+              <button
+                type="button"
+                className="pm-portrait-zoom-hit"
+                aria-label="Fotoğrafı büyüt"
+                onClick={() => setLightboxOpen(true)}
+              />
+            ) : null}
             {player.isOnline ? <span className="pm-status-pill">Online</span> : null}
+            {!isPeek && !photosOpen ? (
+              <div className="pm-hero-card__photos-cta-wrap">
+                <button type="button" className="pm-hero-card__photos-cta" onClick={openPhotos}>
+                  FOTOĞRAFLARI GÖR
+                </button>
+              </div>
+            ) : null}
+            {!isPeek && photosOpen ? (
+              <div className="pm-hero-card__photos-ui" role="dialog" aria-label="Profil fotoğrafları">
+                <div className="pm-hero-card__photos-top">
+                  <span>{photoIndex + 1} / {heroPhotoPositions.length}</span>
+                  <button type="button" onClick={closePhotos} aria-label="Fotoğrafları kapat">
+                    <FiX aria-hidden />
+                  </button>
+                </div>
+                <div className="pm-hero-card__photos-dots" aria-hidden>
+                  {heroPhotoPositions.map((_, index) => (
+                    <span key={`hero-photo-dot-${index}`} className={index === photoIndex ? 'is-active' : ''} />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  className="pm-hero-card__photos-nav pm-hero-card__photos-nav--prev"
+                  onClick={() => setPhotoIndex((prev) => Math.max(0, prev - 1))}
+                  disabled={!canPrev}
+                  aria-label="Önceki fotoğraf"
+                >
+                  <FiChevronLeft aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="pm-hero-card__photos-nav pm-hero-card__photos-nav--next"
+                  onClick={() => setPhotoIndex((prev) => Math.min(heroPhotoPositions.length - 1, prev + 1))}
+                  disabled={!canNext}
+                  aria-label="Sonraki fotoğraf"
+                >
+                  <FiChevronRight aria-hidden />
+                </button>
+              </div>
+            ) : null}
           </div>
         </div>
 
@@ -217,6 +296,15 @@ export function HeroPlayerCard({
           <span className="pm-hero-btn__label">Oyuna Davet Et</span>
         </button>
       </div>
+
+      <PhotoLightbox
+        open={lightboxOpen}
+        onClose={() => setLightboxOpen(false)}
+        imageSrc={portraitSrc}
+        photos={heroLightboxPhotos}
+        index={photoIndex}
+        onIndexChange={setPhotoIndex}
+      />
     </article>
   )
 }

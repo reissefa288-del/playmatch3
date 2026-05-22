@@ -151,24 +151,7 @@
   color: #d0dcff;
 }
 
-.pm-nearby-list-card__like {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 90, 200, 0.4);
-  background: rgba(20, 10, 40, 0.8);
-  color: #ff6fd8;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-  font-size: 18px;
-}
-
-.pm-nearby-list-card__like.is-liked {
-  background: rgba(255, 60, 180, 0.25);
-  color: #fff;
-  box-shadow: 0 0 16px rgba(255, 60, 180, 0.35);
-}
+/* Eski dairesel kalp — NearbyLikeButton (.pm-nearby-card__like-btn) kullanılıyor */
 
 .pm-nearby-list__eyebrow {
   margin: 2px 0 0;

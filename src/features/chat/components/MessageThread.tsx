@@ -11,6 +11,7 @@ type MessageThreadProps = {
 
 export function MessageThread({ chatId, messages, portraitPosition }: MessageThreadProps) {
   const portraitUrl = fakePortraitForProfile(chatId)
+
   return (
     <div className="pm-message-thread" role="log" aria-label="Mesajlar">
       {messages.map((message, index) => {
@@ -50,7 +51,8 @@ export function MessageThread({ chatId, messages, portraitPosition }: MessageThr
                   <span>O</span>
                 </span>
               </div>
-              <p>{message.text}</p>
+              <strong className="pm-message-invite__title">{message.gameTitle}</strong>
+              <p>Seni oyuna davet etti</p>
               <motion.button type="button" whileTap={{ scale: 0.97 }}>
                 Daveti Kabul Et
               </motion.button>
@@ -76,13 +78,20 @@ export function MessageThread({ chatId, messages, portraitPosition }: MessageThr
                 }}
               />
             ) : null}
-            <div className={`pm-message-bubble ${isMe ? 'is-me' : 'is-them'}`}>
-              <p>{message.text}</p>
-              {isMe && message.read ? (
-                <span className="pm-message-bubble__read" aria-label="Okundu">
-                  <FiCheck />
-                  <FiCheck />
-                </span>
+            <div className="pm-message-bubble-stack">
+              <div className={`pm-message-bubble ${isMe ? 'is-me' : 'is-them'}`}>
+                <p>{message.text}</p>
+                {isMe && message.read ? (
+                  <span className="pm-message-bubble__read" aria-label="Okundu">
+                    <FiCheck />
+                    <FiCheck />
+                  </span>
+                ) : null}
+              </div>
+              {message.time ? (
+                <time className="pm-message-bubble-row__time" dateTime={message.time}>
+                  {message.time}
+                </time>
               ) : null}
             </div>
           </motion.div>

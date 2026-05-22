@@ -1,5 +1,5 @@
 import { Navigate, useParams } from 'react-router-dom'
-import type { CSSProperties } from 'react'
+import { motion } from 'framer-motion'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
 import { getChatDetail } from './data'
@@ -7,7 +7,6 @@ import { GameActivityCard } from './components/GameActivityCard'
 import { MessageHeader } from './components/MessageHeader'
 import { MessageInput } from './components/MessageInput'
 import { MessageThread } from './components/MessageThread'
-import messageReference from '../../reference/message-final.png'
 
 export function MessageScreen() {
   const { chatId } = useParams<{ chatId: string }>()
@@ -17,15 +16,16 @@ export function MessageScreen() {
     return <Navigate to="/chat" replace />
   }
 
-  const messageVars = {
-    '--pm-message-reference': `url(${messageReference})`,
-  } as CSSProperties
-
   return (
-    <div className="pm-app-shell pm-app-shell--message">
+    <motion.div
+      className="pm-app-shell pm-app-shell--message"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.32 }}
+    >
       <div className="pm-artboard">
         <AmbientParticles />
-        <main className="pm-message" style={messageVars}>
+        <main className="pm-message">
           <Navbar />
           <MessageHeader chat={chat} />
           <GameActivityCard lastGame={chat.lastGame} />
@@ -35,8 +35,10 @@ export function MessageScreen() {
             portraitPosition={chat.portraitPosition}
           />
         </main>
-        <MessageInput />
+        <div className="pm-message-input-wrap">
+          <MessageInput />
+        </div>
       </div>
-    </div>
+    </motion.div>
   )
 }

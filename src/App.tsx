@@ -1,6 +1,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { GemBalanceProvider } from './features/currency/GemBalanceProvider'
 import { NearbyLikesProvider } from './features/home/NearbyLikesProvider'
+import { ProfileLevelProvider } from './features/profile/ProfileLevelProvider'
 import { AppRoutes } from './navigation/AppRoutes'
 import './styles/currency-ui.css'
 import './styles/home-filters.css'
@@ -24,7 +25,11 @@ import './styles/match-screen.css'
 import './styles/match-aaa.css'
 import './styles/match-toast.css'
 import './styles/chat.css'
+import './styles/message-ambient.css'
+import './styles/message-screen.css'
 import './styles/profile.css'
+import './styles/profile-ambient.css'
+import './styles/photo-lightbox.css'
 import './styles/premium.css'
 import './styles/premium-feature-icons.css'
 import './styles/navigation.css'
@@ -32,14 +37,16 @@ import './styles/navigation.css'
 function App() {
   return (
     <GemBalanceProvider>
-      <NearbyLikesProvider>
-        <BrowserRouter>
+      <ProfileLevelProvider>
+        <NearbyLikesProvider>
+          <BrowserRouter>
           <Routes>
             <Route path="/chat/:chatId" element={null} />
             <Route path="*" element={<AppRoutes />} />
           </Routes>
-        </BrowserRouter>
-      </NearbyLikesProvider>
+          </BrowserRouter>
+        </NearbyLikesProvider>
+      </ProfileLevelProvider>
     </GemBalanceProvider>
   )
 }

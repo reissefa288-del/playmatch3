@@ -360,6 +360,13 @@
   .pm-match-hero-card__ring,
   .pm-match-online-dot,
   .pm-match-boost-shimmer,
+  .pm-match-boost__rim,
+  .pm-match-boost__aura,
+  .pm-match-boost__scan,
+  .pm-match-boost__spark,
+  .pm-match-boost__progress-fill,
+  .pm-match-boost.is-active,
+  .pm-match-boost.is-active .pm-match-boost__text strong,
   .pm-match-action-btn--match,
   .pm-match-action-btn--invite,
   .pm-app-shell--match .pm-bottom-nav__item.is-active:not(.is-premium) .pm-bottom-nav__icon {

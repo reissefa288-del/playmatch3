@@ -1,6 +1,6 @@
 import { FiStar, FiX, FiZap } from 'react-icons/fi'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { currencyMeta } from './currencyPackages'
+import { currencyMeta, GEM_MOR_PACKAGE_IDS, morGemIcon } from './currencyPackages'
 import { useGemBalance } from './GemBalanceProvider'
 import type { CurrencyKind } from './types'
 
@@ -83,7 +83,6 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
             >
               <span className="pm-currency-shop__ambient" aria-hidden />
               <span className="pm-currency-shop__aura" aria-hidden />
-              <span className="pm-currency-shop__shine" aria-hidden />
               <span className="pm-currency-shop__particles" aria-hidden>
                 {Array.from({ length: PARTICLE_COUNT }, (_, i) => (
                   <span key={i} className="pm-currency-shop__particle" />
@@ -182,10 +181,11 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
                 >
                   {meta.packages.map((pkg, index) => {
                     const total = pkg.amount + (pkg.bonus ?? 0)
+                    const showMorGem = kind === 'gems' && GEM_MOR_PACKAGE_IDS.has(pkg.id)
                     return (
                       <motion.article
                         key={pkg.id}
-                        className={`pm-currency-shop__pkg${pkg.popular ? ' is-popular' : ''}`}
+                        className={`pm-currency-shop__pkg${pkg.popular ? ' is-popular' : ''}${showMorGem ? ' has-mor-gem' : ''}`}
                         variants={shopItem}
                         custom={index}
                         whileHover={
@@ -194,7 +194,6 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
                             : { scale: 1.02, y: -2, transition: { duration: 0.2 } }
                         }
                       >
-                        <span className="pm-currency-shop__pkg-shine" aria-hidden />
                         {pkg.popular ? (
                           <span className="pm-currency-shop__pkg-aura" aria-hidden />
                         ) : null}
@@ -203,6 +202,53 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
                             <FiStar aria-hidden />
                             {pkg.badge}
                           </span>
+                        ) : null}
+                        {showMorGem ? (
+                          <motion.div
+                            className="pm-currency-shop__pkg-mor-hero"
+                            aria-hidden
+                            initial={
+                              reduceMotion ? false : { opacity: 0, scale: 0.65, y: 10 }
+                            }
+                            animate={
+                              reduceMotion
+                                ? { opacity: 1, scale: 1, y: 0 }
+                                : {
+                                    opacity: 1,
+                                    scale: [1, 1.06, 1],
+                                    y: [0, -8, 0],
+                                    rotate: [0, -5, 5, 0],
+                                  }
+                            }
+                            transition={
+                              reduceMotion
+                                ? { duration: 0.35 }
+                                : {
+                                    opacity: { duration: 0.45, delay: 0.25 + index * 0.06 },
+                                    scale: {
+                                      duration: 3,
+                                      repeat: Infinity,
+                                      ease: 'easeInOut',
+                                      delay: 0.5,
+                                    },
+                                    y: {
+                                      duration: 3.2,
+                                      repeat: Infinity,
+                                      ease: 'easeInOut',
+                                      delay: 0.5,
+                                    },
+                                    rotate: {
+                                      duration: 4,
+                                      repeat: Infinity,
+                                      ease: 'easeInOut',
+                                      delay: 0.5,
+                                    },
+                                  }
+                            }
+                          >
+                            <span className="pm-currency-shop__pkg-mor-hero-glow" />
+                            <img src={morGemIcon} alt="" />
+                          </motion.div>
                         ) : null}
                         <motion.div
                           className="pm-currency-shop__pkg-main"
@@ -253,7 +299,6 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
                           whileHover={reduceMotion ? undefined : { scale: 1.02 }}
                           whileTap={reduceMotion ? undefined : { scale: 0.97 }}
                         >
-                          <span className="pm-currency-shop__buy-shine" aria-hidden />
                           Satın Al
                         </motion.button>
                       </motion.article>

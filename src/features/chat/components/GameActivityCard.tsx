@@ -19,8 +19,9 @@ export function GameActivityCard({ lastGame }: GameActivityCardProps) {
       </span>
       <motion.div className="pm-message-activity__copy">
         <p>Birlikte Oyun Oynadınız</p>
-        <strong>{lastGame.title}</strong>
-        <small>{lastGame.playedAgo}</small>
+        <strong>
+          {lastGame.title} • {lastGame.playedAgo}
+        </strong>
       </motion.div>
       <motion.button
         type="button"

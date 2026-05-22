@@ -37,8 +37,8 @@ export function NearbyPlayersScreen() {
             <button
               type="button"
               className="pm-nearby-screen__back"
-              onClick={() => navigate(-1)}
-              aria-label="Geri"
+              onClick={() => navigate('/', { replace: true })}
+              aria-label="Ana sayfaya dön"
             >
               <FiArrowLeft />
             </button>
