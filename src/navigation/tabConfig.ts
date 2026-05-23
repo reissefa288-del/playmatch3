@@ -42,6 +42,10 @@ export function resolveTabId(pathname: string): TabId | null {
     return 'chat'
   }
 
+  if (/^\/games(\/|$)/.test(path)) {
+    return 'games'
+  }
+
   if (path === '/' || path === '/nearby') {
     return 'home'
   }

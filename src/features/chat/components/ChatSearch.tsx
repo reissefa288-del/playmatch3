@@ -1,4 +1,4 @@
-import { FiSearch, FiSliders } from 'react-icons/fi'
+import { FiSearch } from 'react-icons/fi'
 import { motion } from 'framer-motion'
 
 export function ChatSearch() {
@@ -13,15 +13,6 @@ export function ChatSearch() {
         <FiSearch aria-hidden />
         <input type="search" placeholder="Kişi veya mesaj ara..." />
       </label>
-      <motion.button
-        type="button"
-        className="pm-chat-search__filter"
-        aria-label="Filtrele"
-        whileHover={{ scale: 1.04, filter: 'brightness(1.08)' }}
-        whileTap={{ scale: 0.96 }}
-      >
-        <FiSliders />
-      </motion.button>
     </motion.div>
   )
 }

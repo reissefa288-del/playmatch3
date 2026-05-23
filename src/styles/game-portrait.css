@@ -1,0 +1,35 @@
+/* Paylaşılan 9:16 oyun ekranı çerçevesi (mobil portre) */
+
+.pm-stack-overlay:has(.pm-app-shell--game-play) {
+  display: flex;
+  justify-content: center;
+  background: #0a0e28;
+}
+
+.pm-app-shell--game-play {
+  --pm-game-pad: clamp(12px, 3.6vw, 18px);
+  --pm-game-w: min(430px, 100vw);
+  width: 100%;
+  max-width: var(--pm-game-w);
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  background: transparent;
+  overflow: hidden;
+}
+
+.pm-app-shell--game-play .pm-artboard {
+  width: 100%;
+  max-width: none;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}

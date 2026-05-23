@@ -9,6 +9,8 @@ type MessageThreadProps = {
   portraitPosition: string
 }
 
+const XOX_GRID = ['X', 'O', 'O', 'X', 'X', 'O', 'O', 'X', 'O'] as const
+
 export function MessageThread({ chatId, messages, portraitPosition }: MessageThreadProps) {
   const portraitUrl = fakePortraitForProfile(chatId)
 
@@ -38,22 +40,25 @@ export function MessageThread({ chatId, messages, portraitPosition }: MessageThr
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: index * 0.05, duration: 0.4 }}
             >
-              <div className="pm-message-invite__art">
-                <span className="pm-message-invite__grid" aria-hidden>
-                  <span>X</span>
-                  <span>O</span>
-                  <span>O</span>
-                  <span>X</span>
-                  <span>X</span>
-                  <span>O</span>
-                  <span>O</span>
-                  <span>X</span>
-                  <span>O</span>
-                </span>
+              <div className="pm-message-invite__body">
+                <div className="pm-message-invite__art" aria-hidden>
+                  <span className="pm-message-invite__grid">
+                    {XOX_GRID.map((cell, i) => (
+                      <span
+                        key={i}
+                        className={cell === 'X' ? 'is-x' : 'is-o'}
+                      >
+                        {cell}
+                      </span>
+                    ))}
+                  </span>
+                </div>
+                <div className="pm-message-invite__copy">
+                  <strong className="pm-message-invite__title">{message.gameTitle}</strong>
+                  <p>Seni oyuna davet etti</p>
+                </div>
               </div>
-              <strong className="pm-message-invite__title">{message.gameTitle}</strong>
-              <p>Seni oyuna davet etti</p>
-              <motion.button type="button" whileTap={{ scale: 0.97 }}>
+              <motion.button type="button" className="pm-message-invite__cta" whileTap={{ scale: 0.97 }}>
                 Daveti Kabul Et
               </motion.button>
             </motion.article>
@@ -81,17 +86,21 @@ export function MessageThread({ chatId, messages, portraitPosition }: MessageThr
             <div className="pm-message-bubble-stack">
               <div className={`pm-message-bubble ${isMe ? 'is-me' : 'is-them'}`}>
                 <p>{message.text}</p>
-                {isMe && message.read ? (
-                  <span className="pm-message-bubble__read" aria-label="Okundu">
-                    <FiCheck />
-                    <FiCheck />
-                  </span>
-                ) : null}
               </div>
-              {message.time ? (
-                <time className="pm-message-bubble-row__time" dateTime={message.time}>
-                  {message.time}
-                </time>
+              {message.time || (isMe && message.read) ? (
+                <div className="pm-message-bubble-meta">
+                  {message.time ? (
+                    <time className="pm-message-bubble-meta__time" dateTime={message.time}>
+                      {message.time}
+                    </time>
+                  ) : null}
+                  {isMe && message.read ? (
+                    <span className="pm-message-bubble-meta__read" aria-label="Okundu">
+                      <FiCheck />
+                      <FiCheck />
+                    </span>
+                  ) : null}
+                </div>
               ) : null}
             </div>
           </motion.div>

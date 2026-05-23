@@ -213,3 +213,103 @@ export const gamesGrid: HubGame[] = [
     artPosition: '50% 58%',
   },
 ]
+
+export type GamesHeroStat = {
+  id: string
+  icon: IconType
+  label: string
+}
+
+export type GamesMiniCard = {
+  id: string
+  title: string
+  icon: IconType
+  artKind:
+    | 'brick-break'
+    | 'block-duel'
+    | 'pong'
+    | 'word-arena'
+    | 'xox'
+    | 'snake'
+    | 'color-match'
+    | 'memory'
+    | 'arena2048'
+    | 'dart'
+    | 'math'
+    | 'more'
+  badge?: string
+  players: string
+  color: 'is-pink' | 'is-blue' | 'is-green' | 'is-orange' | 'is-violet'
+  isMore?: boolean
+}
+
+export const gamesHeroStats: GamesHeroStat[] = [
+  { id: 'online', icon: IoGameControllerOutline, label: '3.842 oyuncu çevrimiçi' },
+  { id: 'active', icon: FiZap, label: '42 aktif maç' },
+]
+
+export const popularGamesCards: GamesMiniCard[] = [
+  {
+    id: 'brick-break-duel',
+    title: 'BRICK BREAK',
+    icon: FiGrid,
+    artKind: 'brick-break',
+    badge: 'Duel',
+    players: '1120',
+    color: 'is-blue',
+  },
+  {
+    id: 'block-duel',
+    title: 'BLOCK DUEL',
+    icon: FiGrid,
+    artKind: 'block-duel',
+    badge: 'Duel',
+    players: '1245',
+    color: 'is-blue',
+  },
+  {
+    id: 'pong',
+    title: 'PONG',
+    icon: IoGameControllerOutline,
+    artKind: 'pong',
+    badge: 'Spor',
+    players: '982',
+    color: 'is-violet',
+  },
+  {
+    id: 'word-arena',
+    title: 'WORD ARENA',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'word-arena',
+    badge: 'Kelime',
+    players: '756',
+    color: 'is-orange',
+  },
+  { id: 'xox', title: 'XO', icon: LuSwords, artKind: 'xox', badge: 'Klasik', players: '654', color: 'is-pink' },
+  {
+    id: 'snake-battle',
+    title: 'SNAKE BATTLE',
+    icon: IoRocketOutline,
+    artKind: 'snake',
+    badge: 'Aksiyon',
+    players: '512',
+    color: 'is-green',
+  },
+]
+
+export const allGamesCards: GamesMiniCard[] = [
+  { id: 'color-match', title: 'COLOR MATCH', icon: FiGrid, artKind: 'color-match', players: '432', color: 'is-violet' },
+  { id: 'memory-duel', title: 'MEMORY DUEL', icon: IoExtensionPuzzleOutline, artKind: 'memory', players: '398', color: 'is-blue' },
+  { id: '2048-arena', title: '2048 ARENA', icon: FiZap, artKind: 'arena2048', players: '365', color: 'is-orange' },
+  { id: 'dart-duel', title: 'DART DUEL', icon: LuSwords, artKind: 'dart', players: '287', color: 'is-orange' },
+  { id: 'math-clash', title: 'MATH CLASH', icon: FiUsers, artKind: 'math', players: '256', color: 'is-green' },
+  {
+    id: 'more-games',
+    title: 'DAHA FAZLASI',
+    icon: IoGameControllerOutline,
+    artKind: 'more',
+    players: ' ',
+    color: 'is-violet',
+    isMore: true,
+  },
+]

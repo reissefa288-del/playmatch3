@@ -4,6 +4,7 @@ import {
   FiMessageCircle,
   FiUser,
 } from 'react-icons/fi'
+import { PiCrownSimpleFill } from 'react-icons/pi'
 import { LuGamepad2 } from 'react-icons/lu'
 import type { BottomNavItem, FavoriteGame, HeroDiscoveryPlayer, NearbyPlayer } from './types'
 
@@ -282,5 +283,6 @@ export const bottomNavigation: BottomNavItem[] = [
   { id: 'match', label: 'Eşleşme', icon: FiHeart, to: '/match' },
   { id: 'games', label: 'Oyunlar', icon: LuGamepad2, to: '/games' },
   { id: 'chat', label: 'Sohbet', icon: FiMessageCircle, badge: 2, to: '/chat' },
+  { id: 'premium', label: 'Premium', icon: PiCrownSimpleFill, to: '/premium', variant: 'premium' },
   { id: 'profile', label: 'Profil', icon: FiUser, to: '/profile' },
 ]

@@ -127,7 +127,7 @@
 .pm-chat-search {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 0;
 }
 
 .pm-chat-search__field {
@@ -179,35 +179,6 @@
 
 .pm-chat-search__field input::placeholder {
   color: #8a9bcf;
-}
-
-.pm-chat-search__filter {
-  width: 54px;
-  min-width: 54px;
-  height: 54px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 120, 200, 0.55);
-  background:
-    radial-gradient(circle at 80% 20%, rgba(255, 90, 180, 0.22), transparent 58%),
-    rgba(10, 14, 40, 0.88);
-  color: #ffc0e8;
-  font-size: 1.15rem;
-  display: grid;
-  place-content: center;
-  cursor: pointer;
-  box-shadow:
-    0 0 24px rgba(255, 90, 180, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition:
-    transform 0.28s var(--pm-ease-spring),
-    box-shadow 0.32s var(--pm-ease-luxe),
-    filter 0.28s ease;
-}
-
-.pm-chat-search__filter:hover {
-  box-shadow:
-    0 0 32px rgba(255, 90, 180, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* --- Online row ----------------------------------------------------------- */

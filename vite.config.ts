@@ -7,5 +7,13 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    proxy: {
+      '/game-server': {
+        target: 'http://localhost:8787',
+        changeOrigin: true,
+        ws: true,
+        rewrite: (path) => path.replace(/^\/game-server/, ''),
+      },
+    },
   },
 })

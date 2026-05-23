@@ -60,7 +60,6 @@ export type ChatDetail = {
   messages: ChatMessage[]
 }
 
-
 export const chatBottomNavigation: BottomNavItem[] = bottomNavigation.map((item) => ({
   ...item,
   badge: item.id === 'chat' ? 12 : item.badge,
@@ -85,7 +84,7 @@ export const chatThreads: ChatThread[] = [
   {
     id: 'zeynep',
     name: 'Zeynep',
-    lastMessage: 'Harika maçtı! Tekrar oynayalım mı? 🎮',
+    lastMessage: 'Süper olur! O zaman XOX atarız 💪',
     time: '14:35',
     unread: 1,
     isOnline: true,
@@ -138,6 +137,7 @@ export const chatThreads: ChatThread[] = [
   },
 ]
 
+/** message-final.png — Zeynep demo konuşması */
 export const chatDetails: Record<string, ChatDetail> = {
   zeynep: {
     id: 'zeynep',
@@ -160,11 +160,33 @@ export const chatDetails: Record<string, ChatDetail> = {
         type: 'text',
         sender: 'me',
         text: 'Kesinlikle! Sen çok iyiydin 🔥',
-        time: '14:35',
+        time: '14:33',
         read: true,
       },
       {
         id: 'm3',
+        type: 'text',
+        sender: 'them',
+        text: 'Teşekkürler! 🙏 Bu akşam müsait misin?',
+        time: '14:34',
+      },
+      {
+        id: 'm4',
+        type: 'text',
+        sender: 'me',
+        text: 'Evet, 21:00 gibi olur mu?',
+        time: '14:35',
+        read: true,
+      },
+      {
+        id: 'm5',
+        type: 'text',
+        sender: 'them',
+        text: 'Süper olur! O zaman XOX atarız 💪',
+        time: '14:35',
+      },
+      {
+        id: 'm6',
         type: 'invite',
         sender: 'them',
         gameTitle: 'XOX',

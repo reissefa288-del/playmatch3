@@ -3,6 +3,8 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { BottomNavigation } from '../features/home/components/BottomNavigation'
 import { bottomNavigation } from '../features/home/data'
 import { MessageScreen } from '../features/chat/MessageScreen'
+import { BrickBreakScreen } from '../features/games/BrickBreakScreen'
+import { XoxGameScreen } from '../features/games/XoxGameScreen'
 import { NearbyPlayersScreen } from '../features/home/NearbyPlayersScreen'
 import { MainTabLayout } from './MainTabLayout'
 import { resolveTabId } from './tabConfig'
@@ -11,12 +13,16 @@ import { useNavDockHeight } from './useNavDockHeight'
 
 const MESSAGE_PATH = /^\/chat\/[^/]+$/
 const NEARBY_PATH = /^\/nearby$/
+const XOX_PATH = /^\/games\/xox$/
+const BRICK_PATH = /^\/games\/brick-break$/
 
 export function AppRoutes() {
   const location = useLocation()
   const isMessage = MESSAGE_PATH.test(location.pathname)
   const isNearby = NEARBY_PATH.test(location.pathname)
-  const stackOpen = isMessage || isNearby
+  const isXox = XOX_PATH.test(location.pathname)
+  const isBrick = BRICK_PATH.test(location.pathname)
+  const stackOpen = isMessage || isNearby || isXox || isBrick
   const activeTabId = resolveTabId(location.pathname)
 
   useNavDockHeight(!stackOpen && Boolean(activeTabId))
@@ -42,6 +48,8 @@ export function AppRoutes() {
             <Routes>
               {isMessage ? <Route path="/chat/:chatId" element={<MessageScreen />} /> : null}
               {isNearby ? <Route path="/nearby" element={<NearbyPlayersScreen />} /> : null}
+              {isXox ? <Route path="/games/xox" element={<XoxGameScreen />} /> : null}
+              {isBrick ? <Route path="/games/brick-break" element={<BrickBreakScreen />} /> : null}
             </Routes>
           </motion.div>
         ) : null}

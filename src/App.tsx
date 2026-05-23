@@ -19,14 +19,19 @@ import './styles/brand-aaa.css'
 import './styles/navbar-tray.css'
 import './styles/home.css'
 import './styles/games.css'
+import './styles/game-portrait.css'
+import './styles/xox-game.css'
+import './styles/brick-break.css'
 import './styles/match.css'
 import './styles/match-ambient.css'
 import './styles/match-screen.css'
 import './styles/match-aaa.css'
 import './styles/match-toast.css'
+import './styles/chat-ambient.css'
 import './styles/chat.css'
 import './styles/message-ambient.css'
 import './styles/message-screen.css'
+import './styles/message-final.css'
 import './styles/profile.css'
 import './styles/profile-ambient.css'
 import './styles/photo-lightbox.css'
@@ -40,10 +45,9 @@ function App() {
       <ProfileLevelProvider>
         <NearbyLikesProvider>
           <BrowserRouter>
-          <Routes>
-            <Route path="/chat/:chatId" element={null} />
-            <Route path="*" element={<AppRoutes />} />
-          </Routes>
+            <Routes>
+              <Route path="*" element={<AppRoutes />} />
+            </Routes>
           </BrowserRouter>
         </NearbyLikesProvider>
       </ProfileLevelProvider>

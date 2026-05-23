@@ -1,10 +1,8 @@
-/* Message thread — message-final layout */
+/* Message layout — shell + flex (message-final.css = görsel sistem) */
 
 .pm-app-shell--message .pm-message {
   flex: 1;
   min-height: 0;
-  padding-bottom: 0;
-  gap: 14px;
 }
 
 .pm-message-header__info {
@@ -29,25 +27,9 @@
   min-width: 0;
 }
 
-.pm-message-activity__copy p {
-  margin: 0 0 4px;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: #b8c8f5;
-}
-
-.pm-message-activity__copy strong {
-  display: block;
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: #f0f4ff;
-  line-height: 1.35;
-}
-
 .pm-message-thread {
   flex: 1;
   min-height: 0;
-  padding-bottom: 4px;
 }
 
 .pm-message-bubble-row.is-me {
@@ -74,30 +56,6 @@
   align-items: flex-start;
 }
 
-.pm-message-bubble-row__time {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: #7f92c8;
-  letter-spacing: 0.02em;
-  padding: 0 4px;
-}
-
 .pm-message-bubble p {
   margin: 0;
-}
-
-.pm-message-invite {
-  align-self: flex-end;
-  margin-left: auto;
-  margin-right: 0;
-}
-
-.pm-message-invite__title {
-  display: block;
-  margin: 0 0 6px;
-  font-size: 1.125rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  color: #fff;
-  text-shadow: 0 0 20px rgba(120, 200, 255, 0.45);
 }

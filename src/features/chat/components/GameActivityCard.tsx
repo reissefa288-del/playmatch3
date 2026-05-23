@@ -17,12 +17,13 @@ export function GameActivityCard({ lastGame }: GameActivityCardProps) {
       <span className="pm-message-activity__icon" aria-hidden>
         {lastGame.emoji}
       </span>
-      <motion.div className="pm-message-activity__copy">
-        <p>Birlikte Oyun Oynadınız</p>
-        <strong>
-          {lastGame.title} • {lastGame.playedAgo}
-        </strong>
-      </motion.div>
+      <div className="pm-message-activity__copy">
+        <p className="pm-message-activity__label">Birlikte Oyun Oynadınız</p>
+        <p className="pm-message-activity__game-line">
+          <strong className="pm-message-activity__game">{lastGame.title}</strong>
+          <span className="pm-message-activity__ago">{lastGame.playedAgo}</span>
+        </p>
+      </div>
       <motion.button
         type="button"
         className="pm-message-activity__cta"
