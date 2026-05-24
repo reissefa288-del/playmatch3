@@ -6,7 +6,8 @@ import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
 import { useProfileLevel } from '../profile/ProfileLevelProvider'
 import { XP_GAME_FEATURED, XP_GAME_POPULAR } from '../profile/profileLevel'
-import { allGamesCards, gamesHeroStats, popularGamesCards, type GamesMiniCard } from './data'
+import { allGamesCards, featuredGames, gamesHeroStats, popularGamesCards, type FeaturedGame, type GamesMiniCard } from './data'
+import { FeaturedGamesRow } from './components/FeaturedGamesRow'
 import oyunReference from '../../reference/oyun.png'
 
 export function GamesScreen() {
@@ -32,14 +33,49 @@ export function GamesScreen() {
     navigate('/games/xox')
   }, [navigate])
 
+  const openBubbleShooter = useCallback(() => {
+    navigate('/games/bubble-shooter')
+  }, [navigate])
+
   const openBrickBreak = useCallback(() => {
     navigate('/games/brick-break')
   }, [navigate])
 
+  const openBlockDuel = useCallback(() => {
+    navigate('/games/block-duel')
+  }, [navigate])
+
+  const handleFeaturedPlay = useCallback(
+    (game: FeaturedGame) => {
+      if (game.id === 'bubble-shooter-duel') {
+        openBubbleShooter()
+        return
+      }
+      if (game.id === 'block-duel') {
+        openBlockDuel()
+        return
+      }
+      if (game.id === 'xox-featured') {
+        openXox()
+        return
+      }
+      addXp(XP_GAME_FEATURED)
+    },
+    [addXp, openBlockDuel, openBrickBreak, openBubbleShooter, openXox],
+  )
+
   const handleMiniCardClick = useCallback(
     (game: GamesMiniCard, xp: number) => {
+      if (isBubbleShooterGame(game)) {
+        openBubbleShooter()
+        return
+      }
       if (isBrickBreakGame(game)) {
         openBrickBreak()
+        return
+      }
+      if (isBlockDuelGame(game)) {
+        openBlockDuel()
         return
       }
       if (isXoxGame(game)) {
@@ -48,7 +84,7 @@ export function GamesScreen() {
       }
       addXp(xp)
     },
-    [addXp, openBrickBreak, openXox],
+    [addXp, openBlockDuel, openBrickBreak, openBubbleShooter, openXox],
   )
 
   useEffect(() => {
@@ -145,6 +181,8 @@ export function GamesScreen() {
               <FiSliders />
             </button>
           </motion.div>
+
+          <FeaturedGamesRow games={featuredGames} onPlay={handleFeaturedPlay} />
 
           <section className="pm-games-shelf pm-games-shelf--popular">
             <header className="pm-games-shelf__head">
@@ -258,12 +296,20 @@ export function GamesScreen() {
   )
 }
 
+function isBubbleShooterGame(game: GamesMiniCard) {
+  return game.id === 'bubble-shooter-duel' || game.artKind === 'bubble-shooter'
+}
+
 function isXoxGame(game: GamesMiniCard) {
   return game.id === 'xox' || game.artKind === 'xox'
 }
 
 function isBrickBreakGame(game: GamesMiniCard) {
   return game.id === 'brick-break-duel' || game.artKind === 'brick-break'
+}
+
+function isBlockDuelGame(game: GamesMiniCard) {
+  return game.id === 'block-duel' || game.artKind === 'block-duel'
 }
 
 function randomInt(min: number, max: number) {

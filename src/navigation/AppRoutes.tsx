@@ -3,6 +3,8 @@ import { Route, Routes, useLocation } from 'react-router-dom'
 import { BottomNavigation } from '../features/home/components/BottomNavigation'
 import { bottomNavigation } from '../features/home/data'
 import { MessageScreen } from '../features/chat/MessageScreen'
+import { BlockDuelScreen } from '../features/games/BlockDuelScreen'
+import { BubbleShooterScreen } from '../features/games/BubbleShooterScreen'
 import { BrickBreakScreen } from '../features/games/BrickBreakScreen'
 import { XoxGameScreen } from '../features/games/XoxGameScreen'
 import { NearbyPlayersScreen } from '../features/home/NearbyPlayersScreen'
@@ -15,6 +17,8 @@ const MESSAGE_PATH = /^\/chat\/[^/]+$/
 const NEARBY_PATH = /^\/nearby$/
 const XOX_PATH = /^\/games\/xox$/
 const BRICK_PATH = /^\/games\/brick-break$/
+const BUBBLE_PATH = /^\/games\/bubble-shooter$/
+const BLOCK_PATH = /^\/games\/block-duel$/
 
 export function AppRoutes() {
   const location = useLocation()
@@ -22,7 +26,9 @@ export function AppRoutes() {
   const isNearby = NEARBY_PATH.test(location.pathname)
   const isXox = XOX_PATH.test(location.pathname)
   const isBrick = BRICK_PATH.test(location.pathname)
-  const stackOpen = isMessage || isNearby || isXox || isBrick
+  const isBubble = BUBBLE_PATH.test(location.pathname)
+  const isBlock = BLOCK_PATH.test(location.pathname)
+  const stackOpen = isMessage || isNearby || isXox || isBrick || isBubble || isBlock
   const activeTabId = resolveTabId(location.pathname)
 
   useNavDockHeight(!stackOpen && Boolean(activeTabId))
@@ -50,6 +56,8 @@ export function AppRoutes() {
               {isNearby ? <Route path="/nearby" element={<NearbyPlayersScreen />} /> : null}
               {isXox ? <Route path="/games/xox" element={<XoxGameScreen />} /> : null}
               {isBrick ? <Route path="/games/brick-break" element={<BrickBreakScreen />} /> : null}
+              {isBubble ? <Route path="/games/bubble-shooter" element={<BubbleShooterScreen />} /> : null}
+              {isBlock ? <Route path="/games/block-duel" element={<BlockDuelScreen />} /> : null}
             </Routes>
           </motion.div>
         ) : null}

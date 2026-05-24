@@ -9,9 +9,10 @@ const FEATURED_CARD_STEP = 262
 
 type FeaturedGamesRowProps = {
   games: FeaturedGame[]
+  onPlay?: (game: FeaturedGame) => void
 }
 
-export function FeaturedGamesRow({ games }: FeaturedGamesRowProps) {
+export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
   const reduceMotion = useReducedMotion()
   const { addXp } = useProfileLevel()
   const [activeIndex, setActiveIndex] = useState(0)
@@ -42,7 +43,7 @@ export function FeaturedGamesRow({ games }: FeaturedGamesRowProps) {
         {games.map((game, index) => (
           <motion.article
             key={game.id}
-            className={`pm-featured-card ${game.accent === 'pink' ? 'is-pink' : 'is-blue'}`}
+            className={`pm-featured-card ${game.accent === 'pink' ? 'is-pink' : 'is-blue'} is-${game.id}`}
             style={{ '--pm-card-art-pos': game.artPosition } as CSSProperties}
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0 }}
@@ -82,7 +83,10 @@ export function FeaturedGamesRow({ games }: FeaturedGamesRowProps) {
 
             <motion.button
               type="button"
-              onClick={() => addXp(XP_GAME_FEATURED)}
+              onClick={() => {
+                addXp(XP_GAME_FEATURED)
+                onPlay?.(game)
+              }}
               whileHover={reduceMotion ? undefined : { scale: 1.03, y: -1 }}
               whileTap={reduceMotion ? undefined : { scale: 0.96 }}
             >

@@ -689,6 +689,87 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.pm-xox-board__cell.is-placing {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.pm-xox-board__cell.is-placing::after {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.22), transparent 70%);
+  animation: pm-xox-place-pulse 0.48s ease-out forwards;
+  pointer-events: none;
+}
+
+.pm-xox-placement-fx {
+  position: absolute;
+  z-index: 5;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.pm-xox-placement-fx__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+}
+
+.pm-xox-placement-fx__ring--inner {
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+}
+
+.pm-xox-placement-fx.is-x {
+  color: var(--xox-pink);
+}
+
+.pm-xox-placement-fx.is-o {
+  color: var(--xox-blue);
+}
+
+.pm-xox-placement-fx__spark {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 5px;
+  height: 5px;
+  margin: -2.5px 0 0 -2.5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.pm-xox-board__win-flash {
+  position: absolute;
+  inset: -7px;
+  border-radius: 16px;
+  pointer-events: none;
+  z-index: 6;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.35), transparent 68%);
+  mix-blend-mode: screen;
+}
+
+@keyframes pm-xox-place-pulse {
+  from {
+    opacity: 0.75;
+    transform: scale(0.35);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
 .pm-xox-board__cell.is-winning {
   background: rgba(255, 255, 255, 0.06);
   animation: pm-xox-cell-flash 1.1s ease-in-out infinite;
@@ -920,6 +1001,12 @@
   .pm-xox-board__cell.is-winning,
   .pm-xox-board-wrap.has-win .pm-xox-board-frame,
   .pm-xox-loader__ring {
+    animation: none !important;
+  }
+
+  .pm-xox-board__cell.is-placing::after,
+  .pm-xox-placement-fx__ring,
+  .pm-xox-board__win-flash {
     animation: none !important;
   }
 

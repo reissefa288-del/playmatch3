@@ -57,6 +57,21 @@ export const gamesLiveHub = {
 
 export const featuredGames: FeaturedGame[] = [
   {
+    id: 'bubble-shooter-duel',
+    title: 'BUBBLE SHOOTER',
+    mode: 'Duel · 1v1',
+    players: '1.9K oyuncu',
+    playersShort: '1.9K',
+    activity: 'Canlı lobi',
+    badge: 'YENİ',
+    icon: IoGameControllerOutline,
+    accent: 'blue',
+    artPosition: '12% 42%',
+    friends: ['E', 'Z', 'K'],
+    friendsPlaying: '3 arkadaş oynuyor',
+    cta: 'Şimdi Oyna',
+  },
+  {
     id: 'block-duel',
     title: 'BLOCK DUEL',
     mode: 'Ranked · 2v2',
@@ -225,6 +240,7 @@ export type GamesMiniCard = {
   title: string
   icon: IconType
   artKind:
+    | 'bubble-shooter'
     | 'brick-break'
     | 'block-duel'
     | 'pong'
@@ -249,6 +265,15 @@ export const gamesHeroStats: GamesHeroStat[] = [
 ]
 
 export const popularGamesCards: GamesMiniCard[] = [
+  {
+    id: 'bubble-shooter-duel',
+    title: 'BUBBLE SHOOTER',
+    icon: IoGameControllerOutline,
+    artKind: 'bubble-shooter',
+    badge: 'Duel',
+    players: '1340',
+    color: 'is-violet',
+  },
   {
     id: 'brick-break-duel',
     title: 'BRICK BREAK',

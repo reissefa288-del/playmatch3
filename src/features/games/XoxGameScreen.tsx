@@ -6,6 +6,7 @@ import { useProfileLevel } from '../profile/ProfileLevelProvider'
 import { XoxAmbientBg } from './components/XoxAmbientBg'
 import { XoxGameBoard } from './components/XoxGameBoard'
 import { useXoxRealtime } from './useXoxRealtime'
+import { playXoxSound, unlockXoxAudio } from './utils/xoxSounds'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 
 type SessionScores = { x: number; o: number }
@@ -15,6 +16,8 @@ export function XoxGameScreen() {
   const { addXp } = useProfileLevel()
   const [scores, setScores] = useState<SessionScores>({ x: 0, o: 0 })
   const scoredRoomRef = useRef<string | null>(null)
+  const prevWinnerRef = useRef<null | 'X' | 'O' | 'draw'>(null)
+  const prevPhaseRef = useRef<string>('idle')
 
   const xox = useXoxRealtime({
     onMatchXp: ({ result, xpAward }) => {
@@ -45,12 +48,50 @@ export function XoxGameScreen() {
   }, [navigate, xox.close])
 
   const handleRematch = useCallback(() => {
+    unlockXoxAudio()
     scoredRoomRef.current = null
+    prevWinnerRef.current = null
     xox.close()
     window.setTimeout(() => {
       void xox.open()
     }, 120)
   }, [xox.close, xox.open])
+
+  const handleSymbolPlaced = useCallback((symbol: 'X' | 'O', _index: number) => {
+    unlockXoxAudio()
+    playXoxSound(symbol === 'X' ? 'moveX' : 'moveO')
+  }, [])
+
+  const handleMove = useCallback(
+    (index: number) => {
+      unlockXoxAudio()
+      xox.submitMove(index)
+    },
+    [xox],
+  )
+
+  useEffect(() => {
+    if (xox.phase === 'matched' && prevPhaseRef.current !== 'matched') {
+      unlockXoxAudio()
+      playXoxSound('start')
+    }
+    prevPhaseRef.current = xox.phase
+  }, [xox.phase])
+
+  useEffect(() => {
+    const winner = xox.room.winner
+    if (!winner || winner === prevWinnerRef.current) return
+    prevWinnerRef.current = winner
+
+    if (winner === 'draw') {
+      playXoxSound('draw')
+      return
+    }
+
+    const mySymbol = xox.transport === 'local' ? 'X' : xox.identity?.mySymbol
+    if (mySymbol && winner === mySymbol) playXoxSound('win')
+    else playXoxSound('lose')
+  }, [xox.identity?.mySymbol, xox.room.winner, xox.transport])
 
   const mySymbol = xox.identity?.mySymbol
   const interactive =
@@ -163,7 +204,8 @@ export function XoxGameScreen() {
               board={xox.room.board}
               interactive={interactive}
               hoverSymbol={hoverSymbol}
-              onMove={xox.submitMove}
+              onMove={handleMove}
+              onSymbolPlaced={handleSymbolPlaced}
             />
           </div>
 
