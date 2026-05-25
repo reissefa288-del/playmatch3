@@ -2,14 +2,14 @@ import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { BlockAmbientBg } from './components/BlockAmbientBg'
+import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
 import { BlockBoardCanvas } from './components/BlockBoardCanvas'
+import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import {
   BlockArrowDownIcon,
   BlockArrowLeftIcon,
   BlockArrowRightIcon,
   BlockBackIcon,
-  BlockCrownIcon,
   BlockLightningIcon,
   BlockRotateIcon,
   BlockTrophyIcon,
@@ -116,7 +116,7 @@ export function BlockDuelScreen() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.32 }}
         >
-          <BlockAmbientBg />
+          <GameDuelAmbientBg />
 
           <button type="button" className="pm-block-back" onClick={handleBack} aria-label="Geri dön">
             <BlockBackIcon />
@@ -131,17 +131,8 @@ export function BlockDuelScreen() {
             </header>
 
             <section className="pm-block-top" aria-label="Oyuncular">
-              <article className="pm-block-player is-p1">
-                <div className="pm-block-player__hex is-cyan">
-                  <span className="pm-block-player__crown">
-                    <BlockCrownIcon size={12} />
-                  </span>
-                  <img src={FAKE_PORTRAIT_MALE} alt="" className="pm-block-player__photo" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--tl" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--tr" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--bl" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--br" />
-                </div>
+              <article className={`pm-block-player is-p1 ${game.running ? 'is-active' : ''}`}>
+                <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={game.running} />
                 <p className="pm-block-player__name">PLAYER 1</p>
                 <p className="pm-block-player__trophy">
                   <BlockTrophyIcon size={11} />
@@ -160,16 +151,7 @@ export function BlockDuelScreen() {
               </div>
 
               <article className="pm-block-player is-p2">
-                <div className="pm-block-player__hex is-pink">
-                  <span className="pm-block-player__crown">
-                    <BlockCrownIcon size={12} />
-                  </span>
-                  <img src={FAKE_PORTRAIT_FEMALE} alt="" className="pm-block-player__photo" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--tl" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--tr" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--bl" />
-                  <span className="pm-block-player__bracket pm-block-player__bracket--br" />
-                </div>
+                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" />
                 <p className="pm-block-player__name">PLAYER 2</p>
                 <p className="pm-block-player__trophy">
                   <BlockTrophyIcon size={11} />

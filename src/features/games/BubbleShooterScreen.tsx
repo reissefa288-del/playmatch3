@@ -2,21 +2,33 @@ import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { BubbleAmbientBg } from './components/BubbleAmbientBg'
+import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
+import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import {
   BubbleAimLeftIcon,
   BubbleAimRightIcon,
   BubbleBackIcon,
   BubbleFireIcon,
   BubbleSwapIcon,
-  BubbleTrophyIcon,
 } from './components/BubbleGameIcons'
 import { BubbleShooterCanvas } from './components/BubbleShooterCanvas'
 import { useBubbleShooterDuel } from './useBubbleShooterDuel'
 import { COLOR_HEX, type BubbleColor } from './utils/bubbleShooterEngine'
 import { unlockBubbleAudio } from './utils/bubbleShooterSounds'
 
-const PROFILE_SCORES = { p1: 1250, p2: 1180 }
+function DuelScore({ value, variant }: { value: number; variant: 'p1' | 'p2' }) {
+  return (
+    <motion.em
+      key={value}
+      className={`is-${variant}`}
+      initial={{ scale: 1.12, opacity: 0.55 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.22, ease: 'easeOut' }}
+    >
+      {value}
+    </motion.em>
+  )
+}
 
 function NextBubble({ color, label }: { color: BubbleColor; label: string }) {
   const hex = COLOR_HEX[color]
@@ -59,6 +71,7 @@ export function BubbleShooterScreen() {
   }, [game])
 
   const playing = game.running
+  const isPlayerTurn = playing && game.activeTurn === 'p1'
 
   const overlayMessage = !game.running
     ? game.winner === 'draw'
@@ -98,74 +111,50 @@ export function BubbleShooterScreen() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.32 }}
         >
-          <BubbleAmbientBg />
-
-          <button type="button" className="pm-bubble-back" onClick={handleBack} aria-label="Geri dön">
-            <BubbleBackIcon />
-          </button>
+          <GameDuelAmbientBg />
 
           <div className="pm-bubble-screen__stack">
-          <header className="pm-bubble-header">
+          <header className="pm-bubble-header" aria-label="Oyuncu bilgileri">
+            <article className="pm-bubble-header__side is-p1">
+              <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={playing} />
+              <p className="pm-bubble-header__round-wins">
+                {game.lane1.matchPoints}/{game.winPoints}
+              </p>
+              <p className="pm-bubble-header__name">EMİR</p>
+            </article>
+
             <h1 className="pm-bubble-header__title">
               <span className="is-cyan">BUBBLE</span>
               <span className="is-pink">SHOOTER</span>
               <span className="is-gold">DUEL</span>
             </h1>
-          </header>
 
-          <section className="pm-bubble-hud" aria-label="Oyuncu bilgileri">
-            <article className="pm-bubble-hud__side is-p1">
-              <div className="pm-bubble-hud-frame is-cyan">
-                <img src={FAKE_PORTRAIT_MALE} alt="" className="pm-bubble-hud-frame__photo" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--tl" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--tr" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--bl" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--br" />
-              </div>
-              <p className="pm-bubble-hud__name">EMİR</p>
-              <p className="pm-bubble-hud__trophy">
-                <BubbleTrophyIcon size={13} />
-                <span>{PROFILE_SCORES.p1}</span>
-              </p>
-              <p className="pm-bubble-hud__round-wins">
-                {game.lane1.matchPoints}/{game.winPoints}
-              </p>
-            </article>
-
-            <article className="pm-bubble-hud__side is-p2">
-              <div className="pm-bubble-hud-frame is-pink">
-                <img src={FAKE_PORTRAIT_FEMALE} alt="" className="pm-bubble-hud-frame__photo" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--tl" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--tr" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--bl" />
-                <span className="pm-bubble-hud-frame__bracket pm-bubble-hud-frame__bracket--br" />
-              </div>
-              <p className="pm-bubble-hud__name">ZEYNEP</p>
-              <p className="pm-bubble-hud__trophy">
-                <BubbleTrophyIcon size={13} />
-                <span>{PROFILE_SCORES.p2}</span>
-              </p>
-              <p className="pm-bubble-hud__round-wins">
+            <article className="pm-bubble-header__side is-p2">
+              <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={playing} />
+              <p className="pm-bubble-header__round-wins">
                 {game.lane2.matchPoints}/{game.winPoints}
               </p>
+              <p className="pm-bubble-header__name">ZEYNEP</p>
             </article>
-          </section>
+          </header>
 
           <section className="pm-bubble-stats" aria-label="Maç durumu">
             <motion.div className="pm-bubble-stats__block">
-              <span>ROUND {game.roundNumber}/{game.winPoints}</span>
-              <strong>{game.formatTime}</strong>
+              <span className="pm-bubble-stats__label">
+                ROUND {game.roundNumber}/{game.winPoints}
+              </span>
+              <strong className="pm-bubble-stats__value">{game.formatTime}</strong>
             </motion.div>
-            <motion.div className="pm-bubble-stats__block is-score">
-              <span>SKOR</span>
-              <strong>
-                <em className="is-p1">{game.lane1.score}</em>
+            <motion.div className="pm-bubble-stats__block is-score" key={`score-${game.roundNumber}`}>
+              <span className="pm-bubble-stats__label">SKOR</span>
+              <strong className="pm-bubble-stats__value is-duel-score">
+                <DuelScore value={game.lane1.score} variant="p1" />
                 <i aria-hidden>/</i>
-                <em className="is-p2">{game.lane2.score}</em>
+                <DuelScore value={game.lane2.score} variant="p2" />
               </strong>
             </motion.div>
             <motion.div className="pm-bubble-stats__block is-next">
-              <span>SIRADAKİ</span>
+              <span className="pm-bubble-stats__label">SIRADAKİ</span>
               <motion.div className="pm-bubble-stats__next-row">
                 <NextBubble color={game.lane1.nextColor} label="Sol" />
                 <NextBubble color={game.lane2.nextColor} label="Sağ" />
@@ -186,6 +175,7 @@ export function BubbleShooterScreen() {
                 accent="cyan"
                 showShooterExtras
                 active={playing}
+                showAimGuide={isPlayerTurn}
               />
             </div>
             <div className="pm-bubble-arena is-p2">
@@ -200,55 +190,71 @@ export function BubbleShooterScreen() {
           </motion.div>
 
           <footer className="pm-bubble-footer">
-            <p className="pm-bubble-footer__hint">
-              3 ROUND · SÜRE BİTİNCE YÜKSEK SKOR KAZANIR · BOŞ ATIŞLARDA YENİ SIRA GELİR
-            </p>
             <motion.div className="pm-bubble-footer__vs">
               <span className="pm-bubble-footer__points is-p1">{game.lane1.matchPoints}</span>
               <strong className="pm-bubble-footer__vs-badge">VS</strong>
               <span className="pm-bubble-footer__points is-p2">{game.lane2.matchPoints}</span>
             </motion.div>
-            <div className="pm-bubble-controls">
-              <button
-                type="button"
-                className="pm-bubble-controls__btn"
-                aria-label="Sola nişan"
-                disabled={!playing}
-                onPointerDown={pressLeft}
-                onPointerUp={release}
-                onPointerLeave={release}
-              >
-                <BubbleAimLeftIcon />
+            <div className="pm-bubble-footer__actions">
+              <button type="button" className="pm-bubble-back" onClick={handleBack} aria-label="Geri dön">
+                <BubbleBackIcon />
               </button>
-              <button
-                type="button"
-                className="pm-bubble-controls__btn pm-bubble-controls__btn--swap"
-                aria-label="Balon değiştir"
-                disabled={!playing}
-                onClick={handleSwap}
-              >
-                <BubbleSwapIcon />
-              </button>
-              <button
-                type="button"
-                className="pm-bubble-controls__btn pm-bubble-controls__btn--fire"
-                aria-label="Ateş"
-                disabled={!playing}
-                onClick={handleFire}
-              >
-                <BubbleFireIcon />
-              </button>
-              <button
-                type="button"
-                className="pm-bubble-controls__btn"
-                aria-label="Sağa nişan"
-                disabled={!playing}
-                onPointerDown={pressRight}
-                onPointerUp={release}
-                onPointerLeave={release}
-              >
-                <BubbleAimRightIcon />
-              </button>
+              <div className={`pm-bubble-controls-dock ${playing ? 'is-live' : ''}`}>
+                <div className="pm-bubble-controls-dock__aura" aria-hidden />
+                <div className={`pm-bubble-controls ${playing ? 'is-live' : ''}`}>
+                  <button
+                    type="button"
+                    className="pm-bubble-controls__btn is-aim"
+                    aria-label="Sola nişan"
+                    disabled={!isPlayerTurn}
+                    onPointerDown={pressLeft}
+                    onPointerUp={release}
+                    onPointerLeave={release}
+                  >
+                    <span className="pm-bubble-controls__btn-inner">
+                      <BubbleAimLeftIcon />
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="pm-bubble-controls__btn pm-bubble-controls__btn--swap"
+                    aria-label="Balon değiştir"
+                    disabled={!isPlayerTurn}
+                    onClick={handleSwap}
+                  >
+                    <span className="pm-bubble-controls__btn-inner">
+                      <BubbleSwapIcon />
+                    </span>
+                  </button>
+                  <motion.button
+                    type="button"
+                    className="pm-bubble-controls__btn pm-bubble-controls__btn--fire"
+                    aria-label="Ateş"
+                    disabled={!isPlayerTurn}
+                    onClick={handleFire}
+                    whileTap={playing ? { scale: 0.9 } : undefined}
+                  >
+                    <span className="pm-bubble-controls__btn-ring" aria-hidden />
+                    <span className="pm-bubble-controls__btn-ring is-delay" aria-hidden />
+                    <span className="pm-bubble-controls__btn-inner">
+                      <BubbleFireIcon size={26} />
+                    </span>
+                  </motion.button>
+                  <button
+                    type="button"
+                    className="pm-bubble-controls__btn is-aim"
+                    aria-label="Sağa nişan"
+                    disabled={!isPlayerTurn}
+                    onPointerDown={pressRight}
+                    onPointerUp={release}
+                    onPointerLeave={release}
+                  >
+                    <span className="pm-bubble-controls__btn-inner">
+                      <BubbleAimRightIcon />
+                    </span>
+                  </button>
+                </div>
+              </div>
             </div>
           </footer>
           </div>

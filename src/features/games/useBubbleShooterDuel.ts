@@ -14,12 +14,14 @@ import { playBubbleSound } from './utils/bubbleShooterSounds'
 
 type MatchResult = 'p1' | 'p2' | 'draw'
 type RoundWinner = 'p1' | 'p2' | 'draw'
+export type ShootTurn = 'p1' | 'p2'
 
 function updateBotLane(
   lane: LaneState,
   dt: number,
   nowSec: number,
   bot: BotBrain,
+  canShoot: boolean,
 ): { lane: LaneState; events: LaneEvent[] } {
   const events: LaneEvent[] = []
 
@@ -43,7 +45,8 @@ function updateBotLane(
     return { lane: swapped.lane, events }
   }
 
-  const shouldFire = nowSec >= bot.fireAt && aligned && working.canShoot && !working.projectile
+  const shouldFire =
+    canShoot && nowSec >= bot.fireAt && aligned && working.canShoot && !working.projectile
   if (shouldFire) bot.fireAt = nowSec + botFireDelay(bot.quality)
 
   const result = updateLane(working, 0, dt, shouldFire, false)
@@ -81,6 +84,7 @@ export function useBubbleShooterDuel() {
   const [running, setRunning] = useState(true)
   const [winner, setWinner] = useState<MatchResult | null>(null)
   const [shakeKey, setShakeKey] = useState(0)
+  const [activeTurn, setActiveTurn] = useState<ShootTurn>('p1')
 
   const syncUiTickRef = useRef(0)
   const roundTimeRef = useRef(ROUND_SECONDS)
@@ -99,6 +103,7 @@ export function useBubbleShooterDuel() {
   const fireRef = useRef(false)
   const swapRef = useRef(false)
   const botRef = useRef<BotBrain>(createBotBrain(0))
+  const activeTurnRef = useRef<ShootTurn>('p1')
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
@@ -124,7 +129,6 @@ export function useBubbleShooterDuel() {
         playBubbleSound('pop')
         if (side === 'p1') setShakeKey((k) => k + 1)
       }
-      else if (event === 'overflow') playBubbleSound('overflow')
     }
   }, [])
 
@@ -159,6 +163,8 @@ export function useBubbleShooterDuel() {
       setIsRoundBreak(false)
       syncLanesToReact(next1, next2, ROUND_SECONDS)
       botRef.current = createBotBrain(performance.now() / 1000)
+      activeTurnRef.current = 'p1'
+      setActiveTurn('p1')
     },
     [syncLanesToReact],
   )
@@ -208,15 +214,15 @@ export function useBubbleShooterDuel() {
     [finishRound],
   )
 
-  const handleOverflow = useCallback(
-    (side: 'p1' | 'p2', l1: LaneState, l2: LaneState) => {
-      if (roundEndingRef.current) return
-      roundEndingRef.current = true
-      const roundWinner: RoundWinner = side === 'p1' ? 'p2' : 'p1'
-      finishRound(roundWinner, l1, l2)
-    },
-    [finishRound],
-  )
+  const passTurn = useCallback(() => {
+    const next: ShootTurn = activeTurnRef.current === 'p1' ? 'p2' : 'p1'
+    activeTurnRef.current = next
+    setActiveTurn(next)
+    if (next === 'p2') {
+      const nowSec = performance.now() / 1000
+      botRef.current.fireAt = nowSec + 0.45
+    }
+  }, [])
 
   useEffect(() => {
     if (!running) return
@@ -239,8 +245,8 @@ export function useBubbleShooterDuel() {
 
       roundTimeRef.current = Math.max(0, roundTimeRef.current - dt)
 
-      const wantsFire = fireRef.current
-      const wantsSwap = swapRef.current
+      const wantsFire = fireRef.current && activeTurnRef.current === 'p1'
+      const wantsSwap = swapRef.current && activeTurnRef.current === 'p1'
       fireRef.current = false
       swapRef.current = false
 
@@ -249,7 +255,7 @@ export function useBubbleShooterDuel() {
       playEvents(r1.events, 'p1')
 
       const prev2 = lane2Ref.current
-      const r2 = updateBotLane(prev2, dt, nowSec, botRef.current)
+      const r2 = updateBotLane(prev2, dt, nowSec, botRef.current, activeTurnRef.current === 'p2')
       playEvents(r2.events, 'p2')
 
       lane1Ref.current = r1.lane
@@ -257,30 +263,20 @@ export function useBubbleShooterDuel() {
       lane1RenderRef.current = r1.lane
       lane2RenderRef.current = r2.lane
 
-      if (r1.events.includes('overflow')) {
-        handleOverflow('p1', r1.lane, r2.lane)
-        raf = requestAnimationFrame(tick)
-        return
-      }
-      if (r2.events.includes('overflow')) {
-        handleOverflow('p2', r1.lane, r2.lane)
-        raf = requestAnimationFrame(tick)
-        return
-      }
-
-      if (r1.events.includes('clear')) {
-        syncLanesToReact(r1.lane, r2.lane, roundTimeRef.current)
-        endMatch('p1')
-        return
-      }
-      if (r2.events.includes('clear')) {
-        syncLanesToReact(r1.lane, r2.lane, roundTimeRef.current)
-        endMatch('p2')
-        return
+      const p1ShotDone = Boolean(prev1.projectile && !r1.lane.projectile && r1.lane.canShoot)
+      const p2ShotDone = Boolean(prev2.projectile && !r2.lane.projectile && r2.lane.canShoot)
+      if (p1ShotDone || p2ShotDone) {
+        passTurn()
       }
 
       syncUiTickRef.current += 1
-      const forceUi = wantsFire || wantsSwap || r1.events.length > 0 || r2.events.length > 0
+      const forceUi =
+        wantsFire ||
+        wantsSwap ||
+        p1ShotDone ||
+        p2ShotDone ||
+        r1.events.length > 0 ||
+        r2.events.length > 0
       if (forceUi || syncUiTickRef.current % 2 === 0) {
         syncLanesToReact(r1.lane, r2.lane, roundTimeRef.current)
       }
@@ -295,9 +291,10 @@ export function useBubbleShooterDuel() {
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [running, playEvents, handleOverflow, handleTimeUp, syncLanesToReact])
+  }, [running, playEvents, passTurn, handleTimeUp, syncLanesToReact])
 
   const setAimDirection = useCallback((dir: -1 | 0 | 1) => {
+    if (activeTurnRef.current !== 'p1') return
     aimDirRef.current = dir
     setAimDir(dir)
   }, [])
@@ -305,12 +302,16 @@ export function useBubbleShooterDuel() {
   const fire = useCallback(() => {
     if (!runningRef.current || endedRef.current) return
     if (performance.now() < roundBreakUntilRef.current) return
+    if (activeTurnRef.current !== 'p1') return
+    if (lane1Ref.current.projectile || !lane1Ref.current.canShoot) return
     fireRef.current = true
   }, [])
 
   const swapBubble = useCallback(() => {
     if (!runningRef.current || endedRef.current) return
     if (performance.now() < roundBreakUntilRef.current) return
+    if (activeTurnRef.current !== 'p1') return
+    if (lane1Ref.current.projectile || !lane1Ref.current.canShoot) return
     swapRef.current = true
   }, [])
 
@@ -346,6 +347,8 @@ export function useBubbleShooterDuel() {
     setShakeKey(0)
     setAimDir(0)
     aimDirRef.current = 0
+    activeTurnRef.current = 'p1'
+    setActiveTurn('p1')
   }, [])
 
   const formatTime = `${String(Math.floor(roundTimeLeft / 60)).padStart(2, '0')}:${String(roundTimeLeft % 60).padStart(2, '0')}`
@@ -362,6 +365,7 @@ export function useBubbleShooterDuel() {
     running,
     winner,
     shakeKey,
+    activeTurn,
     lane1RenderRef,
     lane2RenderRef,
     setAimDirection,

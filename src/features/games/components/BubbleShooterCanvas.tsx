@@ -3,7 +3,6 @@ import {
   BUBBLE_RADIUS,
   COLLISION_DISTANCE,
   COLOR_HEX,
-  DANGER_Y,
   GRID_TOP,
   SHOOTER_X,
   SHOOTER_Y,
@@ -17,6 +16,7 @@ type BubbleShooterCanvasProps = {
   accent: 'cyan' | 'pink'
   showShooterExtras?: boolean
   active?: boolean
+  showAimGuide?: boolean
 }
 
 const ACCENT = {
@@ -43,12 +43,15 @@ export function BubbleShooterCanvas({
   accent,
   showShooterExtras = false,
   active = true,
+  showAimGuide = true,
 }: BubbleShooterCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const accentRef = useRef(accent)
   const extrasRef = useRef(showShooterExtras)
+  const aimGuideRef = useRef(showAimGuide)
   accentRef.current = accent
   extrasRef.current = showShooterExtras
+  aimGuideRef.current = showAimGuide
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -82,18 +85,9 @@ export function BubbleShooterCanvas({
       const palette = ACCENT[accentRef.current]
       ctx.clearRect(0, 0, w, h)
       drawArenaDepth(ctx, w, h, palette.floor)
-      drawAimTrajectory(ctx, lane, w, h, palette.dot, palette.dotDim, dpr)
-
-      ctx.save()
-      ctx.strokeStyle = palette.danger
-      ctx.lineWidth = 1 * dpr
-      ctx.setLineDash([5 * dpr, 5 * dpr])
-      ctx.beginPath()
-      ctx.moveTo(0, DANGER_Y * h)
-      ctx.lineTo(w, DANGER_Y * h)
-      ctx.stroke()
-      ctx.setLineDash([])
-      ctx.restore()
+      if (aimGuideRef.current && !lane.projectile?.active && lane.canShoot) {
+        drawAimTrajectory(ctx, lane, w, h, palette.dot, palette.dotDim, dpr)
+      }
 
       for (const [key, color] of lane.grid) {
         const [row, col] = key.split(',').map(Number)
@@ -145,7 +139,7 @@ export function BubbleShooterCanvas({
 
     raf = requestAnimationFrame(draw)
     return () => cancelAnimationFrame(raf)
-  }, [active, laneRef])
+  }, [active, laneRef, showAimGuide])
 
   return <canvas ref={canvasRef} className="pm-bubble-arena__canvas" />
 }
@@ -164,22 +158,27 @@ function drawAimTrajectory(
   for (let i = 1; i < points.length; i += 4) {
     const point = points[i]!
     const t = i / points.length
-    const fade = 1 - t * 0.58
+    const fade = (1 - t * 0.5) * 0.75
     ctx.fillStyle = i % 8 === 0 ? bright : dim
     ctx.globalAlpha = fade
     ctx.beginPath()
-    ctx.arc(point.x * w, point.y * h, (1.7 + fade * 0.9) * dpr, 0, Math.PI * 2)
+    ctx.arc(point.x * w, point.y * h, (1.5 + fade * 0.8) * dpr, 0, Math.PI * 2)
     ctx.fill()
   }
 
   const impact = points.at(-1)
   if (impact) {
-    ctx.globalAlpha = 0.7
+    ctx.globalAlpha = 0.82
     ctx.strokeStyle = bright
-    ctx.lineWidth = 1.2 * dpr
+    ctx.lineWidth = 1.5 * dpr
     ctx.beginPath()
-    ctx.arc(impact.x * w, impact.y * h, 5.6 * dpr, 0, Math.PI * 2)
+    ctx.arc(impact.x * w, impact.y * h, 6 * dpr, 0, Math.PI * 2)
     ctx.stroke()
+    ctx.globalAlpha = 0.45
+    ctx.fillStyle = bright
+    ctx.beginPath()
+    ctx.arc(impact.x * w, impact.y * h, 2.2 * dpr, 0, Math.PI * 2)
+    ctx.fill()
   }
 
   ctx.globalAlpha = 1

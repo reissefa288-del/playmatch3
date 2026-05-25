@@ -45,6 +45,26 @@ export function GamesScreen() {
     navigate('/games/block-duel')
   }, [navigate])
 
+  const openMemoryDuel = useCallback(() => {
+    navigate('/games/memory-duel')
+  }, [navigate])
+
+  const openStackDuel = useCallback(() => {
+    navigate('/games/stack-duel')
+  }, [navigate])
+
+  const openMathDuel = useCallback(() => {
+    navigate('/games/math-duel')
+  }, [navigate])
+
+  const openFlappyDuel = useCallback(() => {
+    navigate('/games/flappy-duel')
+  }, [navigate])
+
+  const openCandyClash = useCallback(() => {
+    navigate('/games/candy-clash')
+  }, [navigate])
+
   const handleFeaturedPlay = useCallback(
     (game: FeaturedGame) => {
       if (game.id === 'bubble-shooter-duel') {
@@ -82,9 +102,40 @@ export function GamesScreen() {
         openXox()
         return
       }
+      if (isMemoryDuelGame(game)) {
+        openMemoryDuel()
+        return
+      }
+      if (isStackDuelGame(game)) {
+        openStackDuel()
+        return
+      }
+      if (isMathDuelGame(game)) {
+        openMathDuel()
+        return
+      }
+      if (isFlappyDuelGame(game)) {
+        openFlappyDuel()
+        return
+      }
+      if (isCandyClashGame(game)) {
+        openCandyClash()
+        return
+      }
       addXp(xp)
     },
-    [addXp, openBlockDuel, openBrickBreak, openBubbleShooter, openXox],
+    [
+      addXp,
+      openBlockDuel,
+      openBrickBreak,
+      openBubbleShooter,
+      openCandyClash,
+      openFlappyDuel,
+      openMathDuel,
+      openMemoryDuel,
+      openStackDuel,
+      openXox,
+    ],
   )
 
   useEffect(() => {
@@ -310,6 +361,26 @@ function isBrickBreakGame(game: GamesMiniCard) {
 
 function isBlockDuelGame(game: GamesMiniCard) {
   return game.id === 'block-duel' || game.artKind === 'block-duel'
+}
+
+function isMemoryDuelGame(game: GamesMiniCard) {
+  return game.id === 'memory-duel' || game.artKind === 'memory'
+}
+
+function isStackDuelGame(game: GamesMiniCard) {
+  return game.id === 'stack-duel' || game.artKind === 'stack'
+}
+
+function isMathDuelGame(game: GamesMiniCard) {
+  return game.id === 'math-duel' || game.artKind === 'math-duel' || game.artKind === 'math'
+}
+
+function isFlappyDuelGame(game: GamesMiniCard) {
+  return game.id === 'flappy-duel' || game.artKind === 'flappy-duel'
+}
+
+function isCandyClashGame(game: GamesMiniCard) {
+  return game.id === 'candy-clash' || game.artKind === 'candy-clash'
 }
 
 function randomInt(min: number, max: number) {

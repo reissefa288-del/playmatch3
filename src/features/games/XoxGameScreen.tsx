@@ -3,8 +3,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { useProfileLevel } from '../profile/ProfileLevelProvider'
-import { XoxAmbientBg } from './components/XoxAmbientBg'
+import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
 import { XoxGameBoard } from './components/XoxGameBoard'
+import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useXoxRealtime } from './useXoxRealtime'
 import { playXoxSound, unlockXoxAudio } from './utils/xoxSounds'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
@@ -129,7 +130,7 @@ export function XoxGameScreen() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.34 }}
         >
-          <XoxAmbientBg />
+          <GameDuelAmbientBg />
 
           <button type="button" className="pm-xox-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
@@ -151,13 +152,11 @@ export function XoxGameScreen() {
           {showHud ? (
             <section className="pm-xox-hud" aria-label="Oyuncu bilgileri">
               <article className={`pm-xox-hud__side is-p1 ${activeTurnSide === 'x' && interactive ? 'is-active' : ''}`}>
-                <div className="pm-xox-hud-frame is-pink">
-                  <img src={FAKE_PORTRAIT_MALE} alt="" className="pm-xox-hud-frame__photo" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--tl" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--tr" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--bl" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--br" />
-                </div>
+                <GamePlayerPortrait
+                  src={FAKE_PORTRAIT_MALE}
+                  variant="cyan"
+                  active={activeTurnSide === 'x' && interactive}
+                />
                 <p className="pm-xox-hud__label">OYUNCU 1</p>
                 <div className="pm-xox-score-pill is-pink">
                   <span className="pm-xox-score-pill__symbol">X</span>
@@ -166,13 +165,11 @@ export function XoxGameScreen() {
               </article>
 
               <article className={`pm-xox-hud__side is-p2 ${activeTurnSide === 'o' && interactive ? 'is-active' : ''}`}>
-                <div className="pm-xox-hud-frame is-blue">
-                  <img src={FAKE_PORTRAIT_FEMALE} alt="" className="pm-xox-hud-frame__photo" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--tl" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--tr" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--bl" />
-                  <span className="pm-xox-hud-frame__bracket pm-xox-hud-frame__bracket--br" />
-                </div>
+                <GamePlayerPortrait
+                  src={FAKE_PORTRAIT_FEMALE}
+                  variant="pink"
+                  active={activeTurnSide === 'o' && interactive}
+                />
                 <p className="pm-xox-hud__label">OYUNCU 2</p>
                 <div className="pm-xox-score-pill is-blue">
                   <strong>{scores.o}</strong>

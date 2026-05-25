@@ -50,6 +50,19 @@ export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
             transition={{ delay: 0.05 + index * 0.06, duration: 0.4 }}
             whileHover={reduceMotion ? undefined : { y: -8, scale: 1.01 }}
             whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+            role="button"
+            tabIndex={0}
+            onClick={() => {
+              addXp(XP_GAME_FEATURED)
+              onPlay?.(game)
+            }}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                addXp(XP_GAME_FEATURED)
+                onPlay?.(game)
+              }
+            }}
           >
             <span className="pm-featured-card__edge" aria-hidden />
             <span className="pm-featured-card__glow" aria-hidden />
@@ -83,7 +96,8 @@ export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
 
             <motion.button
               type="button"
-              onClick={() => {
+              onClick={(event) => {
+                event.stopPropagation()
                 addXp(XP_GAME_FEATURED)
                 onPlay?.(game)
               }}

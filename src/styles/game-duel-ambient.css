@@ -1,0 +1,192 @@
+/* Premium AAA duel arka planı — Block · Brick · Bubble · XOX */
+
+.pm-duel-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.92;
+}
+
+.pm-duel-ambient__base {
+  position: absolute;
+  inset: -24%;
+  background:
+    radial-gradient(ellipse 95% 58% at 14% 4%, rgba(0, 232, 255, 0.14), transparent 54%),
+    radial-gradient(ellipse 92% 54% at 86% 6%, rgba(255, 45, 154, 0.12), transparent 52%),
+    radial-gradient(ellipse 78% 48% at 50% 92%, rgba(100, 60, 200, 0.1), transparent 50%),
+    linear-gradient(168deg, #080c1e 0%, #060810 40%, #0a0614 65%, #04060e 100%);
+  background-size: 115% 115%;
+}
+
+.pm-duel-ambient__split {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 38%;
+  filter: blur(48px);
+}
+
+.pm-duel-ambient__split--cyan {
+  left: -6%;
+  background: radial-gradient(ellipse 80% 90% at 8% 50%, rgba(0, 232, 255, 0.2), transparent 68%);
+}
+
+.pm-duel-ambient__split--pink {
+  right: -6%;
+  background: radial-gradient(ellipse 80% 90% at 92% 50%, rgba(255, 45, 154, 0.18), transparent 68%);
+}
+
+.pm-duel-ambient__aurora {
+  position: absolute;
+  width: 130%;
+  height: 38%;
+  left: -15%;
+  filter: blur(58px);
+  border-radius: 50%;
+}
+
+.pm-duel-ambient__aurora--cyan {
+  top: 4%;
+  background: radial-gradient(ellipse at center, rgba(0, 232, 255, 0.22), transparent 70%);
+}
+
+.pm-duel-ambient__aurora--pink {
+  top: 24%;
+  background: radial-gradient(ellipse at center, rgba(255, 45, 154, 0.18), transparent 72%);
+}
+
+.pm-duel-ambient__orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(54px);
+}
+
+.pm-duel-ambient__orb--cyan {
+  top: 18%;
+  left: -12%;
+  width: 48%;
+  height: 24%;
+  background: rgba(0, 232, 255, 0.1);
+}
+
+.pm-duel-ambient__orb--pink {
+  top: 26%;
+  right: -12%;
+  width: 46%;
+  height: 22%;
+  background: rgba(255, 45, 154, 0.09);
+}
+
+.pm-duel-ambient__particles {
+  position: absolute;
+  inset: 0;
+}
+
+.pm-duel-ambient__particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(180, 220, 255, 0.45);
+  box-shadow: 0 0 5px rgba(120, 200, 255, 0.35);
+  animation: pm-duel-particle-float 7s ease-in-out infinite;
+}
+
+.pm-duel-ambient__particle.is-tone-1 {
+  background: rgba(255, 160, 220, 0.5);
+  box-shadow: 0 0 5px rgba(255, 100, 200, 0.3);
+}
+
+.pm-duel-ambient__particle.is-tone-2 {
+  width: 1.5px;
+  height: 1.5px;
+  background: rgba(200, 180, 255, 0.5);
+  box-shadow: 0 0 4px rgba(160, 120, 255, 0.3);
+}
+
+.pm-duel-ambient__city {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 42%;
+  opacity: 0.5;
+  background:
+    linear-gradient(180deg, transparent 0%, rgba(4, 6, 16, 0.45) 32%, rgba(4, 6, 16, 0.92) 100%),
+    linear-gradient(90deg, transparent 0%, rgba(0, 232, 255, 0.03) 22%, transparent 50%, rgba(255, 45, 154, 0.03) 78%, transparent 100%);
+  mask-image: linear-gradient(to top, black 58%, transparent);
+}
+
+.pm-duel-ambient__stars {
+  position: absolute;
+  inset: 0;
+}
+
+.pm-duel-ambient__star {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(220, 230, 255, 0.7);
+  box-shadow: 0 0 2px rgba(180, 200, 255, 0.3);
+  animation: pm-duel-star-twinkle 4.5s ease-in-out infinite;
+}
+
+.pm-duel-ambient__grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+.pm-duel-ambient__dim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 48%, rgba(4, 6, 14, 0.72) 0%, rgba(4, 6, 14, 0.35) 55%, transparent 100%),
+    linear-gradient(180deg, rgba(2, 4, 10, 0.45) 0%, transparent 28%, transparent 72%, rgba(2, 4, 10, 0.55) 100%);
+  pointer-events: none;
+}
+
+.pm-duel-ambient__vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 88% 78% at 50% 46%, transparent 22%, rgba(2, 4, 12, 0.82) 100%);
+}
+
+@keyframes pm-duel-particle-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.1);
+    opacity: 0.5;
+  }
+}
+
+@keyframes pm-duel-star-twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.85);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-duel-ambient__base,
+  .pm-duel-ambient__orb,
+  .pm-duel-ambient__aurora,
+  .pm-duel-ambient__particle,
+  .pm-duel-ambient__star,
+  .pm-duel-ambient__city,
+  .pm-duel-ambient__split {
+    animation: none !important;
+  }
+}

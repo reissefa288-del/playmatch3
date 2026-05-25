@@ -100,20 +100,6 @@ export const featuredGames: FeaturedGame[] = [
     friends: ['A', 'D', 'Z'],
     cta: 'Şimdi Oyna',
   },
-  {
-    id: 'eruption',
-    title: 'ERUPTION',
-    mode: 'Element Savaşı',
-    players: '1.8K oyuncu',
-    playersShort: '1.8K',
-    activity: 'Yeni sezon',
-    badge: 'YENİ',
-    icon: IoExtensionPuzzleOutline,
-    accent: 'pink',
-    artPosition: '72% 42%',
-    friends: ['S', 'L'],
-    cta: 'Şimdi Oyna',
-  },
 ]
 
 export const gamesGrid: HubGame[] = [
@@ -247,11 +233,14 @@ export type GamesMiniCard = {
     | 'word-arena'
     | 'xox'
     | 'snake'
-    | 'color-match'
     | 'memory'
-    | 'arena2048'
+    | 'stack'
+    | 'color-match'
     | 'dart'
     | 'math'
+    | 'math-duel'
+    | 'flappy-duel'
+    | 'candy-clash'
     | 'more'
   badge?: string
   players: string
@@ -292,42 +281,59 @@ export const popularGamesCards: GamesMiniCard[] = [
     players: '1245',
     color: 'is-blue',
   },
+  { id: 'xox', title: 'XO', icon: LuSwords, artKind: 'xox', badge: 'Klasik', players: '654', color: 'is-pink' },
   {
-    id: 'pong',
-    title: 'PONG',
-    icon: IoGameControllerOutline,
-    artKind: 'pong',
-    badge: 'Spor',
-    players: '982',
+    id: 'memory-duel',
+    title: 'MEMORY DUEL',
+    icon: FiZap,
+    artKind: 'memory',
+    badge: 'Duel',
+    players: '890',
     color: 'is-violet',
   },
   {
-    id: 'word-arena',
-    title: 'WORD ARENA',
-    icon: IoExtensionPuzzleOutline,
-    artKind: 'word-arena',
-    badge: 'Kelime',
-    players: '756',
-    color: 'is-orange',
+    id: 'stack-duel',
+    title: 'STACK DUEL',
+    icon: FiGrid,
+    artKind: 'stack',
+    badge: 'Duel',
+    players: '1040',
+    color: 'is-blue',
   },
-  { id: 'xox', title: 'XO', icon: LuSwords, artKind: 'xox', badge: 'Klasik', players: '654', color: 'is-pink' },
   {
-    id: 'snake-battle',
-    title: 'SNAKE BATTLE',
-    icon: IoRocketOutline,
-    artKind: 'snake',
-    badge: 'Aksiyon',
-    players: '512',
+    id: 'math-duel',
+    title: 'MATH DUEL',
+    icon: FiUsers,
+    artKind: 'math-duel',
+    badge: 'Duel',
+    players: '920',
     color: 'is-green',
+  },
+  {
+    id: 'flappy-duel',
+    title: 'FLAPPY DUEL',
+    icon: IoRocketOutline,
+    artKind: 'flappy-duel',
+    badge: 'Duel',
+    players: '1180',
+    color: 'is-violet',
+  },
+  {
+    id: 'candy-clash',
+    title: 'CANDY CLASH',
+    icon: FiZap,
+    artKind: 'candy-clash',
+    badge: 'Duel',
+    players: '1.4K',
+    color: 'is-pink',
   },
 ]
 
 export const allGamesCards: GamesMiniCard[] = [
   { id: 'color-match', title: 'COLOR MATCH', icon: FiGrid, artKind: 'color-match', players: '432', color: 'is-violet' },
-  { id: 'memory-duel', title: 'MEMORY DUEL', icon: IoExtensionPuzzleOutline, artKind: 'memory', players: '398', color: 'is-blue' },
-  { id: '2048-arena', title: '2048 ARENA', icon: FiZap, artKind: 'arena2048', players: '365', color: 'is-orange' },
   { id: 'dart-duel', title: 'DART DUEL', icon: LuSwords, artKind: 'dart', players: '287', color: 'is-orange' },
-  { id: 'math-clash', title: 'MATH CLASH', icon: FiUsers, artKind: 'math', players: '256', color: 'is-green' },
+  { id: 'math-duel', title: 'MATH DUEL', icon: FiUsers, artKind: 'math-duel', players: '920', color: 'is-green' },
+  { id: 'candy-clash', title: 'CANDY CLASH', icon: FiZap, artKind: 'candy-clash', players: '1.4K', color: 'is-pink' },
   {
     id: 'more-games',
     title: 'DAHA FAZLASI',

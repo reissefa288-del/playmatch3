@@ -1,13 +1,11 @@
 export const BUBBLE_RADIUS = 0.036
 export const GRID_TOP = 0.1
-export const DANGER_Y = 0.74
 export const SHOOTER_Y = 0.9
 export const SHOOTER_X = 0.5
 export const WIN_POINTS = 3
 export const ROUND_SECONDS = 75
 export const OVERTIME_SECONDS = 20
 export const ROUND_BREAK_MS = 2600
-const PRESSURE_AFTER_MISSES = 4
 export const COLLISION_DISTANCE = BUBBLE_RADIUS * 2.34
 export const AIM_MIN = -2.75
 export const AIM_MAX = -0.38
@@ -176,20 +174,9 @@ export function updateLane(
         if (next.grid.size === 0) events.push('clear')
       } else {
         next.missStreak += 1
-        if (next.missStreak >= PRESSURE_AFTER_MISSES) {
-          next.missStreak = 0
-          addPressureRow(next, Math.floor(next.score + next.grid.size))
-          events.push('drop')
-        }
       }
       next.projectile = null
       next.canShoot = true
-
-      const danger = getLowestY(next.grid)
-      if (danger > DANGER_Y && !next.overflowed) {
-        next.overflowed = true
-        events.push('overflow')
-      }
     }
   }
 
@@ -423,39 +410,6 @@ function findFloating(grid: Map<string, BubbleColor>) {
   return floating
 }
 
-function getLowestY(grid: Map<string, BubbleColor>) {
-  let max = 0
-  for (const key of grid.keys()) {
-    const [row, col] = key.split(',').map(Number)
-    max = Math.max(max, bubblePos(row, col).y)
-  }
-  return max
-}
-
-function addPressureRow(lane: LaneState, seed: number) {
-  const shifted = new Map<string, BubbleColor>()
-  const cells = [...lane.grid.entries()]
-    .map(([key, color]) => {
-      const [row, col] = key.split(',').map(Number)
-      return { row, col, color }
-    })
-    .sort((a, b) => b.row - a.row)
-
-  for (const { row, col, color } of cells) {
-    const targetRow = row + 1
-    const targetCol = nearestFreeColInRow(shifted, targetRow, bubblePos(row, col).x)
-    if (targetCol != null) shifted.set(cellKey(targetRow, targetCol), color)
-  }
-
-  const rng = mulberry32((seed + 17) * 1409)
-  for (let col = 0; col < colsForRow(0); col += 1) {
-    if (rng() > 0.86) continue
-    shifted.set(cellKey(0, col), BUBBLE_COLORS[Math.floor(rng() * BUBBLE_COLORS.length)])
-  }
-
-  lane.grid = shifted
-}
-
 export function bubblePos(row: number, col: number) {
   const cols = colsForRow(row)
   const stepX = cols > 1 ? (1 - BUBBLE_RADIUS * 2) / (cols - 1) : 0
@@ -500,18 +454,6 @@ function nearestColInRow(row: number, x: number) {
     }
   }
   return best
-}
-
-function nearestFreeColInRow(grid: Map<string, BubbleColor>, row: number, x: number) {
-  const cols = colsForRow(row)
-  const preferred = nearestColInRow(row, x)
-  for (let offset = 0; offset < cols; offset += 1) {
-    const left = preferred - offset
-    if (left >= 0 && !grid.has(cellKey(row, left))) return left
-    const right = preferred + offset
-    if (right < cols && !grid.has(cellKey(row, right))) return right
-  }
-  return null
 }
 
 function createInitialGrid(seed: number) {

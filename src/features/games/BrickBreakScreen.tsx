@@ -3,8 +3,9 @@ import { useCallback, useEffect } from 'react'
 import { FiArrowLeft, FiChevronLeft, FiChevronRight, FiAward } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { BrickAmbientBg } from './components/BrickAmbientBg'
+import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
 import { BrickBreakCanvas } from './components/BrickBreakCanvas'
+import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useBrickBreakDuel } from './useBrickBreakDuel'
 import { unlockBrickBreakAudio } from './utils/brickBreakSounds'
 
@@ -70,7 +71,7 @@ export function BrickBreakScreen() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.32 }}
         >
-          <BrickAmbientBg />
+          <GameDuelAmbientBg />
 
           <button type="button" className="pm-brick-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
@@ -85,13 +86,7 @@ export function BrickBreakScreen() {
 
           <section className="pm-brick-hud" aria-label="Skor tablosu">
             <article className={`pm-brick-hud__side is-p1 ${game.running && game.lane1.lives > 0 ? 'is-active' : ''}`}>
-              <div className="pm-brick-hud-frame is-cyan">
-                <img src={FAKE_PORTRAIT_MALE} alt="" className="pm-brick-hud-frame__photo" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--tl" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--tr" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--bl" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--br" />
-              </div>
+              <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={game.running && game.lane1.lives > 0} />
               <p className="pm-brick-hud__label">OYUNCU 1</p>
               <LivesRow lives={game.lane1.lives} max={game.maxLives} variant="cyan" />
               <div className="pm-brick-score-pill is-cyan">
@@ -121,13 +116,7 @@ export function BrickBreakScreen() {
             </div>
 
             <article className="pm-brick-hud__side is-p2">
-              <div className="pm-brick-hud-frame is-pink">
-                <img src={FAKE_PORTRAIT_FEMALE} alt="" className="pm-brick-hud-frame__photo" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--tl" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--tr" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--bl" />
-                <span className="pm-brick-hud-frame__bracket pm-brick-hud-frame__bracket--br" />
-              </div>
+              <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" />
               <p className="pm-brick-hud__label">OYUNCU 2</p>
               <LivesRow lives={game.lane2.lives} max={game.maxLives} variant="pink" />
               <div className="pm-brick-score-pill is-pink">

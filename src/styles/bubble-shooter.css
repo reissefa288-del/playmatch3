@@ -33,12 +33,11 @@
   min-height: 0;
   display: grid;
   grid-template-rows:
-    minmax(48px, auto)
-    minmax(96px, auto)
-    minmax(40px, auto)
+    minmax(100px, auto)
+    minmax(44px, auto)
     minmax(0, 1fr)
-    minmax(92px, auto);
-  gap: 4px;
+    minmax(78px, auto);
+  gap: 3px;
 }
 
 /* ── Ambient ── */
@@ -141,39 +140,98 @@
   background: radial-gradient(ellipse 85% 75% at 50% 48%, transparent 42%, rgba(2, 4, 12, 0.55) 100%);
 }
 
-/* ── Back ── */
+/* ── Back (footer, sol alt) ── */
 .pm-bubble-back {
-  position: absolute;
-  z-index: 6;
-  top: max(10px, env(safe-area-inset-top));
-  left: var(--bubble-pad);
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid rgba(78, 200, 232, 0.28);
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(34, 200, 255, 0.42);
   background:
-    linear-gradient(145deg, rgba(18, 24, 48, 0.92), rgba(8, 12, 28, 0.96));
-  color: rgba(180, 220, 240, 0.9);
+    linear-gradient(165deg, rgba(28, 42, 72, 0.95) 0%, rgba(8, 12, 28, 0.98) 55%, rgba(4, 8, 18, 1) 100%);
+  color: rgba(180, 230, 255, 0.95);
   display: grid;
   place-items: center;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 4px 14px rgba(0, 0, 0, 0.35);
-  transition: border-color 0.2s ease, transform 0.15s ease;
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.35),
+    0 0 16px rgba(34, 200, 255, 0.12),
+    0 6px 18px rgba(0, 0, 0, 0.38);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition:
+    transform 0.18s cubic-bezier(0.34, 1.4, 0.64, 1),
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .pm-bubble-back:active {
-  transform: scale(0.94);
+  transform: scale(0.92);
+  box-shadow:
+    inset 0 2px 8px rgba(0, 0, 0, 0.45),
+    0 0 22px rgba(34, 200, 255, 0.28);
 }
 
-/* ── Header ── */
+/* ── Header (portraits flanking title) ── */
 .pm-bubble-header {
   position: relative;
   z-index: 2;
   display: grid;
-  place-items: center;
-  padding-top: 18px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  padding-top: 14px;
   min-height: 0;
+}
+
+.pm-bubble-header__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-width: 0;
+}
+
+.pm-bubble-header__side.is-p1 {
+  justify-self: end;
+  padding-right: 2px;
+}
+
+.pm-bubble-header__side.is-p2 {
+  justify-self: start;
+  padding-left: 2px;
+}
+
+.pm-bubble-header__name {
+  margin: 0;
+  font-size: clamp(0.4rem, 2.4vw, 0.46rem);
+  letter-spacing: 0.12em;
+  font-weight: 700;
+}
+
+.pm-bubble-header__side.is-p1 .pm-bubble-header__name {
+  color: rgba(140, 210, 230, 0.92);
+}
+
+.pm-bubble-header__side.is-p2 .pm-bubble-header__name {
+  color: rgba(230, 160, 200, 0.92);
+}
+
+.pm-bubble-header__round-wins {
+  margin: 0;
+  font-size: clamp(0.48rem, 2.8vw, 0.58rem);
+  letter-spacing: 0.12em;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  color: rgba(200, 220, 255, 0.92);
+}
+
+.pm-bubble-header__side.is-p1 .pm-bubble-header__round-wins {
+  color: rgba(120, 210, 240, 0.95);
+}
+
+.pm-bubble-header__side.is-p2 .pm-bubble-header__round-wins {
+  color: rgba(240, 160, 200, 0.95);
 }
 
 .pm-bubble-header__title {
@@ -387,7 +445,7 @@
 
 .pm-bubble-stats__block {
   text-align: center;
-  padding: 5px 6px;
+  padding: 6px 8px;
   border-radius: 10px;
   border: 1px solid var(--bubble-glass-border);
   background:
@@ -400,31 +458,41 @@
     0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-.pm-bubble-stats__block span {
+.pm-bubble-stats__label {
   display: block;
-  font-size: 0.36rem;
-  letter-spacing: 0.14em;
-  color: rgba(180, 195, 230, 0.72);
-  font-weight: 600;
+  margin-bottom: 3px;
+  font-size: clamp(0.44rem, 2.6vw, 0.54rem);
+  letter-spacing: 0.1em;
+  color: rgba(210, 222, 255, 0.92);
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
-.pm-bubble-stats__block strong {
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
+.pm-bubble-stats__value {
+  display: block;
+  font-size: clamp(0.62rem, 3.4vw, 0.8rem);
+  letter-spacing: 0.05em;
   font-variant-numeric: tabular-nums;
-  color: rgba(230, 238, 255, 0.95);
+  font-weight: 800;
+  color: rgba(240, 246, 255, 0.98);
+  line-height: 1.15;
 }
 
-.pm-bubble-stats__block.is-score strong {
+.pm-bubble-stats__value.is-duel-score {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 5px;
 }
 
-.pm-bubble-stats__block.is-score .is-p1 { color: var(--bubble-cyan); }
-.pm-bubble-stats__block.is-score .is-p2 { color: var(--bubble-pink); }
-.pm-bubble-stats__block.is-score i { font-style: normal; opacity: 0.4; font-size: 0.52rem; }
+.pm-bubble-stats__value.is-duel-score em {
+  font-style: normal;
+  min-width: 1.6em;
+}
+
+.pm-bubble-stats__value.is-duel-score .is-p1 { color: var(--bubble-cyan); }
+.pm-bubble-stats__value.is-duel-score .is-p2 { color: var(--bubble-pink); }
+.pm-bubble-stats__value.is-duel-score i { font-style: normal; opacity: 0.45; font-size: 0.58rem; font-weight: 700; }
 
 .pm-bubble-stats__next-row {
   display: flex;
@@ -486,16 +554,9 @@
   isolation: isolate;
 }
 
-.pm-bubble-arena.is-p1 {
-  box-shadow:
-    0 0 34px rgba(34, 200, 255, 0.12),
-    inset 0 0 70px rgba(34, 200, 255, 0.1);
-}
-
+.pm-bubble-arena.is-p1,
 .pm-bubble-arena.is-p2 {
-  box-shadow:
-    0 0 34px rgba(255, 58, 120, 0.12),
-    inset 0 0 70px rgba(255, 58, 120, 0.1);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
 }
 
 .pm-bubble-arena__city {
@@ -515,18 +576,6 @@
   height: 52%;
   opacity: 0.85;
   background:
-    linear-gradient(90deg,
-      transparent 0%,
-      rgba(34, 200, 255, 0.1) 8%,
-      transparent 12%,
-      rgba(255, 58, 120, 0.08) 28%,
-      transparent 32%,
-      rgba(78, 200, 232, 0.04) 55%,
-      transparent 60%,
-      rgba(224, 86, 168, 0.06) 78%,
-      transparent 82%
-    ),
-    /* building silhouettes */
     linear-gradient(180deg, transparent 0%, rgba(6, 8, 18, 0.9) 100%),
     conic-gradient(from 180deg at 12% 100%, #0c1020 0deg, #141828 90deg, #0c1020 180deg),
     conic-gradient(from 180deg at 35% 100%, #101428 0deg, #181c30 90deg, #101428 180deg),
@@ -535,30 +584,18 @@
   mask-image: linear-gradient(to top, black 65%, transparent);
 }
 
-.pm-bubble-arena.is-p1 .pm-bubble-arena__city::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 58% at 50% 92%, rgba(34, 200, 255, 0.24), transparent 68%),
-    radial-gradient(ellipse 68% 42% at 24% 16%, rgba(34, 200, 255, 0.16), transparent 64%);
-  filter: blur(2px);
-}
-
 .pm-bubble-arena.is-p2 .pm-bubble-arena__city {
   background:
     linear-gradient(180deg, rgba(0, 0, 0, 0.04) 0%, transparent 42%, rgba(0, 0, 0, 0.32) 100%),
     linear-gradient(180deg, rgba(20, 12, 34, 0.75) 0%, rgba(12, 8, 24, 0.55) 50%, rgba(6, 8, 16, 0.65) 100%);
 }
 
-.pm-bubble-arena.is-p2 .pm-bubble-arena__city::after {
+.pm-bubble-arena__city::after {
   content: '';
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse 80% 58% at 50% 92%, rgba(255, 58, 120, 0.24), transparent 68%),
-    radial-gradient(ellipse 68% 42% at 76% 16%, rgba(255, 58, 120, 0.16), transparent 64%);
-  filter: blur(2px);
+  background: radial-gradient(ellipse 85% 55% at 50% 92%, rgba(80, 100, 160, 0.12), transparent 70%);
+  pointer-events: none;
 }
 
 .pm-bubble-arena__canvas {
@@ -579,15 +616,22 @@
   align-items: center;
   gap: 6px;
   min-height: 0;
+  padding-bottom: max(2px, env(safe-area-inset-bottom));
 }
 
-.pm-bubble-footer__hint {
-  margin: 0;
-  font-size: 0.42rem;
-  letter-spacing: 0.12em;
-  color: rgba(190, 205, 240, 0.72);
-  text-align: center;
-  font-weight: 600;
+.pm-bubble-footer__actions {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-height: 72px;
+}
+
+.pm-bubble-footer__actions .pm-bubble-back {
+  position: absolute;
+  left: 0;
+  bottom: 0;
 }
 
 .pm-bubble-footer__vs {
@@ -633,55 +677,254 @@
   box-shadow: inset 0 0 12px rgba(224, 86, 168, 0.06);
 }
 
-/* ── Controls ── */
+/* ── Controls dock (AAA) ── */
+.pm-bubble-controls-dock {
+  position: relative;
+  padding: 10px 16px 8px;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 28%, transparent 52%),
+    linear-gradient(135deg, rgba(34, 200, 255, 0.06) 0%, transparent 42%, rgba(255, 58, 120, 0.06) 100%),
+    rgba(6, 10, 28, 0.78);
+  border: 1px solid rgba(34, 200, 255, 0.28);
+  backdrop-filter: blur(16px) saturate(1.35);
+  -webkit-backdrop-filter: blur(16px) saturate(1.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -8px 24px rgba(0, 0, 0, 0.28),
+    0 10px 36px rgba(0, 0, 0, 0.42),
+    0 0 48px rgba(34, 200, 255, 0.1);
+}
+
+.pm-bubble-controls-dock__aura {
+  position: absolute;
+  inset: -4px 8px auto;
+  height: 55%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 0%, rgba(34, 200, 255, 0.22), transparent 68%);
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.pm-bubble-controls-dock.is-live .pm-bubble-controls-dock__aura {
+  animation: pm-bubble-dock-aura 3.2s ease-in-out infinite;
+}
+
 .pm-bubble-controls {
+  position: relative;
+  z-index: 1;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .pm-bubble-controls__btn {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  border: 1px solid rgba(78, 200, 232, 0.28);
-  background:
-    linear-gradient(145deg, rgba(20, 28, 52, 0.95), rgba(8, 12, 28, 0.98));
-  color: rgba(180, 220, 240, 0.88);
-  display: grid;
-  place-items: center;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.07),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.35),
-    0 4px 14px rgba(0, 0, 0, 0.32);
-  transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  color: rgba(200, 240, 255, 0.95);
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.2s cubic-bezier(0.34, 1.35, 0.64, 1);
 }
 
-.pm-bubble-controls__btn:active {
-  transform: scale(0.93);
+.pm-bubble-controls__btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid rgba(34, 200, 255, 0.55);
+  background:
+    linear-gradient(165deg, rgba(32, 48, 82, 0.98) 0%, rgba(10, 16, 36, 0.99) 48%, rgba(4, 8, 20, 1) 100%);
   box-shadow:
-    inset 0 2px 6px rgba(0, 0, 0, 0.4),
-    0 2px 8px rgba(0, 0, 0, 0.25);
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.38),
+    0 0 18px rgba(34, 200, 255, 0.14),
+    0 6px 16px rgba(0, 0, 0, 0.36);
+  transition: box-shadow 0.22s ease, border-color 0.22s ease, filter 0.22s ease;
+}
+
+.pm-bubble-controls__btn::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 42%);
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.pm-bubble-controls__btn-inner {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 6px rgba(34, 200, 255, 0.45));
+}
+
+.pm-bubble-controls__btn:active:not(:disabled) {
+  transform: scale(0.9);
+}
+
+.pm-bubble-controls__btn:active:not(:disabled)::before {
+  box-shadow:
+    inset 0 3px 10px rgba(0, 0, 0, 0.5),
+    0 0 28px rgba(34, 200, 255, 0.35);
+}
+
+.pm-bubble-controls__btn.is-aim:active:not(:disabled) .pm-bubble-controls__btn-inner {
+  animation: pm-bubble-aim-flash 0.35s ease-out;
+}
+
+.pm-bubble-controls__btn--swap::before {
+  border-color: rgba(255, 58, 120, 0.58);
+  background:
+    linear-gradient(165deg, rgba(52, 24, 48, 0.98) 0%, rgba(18, 8, 24, 0.99) 55%, rgba(8, 4, 14, 1) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -4px 10px rgba(0, 0, 0, 0.38),
+    0 0 18px rgba(255, 58, 120, 0.16),
+    0 6px 16px rgba(0, 0, 0, 0.36);
+}
+
+.pm-bubble-controls__btn--swap .pm-bubble-controls__btn-inner {
+  filter: drop-shadow(0 0 6px rgba(255, 58, 120, 0.45));
+  color: rgba(255, 190, 220, 0.98);
+}
+
+.pm-bubble-controls.is-live .pm-bubble-controls__btn--swap:not(:disabled) .pm-bubble-controls__btn-inner {
+  animation: pm-bubble-swap-hint 4s ease-in-out infinite;
 }
 
 .pm-bubble-controls__btn--fire {
-  width: 54px;
-  height: 54px;
-  border-color: rgba(201, 168, 85, 0.38);
-  color: var(--bubble-gold);
-  background:
-    linear-gradient(145deg, rgba(40, 32, 16, 0.95), rgba(16, 12, 8, 0.98));
-  box-shadow:
-    inset 0 1px 0 rgba(255, 230, 160, 0.1),
-    inset 0 -2px 6px rgba(0, 0, 0, 0.35),
-    0 4px 16px rgba(0, 0, 0, 0.35),
-    0 0 20px rgba(201, 168, 85, 0.08);
+  width: 58px;
+  height: 58px;
+  margin-bottom: 2px;
 }
 
-.pm-bubble-controls__btn--swap {
-  border-color: rgba(224, 86, 168, 0.32);
-  color: rgba(230, 170, 210, 0.9);
+.pm-bubble-controls__btn--fire::before {
+  border-color: rgba(255, 213, 74, 0.72);
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255, 240, 180, 0.22), transparent 52%),
+    linear-gradient(165deg, rgba(72, 56, 20, 0.98) 0%, rgba(28, 20, 8, 0.99) 50%, rgba(12, 8, 4, 1) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 180, 0.2),
+    inset 0 -5px 12px rgba(0, 0, 0, 0.4),
+    0 0 28px rgba(255, 213, 74, 0.22),
+    0 8px 22px rgba(0, 0, 0, 0.4);
+}
+
+.pm-bubble-controls__btn--fire .pm-bubble-controls__btn-inner {
+  color: #ffe8a8;
+  filter: drop-shadow(0 0 10px rgba(255, 213, 74, 0.65));
+}
+
+.pm-bubble-controls__btn-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 213, 74, 0.35);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+}
+
+.pm-bubble-controls__btn-ring.is-delay {
+  animation-delay: 0.9s;
+}
+
+.pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled) {
+  animation: pm-bubble-fire-float 2.6s ease-in-out infinite;
+}
+
+.pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled)::before {
+  animation: pm-bubble-fire-glow 2.2s ease-in-out infinite;
+}
+
+.pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled) .pm-bubble-controls__btn-ring {
+  animation: pm-bubble-fire-ring 2.4s ease-out infinite;
+}
+
+.pm-bubble-controls__btn--fire:active:not(:disabled) {
+  animation: none;
+}
+
+.pm-bubble-controls__btn--fire:active:not(:disabled) .pm-bubble-controls__btn-inner {
+  animation: pm-bubble-fire-burst 0.32s ease-out;
+}
+
+@keyframes pm-bubble-dock-aura {
+  0%, 100% { opacity: 0.65; transform: scaleX(0.96); }
+  50% { opacity: 1; transform: scaleX(1.04); }
+}
+
+@keyframes pm-bubble-aim-flash {
+  0% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(34, 200, 255, 0.45)); }
+  40% { transform: scale(1.12); filter: drop-shadow(0 0 14px rgba(34, 200, 255, 0.85)); }
+  100% { transform: scale(1); filter: drop-shadow(0 0 6px rgba(34, 200, 255, 0.45)); }
+}
+
+@keyframes pm-bubble-swap-hint {
+  0%, 88%, 100% { transform: rotate(0deg); }
+  92% { transform: rotate(-14deg); }
+  96% { transform: rotate(10deg); }
+}
+
+@keyframes pm-bubble-fire-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pm-bubble-fire-glow {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 240, 180, 0.2),
+      inset 0 -5px 12px rgba(0, 0, 0, 0.4),
+      0 0 22px rgba(255, 213, 74, 0.18),
+      0 8px 22px rgba(0, 0, 0, 0.4);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 240, 180, 0.28),
+      inset 0 -5px 12px rgba(0, 0, 0, 0.4),
+      0 0 38px rgba(255, 213, 74, 0.42),
+      0 10px 26px rgba(0, 0, 0, 0.42);
+  }
+}
+
+@keyframes pm-bubble-fire-ring {
+  0% { transform: scale(0.88); opacity: 0.65; }
+  70% { transform: scale(1.22); opacity: 0; }
+  100% { transform: scale(1.28); opacity: 0; }
+}
+
+@keyframes pm-bubble-fire-burst {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+.pm-bubble-controls__btn:disabled {
+  opacity: 0.38;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.pm-bubble-controls__btn:disabled::before {
+  filter: grayscale(0.5);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.pm-bubble-controls-dock:not(.is-live) {
+  opacity: 0.72;
 }
 
 /* ── Overlay ── */
@@ -712,11 +955,6 @@
   color: rgba(200, 214, 255, 0.8);
 }
 
-.pm-bubble-controls__btn:disabled {
-  opacity: 0.38;
-  pointer-events: none;
-}
-
 .pm-bubble-overlay__btn {
   justify-self: center;
   min-height: 42px;
@@ -741,13 +979,17 @@
   }
 
   .pm-bubble-controls__btn {
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
   }
 
   .pm-bubble-controls__btn--fire {
-    width: 48px;
-    height: 48px;
+    width: 52px;
+    height: 52px;
+  }
+
+  .pm-bubble-controls-dock {
+    padding: 8px 12px 6px;
   }
 }
 
@@ -755,7 +997,13 @@
   .pm-bubble-ambient__base,
   .pm-bubble-ambient__orb,
   .pm-bubble-ambient__aurora,
-  .pm-bubble-ambient__city {
+  .pm-bubble-ambient__city,
+  .pm-bubble-controls-dock__aura,
+  .pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled),
+  .pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled)::before,
+  .pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled) .pm-bubble-controls__btn-ring,
+  .pm-bubble-controls.is-live .pm-bubble-controls__btn--swap:not(:disabled) .pm-bubble-controls__btn-inner,
+  .pm-bubble-stats__value.is-duel-score em {
     animation: none !important;
   }
 }
