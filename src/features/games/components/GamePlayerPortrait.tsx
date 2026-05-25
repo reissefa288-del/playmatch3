@@ -16,10 +16,6 @@ export function GamePlayerPortrait({ src, variant, active = false, crown = false
     >
       {crown ? <span className="pm-game-portrait__crown" aria-hidden>♛</span> : null}
       <img src={src} alt="" className="pm-game-portrait__photo" />
-      <span className="pm-game-portrait__bracket pm-game-portrait__bracket--tl" aria-hidden />
-      <span className="pm-game-portrait__bracket pm-game-portrait__bracket--tr" aria-hidden />
-      <span className="pm-game-portrait__bracket pm-game-portrait__bracket--bl" aria-hidden />
-      <span className="pm-game-portrait__bracket pm-game-portrait__bracket--br" aria-hidden />
       {label ? <span className="pm-game-portrait__label">{label}</span> : null}
     </motion.div>
   )

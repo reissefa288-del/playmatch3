@@ -2,7 +2,8 @@ import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
+import bubbleHeaderVideo from '../../reference/video.mp4'
+import { SeamlessLoopVideo } from './components/SeamlessLoopVideo'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import {
   BubbleAimLeftIcon,
@@ -111,9 +112,39 @@ export function BubbleShooterScreen() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.32 }}
         >
-          <GameDuelAmbientBg />
-
+          <div className="pm-bubble-screen-video" aria-hidden>
+            <div className="pm-bubble-screen-video__crop is-p1">
+              <SeamlessLoopVideo
+                className="pm-bubble-screen-video__media"
+                src={bubbleHeaderVideo}
+                crossfadeSec={0.52}
+              />
+            </div>
+            <div className="pm-bubble-screen-video__crop is-p2">
+              <SeamlessLoopVideo
+                className="pm-bubble-screen-video__media"
+                src={bubbleHeaderVideo}
+                crossfadeSec={0.52}
+              />
+            </div>
+            <span className="pm-bubble-screen-video__panel is-p1" aria-hidden />
+            <span className="pm-bubble-screen-video__panel is-p2" aria-hidden />
+            <span className="pm-bubble-screen-video__orb is-cyan" />
+            <span className="pm-bubble-screen-video__orb is-pink" />
+            <span className="pm-bubble-screen-video__grid" />
+            <span className="pm-bubble-screen-video__scan" />
+          </div>
           <div className="pm-bubble-screen__stack">
+          <div className="pm-bubble-hud-band">
+            <div className="pm-bubble-hero-bg" aria-hidden>
+              <span className="pm-bubble-hero-bg__panel is-p1" aria-hidden />
+              <span className="pm-bubble-hero-bg__panel is-p2" aria-hidden />
+              <span className="pm-bubble-hero-bg__orb is-cyan" />
+              <span className="pm-bubble-hero-bg__orb is-pink" />
+              <span className="pm-bubble-hero-bg__grid" />
+              <span className="pm-bubble-hero-bg__scan" />
+            </div>
+
           <header className="pm-bubble-header" aria-label="Oyuncu bilgileri">
             <article className="pm-bubble-header__side is-p1">
               <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={playing} />
@@ -161,6 +192,7 @@ export function BubbleShooterScreen() {
               </motion.div>
             </motion.div>
           </section>
+          </div>
 
           <motion.div
             className="pm-bubble-duel"
@@ -168,7 +200,8 @@ export function BubbleShooterScreen() {
             animate={{ x: [0, -4, 4, -3, 3, 0] }}
             transition={{ duration: 0.28, ease: 'easeOut' }}
           >
-            <div className="pm-bubble-arena is-p1">
+            <div className={`pm-bubble-arena is-p1 ${playing ? 'is-live' : ''}`}>
+              <span className="pm-bubble-arena__aura" aria-hidden />
               <div className="pm-bubble-arena__city" aria-hidden />
               <BubbleShooterCanvas
                 laneRef={game.lane1RenderRef}
@@ -178,7 +211,8 @@ export function BubbleShooterScreen() {
                 showAimGuide={isPlayerTurn}
               />
             </div>
-            <div className="pm-bubble-arena is-p2">
+            <div className={`pm-bubble-arena is-p2 ${playing ? 'is-live' : ''}`}>
+              <span className="pm-bubble-arena__aura" aria-hidden />
               <div className="pm-bubble-arena__city" aria-hidden />
               <BubbleShooterCanvas
                 laneRef={game.lane2RenderRef}
