@@ -2,7 +2,6 @@ import {
   BLOCK_COLS,
   BLOCK_ROWS,
   hardDropLane,
-  holdPiece,
   previewPiecePlacement,
   type BlockInput,
   type BlockLaneState,
@@ -24,7 +23,7 @@ export function createBlockBot(nowSec: number): BlockBotBrain {
     targetRot: 0,
     targetCol: 4,
     hardDrop: false,
-    thinkAt: nowSec + 0.2,
+    thinkAt: nowSec + 0.1,
     pending: {},
   }
 }
@@ -104,19 +103,11 @@ export function updateBlockBotLane(
   const events: ReturnType<typeof updateBlockLane>['events'] = []
 
   if (nowSec >= bot.thinkAt || !lane.active) {
-    bot.thinkAt = nowSec + 0.08 + Math.random() * 0.06
+    bot.thinkAt = nowSec + 0.045 + Math.random() * 0.035
     const best = findBestPlacement(lane)
     bot.targetRot = best.rot
     bot.targetCol = best.col
     bot.hardDrop = best.hardDrop
-  }
-
-  if (lane.active && lane.canHold && lane.holdKind === null && lane.active.kind === 'O' && stackHeight(lane) > 9) {
-    const held = holdPiece(lane, () => Math.random())
-    events.push(...held.events)
-    if (held.events.includes('hold')) {
-      return { lane: held.lane, events, attackSent: 0 }
-    }
   }
 
   if (

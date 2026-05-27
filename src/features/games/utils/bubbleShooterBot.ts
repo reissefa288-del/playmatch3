@@ -75,6 +75,6 @@ export function smoothBotAim(current: number, target: number, dt: number, qualit
 }
 
 export function botFireDelay(quality: number, rng = Math.random): number {
-  const base = quality > 5 ? 0.65 : quality > 2 ? 0.82 : 1
-  return base + rng() * 0.32
+  const base = quality > 5 ? 0.48 : quality > 2 ? 0.58 : 0.72
+  return base + rng() * 0.22
 }

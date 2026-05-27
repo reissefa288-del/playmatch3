@@ -11,11 +11,35 @@ const MIN_DURATION = 0.5
 
 function waitEvent(el: HTMLVideoElement, name: keyof HTMLMediaElementEventMap): Promise<void> {
   return new Promise((resolve) => {
+    if (name === 'loadedmetadata' && el.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      resolve()
+      return
+    }
+    if (name === 'canplay' && el.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      resolve()
+      return
+    }
     if (name === 'canplaythrough' && el.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
       resolve()
       return
     }
     el.addEventListener(name, () => resolve(), { once: true })
+  })
+}
+
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | null> {
+  return new Promise((resolve) => {
+    const t = window.setTimeout(() => resolve(null), ms)
+    p.then(
+      (v) => {
+        window.clearTimeout(t)
+        resolve(v)
+      },
+      () => {
+        window.clearTimeout(t)
+        resolve(null)
+      },
+    )
   })
 }
 
@@ -140,10 +164,11 @@ export function SeamlessLoopVideo({
       cyclingRef.current = false
       a.pause()
       b.pause()
-      await seekTo(a, 0)
-      await seekTo(b, 0)
+      await withTimeout(Promise.all([seekTo(a, 0), seekTo(b, 0)]), 1500)
 
-      await Promise.all([waitEvent(a, 'canplaythrough'), waitEvent(b, 'canplaythrough')])
+      // `canplaythrough` bazı ortamlarda hiç gelmeyebilir; hızlı başlat.
+      await withTimeout(Promise.all([waitEvent(a, 'loadedmetadata'), waitEvent(b, 'loadedmetadata')]), 2500)
+      await withTimeout(Promise.all([waitEvent(a, 'canplay'), waitEvent(b, 'canplay')]), 3500)
 
       if (disposed) return
 
@@ -157,7 +182,7 @@ export function SeamlessLoopVideo({
       }
 
       b.pause()
-      await seekTo(b, 0)
+      void withTimeout(seekTo(b, 0), 1200)
 
       a.addEventListener('ended', onEnded)
       b.addEventListener('ended', onEnded)

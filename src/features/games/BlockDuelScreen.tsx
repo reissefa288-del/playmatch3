@@ -37,17 +37,15 @@ export function BlockDuelScreen() {
 
   const pressDown = useCallback(() => {
     unlockBlockAudio()
+    game.setHoldDown(true)
     game.pressDown()
   }, [game])
+
+  const releaseDown = useCallback(() => game.setHoldDown(false), [game])
 
   const pressRotate = useCallback(() => {
     unlockBlockAudio()
     game.pressRotate()
-  }, [game])
-
-  const pressHold = useCallback(() => {
-    unlockBlockAudio()
-    game.pressHold()
   }, [game])
 
   const overlayMessage = game.winner
@@ -72,6 +70,7 @@ export function BlockDuelScreen() {
       }
       if (event.key === 'ArrowDown') {
         event.preventDefault()
+        game.setHoldDown(true)
         game.pressDown()
       }
       if (event.key === 'ArrowUp' || event.key === ' ') {
@@ -82,14 +81,11 @@ export function BlockDuelScreen() {
         event.preventDefault()
         game.hardDrop()
       }
-      if (event.key === 'c' || event.key === 'C') {
-        event.preventDefault()
-        game.pressHold()
-      }
     }
     const onKeyUp = (event: KeyboardEvent) => {
       if (event.key === 'ArrowLeft') game.setHoldLeft(false)
       if (event.key === 'ArrowRight') game.setHoldRight(false)
+      if (event.key === 'ArrowDown') game.setHoldDown(false)
     }
     window.addEventListener('keydown', onKeyDown)
     window.addEventListener('keyup', onKeyUp)
@@ -101,10 +97,10 @@ export function BlockDuelScreen() {
     game.running,
     game.setHoldLeft,
     game.setHoldRight,
+    game.setHoldDown,
     game.pressDown,
     game.pressRotate,
     game.hardDrop,
-    game.pressHold,
   ])
 
   return (
@@ -209,7 +205,7 @@ export function BlockDuelScreen() {
               </div>
             </section>
 
-            <section className="pm-block-controls pm-block-controls--5" aria-label="Kontroller">
+            <section className="pm-block-controls" aria-label="Kontroller">
               <button
                 type="button"
                 className="pm-block-controls__btn is-cyan"
@@ -236,6 +232,9 @@ export function BlockDuelScreen() {
                 aria-label="Aşağı"
                 disabled={!game.running}
                 onPointerDown={pressDown}
+                onPointerUp={releaseDown}
+                onPointerLeave={releaseDown}
+                onPointerCancel={releaseDown}
               >
                 <BlockArrowDownIcon />
                 <span>AŞAĞI</span>
@@ -249,16 +248,6 @@ export function BlockDuelScreen() {
               >
                 <BlockRotateIcon />
                 <span>DÖNDÜR</span>
-              </button>
-              <button
-                type="button"
-                className={`pm-block-controls__btn is-hold ${!game.canHold ? 'is-used' : ''}`}
-                aria-label="Beklet"
-                disabled={!game.running || !game.canHold}
-                onPointerDown={pressHold}
-              >
-                <span className="pm-block-controls__hold-icon">⏸</span>
-                <span>HOLD</span>
               </button>
             </section>
 
@@ -286,7 +275,7 @@ export function BlockDuelScreen() {
             </footer>
 
             <p className="pm-block-footer__hint">
-              C · HOLD · ENTER HARD DROP · İLK {game.winRounds} TUR
+              ENTER HARD DROP · İLK {game.winRounds} TUR
             </p>
           </div>
 

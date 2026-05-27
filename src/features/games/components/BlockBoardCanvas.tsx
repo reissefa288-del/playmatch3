@@ -162,10 +162,6 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
         }
       }
 
-      if (lane.holdKind !== undefined) {
-        drawHoldPanel(ctx, w, h, lane.holdKind ?? null, accent, dpr)
-      }
-
       if (lane.nextQueue?.length) {
         drawNextPanel(ctx, w, h, lane.nextQueue, accent, dpr)
       }
@@ -178,64 +174,6 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
   }, [accent, laneRef])
 
   return <canvas ref={canvasRef} className="pm-block-arena__canvas" />
-}
-
-function drawHoldPanel(
-  ctx: CanvasRenderingContext2D,
-  w: number,
-  h: number,
-  kind: PieceKind | null,
-  accent: 'cyan' | 'pink',
-  dpr: number,
-) {
-  const panelW = w * 0.22
-  const panelH = h * 0.16
-  const x = w * 0.02
-  const y = h * 0.03
-  const border = accent === 'cyan' ? 'rgba(34, 212, 255, 0.5)' : 'rgba(255, 58, 120, 0.5)'
-
-  ctx.save()
-  ctx.fillStyle = 'rgba(6, 10, 28, 0.82)'
-  roundRect(ctx, x, y, panelW, panelH, 6 * dpr)
-  ctx.fill()
-  ctx.strokeStyle = border
-  ctx.lineWidth = 1.2 * dpr
-  roundRect(ctx, x, y, panelW, panelH, 6 * dpr)
-  ctx.stroke()
-
-  ctx.fillStyle = 'rgba(200, 220, 255, 0.75)'
-  ctx.font = `${Math.max(7, 7 * dpr)}px Orbitron, sans-serif`
-  ctx.textAlign = 'center'
-  ctx.fillText('HOLD', x + panelW * 0.5, y + 10 * dpr)
-
-  if (!kind) {
-    ctx.strokeStyle = 'rgba(255,255,255,0.12)'
-    ctx.setLineDash([4 * dpr, 4 * dpr])
-    roundRect(ctx, x + panelW * 0.22, y + 16 * dpr, panelW * 0.56, panelH * 0.55, 4 * dpr)
-    ctx.stroke()
-    ctx.setLineDash([])
-    ctx.restore()
-    return
-  }
-
-  const cell = Math.min(panelW, panelH) * 0.16
-  const offsets = getPiecePreviewOffsets(kind)
-  const color = PIECE_COLOR[kind]
-  const ox = x + panelW * 0.5 - cell * 1.5
-  const oy = y + 18 * dpr
-  for (const off of offsets) {
-    drawBlock(
-      ctx,
-      ox + off.col * cell + cell * 0.5,
-      oy + off.row * cell + cell * 0.5,
-      cell * 0.85,
-      color,
-      dpr,
-      false,
-      false,
-    )
-  }
-  ctx.restore()
 }
 
 function drawParticle(
@@ -286,7 +224,7 @@ function drawNextPanel(
   ctx.stroke()
 
   ctx.fillStyle = 'rgba(200, 220, 255, 0.75)'
-  ctx.font = `${Math.max(7, 7 * dpr)}px Orbitron, sans-serif`
+  ctx.font = `600 ${Math.max(7, 7 * dpr)}px Inter, system-ui, sans-serif`
   ctx.textAlign = 'center'
   ctx.fillText('NEXT', x + panelW * 0.5, y + 10 * dpr)
 

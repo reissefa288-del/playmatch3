@@ -10,6 +10,20 @@
   background: #030610;
 }
 
+.pm-duel-ambient__video {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.62;
+  filter: saturate(1.12) contrast(1.06) brightness(1.03);
+}
+
+.pm-duel-ambient__video .pm-seamless-loop-video__el {
+  object-fit: cover;
+  object-position: 50% 70%;
+}
+
 .pm-duel-ambient__base {
   position: absolute;
   inset: -28%;

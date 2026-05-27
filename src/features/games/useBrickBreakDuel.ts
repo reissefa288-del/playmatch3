@@ -26,19 +26,31 @@ export function useBrickBreakDuel() {
   const [p1Dir, setP1Dir] = useState<-1 | 0 | 1>(0)
   const [running, setRunning] = useState(true)
   const [winner, setWinner] = useState<'p1' | 'p2' | 'draw' | null>(null)
+
   const endedRef = useRef(false)
+  const runningRef = useRef(true)
   const waveSeedRef = useRef(3)
+  const waveLockRef = useRef(false)
+  const syncUiTickRef = useRef(0)
+  const p1DirRef = useRef(p1Dir)
 
   const lane1Ref = useRef(lane1)
   const lane2Ref = useRef(lane2)
-  const p1DirRef = useRef(p1Dir)
+  const lane1RenderRef = useRef(lane1)
+  const lane2RenderRef = useRef(lane2)
   const timeLeftRef = useRef(timeLeft)
   const roundRef = useRef(round)
-  lane1Ref.current = lane1
-  lane2Ref.current = lane2
+
+  if (!running) {
+    lane1Ref.current = lane1
+    lane2Ref.current = lane2
+    lane1RenderRef.current = lane1
+    lane2RenderRef.current = lane2
+  }
   p1DirRef.current = p1Dir
   timeLeftRef.current = timeLeft
   roundRef.current = round
+  runningRef.current = running
 
   const persistBest = useCallback((lane: 'p1' | 'p2', score: number) => {
     if (lane === 'p1') {
@@ -74,23 +86,31 @@ export function useBrickBreakDuel() {
     }
   }, [])
 
-  const waveLockRef = useRef(false)
-
   const nextWave = useCallback((refillP1: boolean, refillP2: boolean) => {
     if (refillP1) {
       waveSeedRef.current += 1
-      setLane1((current) => refillLaneBricks(current, waveSeedRef.current * 2 + 1))
+      const next = refillLaneBricks(lane1Ref.current, waveSeedRef.current * 2 + 1)
+      lane1Ref.current = next
+      lane1RenderRef.current = next
+      setLane1(next)
     }
     if (refillP2) {
       waveSeedRef.current += 1
-      setLane2((current) => refillLaneBricks(current, waveSeedRef.current * 2 + 2))
+      const next = refillLaneBricks(lane2Ref.current, waveSeedRef.current * 2 + 2)
+      lane2Ref.current = next
+      lane2RenderRef.current = next
+      setLane2(next)
     }
-    if (refillP1 || refillP2) setRound((current) => current + 1)
+    if (refillP1 || refillP2) {
+      roundRef.current += 1
+      setRound(roundRef.current)
+    }
   }, [])
 
   const endMatch = useCallback(() => {
     if (endedRef.current) return
     endedRef.current = true
+    runningRef.current = false
     const result =
       lane1Ref.current.lives <= 0 ? 'p2' : getMatchWinner(lane1Ref.current, lane2Ref.current)
     setWinner(result)
@@ -100,81 +120,117 @@ export function useBrickBreakDuel() {
     playBrickBreakSound('win')
   }, [persistBest])
 
+  const syncHud = useCallback((l1: LaneState, l2: LaneState, timeDisplay: number) => {
+    setLane1(l1)
+    setLane2(l2)
+    setTimeLeft(Math.ceil(timeDisplay))
+  }, [])
+
   useEffect(() => {
     if (!running) return
     let last = performance.now()
     let raf = 0
 
     const tick = (now: number) => {
+      if (!runningRef.current || endedRef.current) return
+
       const dt = Math.min((now - last) / 1000, 0.032)
       last = now
       const speedMult = getSpeedMult()
 
-      setLane1((current) => {
-        const { lane: next, events } = updateLane(current, p1DirRef.current, dt, speedMult)
-        playEvents(events)
-        if (next.lives <= 0 && current.lives > 0) {
-          window.setTimeout(() => endMatch(), 500)
-        }
-        return next
-      })
+      const prevLives1 = lane1Ref.current.lives
+      const prevScore1 = lane1Ref.current.score
+      const prevScore2 = lane2Ref.current.score
 
-      setLane2((current) => {
-        const target = botPaddleTarget(current)
-        const delta = target - current.paddleX
-        const botDir: -1 | 0 | 1 = Math.abs(delta) < 0.006 ? 0 : delta > 0 ? 1 : -1
-        const { lane: next, events } = updateLane(current, botDir, dt, speedMult)
-        playEvents(events)
-        return next
-      })
+      const r1 = updateLane(lane1Ref.current, p1DirRef.current, dt, speedMult)
+      playEvents(r1.events)
+      lane1Ref.current = r1.lane
+      lane1RenderRef.current = r1.lane
+
+      if (r1.lane.lives <= 0) {
+        endMatch()
+      }
+
+      const target = botPaddleTarget(lane2Ref.current)
+      const delta = target - lane2Ref.current.paddleX
+      const botDir: -1 | 0 | 1 = Math.abs(delta) < 0.006 ? 0 : delta > 0 ? 1 : -1
+      const r2 = updateLane(lane2Ref.current, botDir, dt, speedMult)
+      playEvents(r2.events)
+      lane2Ref.current = r2.lane
+      lane2RenderRef.current = r2.lane
+
+      syncUiTickRef.current += 1
+      const forceUi =
+        r1.events.length > 0 ||
+        r2.events.length > 0 ||
+        r1.lane.lives !== prevLives1 ||
+        r1.lane.score !== prevScore1 ||
+        r2.lane.score !== prevScore2
+      if (forceUi || syncUiTickRef.current % 4 === 0) {
+        syncHud(r1.lane, r2.lane, timeLeftRef.current)
+      }
+
+      if (!waveLockRef.current) {
+        const refillP1 = bricksRemaining(lane1Ref.current.bricks) === 0
+        const refillP2 = bricksRemaining(lane2Ref.current.bricks) === 0
+        if (refillP1 || refillP2) {
+          waveLockRef.current = true
+          window.setTimeout(() => {
+            nextWave(refillP1, refillP2)
+            waveLockRef.current = false
+          }, 350)
+        }
+      }
 
       raf = requestAnimationFrame(tick)
     }
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [endMatch, getSpeedMult, playEvents, running])
+  }, [endMatch, getSpeedMult, nextWave, playEvents, running, syncHud])
 
   useEffect(() => {
     if (!running) return
     const timer = window.setInterval(() => {
-      setTimeLeft((current) => {
-        if (current <= 1) {
-          endMatch()
-          return 0
-        }
-        return current - 1
-      })
+      timeLeftRef.current = Math.max(0, timeLeftRef.current - 1)
+      if (timeLeftRef.current <= 0) {
+        endMatch()
+        return
+      }
+      setTimeLeft(timeLeftRef.current)
     }, 1000)
     return () => window.clearInterval(timer)
   }, [endMatch, running])
 
-  useEffect(() => {
-    if (!running || waveLockRef.current) return
-    const refillP1 = bricksRemaining(lane1.bricks) === 0
-    const refillP2 = bricksRemaining(lane2.bricks) === 0
-    if (!refillP1 && !refillP2) return
-
-    waveLockRef.current = true
-    window.setTimeout(() => {
-      nextWave(refillP1, refillP2)
-      waveLockRef.current = false
-    }, 350)
-  }, [lane1.bricks, lane2.bricks, nextWave, running])
-
   const setPlayerDirection = useCallback((dir: -1 | 0 | 1) => {
     unlockBrickBreakAudio()
     if (lane1Ref.current.lives <= 0) return
+    p1DirRef.current = dir
     setP1Dir(dir)
   }, [])
 
   const restart = useCallback(() => {
     endedRef.current = false
+    runningRef.current = true
     waveSeedRef.current = 3
-    setLane1(createLane(11))
-    setLane2(createLane(12))
+    waveLockRef.current = false
+    syncUiTickRef.current = 0
+    p1DirRef.current = 0
+    timeLeftRef.current = MATCH_SECONDS
+    roundRef.current = 1
+
+    const l1 = createLane(11)
+    const l2 = createLane(12)
+    lane1Ref.current = l1
+    lane2Ref.current = l2
+    lane1RenderRef.current = l1
+    lane2RenderRef.current = l2
+
+    setLane1(l1)
+    setLane2(l2)
     setTimeLeft(MATCH_SECONDS)
     setRound(1)
+    setP1Dir(0)
     setWinner(null)
     setRunning(true)
   }, [])
@@ -191,6 +247,8 @@ export function useBrickBreakDuel() {
   return {
     lane1,
     lane2,
+    lane1RenderRef,
+    lane2RenderRef,
     best1,
     best2,
     formatTime,

@@ -1,5 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&display=swap');
 
+.pm-app-shell--brick.pm-app-shell--game-play {
+  height: 100svh;
+  max-height: 100svh;
+}
+
+@supports not (height: 100svh) {
+  .pm-app-shell--brick.pm-app-shell--game-play {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+
 .pm-brick-screen {
   --brick-cyan: #00e8ff;
   --brick-pink: #ff2d9a;
@@ -10,19 +22,27 @@
   min-height: 0;
   height: 100%;
   width: 100%;
-  display: grid;
-  grid-template-rows:
-    minmax(54px, 8.5dvh)
-    minmax(118px, 16dvh)
-    minmax(0, 1fr)
-    minmax(72px, 11dvh);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   padding:
-    max(8px, env(safe-area-inset-top))
+    max(6px, env(safe-area-inset-top))
     var(--brick-pad)
-    max(12px, env(safe-area-inset-bottom));
+    max(8px, env(safe-area-inset-bottom));
   overflow: hidden;
   font-family: Orbitron, Inter, system-ui, sans-serif;
   color: #f5f9ff;
+}
+
+.pm-brick-screen__stack {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
 }
 
 .pm-brick-back {
@@ -46,7 +66,7 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  padding-top: 22px;
+  padding-top: 12px;
 }
 
 .pm-brick-header__title {
@@ -59,7 +79,7 @@
 }
 
 .pm-brick-header__title .is-cyan {
-  font-size: clamp(1rem, 4.6vw, 1.3rem);
+  font-size: clamp(0.82rem, 3.8vw, 1.05rem);
   font-weight: 900;
   letter-spacing: 0.16em;
   color: var(--brick-cyan);
@@ -69,7 +89,7 @@
 }
 
 .pm-brick-header__title .is-pink {
-  font-size: clamp(1.15rem, 5.2vw, 1.5rem);
+  font-size: clamp(0.92rem, 4.2vw, 1.15rem);
   font-weight: 900;
   letter-spacing: 0.22em;
   color: var(--brick-pink);
@@ -89,40 +109,52 @@
     0 0 10px rgba(255, 45, 154, 0.35);
 }
 
-/* —— HUD: XOX tarzı profil + skor —— */
+/* —— HUD: bubble ile aynı profil boyutu + Inter tipografi —— */
+.pm-app-shell--brick .pm-game-portrait.is-active {
+  animation: none;
+}
+
+.pm-brick-header,
+.pm-brick-hud,
+.pm-brick-controls {
+  flex-shrink: 0;
+}
+
 .pm-brick-hud {
   position: relative;
   z-index: 2;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  gap: 8px;
-  align-items: start;
-  padding: 0 2px;
+  gap: 6px;
+  align-items: center;
+  padding: 0 2px 2px;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
 .pm-brick-hud__side {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
 }
 
 .pm-brick-hud__label {
   margin: 0;
-  font-size: 0.52rem;
-  letter-spacing: 0.1em;
-  font-weight: 700;
+  font-size: clamp(0.46rem, 2.8vw, 0.54rem);
+  letter-spacing: 0.02em;
+  font-weight: 800;
+  font-family: inherit;
 }
 
 .pm-brick-hud__side.is-p1 .pm-brick-hud__label {
-  color: rgba(160, 240, 255, 0.95);
-  text-shadow: 0 0 8px rgba(0, 232, 255, 0.55);
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 6px rgba(0, 60, 120, 0.55);
 }
 
 .pm-brick-hud__side.is-p2 .pm-brick-hud__label {
-  color: rgba(255, 190, 230, 0.95);
-  text-shadow: 0 0 8px rgba(255, 45, 154, 0.55);
+  color: rgba(255, 255, 255, 0.98);
+  text-shadow: 0 1px 6px rgba(120, 10, 60, 0.55);
 }
 
 .pm-brick-lives {
@@ -166,8 +198,11 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
-  padding: 0 8px;
-  background: rgba(2, 4, 12, 0.9);
+  padding: 0 10px;
+  background: #000;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .pm-brick-score-pill.is-cyan {
@@ -181,29 +216,29 @@
 }
 
 .pm-brick-score-pill__tag {
-  font-size: 0.42rem;
-  letter-spacing: 0.08em;
-  color: rgba(210, 220, 255, 0.8);
+  font-size: clamp(0.5rem, 3vw, 0.62rem);
+  letter-spacing: 0.02em;
+  font-weight: 800;
+  color: rgba(210, 222, 255, 0.92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .pm-brick-score-pill strong {
   text-align: right;
-  font-size: 0.72rem;
-  font-weight: 900;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.06em;
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.35);
+  font-size: clamp(0.7rem, 3.8vw, 0.9rem);
+  font-weight: 800;
+  font-variant-numeric: lining-nums;
+  letter-spacing: 0;
+  color: rgba(240, 246, 255, 0.98);
+  line-height: 1.15;
 }
 
-.pm-brick-hud__best {
-  margin: 0;
-  font-size: 0.4rem;
-  letter-spacing: 0.04em;
-  color: var(--brick-gold);
-  display: flex;
-  align-items: center;
-  gap: 3px;
+.pm-brick-score-pill.is-cyan strong {
+  color: var(--brick-cyan);
+}
+
+.pm-brick-score-pill.is-pink strong {
+  color: var(--brick-pink);
 }
 
 .pm-brick-center {
@@ -212,52 +247,67 @@
   gap: 5px;
   align-items: center;
   align-self: center;
-  padding-top: 18px;
+  min-width: 68px;
+  font-family: inherit;
 }
 
 .pm-brick-center__block {
-  min-width: 68px;
+  width: 100%;
   text-align: center;
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: 1px solid rgba(180, 200, 255, 0.3);
-  background: rgba(6, 10, 28, 0.82);
-  box-shadow: 0 0 12px rgba(120, 150, 255, 0.12);
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(160, 200, 255, 0.28);
+  background: #000;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .pm-brick-center__label {
   display: block;
-  font-size: 0.4rem;
-  letter-spacing: 0.14em;
-  color: rgba(200, 214, 255, 0.7);
+  margin-bottom: 3px;
+  font-size: clamp(0.5rem, 3vw, 0.62rem);
+  letter-spacing: 0.02em;
+  font-weight: 800;
+  color: rgba(210, 222, 255, 0.92);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .pm-brick-center__block strong {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
+  display: block;
+  font-size: clamp(0.7rem, 3.8vw, 0.9rem);
+  letter-spacing: 0;
+  font-weight: 800;
+  font-variant-numeric: lining-nums;
+  color: rgba(240, 246, 255, 0.98);
+  line-height: 1.15;
 }
 
 .pm-brick-center__speed {
-  font-size: 0.42rem;
-  letter-spacing: 0.1em;
+  text-align: center;
+  font-size: clamp(0.46rem, 2.6vw, 0.54rem);
+  letter-spacing: 0.02em;
   font-weight: 800;
   color: var(--brick-gold);
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 999px;
   border: 1px solid rgba(255, 215, 106, 0.35);
   background: rgba(255, 215, 106, 0.08);
   text-shadow: 0 0 8px rgba(255, 215, 106, 0.45);
 }
 
-/* —— Dual arenas —— */
+/* —— Dual arenas (flex ile kalan yükseklik; absolute canvas için min-height şart) —— */
 .pm-brick-duel {
   position: relative;
-  z-index: 2;
+  flex: 1 1 0;
+  min-height: 52dvh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  min-height: 0;
-  padding: 6px 0;
+  grid-template-rows: minmax(0, 1fr);
+  gap: 8px;
+  align-items: stretch;
+  padding: 2px 0 4px;
+  overflow: hidden;
 }
 
 .pm-brick-duel::before {
@@ -279,9 +329,13 @@
   position: relative;
   min-height: 0;
   height: 100%;
+  min-width: 0;
   border-radius: 14px;
   overflow: hidden;
   border: 2px solid transparent;
+  background: rgba(4, 8, 18, 0.92);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.42);
+  isolation: isolate;
 }
 
 .pm-brick-arena.is-p1 {
@@ -343,39 +397,6 @@
   animation: pm-brick-shine-sweep 5s ease-in-out infinite;
 }
 
-.pm-brick-arena__corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 2px solid currentColor;
-  z-index: 3;
-  pointer-events: none;
-}
-
-.pm-brick-arena.is-p1 .pm-brick-arena__corner {
-  color: rgba(0, 232, 255, 0.85);
-  filter: drop-shadow(0 0 8px rgba(0, 232, 255, 0.75));
-}
-
-.pm-brick-arena.is-p2 .pm-brick-arena__corner {
-  color: rgba(255, 45, 154, 0.85);
-  filter: drop-shadow(0 0 8px rgba(255, 45, 154, 0.75));
-}
-
-.pm-brick-arena__corner--tl {
-  top: 4px;
-  left: 4px;
-  border-right: none;
-  border-bottom: none;
-}
-
-.pm-brick-arena__corner--br {
-  bottom: 4px;
-  right: 4px;
-  border-left: none;
-  border-top: none;
-}
-
 .pm-brick-arena__canvas {
   position: absolute;
   inset: 0;
@@ -392,18 +413,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: clamp(28px, 12vw, 48px);
-  padding-top: 10px;
+  gap: clamp(24px, 10vw, 40px);
+  padding: 4px 0 2px;
 }
 
 .pm-brick-controls__btn {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   border: 2px solid rgba(0, 232, 255, 0.65);
   background: linear-gradient(180deg, rgba(12, 24, 48, 0.95), rgba(6, 12, 28, 0.95));
   color: var(--brick-cyan);
-  font-size: 1.65rem;
+  font-size: 1.45rem;
   display: grid;
   place-items: center;
   box-shadow:
@@ -460,8 +481,13 @@
 }
 
 @media (max-width: 360px) {
+  .pm-brick-duel {
+    min-height: 48dvh;
+  }
+
   .pm-brick-score-pill {
     min-height: 30px;
+    width: min(100%, 118px);
   }
 }
 

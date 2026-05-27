@@ -1,6 +1,6 @@
 export const BRICK_COLS = 7
 export const BRICK_ROWS = 6
-export const PADDLE_WIDTH = 0.26
+export const PADDLE_WIDTH = 0.34
 export const PADDLE_HEIGHT = 0.028
 export const BALL_RADIUS = 0.022
 export const PADDLE_Y = 0.905

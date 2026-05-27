@@ -1,7 +1,8 @@
-type BubbleSoundId = 'shoot' | 'pop' | 'swap' | 'overflow' | 'point' | 'round' | 'win' | 'lose'
+export type BubbleSoundId = 'shoot' | 'pop' | 'swap' | 'overflow' | 'point' | 'round' | 'win' | 'lose'
 
 let audioCtx: AudioContext | null = null
 let unlocked = false
+let lastAt = 0
 
 function getCtx(): AudioContext | null {
   if (typeof window === 'undefined') return null
@@ -17,73 +18,46 @@ function getCtx(): AudioContext | null {
 
 export function unlockBubbleAudio() {
   const ctx = getCtx()
-  if (!ctx || unlocked) return
+  if (!ctx) return
   unlocked = true
   if (ctx.state === 'suspended') void ctx.resume()
 }
 
-function tone(freq: number, duration: number, type: OscillatorType, gain: number, slideTo?: number, delay = 0) {
+function playTone() {
   const ctx = getCtx()
   if (!ctx || !unlocked) return
-  const start = ctx.currentTime + delay
+  if (ctx.state === 'suspended') {
+    void ctx.resume().then(() => playTone())
+    return
+  }
+
+  const start = ctx.currentTime
   const osc = ctx.createOscillator()
   const amp = ctx.createGain()
-  osc.type = type
+  const freq = 520 + Math.random() * 60
+  osc.type = 'sine'
   osc.frequency.setValueAtTime(freq, start)
-  if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, start + duration)
-  amp.gain.setValueAtTime(gain, start)
-  amp.gain.exponentialRampToValueAtTime(0.001, start + duration)
+  osc.frequency.exponentialRampToValueAtTime(280, start + 0.06)
+  amp.gain.setValueAtTime(0.09, start)
+  amp.gain.exponentialRampToValueAtTime(0.001, start + 0.07)
   osc.connect(amp)
   amp.connect(ctx.destination)
   osc.start(start)
-  osc.stop(start + duration + 0.02)
+  osc.stop(start + 0.08)
 }
 
-const lastPlayed: Partial<Record<BubbleSoundId, number>> = {}
-const MIN_GAP: Record<BubbleSoundId, number> = {
-  shoot: 120,
-  pop: 45,
-  swap: 180,
-  overflow: 500,
-  point: 350,
-  round: 400,
-  win: 900,
-  lose: 900,
-}
-
-export function playBubbleSound(id: BubbleSoundId) {
+/** Tüm oyun olayları için tek kısa “pop” sesi (önceki Web Audio tonu) */
+export function playBubbleSound(_id?: BubbleSoundId) {
   const now = performance.now()
-  if (lastPlayed[id] && now - lastPlayed[id]! < MIN_GAP[id]) return
-  lastPlayed[id] = now
+  if (now - lastAt < 38) return
+  lastAt = now
+  playTone()
+}
 
-  switch (id) {
-    case 'shoot':
-      tone(380, 0.07, 'triangle', 0.055, 620)
-      break
-    case 'pop':
-      tone(520 + Math.random() * 60, 0.06, 'sine', 0.05, 280)
-      break
-    case 'swap':
-      tone(440, 0.06, 'sine', 0.04, 660)
-      break
-    case 'overflow':
-      tone(220, 0.2, 'sawtooth', 0.055, 110)
-      break
-    case 'round':
-      tone(523, 0.08, 'triangle', 0.055)
-      tone(784, 0.12, 'triangle', 0.05, undefined, 0.1)
-      break
-    case 'point':
-      tone(660, 0.1, 'triangle', 0.05, 990)
-      break
-    case 'win':
-      tone(523, 0.1, 'sine', 0.06)
-      tone(784, 0.14, 'sine', 0.05, undefined, 0.12)
-      break
-    case 'lose':
-      tone(330, 0.16, 'sawtooth', 0.045, 180)
-      break
-    default:
-      break
-  }
+export function playBubbleSoundOnGesture(_id?: BubbleSoundId) {
+  unlockBubbleAudio()
+  const now = performance.now()
+  if (now - lastAt < 38) return
+  lastAt = now
+  playTone()
 }

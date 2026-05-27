@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
-import { FiArrowLeft, FiChevronLeft, FiChevronRight, FiAward } from 'react-icons/fi'
+import { FiArrowLeft, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
@@ -67,6 +67,7 @@ export function BrickBreakScreen() {
       <div className="pm-artboard">
         <motion.div
           className="pm-brick-screen"
+          style={{ height: '100%', minHeight: 0 }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.32 }}
@@ -77,6 +78,7 @@ export function BrickBreakScreen() {
             <FiArrowLeft />
           </button>
 
+          <div className="pm-brick-screen__stack">
           <header className="pm-brick-header">
             <h1 className="pm-brick-header__title">
               <span className="is-cyan">BRICK BREAK</span>
@@ -93,10 +95,6 @@ export function BrickBreakScreen() {
                 <span className="pm-brick-score-pill__tag">SKOR</span>
                 <strong>{score1}</strong>
               </div>
-              <p className="pm-brick-hud__best">
-                <FiAward aria-hidden />
-                EN İYİ: {Math.max(game.best1, game.lane1.score)}
-              </p>
             </article>
 
             <div className="pm-brick-center">
@@ -123,10 +121,6 @@ export function BrickBreakScreen() {
                 <span className="pm-brick-score-pill__tag">SKOR</span>
                 <strong>{score2}</strong>
               </div>
-              <p className="pm-brick-hud__best">
-                <FiAward aria-hidden />
-                EN İYİ: {Math.max(game.best2, game.lane2.score)}
-              </p>
             </article>
           </section>
 
@@ -134,16 +128,12 @@ export function BrickBreakScreen() {
             <div className="pm-brick-arena is-p1">
               <div className="pm-brick-arena__city" aria-hidden />
               <div className="pm-brick-arena__shine" aria-hidden />
-              <span className="pm-brick-arena__corner pm-brick-arena__corner--tl" aria-hidden />
-              <span className="pm-brick-arena__corner pm-brick-arena__corner--br" aria-hidden />
-              <BrickBreakCanvas lane={game.lane1} accent="cyan" />
+              <BrickBreakCanvas laneRef={game.lane1RenderRef} accent="cyan" active={game.running} />
             </div>
             <div className="pm-brick-arena is-p2">
               <div className="pm-brick-arena__city" aria-hidden />
               <div className="pm-brick-arena__shine" aria-hidden />
-              <span className="pm-brick-arena__corner pm-brick-arena__corner--tl" aria-hidden />
-              <span className="pm-brick-arena__corner pm-brick-arena__corner--br" aria-hidden />
-              <BrickBreakCanvas lane={game.lane2} accent="pink" />
+              <BrickBreakCanvas laneRef={game.lane2RenderRef} accent="pink" active={game.running} />
             </div>
           </div>
 
@@ -171,6 +161,7 @@ export function BrickBreakScreen() {
               <FiChevronRight />
             </button>
           </footer>
+          </div>
 
           {!game.running && overlayMessage ? (
             <div className="pm-brick-overlay">

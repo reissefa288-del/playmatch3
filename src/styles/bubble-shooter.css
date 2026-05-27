@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&display=swap');
 
+/* Sabit oyun çerçevesi — dvh/animasyon kaynaklı zıplamayı önler */
+.pm-app-shell--bubble.pm-app-shell--game-play {
+  height: 100svh;
+  max-height: 100svh;
+}
+
+@supports not (height: 100svh) {
+  .pm-app-shell--bubble.pm-app-shell--game-play {
+    height: 100vh;
+    max-height: 100vh;
+  }
+}
+
 .pm-bubble-screen {
   --bubble-cyan: #22c8ff;
   --bubble-cyan-dim: #0a8cb8;
@@ -10,12 +23,12 @@
   --bubble-glass: rgba(10, 16, 42, 0.38);
   --bubble-glass-border: rgba(160, 200, 255, 0.28);
   --bubble-pad: var(--pm-game-pad, 14px);
-  /* video.mp4 — sol mavi / sağ pembe kadraj */
+  /* video.mp4 — sol mavi / sağ pembe kadraj (hafif, doygunluk kontrollü) */
   --bubble-video-blue-x: 34%;
   --bubble-video-blue-y: 76%;
   --bubble-video-pink-x: 72%;
   --bubble-video-pink-y: 76%;
-  --bubble-video-scale: 1.34;
+  --bubble-video-scale: 1.28;
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
@@ -101,7 +114,7 @@
 }
 
 .pm-bubble-screen-video__crop .pm-seamless-loop-video__el {
-  filter: saturate(1.15) contrast(1.06) brightness(1.02);
+  filter: saturate(1.02) contrast(1.04) brightness(0.94);
 }
 
 .pm-bubble-screen-video__panel {
@@ -115,73 +128,24 @@
 
 .pm-bubble-screen-video__panel.is-p1 {
   left: 0;
-  background: linear-gradient(100deg, rgba(0, 118, 210, 0.12), transparent 72%);
+  background: linear-gradient(100deg, rgba(0, 118, 210, 0.05), transparent 78%);
 }
 
 .pm-bubble-screen-video__panel.is-p2 {
   right: 0;
-  background: linear-gradient(260deg, rgba(220, 30, 110, 0.12), transparent 72%);
+  background: linear-gradient(260deg, rgba(220, 30, 110, 0.05), transparent 78%);
 }
 
-.pm-bubble-screen-video__orb,
-.pm-bubble-screen-video__grid,
-.pm-bubble-screen-video__scan {
+.pm-bubble-screen-video__grade {
   grid-column: 1 / -1;
-}
-
-.pm-bubble-screen-video__orb {
-  position: absolute;
-  z-index: 2;
-  border-radius: 999px;
-  filter: blur(28px);
-  mix-blend-mode: screen;
-  animation: pm-bubble-coded-orb 9s ease-in-out infinite;
-}
-
-.pm-bubble-screen-video__orb.is-cyan {
-  left: -10%;
-  top: 8%;
-  width: 55%;
-  height: 42%;
-  background: rgba(80, 220, 255, 0.2);
-}
-
-.pm-bubble-screen-video__orb.is-pink {
-  right: -10%;
-  top: 38%;
-  width: 55%;
-  height: 42%;
-  background: rgba(255, 90, 160, 0.18);
-  animation-delay: -3.5s;
-}
-
-.pm-bubble-screen-video__grid {
   position: absolute;
   inset: 0;
   z-index: 3;
   pointer-events: none;
   background:
-    linear-gradient(90deg, transparent 0 47%, rgba(255, 213, 74, 0.14) 50%, transparent 53%),
-    repeating-linear-gradient(90deg, transparent 0 31px, rgba(34, 200, 255, 0.08) 32px, transparent 33px),
-    repeating-linear-gradient(180deg, transparent 0 18px, rgba(255, 58, 120, 0.06) 19px, transparent 20px);
-  opacity: 0.26;
-  transform: perspective(280px) rotateX(58deg) translateY(18px);
-  transform-origin: 50% 100%;
-  animation: pm-bubble-coded-grid 11s linear infinite;
-}
-
-.pm-bubble-screen-video__scan {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent 34%, black 42%, black 100%);
-  background:
-    repeating-linear-gradient(180deg, transparent 0 8px, rgba(255, 255, 255, 0.05) 9px, transparent 10px),
-    linear-gradient(110deg, transparent 0%, rgba(255, 255, 255, 0.1) 44%, transparent 62%);
-  opacity: 0.22;
-  mix-blend-mode: screen;
-  animation: pm-bubble-coded-scan 7.5s ease-in-out infinite;
+    radial-gradient(ellipse 88% 72% at 50% 42%, rgba(6, 10, 24, 0.5) 0%, transparent 58%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.38) 0%, transparent 22%, transparent 78%, rgba(0, 0, 0, 0.42) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0%, transparent 18%, transparent 82%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 /* Eski tam ekran tint — video ile değiştirildi */
@@ -536,22 +500,25 @@
   z-index: 2;
   flex: 1 1 auto;
   min-height: 0;
-  display: grid;
-  grid-template-rows:
-    minmax(0, auto)
-    minmax(0, 1fr)
-    minmax(78px, auto);
+  display: flex;
+  flex-direction: column;
   gap: 3px;
+  overflow: hidden;
 }
 
 /* Header + istatistik — özel video katmanı (korunur) */
 .pm-bubble-hud-band {
   position: relative;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 3px;
   overflow: hidden;
   isolation: isolate;
+}
+
+.pm-app-shell--bubble .pm-game-portrait.is-active {
+  animation: none;
 }
 
 .pm-bubble-hud-band .pm-bubble-hero-bg {
@@ -676,25 +643,6 @@
   animation: pm-bubble-coded-scan 7.5s ease-in-out infinite;
 }
 
-.pm-bubble-screen-video__grid,
-.pm-bubble-screen-video__scan {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  grid-column: 1 / -1;
-  pointer-events: none;
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent 34%, black 42%, black 100%);
-}
-
-.pm-bubble-screen-video__orb.is-cyan {
-  top: 42%;
-  height: 38%;
-}
-
-.pm-bubble-screen-video__orb.is-pink {
-  top: 58%;
-}
-
 .pm-bubble-hud-band .pm-bubble-header,
 .pm-bubble-hud-band .pm-bubble-stats {
   position: relative;
@@ -805,34 +753,62 @@
   background: radial-gradient(ellipse 85% 75% at 50% 48%, transparent 42%, rgba(2, 4, 12, 0.55) 100%);
 }
 
-/* ── Back (footer, sol alt) ── */
+/* ── Geri (kontrol düğmeleriyle aynı neon kare stili) ── */
 .pm-bubble-back {
+  --bc-back-size: clamp(42px, 11.5vw, 52px);
+  position: relative;
+  z-index: 2;
+  width: var(--bc-back-size);
+  height: var(--bc-back-size);
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #e8f6ff;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
   flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
-  border: 1px solid rgba(34, 200, 255, 0.42);
-  background:
-    linear-gradient(165deg, rgba(48, 88, 140, 0.5) 0%, rgba(28, 52, 96, 0.58) 55%, rgba(18, 36, 72, 0.65) 100%);
-  color: rgba(180, 230, 255, 0.95);
-  display: grid;
-  place-items: center;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.16),
-    0 0 16px rgba(34, 200, 255, 0.14);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  transition:
-    transform 0.18s cubic-bezier(0.34, 1.4, 0.64, 1),
-    box-shadow 0.22s ease,
-    border-color 0.22s ease;
 }
 
-.pm-bubble-back:active {
-  transform: scale(0.92);
+.pm-bubble-back__bezel {
+  position: absolute;
+  inset: 0;
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.55));
   box-shadow:
-    inset 0 2px 8px rgba(0, 0, 0, 0.45),
-    0 0 22px rgba(34, 200, 255, 0.28);
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.45),
+    0 0 14px rgba(62, 196, 255, 0.35);
+  pointer-events: none;
+}
+
+.pm-bubble-back__face {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  margin: 3px auto 0;
+  border-radius: 9px;
+  background: linear-gradient(165deg, #2a3344 0%, #141a24 42%, #080a10 100%);
+  border: 1px solid rgba(78, 210, 255, 0.55);
+  box-shadow:
+    inset 0 2px 4px rgba(255, 255, 255, 0.08),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.pm-bubble-back svg {
+  display: block;
+  width: 46%;
+  height: auto;
+  shape-rendering: geometricPrecision;
+}
+
+.pm-bubble-back:active .pm-bubble-back__face {
+  transform: scale(0.94) translateY(1px);
+  filter: brightness(1.15);
 }
 
 /* ── Header (portraits flanking title) ── */
@@ -1113,7 +1089,7 @@
   gap: 6px;
   align-items: stretch;
   padding: 0 2px;
-  min-height: 0;
+  min-height: 58px;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -1214,6 +1190,24 @@
     inset 0 -2px 4px rgba(0, 0, 0, 0.25);
 }
 
+.pm-bubble-next.is-fire .pm-bubble-next__orb,
+.pm-bubble-next.is-bomb .pm-bubble-next__orb,
+.pm-bubble-next.is-rainbow .pm-bubble-next__orb {
+  box-shadow:
+    0 0 12px var(--orb-special-glow, var(--orb-core)),
+    0 0 4px var(--orb-special, #fff),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.25);
+}
+
+.pm-bubble-next__tag {
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--orb-special, #fff);
+  text-shadow: 0 0 6px var(--orb-special-glow, transparent);
+  line-height: 1;
+}
+
 /* ── Duel arenas ── */
 .pm-bubble-duel {
   position: relative;
@@ -1221,9 +1215,13 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+  flex: 1 1 0;
   min-height: 0;
-  height: 100%;
+  height: auto;
+  max-height: none;
   padding: 4px 0;
+  overflow: hidden;
+  contain: layout style paint;
 }
 
 .pm-bubble-duel::before {
@@ -1259,7 +1257,6 @@
     0 0 10px rgba(34, 200, 255, 0.4),
     0 0 22px rgba(34, 200, 255, 0.18),
     0 8px 22px rgba(0, 0, 0, 0.42);
-  animation: pm-bubble-aura-glow 5s ease-in-out infinite;
 }
 
 .pm-bubble-arena.is-p2 {
@@ -1270,12 +1267,6 @@
     0 0 10px rgba(255, 58, 120, 0.38),
     0 0 22px rgba(255, 58, 120, 0.16),
     0 8px 22px rgba(0, 0, 0, 0.42);
-  animation: pm-bubble-aura-glow 5s ease-in-out infinite;
-}
-
-.pm-bubble-arena.is-live.is-p1,
-.pm-bubble-arena.is-live.is-p2 {
-  animation: pm-bubble-aura-glow 4s ease-in-out infinite;
 }
 
 /* Mavi / pembe aura — arkada yumuşak canlı parıltı */
@@ -1289,41 +1280,11 @@
     radial-gradient(ellipse 72% 58% at 50% 42%, var(--aura-color, rgba(34, 200, 255, 0.5)), transparent 72%),
     radial-gradient(ellipse 90% 70% at 50% 55%, var(--aura-soft, rgba(34, 200, 255, 0.25)), transparent 78%);
   filter: blur(16px);
-  opacity: 0.75;
-  animation: pm-bubble-aura-breathe 5.5s ease-in-out infinite;
+  opacity: 0.62;
 }
 
 .pm-bubble-arena.is-live .pm-bubble-arena__aura {
-  opacity: 0.9;
-  animation-duration: 4.5s;
-}
-
-@keyframes pm-bubble-aura-glow {
-  0%,
-  100% {
-    box-shadow:
-      0 0 10px var(--aura-color),
-      0 0 24px var(--aura-soft),
-      0 8px 22px rgba(0, 0, 0, 0.42);
-  }
-  50% {
-    box-shadow:
-      0 0 16px var(--aura-color),
-      0 0 36px var(--aura-soft),
-      0 8px 22px rgba(0, 0, 0, 0.42);
-  }
-}
-
-@keyframes pm-bubble-aura-breathe {
-  0%,
-  100% {
-    opacity: 0.62;
-    transform: scale(0.98);
-  }
-  50% {
-    opacity: 0.88;
-    transform: scale(1.02);
-  }
+  opacity: 0.72;
 }
 
 .pm-bubble-arena__city {
@@ -1380,65 +1341,93 @@
   opacity: 1;
 }
 
+.pm-bubble-aim-pad {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: transparent;
+  touch-action: none;
+}
+
 /* ── Footer ── */
 .pm-bubble-footer {
   position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  min-height: 0;
-  padding-bottom: max(2px, env(safe-area-inset-bottom));
+  align-items: stretch;
+  justify-content: flex-end;
+  gap: 10px;
+  flex: 0 0 auto;
+  min-height: 118px;
+  padding:
+    4px var(--bubble-pad) max(6px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
   isolation: isolate;
   overflow: visible;
   border-radius: 24px 24px 0 0;
   background: transparent;
 }
 
-.pm-bubble-footer__vs,
-.pm-bubble-footer__actions {
-  position: relative;
-  z-index: 1;
-}
-
-.pm-bubble-footer__actions {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  width: 100%;
-  min-height: 72px;
-}
-
-.pm-bubble-footer__actions .pm-bubble-back {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-}
-
-.pm-bubble-footer__vs {
+.pm-bubble-footer__scores {
   display: flex;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: clamp(18px, 7vw, 32px);
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  padding: 2px 8px 0;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
-.pm-bubble-footer__vs-badge {
-  font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  font-weight: 800;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: #000;
-  border: 1px solid rgba(255, 213, 74, 0.38);
-  color: var(--bubble-gold);
-  box-shadow: 0 0 16px rgba(255, 213, 74, 0.12);
+.pm-bubble-footer__vs-img {
+  display: block;
+  height: clamp(22px, 6.2vw, 30px);
+  width: auto;
+  max-width: 68px;
+  margin: 0 2px;
+  object-fit: contain;
+  flex-shrink: 0;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+}
+
+.pm-bubble-footer__controls {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  width: 100%;
+  padding: 0 max(8px, env(safe-area-inset-left)) 0 max(8px, env(safe-area-inset-right));
+  box-sizing: border-box;
+}
+
+.pm-bubble-footer__controls .pm-bubble-back {
+  justify-self: start;
+}
+
+.pm-bubble-footer__dock-center {
+  justify-self: center;
+  min-width: 0;
+}
+
+.pm-bubble-footer__dock-center .pm-bubble-control-bar {
+  --bc-panel-w: min(72vw, 268px);
+  margin: 0;
+}
+
+.pm-bubble-footer__controls-spacer {
+  justify-self: end;
+  width: var(--bc-back-size, 52px);
+  height: 1px;
 }
 
 .pm-bubble-footer__points {
-  min-width: 44px;
-  min-height: 44px;
+  flex-shrink: 0;
+  min-width: 40px;
+  min-height: 40px;
   display: grid;
   place-items: center;
   font-size: 0.98rem;
@@ -1461,178 +1450,253 @@
   box-shadow: inset 0 0 12px rgba(224, 86, 168, 0.06);
 }
 
-/* ── Controls dock (AAA) ── */
-.pm-bubble-controls-dock {
+/* ── Kontrol paneli (1.png referans — kodla çizilmiş neon dock) ── */
+.pm-bubble-control-bar {
+  --bc-panel-w: min(72vw, 268px);
+  --bc-btn-size: clamp(42px, 11.5vw, 52px);
   position: relative;
-  padding: 10px 16px 8px;
-  border-radius: 22px;
-  background:
-    radial-gradient(ellipse 90% 72% at 50% 0%, rgba(255, 255, 255, 0.22), transparent 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 52%),
-    linear-gradient(135deg, rgba(34, 200, 255, 0.2) 0%, transparent 42%, rgba(255, 58, 120, 0.2) 100%),
-    rgba(14, 32, 64, 0.22);
-  border: 1px solid rgba(122, 221, 255, 0.42);
-  backdrop-filter: blur(14px) saturate(1.35);
-  -webkit-backdrop-filter: blur(14px) saturate(1.35);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    0 0 36px rgba(34, 200, 255, 0.14),
-    0 0 30px rgba(255, 58, 120, 0.1);
-}
-
-.pm-bubble-controls-dock__aura {
-  position: absolute;
-  inset: -4px 8px auto;
-  height: 55%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 50% 0%, rgba(34, 200, 255, 0.22), transparent 68%);
-  pointer-events: none;
-  opacity: 0.85;
-}
-
-.pm-bubble-controls-dock.is-live .pm-bubble-controls-dock__aura {
-  animation: pm-bubble-dock-aura 3.2s ease-in-out infinite;
-}
-
-.pm-bubble-controls {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 12px;
-}
-
-.pm-bubble-controls__btn {
-  position: relative;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border: none;
+  width: var(--bc-panel-w);
+  margin: 0 auto;
+  flex-shrink: 0;
+  padding: 7px 9px 9px;
   border-radius: 14px;
-  cursor: pointer;
-  font-family: inherit;
-  color: rgba(200, 240, 255, 0.95);
-  background: transparent;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform 0.2s cubic-bezier(0.34, 1.35, 0.64, 1);
+  box-sizing: border-box;
+  background:
+    radial-gradient(120% 80% at 50% 0%, rgba(70, 120, 200, 0.08), transparent 55%),
+    linear-gradient(168deg, rgba(34, 40, 54, 0.98) 0%, rgba(14, 16, 24, 0.99) 48%, rgba(8, 9, 14, 1) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -8px 18px rgba(0, 0, 0, 0.35),
+    0 8px 22px rgba(0, 0, 0, 0.42);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.38));
 }
 
-.pm-bubble-controls__btn::before {
-  content: '';
+.pm-bubble-control-bar__rim {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  border: 1.5px solid rgba(34, 200, 255, 0.55);
-  background: #000;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 16px rgba(34, 200, 255, 0.16);
-  transition: box-shadow 0.22s ease, border-color 0.22s ease, filter 0.22s ease;
-}
-
-.pm-bubble-controls__btn::after {
-  content: '';
-  position: absolute;
-  inset: 3px;
-  border-radius: 11px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 42%);
+  padding: 2px;
+  background: linear-gradient(
+    95deg,
+    rgba(62, 196, 255, 0.95) 0%,
+    rgba(90, 210, 255, 0.75) 22%,
+    rgba(120, 140, 180, 0.35) 48%,
+    rgba(220, 70, 130, 0.75) 78%,
+    rgba(255, 90, 120, 0.9) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.92;
 }
 
-.pm-bubble-controls__btn-inner {
+.pm-bubble-control-bar__circuit {
+  position: absolute;
+  inset: 6px;
+  border-radius: 10px;
+  opacity: 0.35;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 18px,
+      rgba(90, 160, 255, 0.06) 18px 19px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 14px,
+      rgba(255, 80, 140, 0.04) 14px 15px
+    ),
+    radial-gradient(circle at 12% 40%, rgba(80, 180, 255, 0.12) 0 1px, transparent 2px),
+    radial-gradient(circle at 88% 60%, rgba(255, 100, 160, 0.1) 0 1px, transparent 2px);
+  pointer-events: none;
+}
+
+.pm-bubble-control-bar__grid {
   position: relative;
-  z-index: 2;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.12fr 1fr;
+  gap: clamp(5px, 1.6vw, 9px);
+  align-items: end;
+  justify-items: center;
+}
+
+.pm-bubble-control-btn {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: var(--bc-btn-size);
+  aspect-ratio: 1.02;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.pm-bubble-control-btn__bezel {
+  position: absolute;
+  inset: 0;
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(0, 0, 0, 0.55));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.45),
+    0 0 14px var(--bc-btn-glow, rgba(80, 180, 255, 0.35));
+  pointer-events: none;
+}
+
+.pm-bubble-control-btn__face {
+  position: relative;
+  z-index: 1;
   display: grid;
   place-items: center;
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 0 6px rgba(34, 200, 255, 0.45));
-}
-
-.pm-bubble-controls__btn:active:not(:disabled) {
-  transform: scale(0.9);
-}
-
-.pm-bubble-controls__btn:active:not(:disabled)::before {
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  margin: 3px auto 0;
+  border-radius: 9px;
+  background: linear-gradient(165deg, #2a3344 0%, #141a24 42%, #080a10 100%);
+  border: 1px solid var(--bc-btn-border, rgba(90, 200, 255, 0.45));
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 0 28px rgba(34, 200, 255, 0.35);
+    inset 0 2px 4px rgba(255, 255, 255, 0.08),
+    inset 0 -4px 8px rgba(0, 0, 0, 0.5);
+  will-change: transform;
 }
 
-.pm-bubble-controls__btn.is-aim:active:not(:disabled) .pm-bubble-controls__btn-inner {
-  animation: pm-bubble-aim-flash 0.35s ease-out;
+.pm-bubble-control-btn__icon {
+  width: 58%;
+  height: auto;
+  max-height: 52%;
+  display: block;
 }
 
-.pm-bubble-controls__btn--swap::before {
-  border-color: rgba(255, 58, 120, 0.58);
-  background: #000;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 18px rgba(255, 58, 120, 0.18);
+.pm-bubble-control-btn__icon.is-gear {
+  width: 62%;
+  max-height: 62%;
 }
 
-.pm-bubble-controls__btn--swap .pm-bubble-controls__btn-inner {
-  filter: drop-shadow(0 0 6px rgba(255, 58, 120, 0.45));
-  color: rgba(255, 190, 220, 0.98);
+.pm-bubble-control-btn.is-aim-left,
+.pm-bubble-control-btn.is-aim-right {
+  --bc-btn-glow: rgba(62, 196, 255, 0.42);
+  --bc-btn-border: rgba(78, 210, 255, 0.55);
 }
 
-.pm-bubble-controls.is-live .pm-bubble-controls__btn--swap:not(:disabled) .pm-bubble-controls__btn-inner {
-  animation: pm-bubble-swap-hint 4s ease-in-out infinite;
+.pm-bubble-control-btn.is-swap {
+  --bc-btn-glow: rgba(255, 90, 170, 0.42);
+  --bc-btn-border: rgba(255, 120, 190, 0.55);
 }
 
-.pm-bubble-controls__btn--fire {
-  width: 58px;
-  height: 58px;
-  margin-bottom: 2px;
+.pm-bubble-control-btn.is-fire {
+  --bc-btn-glow: rgba(255, 200, 80, 0.5);
+  --bc-btn-border: rgba(255, 213, 90, 0.62);
+  max-width: calc(var(--bc-btn-size) * 1.08);
 }
 
-.pm-bubble-controls__btn--fire::before {
-  border-color: rgba(255, 213, 74, 0.72);
-  background: #000;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 0 28px rgba(255, 213, 74, 0.26);
+.pm-bubble-control-btn.is-aim-left .pm-bubble-control-btn__face {
+  animation: pm-bc-float-left 2.5s ease-in-out infinite;
 }
 
-.pm-bubble-controls__btn--fire .pm-bubble-controls__btn-inner {
-  color: #ffe8a8;
-  filter: drop-shadow(0 0 10px rgba(255, 213, 74, 0.65));
+.pm-bubble-control-btn.is-swap .pm-bubble-control-btn__face {
+  animation: pm-bc-float-swap 2.8s ease-in-out infinite 0.18s;
 }
 
-.pm-bubble-controls__btn-ring {
-  position: absolute;
-  inset: -6px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 213, 74, 0.35);
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0;
+.pm-bubble-control-btn.is-fire .pm-bubble-control-btn__face {
+  animation: pm-bc-float-fire 2.3s ease-in-out infinite 0.35s;
 }
 
-.pm-bubble-controls__btn-ring.is-delay {
-  animation-delay: 0.9s;
+.pm-bubble-control-btn.is-fire .pm-bubble-control-btn__icon.is-gear {
+  animation: pm-bc-gear-spin 8s linear infinite;
 }
 
-.pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled) {
-  animation: pm-bubble-fire-float 2.6s ease-in-out infinite;
+.pm-bubble-control-btn.is-aim-right .pm-bubble-control-btn__face {
+  animation: pm-bc-float-right 2.5s ease-in-out infinite 0.55s;
 }
 
-.pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled)::before {
-  animation: pm-bubble-fire-glow 2.2s ease-in-out infinite;
+.pm-bubble-control-btn:active:not(:disabled) .pm-bubble-control-btn__face {
+  animation-play-state: paused;
+  transform: scale(0.94) translateY(2px);
+  filter: brightness(1.2);
 }
 
-.pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled) .pm-bubble-controls__btn-ring {
-  animation: pm-bubble-fire-ring 2.4s ease-out infinite;
+.pm-bubble-control-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
 }
 
-.pm-bubble-controls__btn--fire:active:not(:disabled) {
+.pm-bubble-control-btn:disabled .pm-bubble-control-btn__face,
+.pm-bubble-control-btn:disabled .pm-bubble-control-btn__icon.is-gear {
   animation: none;
 }
 
-.pm-bubble-controls__btn--fire:active:not(:disabled) .pm-bubble-controls__btn-inner {
-  animation: pm-bubble-fire-burst 0.32s ease-out;
+.pm-bubble-control-bar:not(.is-live) {
+  opacity: 0.86;
+}
+
+@keyframes pm-bc-float-left {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(-2px, -4px, 0);
+  }
+}
+
+@keyframes pm-bc-float-right {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(2px, -4px, 0);
+  }
+}
+
+@keyframes pm-bc-float-swap {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  40% {
+    transform: translate3d(0, -3px, 0) rotate(-5deg);
+  }
+  70% {
+    transform: translate3d(0, -5px, 0) rotate(5deg);
+  }
+}
+
+@keyframes pm-bc-float-fire {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+    box-shadow:
+      inset 0 2px 4px rgba(255, 255, 255, 0.08),
+      inset 0 -4px 8px rgba(0, 0, 0, 0.5),
+      0 0 10px rgba(255, 200, 80, 0.2);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0) scale(1.05);
+    box-shadow:
+      inset 0 2px 4px rgba(255, 255, 255, 0.12),
+      inset 0 -4px 8px rgba(0, 0, 0, 0.5),
+      0 0 18px rgba(255, 200, 80, 0.45);
+  }
+}
+
+@keyframes pm-bc-gear-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pm-bubble-coded-orb {
@@ -1715,21 +1779,6 @@
   100% { transform: scale(1); }
 }
 
-.pm-bubble-controls__btn:disabled {
-  opacity: 0.38;
-  pointer-events: none;
-  cursor: not-allowed;
-}
-
-.pm-bubble-controls__btn:disabled::before {
-  filter: grayscale(0.5);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.35);
-}
-
-.pm-bubble-controls-dock:not(.is-live) {
-  opacity: 0.88;
-}
-
 /* ── Overlay ── */
 .pm-bubble-overlay {
   position: absolute;
@@ -1781,18 +1830,28 @@
     height: 62px;
   }
 
-  .pm-bubble-controls__btn {
-    width: 42px;
-    height: 42px;
+  .pm-bubble-control-bar {
+    --bc-panel-w: min(76vw, 236px);
+    --bc-btn-size: clamp(38px, 10.5vw, 46px);
+    padding: 5px 7px 7px;
   }
 
-  .pm-bubble-controls__btn--fire {
-    width: 52px;
-    height: 52px;
+  .pm-bubble-footer {
+    gap: 8px;
+    min-height: 112px;
   }
 
-  .pm-bubble-controls-dock {
-    padding: 8px 12px 6px;
+  .pm-bubble-footer__scores {
+    gap: 14px;
+  }
+
+  .pm-bubble-back {
+    --bc-back-size: clamp(38px, 10.5vw, 46px);
+  }
+
+  .pm-bubble-footer__dock-center .pm-bubble-control-bar {
+    --bc-panel-w: min(calc(100vw - 112px), 228px);
+    --bc-btn-size: clamp(38px, 10.5vw, 46px);
   }
 }
 
@@ -1819,12 +1878,9 @@
   .pm-bubble-arena.is-p1,
   .pm-bubble-arena.is-p2,
   .pm-bubble-arena__aura,
-  .pm-bubble-controls-dock__aura,
-  .pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled),
-  .pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled)::before,
-  .pm-bubble-controls.is-live .pm-bubble-controls__btn--fire:not(:disabled) .pm-bubble-controls__btn-ring,
-  .pm-bubble-controls.is-live .pm-bubble-controls__btn--swap:not(:disabled) .pm-bubble-controls__btn-inner,
-  .pm-bubble-stats__value.is-duel-score em {
+  .pm-bubble-stats__value.is-duel-score em,
+  .pm-bubble-control-btn__face,
+  .pm-bubble-control-btn__icon.is-gear {
     animation: none !important;
   }
 }

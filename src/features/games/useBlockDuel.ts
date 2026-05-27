@@ -47,12 +47,12 @@ export function useBlockDuel() {
   const botRef = useRef<BlockBotBrain>(createBlockBot(0))
   const syncTickRef = useRef(0)
   const roundSeedRef = useRef(5)
-  const dasRef = useRef({ left: false, right: false, leftAccum: 0, rightAccum: 0 })
+  const dasRef = useRef({ left: false, right: false, down: false, leftAccum: 0, rightAccum: 0 })
 
   const roundIntroRef = useRef(2.4)
   const comboBannerRef = useRef(0)
-  const DAS_DELAY = 0.13
-  const DAS_REPEAT = 0.042
+  const DAS_DELAY = 0.07
+  const DAS_REPEAT = 0.022
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
@@ -311,6 +311,8 @@ export function useBlockDuel() {
     dasRef.current.left = held
     if (held) {
       inputRef.current.left = true
+      dasRef.current.leftAccum = DAS_DELAY * 0.72
+    } else {
       dasRef.current.leftAccum = 0
     }
   }, [])
@@ -319,12 +321,15 @@ export function useBlockDuel() {
     dasRef.current.right = held
     if (held) {
       inputRef.current.right = true
+      dasRef.current.rightAccum = DAS_DELAY * 0.72
+    } else {
       dasRef.current.rightAccum = 0
     }
   }, [])
 
-  const pressHold = useCallback(() => {
-    inputRef.current.hold = true
+  const setHoldDown = useCallback((held: boolean) => {
+    dasRef.current.down = held
+    if (held) inputRef.current.down = true
   }, [])
 
   const hardDrop = useCallback(() => {
@@ -351,7 +356,7 @@ export function useBlockDuel() {
     roundSeedRef.current = 5
     roundTimeRef.current = ROUND_SECONDS
     matchPointsRef.current = { p1: 0, p2: 0 }
-    dasRef.current = { left: false, right: false, leftAccum: 0, rightAccum: 0 }
+    dasRef.current = { left: false, right: false, down: false, leftAccum: 0, rightAccum: 0 }
     const l1 = createBlockLane(11, 1)
     const l2 = createBlockLane(22, 1)
     lane1Ref.current = l1
@@ -390,7 +395,6 @@ export function useBlockDuel() {
     running: running && !winner && lane1.alive && roundIntro <= 0,
     roundIntro,
     comboBanner,
-    canHold: lane1.canHold,
     winner,
     shakeKey,
     attackMeter,
@@ -398,10 +402,10 @@ export function useBlockDuel() {
     pressRight,
     pressDown,
     pressRotate,
-    pressHold,
     hardDrop,
     setHoldLeft,
     setHoldRight,
+    setHoldDown,
     restart,
   }
 }

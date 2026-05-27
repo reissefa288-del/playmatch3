@@ -1,4 +1,6 @@
 import { motion } from 'framer-motion'
+import duelVideo from '../../../reference/video.mp4'
+import { SeamlessLoopVideo } from './SeamlessLoopVideo'
 
 const STARS = Array.from({ length: 36 }, (_, i) => ({
   id: i,
@@ -25,10 +27,12 @@ const BEAMS = Array.from({ length: 5 }, (_, i) => ({
 type GameDuelAmbientBgProps = {
   /** Bubble: gölgeleme kapalı, daha açık mavi/pembe ton */
   variant?: 'default' | 'bubble'
+  /** Arka plan videosu (video.mp4) */
+  video?: boolean
 }
 
 /** Paylaşılan premium AAA duel arka planı — Block · Brick · Bubble · XOX */
-export function GameDuelAmbientBg({ variant = 'default' }: GameDuelAmbientBgProps) {
+export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDuelAmbientBgProps) {
   const isBubble = variant === 'bubble'
 
   return (
@@ -39,6 +43,11 @@ export function GameDuelAmbientBg({ variant = 'default' }: GameDuelAmbientBgProp
       animate={{ opacity: 1 }}
       transition={{ duration: 0.55, ease: 'easeOut' }}
     >
+      {video ? (
+        <div className="pm-duel-ambient__video" aria-hidden>
+          <SeamlessLoopVideo src={duelVideo} crossfadeSec={0.52} />
+        </div>
+      ) : null}
       <motion.div
         className="pm-duel-ambient__base"
         animate={{ backgroundPosition: ['0% 0%', '5% 2%', '2% 5%', '0% 0%'] }}

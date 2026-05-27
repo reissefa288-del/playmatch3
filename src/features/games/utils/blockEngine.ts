@@ -90,12 +90,12 @@ export const ROUND_SECONDS = 90
 export const WIN_ROUNDS = 2
 export const MATCH_ROUNDS = 3
 
-export const DROP_INTERVAL = 0.82
-export const SOFT_DROP_INTERVAL = 0.038
-export const LOCK_DELAY = 0.48
+export const DROP_INTERVAL = 0.52
+export const SOFT_DROP_INTERVAL = 0.012
+export const LOCK_DELAY = 0.36
 const MAX_LOCK_RESETS = 15
-const LINE_SPEED_BONUS = 0.014
-const MAX_SPEED_BONUS = 0.38
+const LINE_SPEED_BONUS = 0.018
+const MAX_SPEED_BONUS = 0.42
 
 export const PIECE_COLOR: Record<PieceKind, BlockColor> = {
   I: 'cyan',
@@ -281,10 +281,16 @@ export function updateBlockLane(
     if (moved) {
       next = moved
       if (input.down) events.push('drop')
-    } else {
+    } else if (next.active && isFullyInPlayfield(next.active)) {
       next.locking = true
       break
+    } else {
+      break
     }
+  }
+
+  if (next.locking && next.active && !isFullyInPlayfield(next.active)) {
+    next = { ...next, locking: false, lockAccum: 0 }
   }
 
   if (next.locking) {
@@ -711,6 +717,9 @@ function tryRotate(lane: BlockLaneState): BlockLaneState | null {
 
 function lockActive(lane: BlockLaneState): { lane: BlockLaneState; cleared: number; attackRows: number } {
   if (!lane.active) return { lane, cleared: 0, attackRows: 0 }
+  if (!isFullyInPlayfield(lane.active)) {
+    return { lane: { ...lane, locking: false, lockAccum: 0 }, cleared: 0, attackRows: 0 }
+  }
 
   const rng = mulberry32(lane.lines * 31 + lane.incomingGarbage * 7 + lane.combo * 13)
   const afterGarbage = applyIncomingGarbage(lane, rng)
@@ -718,9 +727,18 @@ function lockActive(lane: BlockLaneState): { lane: BlockLaneState; cleared: numb
     return { lane: afterGarbage, cleared: 0, attackRows: 0 }
   }
 
+  const active = afterGarbage.active
+  if (!active || !isFullyInPlayfield(active)) {
+    return {
+      lane: { ...afterGarbage, locking: false, lockAccum: 0 },
+      cleared: 0,
+      attackRows: 0,
+    }
+  }
+
   const grid = afterGarbage.grid.map((row) => [...row])
-  for (const { row, col } of pieceCells(lane.active)) {
-    if (row >= 0) grid[row]![col] = lane.active.color
+  for (const { row, col } of pieceCells(active)) {
+    grid[row]![col] = active.color
   }
 
   const { count, burstCells } = clearLines(grid)
@@ -758,25 +776,72 @@ function spawnParticles(
   }))
 }
 
+function isFullyInPlayfield(active: ActivePiece): boolean {
+  return pieceCells(active).every((cell) => cell.row >= 0)
+}
+
+function shiftGridForGarbage(grid: BlockCell[][], rows: number, rng: () => number): BlockCell[][] {
+  const next = grid.map((row) => [...row])
+  for (let i = 0; i < rows; i += 1) {
+    next.shift()
+    next.push(createGarbageRow(rng))
+  }
+  return next
+}
+
+/** Grid yukarı kayınca aktif parçayı hizala ve zemine oturt. */
+function settleActiveAfterGridChange(
+  grid: BlockCell[][],
+  active: ActivePiece,
+  rowsShiftedUp: number,
+): ActivePiece | null {
+  let piece: ActivePiece = { ...active, row: active.row - rowsShiftedUp }
+
+  if (!canPlace(grid, pieceCells(piece))) {
+    let placed: ActivePiece | null = null
+    for (let up = 1; up <= 4; up += 1) {
+      const candidate = { ...piece, row: piece.row - up }
+      if (canPlace(grid, pieceCells(candidate))) {
+        placed = candidate
+        break
+      }
+    }
+    if (!placed) return null
+    piece = placed
+  }
+
+  while (canPlace(grid, pieceCells({ ...piece, row: piece.row + 1 }))) {
+    piece = { ...piece, row: piece.row + 1 }
+  }
+
+  return isFullyInPlayfield(piece) ? piece : null
+}
+
 function applyIncomingGarbage(lane: BlockLaneState, rng: () => number): BlockLaneState {
   if (lane.incomingGarbage <= 0) return lane
 
-  const grid = lane.grid.map((row) => [...row])
-  let rowsLeft = lane.incomingGarbage
+  const rows = lane.incomingGarbage
+  const grid = shiftGridForGarbage(lane.grid, rows, rng)
 
-  while (rowsLeft > 0) {
-    grid.shift()
-    grid.push(createGarbageRow(rng))
-    rowsLeft -= 1
+  if (lane.active) {
+    const settled = settleActiveAfterGridChange(grid, lane.active, rows)
+    if (!settled) {
+      return { ...lane, grid, incomingGarbage: 0, active: null, alive: false }
+    }
+    return { ...lane, grid, active: settled, incomingGarbage: 0 }
   }
 
-  const blocked = !canPlace(grid, pieceCells({
-    kind: lane.nextKind,
-    rotation: 0,
-    col: Math.floor(BLOCK_COLS / 2) - 2,
-    row: 0,
-    color: PIECE_COLOR[lane.nextKind],
-  }))
+  const spawnCol = Math.floor(BLOCK_COLS / 2) - 2
+  const blocked = !canPlace(
+    grid,
+    pieceCells({
+      kind: lane.nextKind,
+      rotation: 0,
+      col: spawnCol,
+      row: 0,
+      color: PIECE_COLOR[lane.nextKind],
+    }),
+  )
 
   if (blocked) {
     return { ...lane, grid, incomingGarbage: 0, active: null, alive: false }

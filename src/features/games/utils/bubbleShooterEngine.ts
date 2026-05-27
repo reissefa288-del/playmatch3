@@ -1,4 +1,8 @@
 export const BUBBLE_RADIUS = 0.036
+/** Yatay kenar boşluğu — çizim halo’su için merkezler içeride kalır */
+export const GRID_H_MARGIN = 0.052
+export const GRID_COLS_EVEN = 8
+export const BUBBLE_DRAW_MULT = 2
 export const GRID_TOP = 0.1
 export const SHOOTER_Y = 0.9
 export const SHOOTER_X = 0.5
@@ -6,15 +10,51 @@ export const WIN_POINTS = 3
 export const ROUND_SECONDS = 75
 export const OVERTIME_SECONDS = 20
 export const ROUND_BREAK_MS = 2600
-export const COLLISION_DISTANCE = BUBBLE_RADIUS * 2.34
+/** Izgara boşluklarını kapatır — tünellemeden kaçınmak için biraz geniş */
+export const COLLISION_DISTANCE = BUBBLE_RADIUS * 2.38
+/** Balonlar bu çizgiyi geçerse oyuncu kaybeder (normalize Y) */
+export const DANGER_LINE_Y = SHOOTER_Y - 0.128
+export const ROW_VERTICAL_STEP = BUBBLE_RADIUS * 1.72
+
+/** Canvas genişlik/yükseklik — çarpışma mesafesi dikeyde düzeltilir */
+let playfieldAspect = 1
+
+export function setPlayfieldAspect(width: number, height: number) {
+  if (height <= 0) return
+  playfieldAspect = Math.max(0.38, Math.min(1.15, width / height))
+}
+
+export function bubbleDrawRadiusPx(canvasWidth: number) {
+  return BUBBLE_RADIUS * canvasWidth * BUBBLE_DRAW_MULT
+}
 export const AIM_MIN = -2.75
 export const AIM_MAX = -0.38
-export const AIM_SPEED = 1.85
-export const SHOT_SPEED = 1.05
+export const AIM_SPEED = 2.35
+export const SHOT_SPEED = 1.32
+export const AIM_ACCEL = 14
+export const AIM_DAMP = 10
+export const AIM_SNAP_MAX_DIFF = 0.2
+export const AIM_SNAP_STRENGTH = 12
 
 export type BubbleColor = 'cyan' | 'pink' | 'yellow' | 'green' | 'purple'
 
+export type BubbleKind = 'normal' | 'fire' | 'bomb' | 'rainbow'
+
+export type BubbleSlot = {
+  color: BubbleColor
+  kind: BubbleKind
+}
+
 export const BUBBLE_COLORS: BubbleColor[] = ['cyan', 'pink', 'yellow', 'green', 'purple']
+
+export const SPECIAL_KIND_META: Record<
+  Exclude<BubbleKind, 'normal'>,
+  { label: string; hex: string; glow: string }
+> = {
+  fire: { label: 'ATEŞ', hex: '#ff6b35', glow: 'rgba(255, 107, 53, 0.55)' },
+  bomb: { label: 'BOMBA', hex: '#ff3a78', glow: 'rgba(255, 58, 120, 0.5)' },
+  rainbow: { label: 'GÖK', hex: '#e8f0ff', glow: 'rgba(200, 220, 255, 0.55)' },
+}
 
 export const COLOR_HEX: Record<BubbleColor, string> = {
   cyan: '#22c8ff',
@@ -33,7 +73,17 @@ export const COLOR_GLOW: Record<BubbleColor, string> = {
   purple: 'rgba(157, 108, 255, 0.48)',
 }
 
-export type LaneEvent = 'shoot' | 'pop' | 'drop' | 'swap' | 'burst' | 'overflow' | 'combo' | 'clear'
+export type LaneEvent =
+  | 'shoot'
+  | 'pop'
+  | 'drop'
+  | 'swap'
+  | 'burst'
+  | 'overflow'
+  | 'combo'
+  | 'clear'
+  | 'refill'
+  | 'special'
 
 export type BubbleParticle = {
   x: number
@@ -50,6 +100,7 @@ export type Projectile = {
   vx: number
   vy: number
   color: BubbleColor
+  kind: BubbleKind
   active: boolean
 }
 
@@ -58,7 +109,10 @@ export type LaneState = {
   projectile: Projectile | null
   currentColor: BubbleColor
   nextColor: BubbleColor
+  currentKind: BubbleKind
+  nextKind: BubbleKind
   aimAngle: number
+  aimVel: number
   /** Bu turdaki skor (her tur sıfırlanır) */
   score: number
   /** 3 round sonunda beraberlik olursa toplam skor belirler */
@@ -74,12 +128,18 @@ export type LaneState = {
 }
 
 export function createLane(seed = 0): LaneState {
+  const grid = createInitialGrid(seed)
+  const next = rollShooterBubble(grid, seed + 2)
+  const current = rollShooterBubble(grid, seed + 1)
   return {
-    grid: createInitialGrid(seed),
+    grid,
     projectile: null,
-    currentColor: pickColor(seed + 1),
-    nextColor: pickColor(seed + 2),
+    currentColor: current.color,
+    nextColor: next.color,
+    currentKind: current.kind,
+    nextKind: next.kind,
     aimAngle: -Math.PI / 2,
+    aimVel: 0,
     score: 0,
     totalScore: 0,
     matchPoints: 0,
@@ -118,6 +178,8 @@ export function updateLane(
   swap = false,
 ): { lane: LaneState; events: LaneEvent[] } {
   const events: LaneEvent[] = []
+  if (lane.overflowed) return { lane, events }
+
   const next: LaneState = {
     ...lane,
     grid: new Map(lane.grid),
@@ -135,29 +197,55 @@ export function updateLane(
   }
 
   if (swap && !next.projectile && next.canShoot) {
-    const temp = next.currentColor
+    const tempColor = next.currentColor
+    const tempKind = next.currentKind
     next.currentColor = next.nextColor
-    next.nextColor = pickColorForLane(next.grid, Math.floor(next.score + temp.length))
+    next.currentKind = next.nextKind
+    next.nextColor = tempColor
+    next.nextKind = tempKind
     events.push('swap')
   }
 
-  if (aimDir !== 0 && !next.projectile) {
-    next.aimAngle = clamp(next.aimAngle + aimDir * dt * AIM_SPEED, AIM_MIN, AIM_MAX)
+  if (!next.projectile) {
+    // Daha akıcı nişan: hızlanma + damping (momentum)
+    const damp = Math.exp(-AIM_DAMP * dt)
+    next.aimVel *= damp
+    if (aimDir !== 0) next.aimVel += aimDir * AIM_ACCEL * dt
+
+    next.aimAngle = clamp(next.aimAngle + next.aimVel * dt * AIM_SPEED, AIM_MIN, AIM_MAX)
+
+    // Hedefe tutunma (snap assist): küçük farklarda hücre merkezine yaklaştır
+    const target = predictAttachCell(next.grid, next.aimAngle)
+    if (target) {
+      const desired = aimAtCell(target.row, target.col)
+      const diff = wrapAngle(desired - next.aimAngle)
+      if (Math.abs(diff) <= AIM_SNAP_MAX_DIFF) {
+        const snap = 1 - Math.exp(-AIM_SNAP_STRENGTH * dt)
+        next.aimAngle = clamp(next.aimAngle + diff * snap, AIM_MIN, AIM_MAX)
+      }
+    }
   }
 
   if (fire && !next.projectile && next.canShoot) {
+    const shotKind = next.currentKind
+    next.aimVel = 0
     next.projectile = {
       x: SHOOTER_X,
       y: SHOOTER_Y,
       vx: Math.cos(next.aimAngle) * SHOT_SPEED,
       vy: Math.sin(next.aimAngle) * SHOT_SPEED,
       color: next.currentColor,
+      kind: shotKind,
       active: true,
     }
     next.currentColor = next.nextColor
-    next.nextColor = pickColorForLane(next.grid, Math.floor(next.score + next.grid.size))
+    next.currentKind = next.nextKind
+    const rolled = rollShooterBubble(next.grid, Math.floor(next.score + next.grid.size + 7))
+    next.nextColor = rolled.color
+    next.nextKind = rolled.kind
     next.canShoot = false
     events.push('shoot')
+    if (shotKind !== 'normal') events.push('special')
   }
 
   if (next.projectile?.active) {
@@ -177,18 +265,33 @@ export function updateLane(
       }
       next.projectile = null
       next.canShoot = true
+      refillGridIfEmpty(next, Math.floor(next.score + next.totalScore + 11), events)
     }
+  }
+
+  if (!next.overflowed && checkDangerLine(next)) {
+    next.overflowed = true
+    events.push('overflow')
   }
 
   return { lane: next, events }
 }
 
+export function checkDangerLine(lane: LaneState): boolean {
+  for (const key of lane.grid.keys()) {
+    const [row, col] = key.split(',').map(Number)
+    const pos = bubblePos(row, col)
+    if (pos.y + BUBBLE_RADIUS >= DANGER_LINE_Y) return true
+  }
+  return false
+}
+
 function stepProjectile(
   lane: LaneState,
   dt: number,
-): { row: number; col: number; color: BubbleColor; popped: number } | null {
-  const maxStep = 0.0075
-  const steps = Math.max(1, Math.ceil(dt / maxStep))
+): { row: number; col: number; color: BubbleColor; kind: BubbleKind; popped: number } | null {
+  const travel = SHOT_SPEED * dt
+  const steps = Math.max(4, Math.ceil(travel / (BUBBLE_RADIUS * 0.42)))
   const subDt = dt / steps
   for (let i = 0; i < steps; i += 1) {
     const hit = stepProjectileOnce(lane, subDt)
@@ -197,36 +300,72 @@ function stepProjectile(
   return null
 }
 
+type GridHit = { x: number; y: number; row: number; col: number }
+
+function findProjectileGridHit(
+  lane: LaneState,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+): GridHit | null {
+  const segLen = bubbleDistance(x0, y0, x1, y1)
+  const samples = Math.max(2, Math.ceil(segLen / (BUBBLE_RADIUS * 0.32)))
+  let best: GridHit | null = null
+  let bestT = Infinity
+
+  for (let i = 0; i <= samples; i += 1) {
+    const t = i / samples
+    const x = x0 + (x1 - x0) * t
+    const y = y0 + (y1 - y0) * t
+    for (const [key] of lane.grid) {
+      const [row, col] = key.split(',').map(Number)
+      const pos = bubblePos(row, col)
+      if (bubbleDistance(x, y, pos.x, pos.y) < COLLISION_DISTANCE && t < bestT) {
+        bestT = t
+        best = { x, y, row, col }
+      }
+    }
+  }
+
+  return best
+}
+
 function stepProjectileOnce(
   lane: LaneState,
   dt: number,
-): { row: number; col: number; color: BubbleColor; popped: number } | null {
+): { row: number; col: number; color: BubbleColor; kind: BubbleKind; popped: number } | null {
   const p = lane.projectile!
-  p.x += p.vx * dt
-  p.y += p.vy * dt
+  const startX = p.x
+  const startY = p.y
+  let endX = p.x + p.vx * dt
+  let endY = p.y + p.vy * dt
 
-  if (p.x <= BUBBLE_RADIUS) {
-    p.x = BUBBLE_RADIUS
+  if (endX <= GRID_H_MARGIN) {
+    endX = GRID_H_MARGIN
     p.vx = Math.abs(p.vx)
-  } else if (p.x >= 1 - BUBBLE_RADIUS) {
-    p.x = 1 - BUBBLE_RADIUS
+  } else if (endX >= 1 - GRID_H_MARGIN) {
+    endX = 1 - GRID_H_MARGIN
     p.vx = -Math.abs(p.vx)
   }
 
-  if (p.y <= GRID_TOP + BUBBLE_RADIUS) {
-    return attachAtCeiling(lane, p.x, p.color)
+  if (endY <= GRID_TOP + BUBBLE_RADIUS) {
+    p.x = endX
+    p.y = endY
+    return attachAtCeiling(lane, p.x, p.color, p.kind)
   }
 
-  for (const [key] of lane.grid) {
-    const [row, col] = key.split(',').map(Number)
-    const pos = bubblePos(row, col)
-    const dist = Math.hypot(p.x - pos.x, p.y - pos.y)
-    if (dist < COLLISION_DISTANCE) {
-      const attached = attachNear(lane, p.x, p.y, p.color, row, col)
-      if (attached) return attached
-      return forceAttachBubble(lane, p.x, p.y, p.color)
-    }
+  const gridHit = findProjectileGridHit(lane, startX, startY, endX, endY)
+  if (gridHit) {
+    p.x = gridHit.x
+    p.y = gridHit.y
+    const attached = attachNear(lane, p.x, p.y, p.color, p.kind, gridHit.row, gridHit.col)
+    if (attached) return attached
+    return forceAttachBubble(lane, p.x, p.y, p.color, p.kind)
   }
+
+  p.x = endX
+  p.y = endY
 
   if (p.y > 1.08) {
     lane.projectile = null
@@ -236,30 +375,37 @@ function stepProjectileOnce(
   return null
 }
 
+type AttachResult = {
+  row: number
+  col: number
+  color: BubbleColor
+  kind: BubbleKind
+  popped: number
+}
+
 function forceAttachBubble(
   lane: LaneState,
   x: number,
   y: number,
   color: BubbleColor,
-): { row: number; col: number; color: BubbleColor; popped: number } {
+  kind: BubbleKind,
+): AttachResult {
   const candidates = listAttachCandidates(lane.grid)
   if (candidates.length === 0) {
     const col = nearestColInRow(0, x)
     const key0 = cellKey(0, col)
     if (!lane.grid.has(key0)) {
-      lane.grid.set(key0, color)
-      spawnParticles(lane, bubblePos(0, col), color)
-      const popped = resolveAttachment(lane, 0, col)
-      return { row: 0, col, color, popped }
+      const popped = placeBubbleAndResolve(lane, 0, col, color, kind)
+      return { row: 0, col, color, kind, popped }
     }
-    return { row: 0, col, color, popped: 0 }
+    return { row: 0, col, color, kind, popped: 0 }
   }
 
   let best = candidates[0]!
   let bestDist = Infinity
   for (const c of candidates) {
     const pos = bubblePos(c.row, c.col)
-    const d = Math.hypot(x - pos.x, y - pos.y)
+    const d = bubbleDistance(x, y, pos.x, pos.y)
     if (d < bestDist) {
       bestDist = d
       best = c
@@ -268,28 +414,24 @@ function forceAttachBubble(
 
   const key = cellKey(best.row, best.col)
   if (!lane.grid.has(key)) {
-    lane.grid.set(key, color)
-    spawnParticles(lane, bubblePos(best.row, best.col), color)
-    const popped = resolveAttachment(lane, best.row, best.col)
-    return { row: best.row, col: best.col, color, popped }
+    const popped = placeBubbleAndResolve(lane, best.row, best.col, color, kind)
+    return { row: best.row, col: best.col, color, kind, popped }
   }
 
-  return attachAtCeiling(lane, x, color) ?? { row: 0, col: 0, color, popped: 0 }
+  return attachAtCeiling(lane, x, color, kind) ?? { row: 0, col: 0, color, kind, popped: 0 }
 }
 
-function attachAtCeiling(lane: LaneState, x: number, color: BubbleColor) {
+function attachAtCeiling(lane: LaneState, x: number, color: BubbleColor, kind: BubbleKind) {
   const row = 0
   const col = nearestColInRow(row, x)
   const key = cellKey(row, col)
   if (!lane.grid.has(key)) {
-    lane.grid.set(key, color)
-    spawnParticles(lane, bubblePos(row, col), color)
-    const popped = resolveAttachment(lane, row, col)
-    return { row, col, color, popped }
+    const popped = placeBubbleAndResolve(lane, row, col, color, kind)
+    return { row, col, color, kind, popped }
   }
-  const fallback = attachNear(lane, x, GRID_TOP + BUBBLE_RADIUS, color, row, col)
+  const fallback = attachNear(lane, x, GRID_TOP + BUBBLE_RADIUS, color, kind, row, col)
   if (fallback) return fallback
-  return forceAttachBubble(lane, x, GRID_TOP + BUBBLE_RADIUS, color)
+  return forceAttachBubble(lane, x, GRID_TOP + BUBBLE_RADIUS, color, kind)
 }
 
 function attachNear(
@@ -297,9 +439,10 @@ function attachNear(
   x: number,
   y: number,
   color: BubbleColor,
+  kind: BubbleKind,
   hitRow: number,
   hitCol: number,
-): { row: number; col: number; color: BubbleColor; popped: number } | null {
+): AttachResult | null {
   const candidates = neighbors(hitRow, hitCol).filter(({ row, col }) => {
     const key = cellKey(row, col)
     return row >= 0 && !lane.grid.has(key)
@@ -310,29 +453,55 @@ function attachNear(
     const col = nearestColInRow(row, x)
     const key = cellKey(row, col)
     if (!lane.grid.has(key)) {
-      lane.grid.set(key, color)
-      spawnParticles(lane, bubblePos(row, col), color)
-      const popped = resolveAttachment(lane, row, col)
-      return { row, col, color, popped }
+      const popped = placeBubbleAndResolve(lane, row, col, color, kind)
+      return { row, col, color, kind, popped }
     }
-    return forceAttachBubble(lane, x, y, color)
+    return forceAttachBubble(lane, x, y, color, kind)
   }
 
   let best = candidates[0]
   let bestDist = Infinity
   for (const c of candidates) {
     const pos = bubblePos(c.row, c.col)
-    const d = Math.hypot(x - pos.x, y - pos.y)
+    const d = bubbleDistance(x, y, pos.x, pos.y)
     if (d < bestDist) {
       bestDist = d
       best = c
     }
   }
 
-  lane.grid.set(cellKey(best.row, best.col), color)
-  spawnParticles(lane, bubblePos(best.row, best.col), color)
-  const popped = resolveAttachment(lane, best.row, best.col)
-  return { row: best.row, col: best.col, color, popped }
+  const popped = placeBubbleAndResolve(lane, best.row, best.col, color, kind)
+  return { row: best.row, col: best.col, color, kind, popped }
+}
+
+function placeBubbleAndResolve(
+  lane: LaneState,
+  row: number,
+  col: number,
+  color: BubbleColor,
+  kind: BubbleKind,
+): number {
+  const key = cellKey(row, col)
+  lane.grid.set(key, color)
+  spawnParticles(lane, bubblePos(row, col), color, kind === 'normal' ? 8 : 14)
+  return resolveAttachmentWithKind(lane, row, col, kind)
+}
+
+function resolveAttachmentWithKind(lane: LaneState, row: number, col: number, kind: BubbleKind): number {
+  if (kind === 'bomb') {
+    return popHexRadius(lane, row, col, 2)
+  }
+  if (kind === 'rainbow') {
+    return popRainbowAt(lane, row, col)
+  }
+  if (kind === 'fire') {
+    const cluster = floodColor(lane.grid, row, col)
+    if (cluster.size >= 3) {
+      return resolveAttachment(lane, row, col) + popHexRadius(lane, row, col, 1)
+    }
+    return popHexRadius(lane, row, col, 1)
+  }
+  return resolveAttachment(lane, row, col)
 }
 
 function resolveAttachment(lane: LaneState, row: number, col: number): number {
@@ -411,13 +580,18 @@ function findFloating(grid: Map<string, BubbleColor>) {
 }
 
 export function bubblePos(row: number, col: number) {
-  const cols = colsForRow(row)
-  const stepX = cols > 1 ? (1 - BUBBLE_RADIUS * 2) / (cols - 1) : 0
-  const stagger = row % 2 === 1 ? stepX * 0.5 : 0
+  const hStep = GRID_COLS_EVEN > 1 ? (1 - GRID_H_MARGIN * 2) / (GRID_COLS_EVEN - 1) : 0
+  const stagger = row % 2 === 1 ? hStep * 0.5 : 0
   return {
-    x: BUBBLE_RADIUS + stagger + col * stepX,
-    y: GRID_TOP + row * BUBBLE_RADIUS * 1.72,
+    x: GRID_H_MARGIN + stagger + col * hStep,
+    y: GRID_TOP + row * ROW_VERTICAL_STEP,
   }
+}
+
+export function bubbleDistance(ax: number, ay: number, bx: number, by: number) {
+  const dx = ax - bx
+  const dy = (ay - by) * playfieldAspect
+  return Math.hypot(dx, dy)
 }
 
 export function colsForRow(row: number) {
@@ -500,6 +674,13 @@ function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value))
 }
 
+function wrapAngle(angle: number) {
+  let a = angle
+  while (a > Math.PI) a -= Math.PI * 2
+  while (a < -Math.PI) a += Math.PI * 2
+  return a
+}
+
 function mulberry32(seed: number) {
   let t = seed
   return () => {
@@ -508,6 +689,189 @@ function mulberry32(seed: number) {
     r ^= r + Math.imul(r ^ (r >>> 7), 61 | r)
     return ((r ^ (r >>> 14)) >>> 0) / 4294967296
   }
+}
+
+export type AttachCell = { row: number; col: number }
+
+function predictForceAttach(grid: Map<string, BubbleColor>, x: number, y: number): AttachCell {
+  const candidates = listAttachCandidates(grid)
+  if (candidates.length === 0) {
+    return { row: 0, col: nearestColInRow(0, x) }
+  }
+
+  let best = candidates[0]!
+  let bestDist = Infinity
+  for (const c of candidates) {
+    const pos = bubblePos(c.row, c.col)
+    const d = bubbleDistance(x, y, pos.x, pos.y)
+    if (d < bestDist) {
+      bestDist = d
+      best = c
+    }
+  }
+
+  const key = cellKey(best.row, best.col)
+  if (!grid.has(key)) return { row: best.row, col: best.col }
+  return predictAttachAtCeiling(grid, x)
+}
+
+function predictAttachAtCeiling(grid: Map<string, BubbleColor>, x: number): AttachCell {
+  const row = 0
+  const col = nearestColInRow(row, x)
+  const key = cellKey(row, col)
+  if (!grid.has(key)) return { row, col }
+  const fallback = predictAttachNear(grid, x, GRID_TOP + BUBBLE_RADIUS, row, col)
+  if (fallback) return fallback
+  return predictForceAttach(grid, x, GRID_TOP + BUBBLE_RADIUS)
+}
+
+function predictAttachNear(
+  grid: Map<string, BubbleColor>,
+  x: number,
+  y: number,
+  hitRow: number,
+  hitCol: number,
+): AttachCell | null {
+  const candidates = neighbors(hitRow, hitCol).filter(({ row, col }) => {
+    const key = cellKey(row, col)
+    return row >= 0 && !grid.has(key)
+  })
+
+  if (candidates.length === 0) {
+    const row = hitRow + 1
+    const col = nearestColInRow(row, x)
+    const key = cellKey(row, col)
+    if (!grid.has(key)) return { row, col }
+    return predictForceAttach(grid, x, y)
+  }
+
+  let best = candidates[0]!
+  let bestDist = Infinity
+  for (const c of candidates) {
+    const pos = bubblePos(c.row, c.col)
+    const d = bubbleDistance(x, y, pos.x, pos.y)
+    if (d < bestDist) {
+      bestDist = d
+      best = c
+    }
+  }
+
+  return { row: best.row, col: best.col }
+}
+
+const AIM_GUIDE_DOT_SPACING = 0.022
+const AIM_GUIDE_START_Y = SHOOTER_Y - 0.072
+
+/** Nişan çizgisi için atış yolundan eşit aralıklı noktalar */
+export function sampleAimGuideDots(
+  grid: Map<string, BubbleColor>,
+  aimAngle: number,
+): { dots: { x: number; y: number }[]; target: AttachCell | null } {
+  let x = SHOOTER_X
+  let y = AIM_GUIDE_START_Y
+  let vx = Math.cos(aimAngle) * SHOT_SPEED
+  let vy = Math.sin(aimAngle) * SHOT_SPEED
+  const step = 0.0095
+  const dots: { x: number; y: number }[] = []
+  let distToNextDot = 0
+  let prevX = x
+  let prevY = y
+
+  const addDotsOnSegment = (ax: number, ay: number, bx: number, by: number) => {
+    const segLen = bubbleDistance(ax, ay, bx, by)
+    if (segLen <= 0) return
+    let traveled = 0
+    while (traveled < segLen) {
+      const remain = distToNextDot > 0 ? distToNextDot : AIM_GUIDE_DOT_SPACING
+      const stepAlong = Math.min(remain, segLen - traveled)
+      traveled += stepAlong
+      distToNextDot -= stepAlong
+      if (distToNextDot <= 0.0001) {
+        const t = traveled / segLen
+        dots.push({
+          x: ax + (bx - ax) * t,
+          y: ay + (by - ay) * t,
+        })
+        distToNextDot = AIM_GUIDE_DOT_SPACING
+      }
+    }
+  }
+
+  for (let i = 0; i < 220; i += 1) {
+    prevX = x
+    prevY = y
+    x += vx * step
+    y += vy * step
+
+    if (x <= GRID_H_MARGIN) {
+      x = GRID_H_MARGIN
+      vx = Math.abs(vx)
+    } else if (x >= 1 - GRID_H_MARGIN) {
+      x = 1 - GRID_H_MARGIN
+      vx = -Math.abs(vx)
+    }
+
+    addDotsOnSegment(prevX, prevY, x, y)
+
+    if (y <= GRID_TOP + BUBBLE_RADIUS) {
+      const target = predictAttachAtCeiling(grid, x)
+      return { dots, target }
+    }
+
+    for (const [key] of grid) {
+      const [row, col] = key.split(',').map(Number)
+      const pos = bubblePos(row, col)
+      if (bubbleDistance(x, y, pos.x, pos.y) < COLLISION_DISTANCE) {
+        const attached = predictAttachNear(grid, x, y, row, col)
+        const target = attached ?? predictForceAttach(grid, x, y)
+        return { dots, target }
+      }
+    }
+
+    if (y > 1.08) return { dots, target: null }
+  }
+
+  return { dots, target: null }
+}
+
+/** Nişan açısında topun ızgarada oturacağı hücre (atışla aynı mantık) */
+export function predictAttachCell(grid: Map<string, BubbleColor>, aimAngle: number): AttachCell | null {
+  let x = SHOOTER_X
+  let y = SHOOTER_Y
+  let vx = Math.cos(aimAngle) * SHOT_SPEED
+  let vy = Math.sin(aimAngle) * SHOT_SPEED
+  const step = 0.0095
+
+  for (let i = 0; i < 220; i += 1) {
+    x += vx * step
+    y += vy * step
+
+    if (x <= GRID_H_MARGIN) {
+      x = GRID_H_MARGIN
+      vx = Math.abs(vx)
+    } else if (x >= 1 - GRID_H_MARGIN) {
+      x = 1 - GRID_H_MARGIN
+      vx = -Math.abs(vx)
+    }
+
+    if (y <= GRID_TOP + BUBBLE_RADIUS) {
+      return predictAttachAtCeiling(grid, x)
+    }
+
+    for (const [key] of grid) {
+      const [row, col] = key.split(',').map(Number)
+      const pos = bubblePos(row, col)
+      if (bubbleDistance(x, y, pos.x, pos.y) < COLLISION_DISTANCE) {
+        const attached = predictAttachNear(grid, x, y, row, col)
+        if (attached) return attached
+        return predictForceAttach(grid, x, y)
+      }
+    }
+
+    if (y > 1.08) return null
+  }
+
+  return null
 }
 
 export function listAttachCandidates(grid: Map<string, BubbleColor>) {
@@ -571,4 +935,97 @@ export function resolveRoundByScore(lane1: LaneState, lane2: LaneState): 'p1' | 
   if (lane1.score > lane2.score) return 'p1'
   if (lane2.score > lane1.score) return 'p2'
   return 'draw'
+}
+
+function rollShooterBubble(grid: Map<string, BubbleColor>, seed: number): BubbleSlot {
+  const rng = mulberry32(seed * 313)
+  const color = pickColorForLane(grid, Math.floor(rng() * 999))
+  const roll = rng()
+  if (roll < 0.08) return { color, kind: 'fire' }
+  if (roll < 0.14) return { color, kind: 'bomb' }
+  if (roll < 0.2) return { color, kind: 'rainbow' }
+  return { color, kind: 'normal' }
+}
+
+function refillGridIfEmpty(lane: LaneState, seed: number, events: LaneEvent[]) {
+  if (lane.grid.size > 0) return
+  lane.grid = createInitialGrid(seed)
+  const rolled = rollShooterBubble(lane.grid, seed + 5)
+  lane.currentColor = rolled.color
+  lane.currentKind = rolled.kind
+  const rolledNext = rollShooterBubble(lane.grid, seed + 9)
+  lane.nextColor = rolledNext.color
+  lane.nextKind = rolledNext.kind
+  events.push('refill')
+}
+
+function hexSteps(row0: number, col0: number, row1: number, col1: number): number {
+  if (row0 === row1 && col0 === col1) return 0
+  const visited = new Set<string>()
+  const queue: { row: number; col: number; d: number }[] = [{ row: row0, col: col0, d: 0 }]
+  while (queue.length > 0) {
+    const { row, col, d } = queue.shift()!
+    const key = cellKey(row, col)
+    if (visited.has(key)) continue
+    visited.add(key)
+    if (row === row1 && col === col1) return d
+    for (const n of neighbors(row, col)) {
+      const nKey = cellKey(n.row, n.col)
+      if (!visited.has(nKey)) queue.push({ row: n.row, col: n.col, d: d + 1 })
+    }
+  }
+  return 99
+}
+
+function popHexRadius(lane: LaneState, centerRow: number, centerCol: number, radius: number): number {
+  let removed = 0
+  for (const key of [...lane.grid.keys()]) {
+    const [row, col] = key.split(',').map(Number)
+    if (hexSteps(centerRow, centerCol, row, col) > radius) continue
+    spawnParticles(lane, bubblePos(row, col), lane.grid.get(key)!, 10)
+    lane.grid.delete(key)
+    removed += 1
+  }
+  return removed + popFloating(lane)
+}
+
+function popRainbowAt(lane: LaneState, row: number, col: number): number {
+  let removed = 0
+  const handled = new Set<string>()
+  for (const n of neighbors(row, col)) {
+    const nKey = cellKey(n.row, n.col)
+    const color = lane.grid.get(nKey)
+    if (!color) continue
+    const cluster = floodColor(lane.grid, n.row, n.col)
+    if (cluster.size < 2) continue
+    const signature = [...cluster].sort().join('|')
+    if (handled.has(signature)) continue
+    handled.add(signature)
+    for (const key of cluster) {
+      if (!lane.grid.has(key)) continue
+      const [r, c] = key.split(',').map(Number)
+      spawnParticles(lane, bubblePos(r, c), lane.grid.get(key)!, 10)
+      lane.grid.delete(key)
+      removed += 1
+    }
+  }
+  const selfKey = cellKey(row, col)
+  if (lane.grid.has(selfKey)) {
+    spawnParticles(lane, bubblePos(row, col), lane.grid.get(selfKey)!, 8)
+    lane.grid.delete(selfKey)
+    removed += 1
+  }
+  return removed + popFloating(lane)
+}
+
+function popFloating(lane: LaneState): number {
+  let removed = 0
+  const floating = findFloating(lane.grid)
+  for (const key of floating) {
+    const [r, c] = key.split(',').map(Number)
+    spawnParticles(lane, bubblePos(r, c), lane.grid.get(key)!)
+    lane.grid.delete(key)
+    removed += 1
+  }
+  return removed
 }
