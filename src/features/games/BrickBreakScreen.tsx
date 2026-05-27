@@ -3,7 +3,7 @@ import { useCallback, useEffect } from 'react'
 import { FiArrowLeft, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
+import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { BrickBreakCanvas } from './components/BrickBreakCanvas'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useBrickBreakDuel } from './useBrickBreakDuel'
@@ -72,7 +72,7 @@ export function BrickBreakScreen() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.32 }}
         >
-          <GameDuelAmbientBg />
+          <GameDuelBackdrop />
 
           <button type="button" className="pm-brick-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />

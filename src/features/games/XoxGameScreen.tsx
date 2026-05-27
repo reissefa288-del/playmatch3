@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { useProfileLevel } from '../profile/ProfileLevelProvider'
-import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
+import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { XoxGameBoard } from './components/XoxGameBoard'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useXoxRealtime } from './useXoxRealtime'
@@ -130,7 +130,7 @@ export function XoxGameScreen() {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.34 }}
         >
-          <GameDuelAmbientBg />
+          <GameDuelBackdrop />
 
           <button type="button" className="pm-xox-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />

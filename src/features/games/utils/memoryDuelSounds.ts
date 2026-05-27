@@ -17,7 +17,7 @@ function getCtx(): AudioContext | null {
 
 export function unlockMemoryDuelAudio() {
   const ctx = getCtx()
-  if (!ctx || unlocked) return
+  if (!ctx) return
   unlocked = true
   if (ctx.state === 'suspended') void ctx.resume()
 }
@@ -41,46 +41,59 @@ function tone(freq: number, duration: number, type: OscillatorType, gain: number
 
 const lastPlayed: Partial<Record<MemorySoundId, number>> = {}
 const MIN_GAP: Record<MemorySoundId, number> = {
-  flip: 80,
-  match: 120,
-  miss: 180,
-  combo: 200,
-  round: 500,
+  flip: 70,
+  match: 110,
+  miss: 160,
+  combo: 180,
+  round: 450,
   win: 900,
   lose: 900,
 }
 
-export function playMemoryDuelSound(id: MemorySoundId) {
-  const now = performance.now()
-  if (lastPlayed[id] && now - lastPlayed[id]! < MIN_GAP[id]) return
-  lastPlayed[id] = now
-
+function playTone(id: MemorySoundId) {
   switch (id) {
     case 'flip':
-      tone(520, 0.06, 'triangle', 0.05, 680)
+      tone(540, 0.055, 'triangle', 0.07, 720)
       break
     case 'match':
-      tone(660, 0.1, 'sine', 0.07, 920)
-      tone(880, 0.12, 'sine', 0.05, undefined, 0.04)
+      tone(680, 0.1, 'sine', 0.085, 940)
+      tone(900, 0.12, 'sine', 0.06, undefined, 0.04)
       break
     case 'miss':
-      tone(220, 0.14, 'sawtooth', 0.04, 160)
+      tone(240, 0.13, 'sawtooth', 0.055, 170)
       break
     case 'combo':
-      tone(740, 0.08, 'triangle', 0.05, 980)
+      tone(780, 0.085, 'triangle', 0.065, 1020)
+      tone(1040, 0.1, 'sine', 0.05, undefined, 0.05)
       break
     case 'round':
-      tone(440, 0.16, 'sine', 0.06, 660)
+      tone(460, 0.14, 'sine', 0.075, 680)
+      tone(580, 0.12, 'sine', 0.055, undefined, 0.08)
       break
     case 'win':
-      tone(523, 0.12, 'sine', 0.07)
-      tone(659, 0.12, 'sine', 0.06, undefined, 0.1)
-      tone(784, 0.18, 'sine', 0.07, undefined, 0.2)
+      tone(523, 0.12, 'sine', 0.08)
+      tone(659, 0.12, 'sine', 0.07, undefined, 0.1)
+      tone(784, 0.2, 'sine', 0.075, undefined, 0.2)
       break
     case 'lose':
-      tone(330, 0.2, 'triangle', 0.05, 180)
+      tone(350, 0.18, 'triangle', 0.06, 190)
+      tone(260, 0.22, 'sine', 0.05, undefined, 0.1)
       break
     default:
       break
   }
+}
+
+export function playMemoryDuelSound(id: MemorySoundId) {
+  const ctx = getCtx()
+  if (!ctx || !unlocked) return
+  if (ctx.state === 'suspended') {
+    void ctx.resume().then(() => playMemoryDuelSound(id))
+    return
+  }
+
+  const now = performance.now()
+  if (lastPlayed[id] && now - lastPlayed[id]! < MIN_GAP[id]) return
+  lastPlayed[id] = now
+  playTone(id)
 }

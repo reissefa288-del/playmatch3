@@ -215,6 +215,7 @@ export function SeamlessLoopVideo({
         ref={videoARef}
         className={`pm-seamless-loop-video__el ${active === 'a' ? 'is-active' : ''}`}
         src={src}
+        autoPlay
         muted
         playsInline
         preload="auto"
@@ -225,6 +226,7 @@ export function SeamlessLoopVideo({
         ref={videoBRef}
         className={`pm-seamless-loop-video__el ${active === 'b' ? 'is-active' : ''}`}
         src={src}
+        autoPlay
         muted
         playsInline
         preload="auto"

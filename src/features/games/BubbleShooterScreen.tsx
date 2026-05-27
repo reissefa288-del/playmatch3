@@ -2,9 +2,8 @@ import { motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, type PointerEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import bubbleHeaderVideo from '../../reference/video.mp4'
 import vsBadge from '../../reference/vs.png'
-import { SeamlessLoopVideo } from './components/SeamlessLoopVideo'
+import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { BubbleBackIcon } from './components/BubbleGameIcons'
 import { BubbleControlDock } from './components/BubbleControlDock'
@@ -143,25 +142,7 @@ export function BubbleShooterScreen() {
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--bubble">
       <div className="pm-artboard">
         <div className="pm-bubble-screen" onPointerDown={interact}>
-          <div className="pm-bubble-screen-video" aria-hidden>
-            <div className="pm-bubble-screen-video__crop is-p1">
-              <SeamlessLoopVideo
-                className="pm-bubble-screen-video__media"
-                src={bubbleHeaderVideo}
-                crossfadeSec={0.52}
-              />
-            </div>
-            <div className="pm-bubble-screen-video__crop is-p2">
-              <SeamlessLoopVideo
-                className="pm-bubble-screen-video__media"
-                src={bubbleHeaderVideo}
-                crossfadeSec={0.52}
-              />
-            </div>
-            <span className="pm-bubble-screen-video__panel is-p1" aria-hidden />
-            <span className="pm-bubble-screen-video__panel is-p2" aria-hidden />
-            <span className="pm-bubble-screen-video__grade" aria-hidden />
-          </div>
+          <GameDuelBackdrop />
           <div className="pm-bubble-screen__stack">
           <div className="pm-bubble-hud-band">
           <header className="pm-bubble-header" aria-label="Oyuncu bilgileri">

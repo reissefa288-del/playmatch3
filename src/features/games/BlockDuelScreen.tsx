@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
+import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { BlockBoardCanvas } from './components/BlockBoardCanvas'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import {
@@ -112,7 +112,7 @@ export function BlockDuelScreen() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.32 }}
         >
-          <GameDuelAmbientBg />
+          <GameDuelBackdrop />
 
           <button type="button" className="pm-block-back" onClick={handleBack} aria-label="Geri dön">
             <BlockBackIcon />

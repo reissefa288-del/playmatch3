@@ -23,12 +23,6 @@
   --bubble-glass: rgba(10, 16, 42, 0.38);
   --bubble-glass-border: rgba(160, 200, 255, 0.28);
   --bubble-pad: var(--pm-game-pad, 14px);
-  /* video.mp4 — sol mavi / sağ pembe kadraj (hafif, doygunluk kontrollü) */
-  --bubble-video-blue-x: 34%;
-  --bubble-video-blue-y: 76%;
-  --bubble-video-pink-x: 72%;
-  --bubble-video-pink-y: 76%;
-  --bubble-video-scale: 1.28;
   position: relative;
   flex: 1 1 auto;
   min-height: 0;
@@ -43,109 +37,6 @@
   overflow: hidden;
   font-family: Orbitron, Inter, system-ui, sans-serif;
   color: #e8eef8;
-}
-
-/* Tam ekran video — sol mavi / sağ pembe ayrı kadraj */
-.pm-bubble-screen-video {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.pm-bubble-screen-video__crop {
-  position: relative;
-  overflow: hidden;
-}
-
-.pm-bubble-screen-video__crop .pm-seamless-loop-video {
-  position: absolute;
-  top: -14%;
-  width: 200%;
-  height: 124%;
-}
-
-.pm-bubble-screen-video__crop.is-p1 .pm-seamless-loop-video {
-  left: 0;
-}
-
-.pm-bubble-screen-video__crop.is-p2 .pm-seamless-loop-video {
-  left: -100%;
-}
-
-.pm-bubble-screen-video__crop.is-p1 .pm-seamless-loop-video__el {
-  object-position: var(--bubble-video-blue-x) var(--bubble-video-blue-y);
-  transform: scale(var(--bubble-video-scale)) translateZ(0);
-  transform-origin: var(--bubble-video-blue-x) var(--bubble-video-blue-y);
-}
-
-.pm-bubble-screen-video__crop.is-p2 .pm-seamless-loop-video__el {
-  object-position: var(--bubble-video-pink-x) var(--bubble-video-pink-y);
-  transform: scale(var(--bubble-video-scale)) translateZ(0);
-  transform-origin: var(--bubble-video-pink-x) var(--bubble-video-pink-y);
-}
-
-.pm-seamless-loop-video {
-  --pm-seamless-fade: 0.52s;
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-}
-
-.pm-seamless-loop-video__el {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0;
-  transition: opacity var(--pm-seamless-fade) linear;
-  will-change: opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-}
-
-.pm-seamless-loop-video__el.is-active {
-  opacity: 1;
-}
-
-.pm-bubble-screen-video__crop .pm-seamless-loop-video__el {
-  filter: saturate(1.02) contrast(1.04) brightness(0.94);
-}
-
-.pm-bubble-screen-video__panel {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 2;
-  width: 50%;
-  pointer-events: none;
-}
-
-.pm-bubble-screen-video__panel.is-p1 {
-  left: 0;
-  background: linear-gradient(100deg, rgba(0, 118, 210, 0.05), transparent 78%);
-}
-
-.pm-bubble-screen-video__panel.is-p2 {
-  right: 0;
-  background: linear-gradient(260deg, rgba(220, 30, 110, 0.05), transparent 78%);
-}
-
-.pm-bubble-screen-video__grade {
-  grid-column: 1 / -1;
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 88% 72% at 50% 42%, rgba(6, 10, 24, 0.5) 0%, transparent 58%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.38) 0%, transparent 22%, transparent 78%, rgba(0, 0, 0, 0.42) 100%),
-    linear-gradient(90deg, rgba(0, 0, 0, 0.12) 0%, transparent 18%, transparent 82%, rgba(0, 0, 0, 0.12) 100%);
 }
 
 /* Eski tam ekran tint — video ile değiştirildi */
@@ -555,18 +446,12 @@
   left: -100%;
 }
 
-.pm-bubble-hero-bg__crop.is-p1 .pm-seamless-loop-video__el {
-  object-position: var(--bubble-video-blue-x) var(--bubble-video-blue-y);
-  transform: scale(var(--bubble-video-scale)) translateZ(0);
-  transform-origin: var(--bubble-video-blue-x) var(--bubble-video-blue-y);
-  filter: saturate(1.15) contrast(1.06) brightness(1.02);
-}
-
+.pm-bubble-hero-bg__crop.is-p1 .pm-seamless-loop-video__el,
 .pm-bubble-hero-bg__crop.is-p2 .pm-seamless-loop-video__el {
-  object-position: var(--bubble-video-pink-x) var(--bubble-video-pink-y);
-  transform: scale(var(--bubble-video-scale)) translateZ(0);
-  transform-origin: var(--bubble-video-pink-x) var(--bubble-video-pink-y);
-  filter: saturate(1.15) contrast(1.06) brightness(1.02);
+  object-position: var(--duel-video-focus-x) var(--duel-video-focus-y);
+  transform: scale(var(--duel-video-scale)) translateZ(0);
+  transform-origin: var(--duel-video-focus-x) var(--duel-video-focus-y);
+  filter: saturate(1.16) contrast(1.05) brightness(1.04);
 }
 
 .pm-bubble-hero-bg__panel {

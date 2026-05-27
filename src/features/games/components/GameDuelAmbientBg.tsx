@@ -31,7 +31,7 @@ type GameDuelAmbientBgProps = {
   video?: boolean
 }
 
-/** Paylaşılan premium AAA duel arka planı — Block · Brick · Bubble · XOX */
+/** Paylaşılan premium AAA duel arka planı — video={false} ile GameDuelVideoBg üstünde */
 export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDuelAmbientBgProps) {
   const isBubble = variant === 'bubble'
 

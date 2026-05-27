@@ -20,7 +20,7 @@ import {
   type LaneEvent,
   type LaneState,
 } from './utils/memoryDuelEngine'
-import { playMemoryDuelSound } from './utils/memoryDuelSounds'
+import { playMemoryDuelSound, unlockMemoryDuelAudio } from './utils/memoryDuelSounds'
 
 type MatchResult = 'p1' | 'p2' | 'draw'
 type RoundWinner = 'p1' | 'p2' | 'draw'
@@ -76,12 +76,12 @@ export function useMemoryDuel() {
     }
   }, [])
 
-  const playEvents = useCallback((events: LaneEvent[], side: 'p1' | 'p2', combo: number) => {
+  const playEvents = useCallback((events: LaneEvent[], combo: number) => {
     for (const event of events) {
       if (event === 'flip') playMemoryDuelSound('flip')
       else if (event === 'match') playMemoryDuelSound(combo > 1 ? 'combo' : 'match')
       else if (event === 'miss') playMemoryDuelSound('miss')
-      else if (event === 'win' && side === 'p1') playMemoryDuelSound('round')
+      else if (event === 'win') playMemoryDuelSound('round')
     }
   }, [])
 
@@ -180,7 +180,7 @@ export function useMemoryDuel() {
   const applyLaneResult = useCallback(
     (side: 'p1' | 'p2', result: ReturnType<typeof flipCard>) => {
       const combo = result.lane.combo
-      playEvents(result.events, side, combo)
+      playEvents(result.events, combo)
       if (side === 'p1') syncLanes(result.lane, lane2Ref.current)
       else syncLanes(lane1Ref.current, result.lane)
 
@@ -231,6 +231,7 @@ export function useMemoryDuel() {
   )
 
   const restartMatch = useCallback(() => {
+    unlockMemoryDuelAudio()
     clearFlipBack()
     clearBotTimer()
     endedRef.current = false

@@ -19,9 +19,37 @@
   filter: saturate(1.12) contrast(1.06) brightness(1.03);
 }
 
+.pm-seamless-loop-video {
+  --pm-seamless-fade: 0.52s;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.pm-seamless-loop-video__el {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0;
+  transition: opacity var(--pm-seamless-fade) linear;
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.pm-seamless-loop-video__el.is-active {
+  opacity: 1;
+}
+
 .pm-duel-ambient__video .pm-seamless-loop-video__el {
   object-fit: cover;
   object-position: 50% 70%;
+  filter: saturate(1.12) contrast(1.06) brightness(1.03);
 }
 
 .pm-duel-ambient__base {

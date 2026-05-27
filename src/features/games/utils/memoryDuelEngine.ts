@@ -1,5 +1,5 @@
 export const GRID_COLS = 4
-export const GRID_ROWS = 4
+export const GRID_ROWS = 6
 export const CARD_COUNT = GRID_COLS * GRID_ROWS
 export const PAIR_COUNT = CARD_COUNT / 2
 export const WIN_ROUNDS = 3
@@ -8,30 +8,63 @@ export const ROUND_BREAK_MS = 2600
 export const FLIP_BACK_MS = 680
 export const ROUND_SECONDS = 90
 
-export type MemorySymbol = 'star' | 'bolt' | 'heart' | 'diamond' | 'moon' | 'sun' | 'clover' | 'hex'
+export type MemorySymbol =
+  | 'star'
+  | 'diamond'
+  | 'bolt'
+  | 'heart'
+  | 'clover'
+  | 'flame'
+  | 'moon'
+  | 'planet'
+  | 'sun'
+  | 'crown'
+  | 'rose'
+  | 'shield'
 
-export const MEMORY_SYMBOLS: MemorySymbol[] = ['star', 'bolt', 'heart', 'diamond', 'moon', 'sun', 'clover', 'hex']
+export const MEMORY_SYMBOLS: MemorySymbol[] = [
+  'star',
+  'diamond',
+  'bolt',
+  'heart',
+  'clover',
+  'flame',
+  'moon',
+  'planet',
+  'sun',
+  'crown',
+  'rose',
+  'shield',
+]
 
 export const SYMBOL_GLYPH: Record<MemorySymbol, string> = {
   star: '★',
+  diamond: '◆',
   bolt: '⚡',
   heart: '♥',
-  diamond: '◆',
+  clover: '♣',
+  flame: '🔥',
   moon: '☾',
+  planet: '⦿',
   sun: '☀',
-  clover: '✦',
-  hex: '⬡',
+  crown: '♛',
+  rose: '❀',
+  shield: '⛨',
 }
 
 export const SYMBOL_COLOR: Record<MemorySymbol, string> = {
   star: '#ffb347',
-  bolt: '#5cff8a',
+  diamond: '#7ecbff',
+  bolt: '#ffd76a',
   heart: '#ff5a9a',
-  diamond: '#b48cff',
-  moon: '#7ecbff',
-  sun: '#ffd76a',
-  clover: '#6ef0c8',
-  hex: '#5a9bff',
+  clover: '#5cff8a',
+  flame: '#ff8a4a',
+  moon: '#b48cff',
+  planet: '#00e8ff',
+  sun: '#ffcf5a',
+  crown: '#ff55c8',
+  rose: '#ff4a5a',
+  shield: '#5a9bff',
 }
 
 export type CardStatus = 'hidden' | 'shown' | 'matched'
@@ -57,6 +90,7 @@ export type LaneState = {
   openIndices: number[]
   pairsFound: number
   combo: number
+  score: number
   matchPoints: number
   inputLocked: boolean
   flipBackPending: boolean
@@ -94,6 +128,7 @@ export function createLane(laneId: number, seed = 11): LaneState {
     openIndices: [],
     pairsFound: 0,
     combo: 0,
+    score: 0,
     matchPoints: 0,
     inputLocked: false,
     flipBackPending: false,
@@ -106,7 +141,7 @@ export function createLane(laneId: number, seed = 11): LaneState {
 
 export function startNewRound(lane: LaneState, seed: number): LaneState {
   const next = createLane(lane.laneId, seed)
-  return { ...next, matchPoints: lane.matchPoints }
+  return { ...next, matchPoints: lane.matchPoints, score: lane.score }
 }
 
 export function decayLaneFx(lane: LaneState, dt: number): LaneState {
@@ -141,6 +176,7 @@ export function flipCard(lane: LaneState, index: number): { lane: LaneState; eve
     )
     const pairsFound = lane.pairsFound + 1
     const combo = lane.combo + 1
+    const score = lane.score + 100 * combo
     const finished = pairsFound >= PAIR_COUNT
     if (finished) events.push('win')
     events.push('match')
@@ -151,6 +187,7 @@ export function flipCard(lane: LaneState, index: number): { lane: LaneState; eve
         openIndices: [],
         pairsFound,
         combo,
+        score,
         finished,
         lastMatchIndex: b,
         shake: 0.35,
