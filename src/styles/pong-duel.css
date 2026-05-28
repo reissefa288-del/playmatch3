@@ -1,0 +1,352 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800;900&display=swap');
+
+.pm-app-shell--pong.pm-app-shell--game-play {
+  height: 100svh;
+  max-height: 100svh;
+}
+
+@supports not (height: 100svh) {
+  .pm-app-shell--pong.pm-app-shell--game-play {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+
+.pm-app-shell--pong .pm-artboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pm-pong-lobby,
+.pm-pong-screen {
+  --pong-cyan: #00e8ff;
+  --pong-pink: #ff2d9a;
+  --pong-pad: clamp(8px, 2.5vw, 12px);
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  color: #f5f9ff;
+}
+
+.pm-pong-back,
+.pm-pong-settings {
+  position: absolute;
+  z-index: 6;
+  top: max(8px, env(safe-area-inset-top));
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(130, 190, 255, 0.4);
+  background: rgba(6, 10, 28, 0.82);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  cursor: pointer;
+}
+
+.pm-pong-back { left: var(--pong-pad); }
+.pm-pong-settings { right: var(--pong-pad); }
+
+.pm-pong-lobby__stack {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.5vh, 18px);
+  padding: max(44px, env(safe-area-inset-top)) var(--pong-pad) max(12px, env(safe-area-inset-bottom));
+}
+
+.pm-pong-lobby__eyebrow {
+  margin: 0;
+  font-size: 0.4rem;
+  letter-spacing: 0.2em;
+  color: rgba(170, 195, 240, 0.85);
+}
+
+.pm-pong-lobby__title {
+  margin: 0;
+  display: flex;
+  gap: 0.35em;
+  font-family: Orbitron, system-ui, sans-serif;
+  font-weight: 900;
+  font-size: clamp(0.95rem, 4.8vw, 1.25rem);
+  letter-spacing: 0.12em;
+}
+
+.pm-pong-lobby__title .is-cyan { color: var(--pong-cyan); }
+.pm-pong-lobby__title .is-pink { color: var(--pong-pink); }
+
+.pm-pong-lobby__sub {
+  margin: 4px 0 0;
+  font-size: clamp(0.34rem, 1.9vw, 0.42rem);
+  letter-spacing: 0.12em;
+  color: rgba(170, 195, 240, 0.88);
+}
+
+.pm-pong-lobby__rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: min(100%, 300px);
+  display: grid;
+  gap: 8px;
+}
+
+.pm-pong-lobby__rules li {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(130, 190, 255, 0.28);
+  background: rgba(4, 8, 24, 0.82);
+}
+
+.pm-pong-lobby__rules svg { color: var(--pong-cyan); flex-shrink: 0; }
+.pm-pong-lobby__rules strong {
+  display: block;
+  font-family: Orbitron, system-ui, sans-serif;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+}
+.pm-pong-lobby__rules span { font-size: 0.68rem; color: rgba(190, 210, 245, 0.9); line-height: 1.35; }
+
+.pm-pong-lobby__preview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(100%, 200px);
+  height: 48px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid rgba(130, 190, 255, 0.35);
+  background: rgba(4, 10, 28, 0.9);
+}
+
+.pm-pong-lobby__preview .is-paddle {
+  width: 6px;
+  height: 28px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--pong-cyan), #4ab8ff);
+  box-shadow: 0 0 10px rgba(0, 232, 255, 0.5);
+}
+
+.pm-pong-lobby__preview .is-paddle.is-right {
+  margin-left: auto;
+  background: linear-gradient(180deg, var(--pong-pink), #ff8fd4);
+  box-shadow: 0 0 10px rgba(255, 45, 154, 0.45);
+}
+
+.pm-pong-lobby__preview .is-ball {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 12px #fff;
+}
+
+.pm-pong-lobby__cta {
+  width: min(100%, 260px);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-family: Orbitron, system-ui, sans-serif;
+  font-weight: 800;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: #0a0e1c;
+  background: linear-gradient(90deg, var(--pong-cyan), var(--pong-pink));
+  cursor: pointer;
+}
+
+.pm-pong-screen__stack {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: clamp(3px, 0.8vw, 6px);
+  padding:
+    max(4px, env(safe-area-inset-top))
+    var(--pong-pad)
+    max(4px, env(safe-area-inset-bottom));
+  overflow: hidden;
+}
+
+.pm-pong-header {
+  padding-top: clamp(10px, 3vw, 16px);
+  text-align: center;
+}
+
+.pm-pong-header__title {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  gap: 0.35em;
+  font-family: Orbitron, system-ui, sans-serif;
+  font-weight: 900;
+  font-size: clamp(0.78rem, 3.6vw, 0.98rem);
+  letter-spacing: 0.12em;
+}
+
+.pm-pong-header__title .is-cyan { color: var(--pong-cyan); }
+.pm-pong-header__title .is-pink { color: var(--pong-pink); }
+
+.pm-pong-header__sub {
+  margin: 2px 0 0;
+  font-size: 0.34rem;
+  letter-spacing: 0.1em;
+  color: rgba(170, 195, 240, 0.85);
+}
+
+.pm-pong-hud {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pm-pong-hud__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  font-family: Orbitron, system-ui, sans-serif;
+  font-size: 0.42rem;
+}
+
+.pm-pong-hud__side strong {
+  font-size: clamp(0.85rem, 4vw, 1.1rem);
+  color: var(--pong-cyan);
+}
+
+.pm-pong-hud__side.is-p2 strong { color: var(--pong-pink); }
+
+.pm-pong-hud__side span {
+  font-size: 0.34rem;
+  color: rgba(160, 185, 230, 0.85);
+}
+
+.pm-pong-arena {
+  position: relative;
+  width: min(100%, 360px);
+  max-height: 100%;
+  margin: 0 auto;
+  aspect-ratio: 4 / 5;
+  border-radius: 14px;
+  border: 2px solid rgba(130, 190, 255, 0.4);
+  background:
+    linear-gradient(90deg, rgba(0, 232, 255, 0.06) 0 49%, rgba(255, 45, 154, 0.06) 51% 100%),
+    rgba(4, 10, 28, 0.95);
+  box-shadow:
+    inset 0 0 40px rgba(0, 232, 255, 0.06),
+    inset 0 0 40px rgba(255, 45, 154, 0.05),
+    0 0 24px rgba(80, 140, 255, 0.15);
+  overflow: hidden;
+  touch-action: none;
+  cursor: none;
+}
+
+.pm-pong-arena__mid {
+  position: absolute;
+  left: 50%;
+  top: 4%;
+  bottom: 4%;
+  width: 2px;
+  margin-left: -1px;
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0 8px,
+    transparent 8px 16px
+  );
+  opacity: 0.5;
+}
+
+.pm-pong-arena__vs {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: Orbitron, system-ui, sans-serif;
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.55);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.pm-pong-paddle {
+  position: absolute;
+  border-radius: 6px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.pm-pong-paddle.is-p1 {
+  left: 2%;
+  background: linear-gradient(180deg, #7af0ff, var(--pong-cyan));
+  box-shadow: 0 0 14px rgba(0, 232, 255, 0.55);
+}
+
+.pm-pong-paddle.is-p2 {
+  right: 2%;
+  background: linear-gradient(180deg, #ff8fd4, var(--pong-pink));
+  box-shadow: 0 0 14px rgba(255, 45, 154, 0.5);
+}
+
+.pm-pong-ball {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff, #d0e8ff 55%, #88b8ff);
+  box-shadow: 0 0 16px rgba(255, 255, 255, 0.85);
+  z-index: 4;
+  pointer-events: none;
+}
+
+.pm-pong-hint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.34rem;
+  letter-spacing: 0.1em;
+  color: rgba(160, 185, 230, 0.75);
+}
+
+.pm-pong-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  background: rgba(2, 4, 12, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.pm-pong-overlay p {
+  margin: 0;
+  font-family: Orbitron, system-ui, sans-serif;
+  font-size: clamp(0.85rem, 3.8vw, 1rem);
+  letter-spacing: 0.1em;
+  text-align: center;
+  padding: 0 14px;
+}
+
+.pm-pong-overlay button {
+  border: 1px solid rgba(130, 190, 255, 0.5);
+  border-radius: 10px;
+  padding: 9px 16px;
+  background: rgba(130, 190, 255, 0.12);
+  color: #fff;
+  font-family: Orbitron, system-ui, sans-serif;
+  font-size: 0.52rem;
+  cursor: pointer;
+}

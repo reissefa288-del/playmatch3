@@ -16,16 +16,6 @@ function formatTime(sec: number) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-function RoundDots({ wins, max, variant }: { wins: number; max: number; variant: 'cyan' | 'pink' }) {
-  return (
-    <motion.div className={`pm-memory-round-dots is-${variant}`} aria-hidden>
-      {Array.from({ length: max }, (_, i) => (
-        <span key={i} className={i < wins ? 'is-won' : ''} />
-      ))}
-    </motion.div>
-  )
-}
-
 export function MemoryDuelScreen() {
   const navigate = useNavigate()
   const game = useMemoryDuel()

@@ -5,7 +5,6 @@ import {
   FiArrowDown,
   FiArrowRight,
   FiChevronLeft,
-  FiAward,
   FiClock,
   FiMenu,
   FiSettings,
@@ -13,11 +12,10 @@ import {
 } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
+import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { StackDuelTower } from './components/StackDuelTower'
 import { useStackDuel } from './useStackDuel'
-import { TARGET_SCORE } from './utils/stackDuelEngine'
 import { unlockStackDuelAudio } from './utils/stackDuelSounds'
 
 function formatTime(sec: number) {
@@ -47,7 +45,6 @@ export function StackDuelScreen() {
   const handleBack = useCallback(() => navigate(-1), [navigate])
   const interact = useCallback(() => unlockStackDuelAudio(), [])
 
-  const progress = Math.min(100, (game.lane1.score / TARGET_SCORE) * 100)
   const overlayMessage = !game.running
     ? game.winner === 'draw'
       ? 'MAÇ BERABERE'
@@ -60,7 +57,7 @@ export function StackDuelScreen() {
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--stack">
       <div className="pm-artboard">
         <motion.div className="pm-stack-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <GameDuelAmbientBg />
+          <GameDuelBackdrop />
 
           <button type="button" className="pm-stack-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
@@ -138,15 +135,6 @@ export function StackDuelScreen() {
               </button>
             ) : null}
           </section>
-
-          <div className="pm-stack-target">
-            <FiAward aria-hidden />
-            <span>HEDEF SKOR</span>
-            <strong>{formatScore(TARGET_SCORE)}</strong>
-            <div className="pm-stack-target__bar">
-              <span style={{ width: `${progress}%` }} />
-            </div>
-          </div>
 
           <div className="pm-stack-controls" role="group" aria-label="Kontroller">
             <button

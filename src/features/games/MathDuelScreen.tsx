@@ -3,7 +3,7 @@ import { useCallback } from 'react'
 import { FiArrowLeft, FiAward, FiClock, FiSettings, FiVolume2 } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { GameDuelAmbientBg } from './components/GameDuelAmbientBg'
+import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { MathDuelSide } from './components/MathDuelSide'
 import { useMathDuel } from './useMathDuel'
@@ -78,7 +78,7 @@ export function MathDuelScreen() {
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--math">
       <div className="pm-artboard">
         <motion.div className="pm-math-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-          <GameDuelAmbientBg />
+          <GameDuelBackdrop />
 
           <button type="button" className="pm-math-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />

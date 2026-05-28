@@ -3,8 +3,22 @@
 .pm-brick-screen,
 .pm-block-screen,
 .pm-xox-screen,
+.pm-math-screen,
+.pm-cmatch-lobby,
+.pm-cmatch-screen,
+.pm-ncrush-lobby,
+.pm-ncrush-screen,
+.pm-dart-lobby,
+.pm-dart-screen,
+.pm-snake-lobby,
+.pm-snake-screen,
+.pm-pong-lobby,
+.pm-pong-screen,
+.pm-reflex-lobby,
+.pm-reflex-screen,
 .pm-memory-screen,
-.pm-bubble-screen {
+.pm-bubble-screen,
+.pm-stack-screen {
   --duel-video-focus-x: 50%;
   --duel-video-focus-y: 64%;
   --duel-video-scale: 1.14;
@@ -95,8 +109,22 @@
 .pm-brick-screen .pm-duel-ambient,
 .pm-block-screen .pm-duel-ambient,
 .pm-xox-screen .pm-duel-ambient,
+.pm-math-screen .pm-duel-ambient,
+.pm-cmatch-lobby .pm-duel-ambient,
+.pm-cmatch-screen .pm-duel-ambient,
+.pm-ncrush-lobby .pm-duel-ambient,
+.pm-ncrush-screen .pm-duel-ambient,
+.pm-dart-lobby .pm-duel-ambient,
+.pm-dart-screen .pm-duel-ambient,
+.pm-snake-lobby .pm-duel-ambient,
+.pm-snake-screen .pm-duel-ambient,
+.pm-pong-lobby .pm-duel-ambient,
+.pm-pong-screen .pm-duel-ambient,
+.pm-reflex-lobby .pm-duel-ambient,
+.pm-reflex-screen .pm-duel-ambient,
 .pm-memory-screen .pm-duel-ambient,
-.pm-bubble-screen .pm-duel-ambient {
+.pm-bubble-screen .pm-duel-ambient,
+.pm-stack-screen .pm-duel-ambient {
   display: none;
 }
 

@@ -230,17 +230,27 @@ export type GamesMiniCard = {
     | 'brick-break'
     | 'block-duel'
     | 'pong'
+    | 'pong-duel'
+    | 'reflex-duel'
+    | 'simon-duel'
+    | 'whack-duel'
+    | 'rhythm-duel'
+    | 'catch-duel'
+    | 'slice-duel'
+    | 'basket-duel'
+    | 'chess-duel'
+    | 'galaga-duel'
     | 'word-arena'
     | 'xox'
     | 'snake'
     | 'memory'
     | 'stack'
     | 'color-match'
+    | 'neon-crush'
     | 'dart'
+    | 'snake-duel'
     | 'math'
     | 'math-duel'
-    | 'flappy-duel'
-    | 'candy-clash'
     | 'more'
   badge?: string
   players: string
@@ -310,30 +320,135 @@ export const popularGamesCards: GamesMiniCard[] = [
     color: 'is-green',
   },
   {
-    id: 'flappy-duel',
-    title: 'FLAPPY DUEL',
-    icon: IoRocketOutline,
-    artKind: 'flappy-duel',
+    id: 'color-match-duel',
+    title: 'COLOR MATCH',
+    icon: FiGrid,
+    artKind: 'color-match',
     badge: 'Duel',
-    players: '1180',
+    players: '680',
     color: 'is-violet',
   },
   {
-    id: 'candy-clash',
-    title: 'CANDY CLASH',
-    icon: FiZap,
-    artKind: 'candy-clash',
-    badge: 'Duel',
-    players: '1.4K',
+    id: 'neon-crush-duel',
+    title: 'NEON CRUSH',
+    icon: IoRocketOutline,
+    artKind: 'neon-crush',
+    badge: 'YENİ',
+    players: '740',
     color: 'is-pink',
+  },
+  {
+    id: 'dart-duel',
+    title: 'DART DUEL',
+    icon: LuSwords,
+    artKind: 'dart',
+    badge: 'Duel',
+    players: '520',
+    color: 'is-orange',
+  },
+  {
+    id: 'snake-duel',
+    title: 'SNAKE DUEL',
+    icon: IoRocketOutline,
+    artKind: 'snake-duel',
+    badge: 'YENİ',
+    players: '890',
+    color: 'is-green',
+  },
+  {
+    id: 'pong-duel',
+    title: 'PONG DUEL',
+    icon: IoGameControllerOutline,
+    artKind: 'pong-duel',
+    badge: 'Duel',
+    players: '760',
+    color: 'is-blue',
+  },
+  {
+    id: 'reflex-duel',
+    title: 'REFLEX DUEL',
+    icon: FiZap,
+    artKind: 'reflex-duel',
+    badge: 'YENİ',
+    players: '640',
+    color: 'is-orange',
+  },
+  {
+    id: 'simon-duel',
+    title: 'SIMON DUEL',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'simon-duel',
+    badge: 'YENİ',
+    players: '580',
+    color: 'is-violet',
+  },
+  {
+    id: 'whack-duel',
+    title: 'WHACK DUEL',
+    icon: FiGrid,
+    artKind: 'whack-duel',
+    badge: 'YENİ',
+    players: '510',
+    color: 'is-green',
+  },
+  {
+    id: 'rhythm-duel',
+    title: 'RHYTHM DUEL',
+    icon: FiZap,
+    artKind: 'rhythm-duel',
+    badge: 'YENİ',
+    players: '620',
+    color: 'is-pink',
+  },
+  {
+    id: 'catch-duel',
+    title: 'CATCH DUEL',
+    icon: IoRocketOutline,
+    artKind: 'catch-duel',
+    badge: 'YENİ',
+    players: '540',
+    color: 'is-green',
+  },
+  {
+    id: 'slice-duel',
+    title: 'SLICE DUEL',
+    icon: LuSwords,
+    artKind: 'slice-duel',
+    badge: 'YENİ',
+    players: '460',
+    color: 'is-orange',
+  },
+  {
+    id: 'basket-duel',
+    title: 'BASKET DUEL',
+    icon: IoGameControllerOutline,
+    artKind: 'basket-duel',
+    badge: 'YENİ',
+    players: '720',
+    color: 'is-orange',
+  },
+  {
+    id: 'chess-duel',
+    title: 'SATRANÇ DUEL',
+    icon: LuSwords,
+    artKind: 'chess-duel',
+    badge: 'YENİ',
+    players: '680',
+    color: 'is-violet',
+  },
+  {
+    id: 'galaga-duel',
+    title: 'GALAGA DUEL',
+    icon: IoRocketOutline,
+    artKind: 'galaga-duel',
+    badge: 'YENİ',
+    players: '590',
+    color: 'is-violet',
   },
 ]
 
 export const allGamesCards: GamesMiniCard[] = [
-  { id: 'color-match', title: 'COLOR MATCH', icon: FiGrid, artKind: 'color-match', players: '432', color: 'is-violet' },
-  { id: 'dart-duel', title: 'DART DUEL', icon: LuSwords, artKind: 'dart', players: '287', color: 'is-orange' },
   { id: 'math-duel', title: 'MATH DUEL', icon: FiUsers, artKind: 'math-duel', players: '920', color: 'is-green' },
-  { id: 'candy-clash', title: 'CANDY CLASH', icon: FiZap, artKind: 'candy-clash', players: '1.4K', color: 'is-pink' },
   {
     id: 'more-games',
     title: 'DAHA FAZLASI',

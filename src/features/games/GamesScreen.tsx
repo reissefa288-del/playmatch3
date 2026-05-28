@@ -57,12 +57,60 @@ export function GamesScreen() {
     navigate('/games/math-duel')
   }, [navigate])
 
-  const openFlappyDuel = useCallback(() => {
-    navigate('/games/flappy-duel')
+  const openColorMatch = useCallback(() => {
+    navigate('/games/color-match')
   }, [navigate])
 
-  const openCandyClash = useCallback(() => {
-    navigate('/games/candy-clash')
+  const openNeonCrush = useCallback(() => {
+    navigate('/games/neon-crush')
+  }, [navigate])
+
+  const openDartDuel = useCallback(() => {
+    navigate('/games/dart-duel')
+  }, [navigate])
+
+  const openSnakeDuel = useCallback(() => {
+    navigate('/games/snake-duel')
+  }, [navigate])
+
+  const openPongDuel = useCallback(() => {
+    navigate('/games/pong-duel')
+  }, [navigate])
+
+  const openReflexDuel = useCallback(() => {
+    navigate('/games/reflex-duel')
+  }, [navigate])
+
+  const openSimonDuel = useCallback(() => {
+    navigate('/games/simon-duel')
+  }, [navigate])
+
+  const openWhackDuel = useCallback(() => {
+    navigate('/games/whack-duel')
+  }, [navigate])
+
+  const openRhythmDuel = useCallback(() => {
+    navigate('/games/rhythm-duel')
+  }, [navigate])
+
+  const openCatchDuel = useCallback(() => {
+    navigate('/games/catch-duel')
+  }, [navigate])
+
+  const openSliceDuel = useCallback(() => {
+    navigate('/games/slice-duel')
+  }, [navigate])
+
+  const openBasketDuel = useCallback(() => {
+    navigate('/games/basket-duel')
+  }, [navigate])
+
+  const openChessDuel = useCallback(() => {
+    navigate('/games/chess-duel')
+  }, [navigate])
+
+  const openGalagaDuel = useCallback(() => {
+    navigate('/games/galaga-duel')
   }, [navigate])
 
   const handleFeaturedPlay = useCallback(
@@ -114,12 +162,60 @@ export function GamesScreen() {
         openMathDuel()
         return
       }
-      if (isFlappyDuelGame(game)) {
-        openFlappyDuel()
+      if (isColorMatchGame(game)) {
+        openColorMatch()
         return
       }
-      if (isCandyClashGame(game)) {
-        openCandyClash()
+      if (isNeonCrushGame(game)) {
+        openNeonCrush()
+        return
+      }
+      if (isDartDuelGame(game)) {
+        openDartDuel()
+        return
+      }
+      if (isSnakeDuelGame(game)) {
+        openSnakeDuel()
+        return
+      }
+      if (isPongDuelGame(game)) {
+        openPongDuel()
+        return
+      }
+      if (isReflexDuelGame(game)) {
+        openReflexDuel()
+        return
+      }
+      if (isSimonDuelGame(game)) {
+        openSimonDuel()
+        return
+      }
+      if (isWhackDuelGame(game)) {
+        openWhackDuel()
+        return
+      }
+      if (isRhythmDuelGame(game)) {
+        openRhythmDuel()
+        return
+      }
+      if (isCatchDuelGame(game)) {
+        openCatchDuel()
+        return
+      }
+      if (isSliceDuelGame(game)) {
+        openSliceDuel()
+        return
+      }
+      if (isBasketDuelGame(game)) {
+        openBasketDuel()
+        return
+      }
+      if (isChessDuelGame(game)) {
+        openChessDuel()
+        return
+      }
+      if (isGalagaDuelGame(game)) {
+        openGalagaDuel()
         return
       }
       addXp(xp)
@@ -129,10 +225,22 @@ export function GamesScreen() {
       openBlockDuel,
       openBrickBreak,
       openBubbleShooter,
-      openCandyClash,
-      openFlappyDuel,
+      openColorMatch,
       openMathDuel,
       openMemoryDuel,
+      openNeonCrush,
+      openDartDuel,
+      openSnakeDuel,
+      openPongDuel,
+      openReflexDuel,
+      openSimonDuel,
+      openWhackDuel,
+      openRhythmDuel,
+      openCatchDuel,
+      openSliceDuel,
+      openBasketDuel,
+      openChessDuel,
+      openGalagaDuel,
       openStackDuel,
       openXox,
     ],
@@ -375,12 +483,60 @@ function isMathDuelGame(game: GamesMiniCard) {
   return game.id === 'math-duel' || game.artKind === 'math-duel' || game.artKind === 'math'
 }
 
-function isFlappyDuelGame(game: GamesMiniCard) {
-  return game.id === 'flappy-duel' || game.artKind === 'flappy-duel'
+function isColorMatchGame(game: GamesMiniCard) {
+  return game.id === 'color-match-duel' || game.id === 'color-match' || game.artKind === 'color-match'
 }
 
-function isCandyClashGame(game: GamesMiniCard) {
-  return game.id === 'candy-clash' || game.artKind === 'candy-clash'
+function isNeonCrushGame(game: GamesMiniCard) {
+  return game.id === 'neon-crush-duel' || game.id === 'neon-crush' || game.artKind === 'neon-crush'
+}
+
+function isDartDuelGame(game: GamesMiniCard) {
+  return game.id === 'dart-duel' || game.artKind === 'dart'
+}
+
+function isSnakeDuelGame(game: GamesMiniCard) {
+  return game.id === 'snake-duel' || game.artKind === 'snake-duel' || game.artKind === 'snake'
+}
+
+function isPongDuelGame(game: GamesMiniCard) {
+  return game.id === 'pong-duel' || game.artKind === 'pong-duel' || game.artKind === 'pong'
+}
+
+function isReflexDuelGame(game: GamesMiniCard) {
+  return game.id === 'reflex-duel' || game.artKind === 'reflex-duel'
+}
+
+function isSimonDuelGame(game: GamesMiniCard) {
+  return game.id === 'simon-duel' || game.artKind === 'simon-duel'
+}
+
+function isWhackDuelGame(game: GamesMiniCard) {
+  return game.id === 'whack-duel' || game.artKind === 'whack-duel'
+}
+
+function isRhythmDuelGame(game: GamesMiniCard) {
+  return game.id === 'rhythm-duel' || game.artKind === 'rhythm-duel'
+}
+
+function isCatchDuelGame(game: GamesMiniCard) {
+  return game.id === 'catch-duel' || game.artKind === 'catch-duel'
+}
+
+function isSliceDuelGame(game: GamesMiniCard) {
+  return game.id === 'slice-duel' || game.artKind === 'slice-duel'
+}
+
+function isBasketDuelGame(game: GamesMiniCard) {
+  return game.id === 'basket-duel' || game.artKind === 'basket-duel'
+}
+
+function isChessDuelGame(game: GamesMiniCard) {
+  return game.id === 'chess-duel' || game.artKind === 'chess-duel'
+}
+
+function isGalagaDuelGame(game: GamesMiniCard) {
+  return game.id === 'galaga-duel' || game.artKind === 'galaga-duel'
 }
 
 function randomInt(min: number, max: number) {

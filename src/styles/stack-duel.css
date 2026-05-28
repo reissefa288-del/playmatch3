@@ -16,7 +16,7 @@
   margin: 0 auto;
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto auto auto;
-  gap: clamp(4px, 1.2vw, 6px);
+  gap: clamp(2px, 0.7vw, 4px);
   padding:
     max(6px, env(safe-area-inset-top))
     var(--stack-pad)
@@ -49,7 +49,7 @@
   z-index: 2;
   display: grid;
   place-items: center;
-  padding-top: 22px;
+  padding-top: 8px;
 }
 
 .pm-stack-header__title {
@@ -132,8 +132,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  padding-top: clamp(12px, 3.5vw, 18px);
+  gap: 4px;
+  padding-top: clamp(4px, 2vw, 10px);
 }
 
 .pm-stack-hud__stat {
@@ -178,13 +178,11 @@
   position: relative;
   z-index: 2;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
   overflow: hidden;
-  padding: 2px 0;
+  padding: 0;
+  margin-top: -2px;
+  /* BIRAK şeridi: kuleler geri kalan tüm yüksekliği kaplar */
+  --stack-drop-strip: clamp(44px, 10.5vw, 52px);
 }
 
 .pm-stack-playfield::before {
@@ -197,7 +195,8 @@
 }
 
 .pm-stack-arena {
-  flex: 1 1 auto;
+  position: absolute;
+  inset: 0 0 var(--stack-drop-strip) 0;
   min-height: 0;
   width: 100%;
   max-width: 100%;
@@ -659,60 +658,36 @@
 }
 
 .pm-stack-score-live {
-  flex-shrink: 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--stack-drop-strip) - 2px);
+  z-index: 7;
   width: 100%;
   display: flex;
   justify-content: space-between;
   padding: 0 6px;
+  margin: 0;
   font-size: clamp(0.5rem, 2.8vw, 0.58rem);
   font-weight: 800;
   box-sizing: border-box;
+  pointer-events: none;
 }
 
 .pm-stack-score-live .is-cyan { color: var(--stack-cyan); }
 .pm-stack-score-live .is-pink { color: var(--stack-pink); }
 
-.pm-stack-target {
-  border-radius: 12px;
-  border: 1px solid rgba(120, 150, 255, 0.32);
-  background: rgba(4, 8, 24, 0.88);
-  padding: 5px 10px 7px;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  align-items: center;
-  gap: 6px;
-  font-size: clamp(0.32rem, 2.2vw, 0.36rem);
-  letter-spacing: 0.08em;
-  color: rgba(170, 195, 240, 0.85);
-}
-
-.pm-stack-target svg { color: var(--stack-gold); }
-.pm-stack-target strong { color: #fff; font-size: 0.54rem; }
-
-.pm-stack-target__bar {
-  grid-column: 1 / -1;
-  height: 5px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
-  overflow: hidden;
-}
-
-.pm-stack-target__bar span {
-  display: block;
-  height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, var(--stack-cyan), var(--stack-pink));
-  box-shadow: 0 0 10px rgba(0, 232, 255, 0.4);
-  transition: width 0.25s ease;
-}
 
 .pm-stack-drop-fab {
-  position: relative;
-  z-index: 8;
-  align-self: center;
-  margin-top: 2px;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  z-index: 9;
+  transform: translateX(-50%);
+  margin: 0;
   min-width: clamp(140px, 42vw, 180px);
-  min-height: 52px;
+  min-height: var(--stack-drop-strip);
+  max-height: var(--stack-drop-strip);
   border: none;
   border-radius: 16px;
   background:
@@ -750,15 +725,16 @@
 }
 
 .pm-stack-drop-fab:active {
-  transform: scale(0.96);
+  transform: translateX(-50%) scale(0.96);
   box-shadow: 0 0 36px rgba(0, 232, 255, 0.5);
 }
 
 .pm-stack-controls {
   display: grid;
   grid-template-columns: 1fr 1.35fr 1fr;
-  gap: 8px;
-  padding: 2px 0;
+  gap: 6px;
+  padding: 0;
+  margin-top: -4px;
 }
 
 .pm-stack-ctrl {
@@ -768,7 +744,7 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 50%),
     rgba(6, 10, 28, 0.94);
   color: rgba(200, 220, 255, 0.9);
-  min-height: 48px;
+  min-height: 42px;
   display: flex;
   flex-direction: column;
   align-items: center;
