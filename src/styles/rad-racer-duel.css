@@ -1,0 +1,515 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;700;800&family=Press+Start+2P&display=swap');
+
+.pm-app-shell--rad-racer.pm-app-shell--game-play {
+  height: 100svh;
+  max-height: 100svh;
+}
+
+@supports not (height: 100svh) {
+  .pm-app-shell--rad-racer.pm-app-shell--game-play {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+}
+
+.pm-app-shell--rad-racer .pm-artboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.pm-rr-lobby,
+.pm-rr-screen-wrap {
+  --rr-red: #e82020;
+  --rr-blue: #2060e8;
+  --rr-sky: #68c8f8;
+  --rr-grass: #38a838;
+  --rr-road: #505058;
+  --rr-cyan: #5ecbff;
+  --rr-pink: #ff4d8d;
+  --rr-white: #f8f8ff;
+  --rr-pad: clamp(8px, 2.5vw, 12px);
+  --rr-track-h: clamp(220px, 36vh, 300px);
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  color: #f5f9ff;
+  display: flex;
+  flex-direction: column;
+}
+
+.pm-rr-back,
+.pm-rr-settings {
+  position: absolute;
+  z-index: 6;
+  top: max(8px, env(safe-area-inset-top));
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(32, 96, 232, 0.45);
+  background: rgba(6, 10, 28, 0.82);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  cursor: pointer;
+}
+
+.pm-rr-back { left: var(--rr-pad); }
+.pm-rr-settings { right: var(--rr-pad); }
+
+.pm-rr-lobby__stack {
+  position: relative;
+  z-index: 2;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(14px, 3vh, 22px);
+  padding: max(44px, env(safe-area-inset-top)) var(--rr-pad) max(12px, env(safe-area-inset-bottom));
+}
+
+.pm-rr-lobby__eyebrow {
+  margin: 0;
+  font-size: 0.4rem;
+  letter-spacing: 0.2em;
+  color: rgba(200, 220, 255, 0.85);
+}
+
+.pm-rr-lobby__title {
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3em;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.42rem, 2.8vw, 0.58rem);
+  line-height: 1.6;
+  letter-spacing: 0.04em;
+}
+
+.pm-rr-lobby__title .is-red { color: var(--rr-red); text-shadow: 2px 2px 0 #8a1010; }
+.pm-rr-lobby__title .is-blue { color: var(--rr-blue); text-shadow: 2px 2px 0 #102878; }
+.pm-rr-lobby__title .is-white { color: var(--rr-white); }
+
+.pm-rr-lobby__sub {
+  margin: 4px 0 0;
+  font-size: clamp(0.34rem, 1.9vw, 0.42rem);
+  letter-spacing: 0.14em;
+  color: rgba(200, 220, 255, 0.88);
+}
+
+.pm-rr-lobby__rules {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: min(100%, 320px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pm-rr-lobby__rules li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(32, 96, 232, 0.28);
+  background: rgba(10, 20, 50, 0.72);
+  font-size: clamp(0.34rem, 1.85vw, 0.4rem);
+  color: rgba(220, 230, 255, 0.92);
+}
+
+.pm-rr-lobby__rules strong {
+  display: block;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.28rem, 1.5vw, 0.32rem);
+  letter-spacing: 0.06em;
+  color: var(--rr-red);
+  margin-bottom: 4px;
+}
+
+.pm-rr-lobby__cta {
+  margin-top: 4px;
+  padding: 12px 28px;
+  border: 0;
+  border-radius: 999px;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.32rem, 1.8vw, 0.38rem);
+  letter-spacing: 0.06em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--rr-red), var(--rr-blue));
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(32, 96, 232, 0.4);
+}
+
+.pm-rr-play__stack {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(4px, 1vh, 8px);
+  padding: max(38px, env(safe-area-inset-top)) var(--rr-pad) max(6px, env(safe-area-inset-bottom));
+}
+
+.pm-rr-header,
+.pm-rr-hud { flex-shrink: 0; }
+
+.pm-rr-header { text-align: center; }
+
+.pm-rr-header__title {
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.3em;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.38rem, 2.2vw, 0.5rem);
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+.pm-rr-header__title .is-red { color: var(--rr-red); }
+.pm-rr-header__title .is-blue { color: var(--rr-blue); }
+.pm-rr-header__title .is-white { color: var(--rr-white); }
+
+.pm-rr-header__sub {
+  margin: 4px 0 0;
+  font-size: clamp(0.28rem, 1.6vw, 0.34rem);
+  letter-spacing: 0.1em;
+  color: rgba(200, 220, 255, 0.85);
+}
+
+.pm-rr-hud {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 6px;
+}
+
+.pm-rr-hud__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  font-size: clamp(0.22rem, 1.2vw, 0.28rem);
+}
+
+.pm-rr-hud__side strong {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.32rem, 1.8vw, 0.4rem);
+  color: var(--rr-cyan);
+}
+
+.pm-rr-hud__side.is-p2 strong { color: var(--rr-pink); }
+
+.pm-rr-hud__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  color: var(--rr-blue);
+  font-size: clamp(0.24rem, 1.3vw, 0.3rem);
+}
+
+.pm-rr-hud__center strong {
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.34rem, 1.9vw, 0.42rem);
+}
+
+.pm-rr-arena {
+  flex: 1 1 auto;
+  min-height: calc(var(--rr-track-h) + 72px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.pm-rr-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  border-radius: 14px;
+  border: 2px solid rgba(32, 96, 232, 0.35);
+  background: #0a1428;
+  overflow: hidden;
+}
+
+.pm-rr-screen.is-pink {
+  border-color: rgba(255, 77, 141, 0.35);
+  opacity: 0.94;
+}
+
+.pm-rr-screen.is-turbo {
+  box-shadow: 0 0 20px rgba(232, 32, 32, 0.45);
+}
+
+.pm-rr-screen.is-offroad {
+  box-shadow: inset 0 0 16px rgba(56, 168, 56, 0.35);
+}
+
+.pm-rr-screen__label {
+  margin: 0;
+  padding: 5px 8px;
+  text-align: center;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.24rem, 1.3vw, 0.3rem);
+  letter-spacing: 0.08em;
+  color: var(--rr-cyan);
+}
+
+.pm-rr-screen.is-pink .pm-rr-screen__label { color: var(--rr-pink); }
+
+.pm-rr-screen__track {
+  --rr-curve: 0%;
+  position: relative;
+  flex: 1 1 auto;
+  min-height: var(--rr-track-h);
+  height: var(--rr-track-h);
+  margin: 0 6px;
+  border-radius: 10px;
+  overflow: hidden;
+  perspective: 280px;
+}
+
+.pm-rr-screen__sky {
+  position: absolute;
+  inset: 0;
+  height: 42%;
+  background: linear-gradient(180deg, #4090d8 0%, var(--rr-sky) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pm-rr-screen__horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 38%;
+  height: 8%;
+  background: linear-gradient(180deg, var(--rr-grass) 0%, #2a8828 100%);
+  transform: translateX(var(--rr-curve));
+  z-index: 1;
+  pointer-events: none;
+}
+
+.pm-rr-screen__road {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: 0;
+  top: 42%;
+  transform: translateX(var(--rr-curve)) rotateX(18deg);
+  transform-origin: center bottom;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      transparent 0,
+      transparent 16px,
+      rgba(255, 255, 255, 0.18) 16px,
+      rgba(255, 255, 255, 0.18) 20px
+    ),
+    linear-gradient(180deg, #686870 0%, var(--rr-road) 45%, #383840 100%);
+  animation: pm-rr-road-scroll 0.5s linear infinite;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.pm-rr-screen.is-turbo .pm-rr-screen__road {
+  animation-duration: 0.28s;
+}
+
+.pm-rr-screen.is-offroad .pm-rr-screen__road {
+  animation-duration: 0.85s;
+}
+
+@keyframes pm-rr-road-scroll {
+  from { background-position: 0 0, 0 0; }
+  to { background-position: 0 20px, 0 0; }
+}
+
+.pm-rr-screen__lane-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  transform: translateX(-50%);
+  background: repeating-linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.8) 0,
+    rgba(255, 255, 255, 0.8) 8px,
+    transparent 8px,
+    transparent 16px
+  );
+  z-index: 3;
+  pointer-events: none;
+}
+
+.pm-rr-screen__traffic {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: clamp(0.85rem, 4.2vw, 1.1rem);
+  line-height: 1;
+  z-index: 5;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
+}
+
+.pm-rr-screen__traffic.is-passed {
+  opacity: 0.35;
+}
+
+.pm-rr-screen__car {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: clamp(16px, 4.8vw, 22px);
+  height: clamp(10px, 3.2vw, 14px);
+  z-index: 7;
+  pointer-events: none;
+  background: linear-gradient(180deg, var(--rr-red), #a01010);
+  border-radius: 4px 6px 2px 2px;
+  box-shadow: 0 0 12px rgba(232, 32, 32, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.pm-rr-screen__car::after {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: 20%;
+  right: 20%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 2px;
+}
+
+.pm-rr-screen.is-pink .pm-rr-screen__car {
+  background: linear-gradient(180deg, var(--rr-pink), #a02858);
+  box-shadow: 0 0 12px rgba(255, 77, 141, 0.6);
+}
+
+.pm-rr-screen__car.is-invuln {
+  animation: pm-rr-blink 0.12s steps(2) infinite;
+}
+
+@keyframes pm-rr-blink {
+  50% { opacity: 0.35; }
+}
+
+.pm-rr-screen__lives {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  display: flex;
+  gap: 4px;
+  z-index: 8;
+}
+
+.pm-rr-screen__life {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--rr-red);
+  box-shadow: 0 0 6px rgba(232, 32, 32, 0.6);
+}
+
+.pm-rr-screen__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 6px 8px 8px;
+}
+
+.pm-rr-screen__steer {
+  display: flex;
+  gap: 6px;
+}
+
+.pm-rr-screen__steer button {
+  width: 36px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: rgba(32, 96, 232, 0.35);
+  color: #fff;
+  font-size: 0.7rem;
+  cursor: pointer;
+}
+
+.pm-rr-screen__steer button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pm-rr-screen__turbo {
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.22rem, 1.2vw, 0.26rem);
+  letter-spacing: 0.04em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--rr-red), #c01818);
+  cursor: pointer;
+}
+
+.pm-rr-screen__turbo:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.pm-rr-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(4, 8, 24, 0.78);
+  backdrop-filter: blur(4px);
+}
+
+.pm-rr-overlay p {
+  margin: 0;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.38rem, 2.2vw, 0.48rem);
+  letter-spacing: 0.06em;
+  color: var(--rr-white);
+  text-align: center;
+  padding: 0 12px;
+}
+
+.pm-rr-overlay button {
+  padding: 10px 20px;
+  border: 0;
+  border-radius: 999px;
+  font-family: 'Press Start 2P', system-ui, sans-serif;
+  font-size: clamp(0.28rem, 1.5vw, 0.32rem);
+  color: #fff;
+  background: linear-gradient(135deg, var(--rr-red), var(--rr-blue));
+  cursor: pointer;
+}
+
+@media (max-width: 380px) {
+  .pm-rr-arena {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+
+  .pm-rr-screen__controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

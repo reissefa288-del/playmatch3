@@ -240,6 +240,41 @@ export type GamesMiniCard = {
     | 'basket-duel'
     | 'chess-duel'
     | 'galaga-duel'
+    | 'asteroids-duel'
+    | 'missile-command-duel'
+    | 'centipede-duel'
+    | 'frogger-duel'
+    | 'pac-dot-duel'
+    | 'invaders-duel'
+    | 'dig-dug-duel'
+    | 'tempest-duel'
+    | 'breakout-duel'
+    | 'robotron-duel'
+    | 'joust-duel'
+    | 'burger-time-duel'
+    | 'donkey-kong-duel'
+    | 'qbert-duel'
+    | 'paperboy-duel'
+    | 'spy-hunter-duel'
+    | 'marble-madness-duel'
+    | 'defender-duel'
+    | 'berzerk-duel'
+    | '1942-duel'
+    | 'gradius-duel'
+    | 'time-pilot-duel'
+    | 'gyruss-duel'
+    | 'outrun-duel'
+    | 'rad-racer-duel'
+    | 'enduro-duel'
+    | 'contra-duel'
+    | 'metal-slug-duel'
+    | 'punch-out-duel'
+    | 'kung-fu-duel'
+    | 'bomberman-duel'
+    | 'tron-duel'
+    | 'pengo-duel'
+    | 'lode-runner-duel'
+    | 'space-harrier-duel'
     | 'word-arena'
     | 'xox'
     | 'snake'
@@ -443,6 +478,321 @@ export const popularGamesCards: GamesMiniCard[] = [
     artKind: 'galaga-duel',
     badge: 'YENİ',
     players: '590',
+    color: 'is-violet',
+  },
+  {
+    id: 'asteroids-duel',
+    title: 'ASTEROIDS DUEL',
+    icon: IoRocketOutline,
+    artKind: 'asteroids-duel',
+    badge: 'YENİ',
+    players: '520',
+    color: 'is-blue',
+  },
+  {
+    id: 'missile-command-duel',
+    title: 'MISSILE CMD',
+    icon: FiZap,
+    artKind: 'missile-command-duel',
+    badge: 'YENİ',
+    players: '480',
+    color: 'is-green',
+  },
+  {
+    id: 'centipede-duel',
+    title: 'CENTIPEDE',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'centipede-duel',
+    badge: 'YENİ',
+    players: '510',
+    color: 'is-violet',
+  },
+  {
+    id: 'frogger-duel',
+    title: 'FROGGER DUEL',
+    icon: IoGameControllerOutline,
+    artKind: 'frogger-duel',
+    badge: 'YENİ',
+    players: '540',
+    color: 'is-green',
+  },
+  {
+    id: 'pac-dot-duel',
+    title: 'PAC-DOT DUEL',
+    icon: IoGameControllerOutline,
+    artKind: 'pac-dot-duel',
+    badge: 'YENİ',
+    players: '560',
+    color: 'is-violet',
+  },
+  {
+    id: 'invaders-duel',
+    title: 'INVADERS DUEL',
+    icon: IoRocketOutline,
+    artKind: 'invaders-duel',
+    badge: 'YENİ',
+    players: '580',
+    color: 'is-green',
+  },
+  {
+    id: 'dig-dug-duel',
+    title: 'DIG DUG DUEL',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'dig-dug-duel',
+    badge: 'YENİ',
+    players: '600',
+    color: 'is-orange',
+  },
+  {
+    id: 'tempest-duel',
+    title: 'TEMPEST DUEL',
+    icon: IoRocketOutline,
+    artKind: 'tempest-duel',
+    badge: 'YENİ',
+    players: '620',
+    color: 'is-violet',
+  },
+  {
+    id: 'breakout-duel',
+    title: 'BREAKOUT DUEL',
+    icon: IoGameControllerOutline,
+    artKind: 'breakout-duel',
+    badge: 'YENİ',
+    players: '640',
+    color: 'is-pink',
+  },
+  {
+    id: 'robotron-duel',
+    title: 'ROBOTRON DUEL',
+    icon: IoRocketOutline,
+    artKind: 'robotron-duel',
+    badge: 'YENİ',
+    players: '660',
+    color: 'is-orange',
+  },
+  {
+    id: 'joust-duel',
+    title: 'JOUST DUEL',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'joust-duel',
+    badge: 'YENİ',
+    players: '680',
+    color: 'is-blue',
+  },
+  {
+    id: 'burger-time-duel',
+    title: 'BURGERTIME DUEL',
+    icon: IoGameControllerOutline,
+    artKind: 'burger-time-duel',
+    badge: 'YENİ',
+    players: '700',
+    color: 'is-orange',
+  },
+  {
+    id: 'donkey-kong-duel',
+    title: 'DONKEY KONG DUEL',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'donkey-kong-duel',
+    badge: 'YENİ',
+    players: '720',
+    color: 'is-violet',
+  },
+  {
+    id: 'qbert-duel',
+    title: 'Q*BERT DUEL',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'qbert-duel',
+    badge: 'YENİ',
+    players: '740',
+    color: 'is-orange',
+  },
+  {
+    id: 'paperboy-duel',
+    title: 'PAPERBOY DUEL',
+    icon: IoRocketOutline,
+    artKind: 'paperboy-duel',
+    badge: 'YENİ',
+    players: '760',
+    color: 'is-green',
+  },
+  {
+    id: 'spy-hunter-duel',
+    title: 'SPY HUNTER DUEL',
+    icon: IoRocketOutline,
+    artKind: 'spy-hunter-duel',
+    badge: 'YENİ',
+    players: '780',
+    color: 'is-blue',
+  },
+  {
+    id: 'marble-madness-duel',
+    title: 'MARBLE MADNESS DUEL',
+    icon: IoExtensionPuzzleOutline,
+    artKind: 'marble-madness-duel',
+    badge: 'YENİ',
+    players: '800',
+    color: 'is-violet',
+  },
+  {
+    id: 'defender-duel',
+    title: 'DEFENDER DUEL',
+    icon: IoRocketOutline,
+    artKind: 'defender-duel',
+    badge: 'YENİ',
+    players: '820',
+    color: 'is-green',
+  },
+  {
+    id: 'berzerk-duel',
+    title: 'BERZERK DUEL',
+    icon: IoGameControllerOutline,
+    artKind: 'berzerk-duel',
+    badge: 'YENİ',
+    players: '840',
+    color: 'is-orange',
+  },
+  {
+    id: '1942-duel',
+    title: '1942 DUEL',
+    icon: IoRocketOutline,
+    artKind: '1942-duel',
+    badge: 'YENİ',
+    players: '860',
+    color: 'is-blue',
+  },
+  {
+    id: 'gradius-duel',
+    title: 'GRADIUS DUEL',
+    icon: IoRocketOutline,
+    artKind: 'gradius-duel',
+    badge: 'YENİ',
+    players: '880',
+    color: 'is-violet',
+  },
+  {
+    id: 'time-pilot-duel',
+    title: 'TIME PILOT DUEL',
+    icon: IoRocketOutline,
+    artKind: 'time-pilot-duel',
+    badge: 'YENİ',
+    players: '900',
+    color: 'is-orange',
+  },
+  {
+    id: 'gyruss-duel',
+    title: 'GYRUSS DUEL',
+    icon: IoRocketOutline,
+    artKind: 'gyruss-duel',
+    badge: 'YENİ',
+    players: '920',
+    color: 'is-violet',
+  },
+  {
+    id: 'outrun-duel',
+    title: 'OUTRUN DUEL',
+    icon: IoRocketOutline,
+    artKind: 'outrun-duel',
+    badge: 'YENİ',
+    players: '940',
+    color: 'is-pink',
+  },
+  {
+    id: 'rad-racer-duel',
+    title: 'RAD RACER DUEL',
+    icon: IoRocketOutline,
+    artKind: 'rad-racer-duel',
+    badge: 'YENİ',
+    players: '960',
+    color: 'is-blue',
+  },
+  {
+    id: 'enduro-duel',
+    title: 'ENDURO DUEL',
+    icon: IoRocketOutline,
+    artKind: 'enduro-duel',
+    badge: 'YENİ',
+    players: '980',
+    color: 'is-orange',
+  },
+  {
+    id: 'contra-duel',
+    title: 'CONTRA DUEL',
+    icon: IoRocketOutline,
+    artKind: 'contra-duel',
+    badge: 'YENİ',
+    players: '1000',
+    color: 'is-green',
+  },
+  {
+    id: 'metal-slug-duel',
+    title: 'METAL SLUG DUEL',
+    icon: IoRocketOutline,
+    artKind: 'metal-slug-duel',
+    badge: 'YENİ',
+    players: '1020',
+    color: 'is-orange',
+  },
+  {
+    id: 'punch-out-duel',
+    title: 'PUNCH-OUT DUEL',
+    icon: IoRocketOutline,
+    artKind: 'punch-out-duel',
+    badge: 'YENİ',
+    players: '1040',
+    color: 'is-violet',
+  },
+  {
+    id: 'kung-fu-duel',
+    title: 'KUNG-FU DUEL',
+    icon: IoRocketOutline,
+    artKind: 'kung-fu-duel',
+    badge: 'YENİ',
+    players: '1060',
+    color: 'is-pink',
+  },
+  {
+    id: 'bomberman-duel',
+    title: 'BOMBERMAN DUEL',
+    icon: IoRocketOutline,
+    artKind: 'bomberman-duel',
+    badge: 'YENİ',
+    players: '1080',
+    color: 'is-blue',
+  },
+  {
+    id: 'tron-duel',
+    title: 'TRON DUEL',
+    icon: IoRocketOutline,
+    artKind: 'tron-duel',
+    badge: 'YENİ',
+    players: '1100',
+    color: 'is-violet',
+  },
+  {
+    id: 'pengo-duel',
+    title: 'PENGO DUEL',
+    icon: IoRocketOutline,
+    artKind: 'pengo-duel',
+    badge: 'YENİ',
+    players: '1120',
+    color: 'is-blue',
+  },
+  {
+    id: 'lode-runner-duel',
+    title: 'LODE RUNNER DUEL',
+    icon: IoRocketOutline,
+    artKind: 'lode-runner-duel',
+    badge: 'YENİ',
+    players: '1140',
+    color: 'is-orange',
+  },
+  {
+    id: 'space-harrier-duel',
+    title: 'SPACE HARRIER DUEL',
+    icon: IoRocketOutline,
+    artKind: 'space-harrier-duel',
+    badge: 'YENİ',
+    players: '1160',
     color: 'is-violet',
   },
 ]
