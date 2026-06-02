@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { BrickBreakCanvas } from './components/BrickBreakCanvas'
+import { BrickPickupBanner } from './components/BrickPickupBanner'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useBrickBreakDuel } from './useBrickBreakDuel'
 import { unlockBrickBreakAudio } from './utils/brickBreakSounds'
@@ -129,11 +130,13 @@ export function BrickBreakScreen() {
               <div className="pm-brick-arena__city" aria-hidden />
               <div className="pm-brick-arena__shine" aria-hidden />
               <BrickBreakCanvas laneRef={game.lane1RenderRef} accent="cyan" active={game.running} />
+              <BrickPickupBanner banner={game.lane1.pickupBanner} variant="cyan" />
             </div>
             <div className="pm-brick-arena is-p2">
               <div className="pm-brick-arena__city" aria-hidden />
               <div className="pm-brick-arena__shine" aria-hidden />
               <BrickBreakCanvas laneRef={game.lane2RenderRef} accent="pink" active={game.running} />
+              <BrickPickupBanner banner={game.lane2.pickupBanner} variant="pink" />
             </div>
           </div>
 

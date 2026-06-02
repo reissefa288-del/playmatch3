@@ -14,6 +14,8 @@ import {
   BlockRotateIcon,
   BlockTrophyIcon,
 } from './components/BlockGameIcons'
+import { BlockComboDock } from './components/BlockComboDock'
+import { COLUMN_SURGE_MIN, FUSION_MIN } from './utils/blockEngine'
 import { useBlockDuel } from './useBlockDuel'
 import { unlockBlockAudio } from './utils/blockSounds'
 
@@ -121,7 +123,7 @@ export function BlockDuelScreen() {
           <div className="pm-block-screen__stack">
             <header className="pm-block-header">
               <h1 className="pm-block-header__title">
-                <span className="is-cyan">BLOCK</span>
+                <span className="is-cyan">CUBE</span>
                 <span className="is-pink">DUEL</span>
               </h1>
             </header>
@@ -166,15 +168,6 @@ export function BlockDuelScreen() {
               animate={{ x: [0, -3, 3, -2, 2, 0] }}
               transition={{ duration: 0.24, ease: 'easeOut' }}
             >
-              {game.comboBanner ? (
-                <motion.div
-                  className="pm-block-combo-banner"
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                >
-                  {game.comboBanner}
-                </motion.div>
-              ) : null}
               <motion.div
                 className={`pm-block-arena is-p1 ${!game.lane1.alive ? 'is-dead' : ''}`}
                 animate={
@@ -189,10 +182,16 @@ export function BlockDuelScreen() {
               <div className={`pm-block-arena is-p2 ${!game.lane2.alive ? 'is-dead' : ''}`}>
                 <BlockBoardCanvas laneRef={game.lane2ViewRef} accent="pink" />
               </div>
+              <BlockComboDock
+                flash={game.comboFlash}
+                combo={game.lane1.combo}
+                fusions={game.lane1.fusions}
+                surges={game.lane1.lines}
+              />
             </motion.section>
 
             <section className="pm-block-attack" aria-label="Saldırı göstergesi">
-              <span className="pm-block-attack__label">ATTACK METER</span>
+              <span className="pm-block-attack__label">KÜP BASKI</span>
               <div className="pm-block-attack__track">
                 <span className="pm-block-attack__fill is-p1" style={{ width: `${game.attackMeter}%` }} />
                 <span
@@ -254,28 +253,35 @@ export function BlockDuelScreen() {
             <footer className="pm-block-stats" aria-label="İstatistikler">
               <div className="pm-block-stats__panel is-p1">
                 <div>
-                  <span>LINES</span>
-                  <strong>{game.lane1.lines}</strong>
+                  <span>FÜZYON</span>
+                  <motion.strong
+                    key={game.lane1.fusions}
+                    initial={{ scale: 1.2 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 14 }}
+                  >
+                    {game.lane1.fusions}
+                  </motion.strong>
                 </div>
                 <div>
-                  <span>COMBO</span>
-                  <strong>{game.lane1.combo}</strong>
+                  <span>DALGA</span>
+                  <strong>{game.lane1.lines}</strong>
                 </div>
               </div>
               <div className="pm-block-stats__panel is-p2">
                 <div>
-                  <span>LINES</span>
-                  <strong>{game.lane2.lines}</strong>
+                  <span>FÜZYON</span>
+                  <strong>{game.lane2.fusions}</strong>
                 </div>
                 <div>
-                  <span>COMBO</span>
-                  <strong>{game.lane2.combo}</strong>
+                  <span>DALGA</span>
+                  <strong>{game.lane2.lines}</strong>
                 </div>
               </div>
             </footer>
 
             <p className="pm-block-footer__hint">
-              ENTER HARD DROP · İLK {game.winRounds} TUR
+              {FUSION_MIN}+ aynı renk füzyon · {COLUMN_SURGE_MIN}+ sütun dalga · ENTER hızlı iniş
             </p>
           </div>
 

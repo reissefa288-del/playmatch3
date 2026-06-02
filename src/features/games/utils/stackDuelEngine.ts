@@ -10,9 +10,9 @@ export const MIN_OVERLAP = 0.03
 export const MIN_PLAY_WIDTH = 0.09
 export const PLATFORM_WIDTH = 0.92
 export const MAX_VISIBLE_BLOCKS = 18
-export const MOVE_SPEED = 1.05
+export const MOVE_SPEED = 0.84
 export const TICK_MS = 16
-export const FALL_DURATION_MS = 520
+export const FALL_DURATION_MS = 700
 export const SLIDE_TOP_PX = 14
 export const STAGE_BASE_BOTTOM_PX = 28
 
@@ -278,6 +278,17 @@ export function decayLaneFx(lane: StackLaneState): StackLaneState {
     ...lane,
     shake: Math.max(0, lane.shake - 1),
   }
+}
+
+/** Oyuncu artık blok koyamaz (can bitti veya kule çok ince). */
+export function laneOutOfMoves(lane: StackLaneState): boolean {
+  return lane.lives <= 0 || lane.finished
+}
+
+/** Hamle kalmayınca süreyi beklemeden round bitsin (skorla kazanan). */
+export function shouldEndRoundEarly(l1: StackLaneState, l2: StackLaneState): boolean {
+  if (l1.lives <= 0 || l2.lives <= 0) return true
+  return laneOutOfMoves(l1) && laneOutOfMoves(l2)
 }
 
 export function resolveRoundWinner(l1: StackLaneState, l2: StackLaneState): 'p1' | 'p2' | 'draw' {

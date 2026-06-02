@@ -11,7 +11,7 @@ export function rememberCard(memory: BotMemory, index: number, symbol: string) {
 }
 
 export function botThinkDelayMs(combo: number): number {
-  return 420 + Math.random() * 380 - combo * 18
+  return 620 + Math.random() * 480 - combo * 10
 }
 
 function hiddenIndices(lane: LaneState): number[] {
@@ -41,7 +41,9 @@ function pickRandomHidden(lane: LaneState, exclude: number[] = []): number | nul
 }
 
 export function pickBotFlip(lane: LaneState, memory: BotMemory, _seed: number): number | null {
-  if (lane.openIndices.length === 1) {
+  const hesitate = Math.random() < 0.34
+
+  if (lane.openIndices.length === 1 && !hesitate) {
     const first = lane.openIndices[0]
     const sym = lane.cards[first]?.symbol
     if (sym) {
@@ -54,8 +56,9 @@ export function pickBotFlip(lane: LaneState, memory: BotMemory, _seed: number): 
   }
 
   const pair = pickKnownPair(lane, memory)
-  if (pair) {
-  const target = lane.openIndices.length === 0 ? pair[0] : pair.find((i) => !lane.openIndices.includes(i))
+  if (pair && !hesitate) {
+    const target =
+      lane.openIndices.length === 0 ? pair[0] : pair.find((i) => !lane.openIndices.includes(i))
     if (target != null) return target
   }
 

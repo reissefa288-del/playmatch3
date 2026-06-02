@@ -2,17 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { botThinkDelayMs, pickBotSwap } from './utils/neonCrushBot'
 import {
   comboMultiplier,
+  computeSpawnIndices,
   createBoard,
   createLane,
-  MATCH_ROUNDS,
+  DUEL_SECONDS,
+  normalizeBoard,
+  MATCH_ANIM_MS,
   resolveRoundWinner,
-  ROUND_BREAK_MS,
-  ROUND_SECONDS,
-  ROUND_TARGET_SCORE,
+  SETTLE_ANIM_MS,
   trySwap,
-  WIN_ROUNDS,
+  type NeonLaneFx,
   type NeonLaneState,
 } from './utils/neonCrushEngine'
+import { playNeonCrushSound } from './utils/neonCrushSounds'
 
 type MatchWinner = 'p1' | 'p2' | 'draw'
 
@@ -26,26 +28,43 @@ function mulberry32(seed: number) {
   }
 }
 
+function applyLaneScore(lane: NeonLaneState, gain: number, combo: number): NeonLaneState {
+  const roundScore = lane.roundScore + gain
+  return {
+    ...lane,
+    score: lane.score + gain,
+    roundScore,
+    combo,
+    comboMult: comboMultiplier(combo),
+    fx: null,
+  }
+}
+
 export function useNeonCrushDuel() {
-  const [lane1, setLane1] = useState<NeonLaneState>(() => createLane(1, 501))
-  const [lane2, setLane2] = useState<NeonLaneState>(() => createLane(2, 709))
+  const [lane1, setLane1] = useState<NeonLaneState>(() => {
+    const lane = createLane(1, 501)
+    return { ...lane, cells: normalizeBoard(lane.cells) }
+  })
+  const [lane2, setLane2] = useState<NeonLaneState>(() => {
+    const lane = createLane(2, 709)
+    return { ...lane, cells: normalizeBoard(lane.cells) }
+  })
   const [selected, setSelected] = useState<number | null>(null)
-  const [roundNumber, setRoundNumber] = useState(1)
-  const [roundTimeLeft, setRoundTimeLeft] = useState(ROUND_SECONDS)
-  const [roundMessage, setRoundMessage] = useState<string | null>(null)
+  const [timeLeft, setTimeLeft] = useState(DUEL_SECONDS)
+  const [matchMessage, setMatchMessage] = useState<string | null>(null)
   const [running, setRunning] = useState(true)
   const [winner, setWinner] = useState<MatchWinner | null>(null)
   const [boardKey, setBoardKey] = useState(0)
 
   const lane1Ref = useRef(lane1)
   const lane2Ref = useRef(lane2)
-  const roundNumberRef = useRef(1)
-  const roundTimeRef = useRef(ROUND_SECONDS)
-  const roundEndingRef = useRef(false)
-  const roundBreakUntilRef = useRef(0)
+  const timeRef = useRef(DUEL_SECONDS)
+  const matchEndingRef = useRef(false)
   const endedRef = useRef(false)
   const seedRef = useRef(501)
   const botTimerRef = useRef<number | null>(null)
+  const p1AnimTimerRef = useRef<number | null>(null)
+  const p2AnimTimerRef = useRef<number | null>(null)
   const scheduleBotRef = useRef<() => void>(() => {})
 
   lane1Ref.current = lane1
@@ -56,102 +75,115 @@ export function useNeonCrushDuel() {
     botTimerRef.current = null
   }, [])
 
+  const clearAnimTimers = useCallback(() => {
+    if (p1AnimTimerRef.current != null) window.clearTimeout(p1AnimTimerRef.current)
+    if (p2AnimTimerRef.current != null) window.clearTimeout(p2AnimTimerRef.current)
+    p1AnimTimerRef.current = null
+    p2AnimTimerRef.current = null
+  }, [])
+
   const bumpBoards = useCallback((seedBump: number) => {
     seedRef.current += seedBump
-    const rand = mulberry32(seedRef.current)
     const b1 = createBoard(seedRef.current + 3)
     const b2 = createBoard(seedRef.current + 17)
-    setLane1((l) => ({ ...l, cells: b1, combo: 0, comboMult: 1 }))
-    setLane2((l) => ({ ...l, cells: b2, combo: 0, comboMult: 1 }))
-    lane1Ref.current = { ...lane1Ref.current, cells: b1, combo: 0, comboMult: 1 }
-    lane2Ref.current = { ...lane2Ref.current, cells: b2, combo: 0, comboMult: 1 }
+    setLane1((l) => ({ ...l, cells: b1, combo: 0, comboMult: 1, fx: null, settle: null }))
+    setLane2((l) => ({ ...l, cells: b2, combo: 0, comboMult: 1, fx: null, settle: null }))
+    lane1Ref.current = { ...lane1Ref.current, cells: b1, combo: 0, comboMult: 1, fx: null, settle: null }
+    lane2Ref.current = { ...lane2Ref.current, cells: b2, combo: 0, comboMult: 1, fx: null, settle: null }
     setBoardKey((k) => k + 1)
-    void rand
   }, [])
 
-  const applyLaneScore = useCallback((lane: NeonLaneState, gain: number, combo: number): NeonLaneState => {
-    const roundScore = lane.roundScore + gain
-    const mult = comboMultiplier(combo)
-    return {
-      ...lane,
-      score: lane.score + gain,
-      roundScore,
-      combo,
-      comboMult: mult,
-    }
-  }, [])
+  const commitLaneSwap = useCallback(
+    (
+      lane: 1 | 2,
+      preview: NeonLaneState,
+      finalBoard: NeonLaneState['cells'],
+      fx: NeonLaneFx,
+      scoreGain: number,
+      combo: number,
+    ) => {
+      const timerRef = lane === 1 ? p1AnimTimerRef : p2AnimTimerRef
+      if (timerRef.current != null) window.clearTimeout(timerRef.current)
 
-  const checkRoundEnd = useCallback(() => {
-    if (roundEndingRef.current || endedRef.current) return
-    if (lane1Ref.current.roundScore < ROUND_TARGET_SCORE && lane2Ref.current.roundScore < ROUND_TARGET_SCORE) {
-      return
-    }
-    endRoundRef.current()
-  }, [])
+      const withFx = { ...preview, fx }
+      if (lane === 1) {
+        lane1Ref.current = withFx
+        setLane1(withFx)
+      } else {
+        lane2Ref.current = withFx
+        setLane2(withFx)
+      }
 
-  const endRoundRef = useRef<() => void>(() => {})
+      timerRef.current = window.setTimeout(() => {
+        const previewCells = (lane === 1 ? lane1Ref.current : lane2Ref.current).cells
+        const next = applyLaneScore(
+          {
+            ...(lane === 1 ? lane1Ref.current : lane2Ref.current),
+            cells: normalizeBoard(finalBoard),
+          },
+          scoreGain,
+          combo,
+        )
+        const spawnIndices = computeSpawnIndices(previewCells, finalBoard)
+        const withSettle =
+          spawnIndices.length > 0
+            ? { ...next, settle: { indices: spawnIndices, tick: Date.now() } }
+            : next
+        if (spawnIndices.length > 0) playNeonCrushSound('fall')
+        if (lane === 1) {
+          lane1Ref.current = withSettle
+          setLane1(withSettle)
+        } else {
+          lane2Ref.current = withSettle
+          setLane2(withSettle)
+        }
+        setBoardKey((k) => k + 1)
+        timerRef.current = null
 
-  const endRound = useCallback(() => {
-    if (roundEndingRef.current) return
-    roundEndingRef.current = true
+        if (spawnIndices.length > 0) {
+          window.setTimeout(() => {
+            const clearSettle = (l: NeonLaneState) => ({ ...l, settle: null })
+            if (lane === 1) {
+              lane1Ref.current = clearSettle(lane1Ref.current)
+              setLane1(lane1Ref.current)
+            } else {
+              lane2Ref.current = clearSettle(lane2Ref.current)
+              setLane2(lane2Ref.current)
+            }
+          }, SETTLE_ANIM_MS)
+        }
+      }, MATCH_ANIM_MS)
+    },
+    [],
+  )
+
+  const endMatchRef = useRef<() => void>(() => {})
+
+  const endMatch = useCallback(() => {
+    if (matchEndingRef.current || endedRef.current) return
+    matchEndingRef.current = true
     clearBot()
+    clearAnimTimers()
     setSelected(null)
 
     const rw = resolveRoundWinner(lane1Ref.current, lane2Ref.current)
-    let l1 = lane1Ref.current
-    let l2 = lane2Ref.current
-    if (rw === 'p1') l1 = { ...l1, matchPoints: l1.matchPoints + 1 }
-    else if (rw === 'p2') l2 = { ...l2, matchPoints: l2.matchPoints + 1 }
-    setLane1(l1)
-    setLane2(l2)
-
-    setRoundMessage(
-      rw === 'draw' ? 'ROUND BERABERE' : rw === 'p1' ? 'ROUND KAZANDIN' : 'ROUND KAYBETTİN',
+    setWinner(rw)
+    setRunning(false)
+    endedRef.current = true
+    setMatchMessage(
+      rw === 'draw' ? 'BERABERE' : rw === 'p1' ? 'KAZANDIN!' : 'KAYBETTİN',
     )
-    roundBreakUntilRef.current = performance.now() + ROUND_BREAK_MS
+    playNeonCrushSound(rw === 'p1' ? 'win' : rw === 'p2' ? 'lose' : 'round')
+  }, [clearAnimTimers, clearBot])
 
-    const matchOver =
-      l1.matchPoints >= WIN_ROUNDS || l2.matchPoints >= WIN_ROUNDS || roundNumberRef.current >= MATCH_ROUNDS
-
-    window.setTimeout(() => {
-      if (matchOver) {
-        const final =
-          l1.matchPoints > l2.matchPoints ? 'p1' : l2.matchPoints > l1.matchPoints ? 'p2' : 'draw'
-        setWinner(final)
-        setRunning(false)
-        endedRef.current = true
-        setRoundMessage(final === 'draw' ? 'MAÇ BERABERE' : final === 'p1' ? 'KAZANDIN!' : 'KAYBETTİN')
-        return
-      }
-      roundNumberRef.current += 1
-      setRoundNumber(roundNumberRef.current)
-      const reset1 = createLane(1, seedRef.current + 41)
-      const reset2 = createLane(2, seedRef.current + 59)
-      reset1.matchPoints = l1.matchPoints
-      reset1.score = l1.score
-      reset2.matchPoints = l2.matchPoints
-      reset2.score = l2.score
-      lane1Ref.current = reset1
-      lane2Ref.current = reset2
-      setLane1(reset1)
-      setLane2(reset2)
-      roundTimeRef.current = ROUND_SECONDS
-      setRoundTimeLeft(ROUND_SECONDS)
-      roundEndingRef.current = false
-      setRoundMessage(null)
-      setBoardKey((k) => k + 1)
-      scheduleBotRef.current()
-    }, ROUND_BREAK_MS)
-  }, [clearBot])
-
-  endRoundRef.current = endRound
+  endMatchRef.current = endMatch
 
   const scheduleBot = useCallback(() => {
     clearBot()
-    if (endedRef.current || roundEndingRef.current) return
+    if (endedRef.current || matchEndingRef.current) return
     const delay = botThinkDelayMs(lane2Ref.current.combo)
     botTimerRef.current = window.setTimeout(() => {
-      if (endedRef.current || roundEndingRef.current) return
+      if (endedRef.current || matchEndingRef.current) return
       const [a, b] = pickBotSwap(lane2Ref.current.cells, seedRef.current)
       if (a < 0) {
         scheduleBotRef.current()
@@ -164,43 +196,54 @@ export function useNeonCrushDuel() {
         scheduleBotRef.current()
         return
       }
-      const next = applyLaneScore(
-        { ...lane2Ref.current, cells: result.board },
+      playNeonCrushSound(result.combo >= 3 ? 'combo' : 'match')
+      const fx: NeonLaneFx = {
+        popIndices: result.popIndices,
+        segments: result.segments,
+        scoreGain: result.scoreGain,
+        combo: result.combo,
+        tick: Date.now(),
+        swap: result.swap,
+      }
+      commitLaneSwap(
+        2,
+        { ...lane2Ref.current, cells: result.previewBoard },
+        result.board,
+        fx,
         result.scoreGain,
         result.combo,
       )
-      lane2Ref.current = next
-      setLane2(next)
-      setBoardKey((k) => k + 1)
-      checkRoundEnd()
-      scheduleBotRef.current()
+      window.setTimeout(() => scheduleBotRef.current(), MATCH_ANIM_MS + 40)
     }, delay)
-  }, [applyLaneScore, bumpBoards, checkRoundEnd, clearBot])
+  }, [bumpBoards, clearBot, commitLaneSwap])
 
   scheduleBotRef.current = scheduleBot
 
   useEffect(() => {
     scheduleBotRef.current()
-    return () => clearBot()
-  }, [clearBot])
+    return () => {
+      clearBot()
+      clearAnimTimers()
+    }
+  }, [clearAnimTimers, clearBot])
 
   useEffect(() => {
     if (!running || endedRef.current) return
     const timer = window.setInterval(() => {
-      if (roundEndingRef.current) return
-      if (performance.now() < roundBreakUntilRef.current) return
-      roundTimeRef.current = Math.max(0, roundTimeRef.current - 1)
-      setRoundTimeLeft(roundTimeRef.current)
-      if (roundTimeRef.current === 0) endRoundRef.current()
+      if (matchEndingRef.current) return
+      timeRef.current = Math.max(0, timeRef.current - 1)
+      setTimeLeft(timeRef.current)
+      if (timeRef.current === 0) endMatchRef.current()
     }, 1000)
     return () => window.clearInterval(timer)
   }, [running])
 
   const tapCell = useCallback(
     (index: number) => {
-      if (!running || roundEndingRef.current || endedRef.current) return
+      if (!running || matchEndingRef.current || endedRef.current) return
 
       if (selected == null) {
+        playNeonCrushSound('select')
         setSelected(index)
         return
       }
@@ -212,55 +255,64 @@ export function useNeonCrushDuel() {
       const rand = mulberry32(seedRef.current++)
       const result = trySwap(lane1Ref.current.cells, selected, index, rand)
       setSelected(null)
-      if (!result.ok) return
+      if (!result.ok) {
+        playNeonCrushSound('invalid')
+        return
+      }
 
-      const next = applyLaneScore(
-        { ...lane1Ref.current, cells: result.board },
+      playNeonCrushSound('swap')
+      playNeonCrushSound(result.combo >= 3 ? 'combo' : 'match')
+      const fx: NeonLaneFx = {
+        popIndices: result.popIndices,
+        segments: result.segments,
+        scoreGain: result.scoreGain,
+        combo: result.combo,
+        tick: Date.now(),
+        swap: result.swap,
+      }
+      commitLaneSwap(
+        1,
+        { ...lane1Ref.current, cells: result.previewBoard },
+        result.board,
+        fx,
         result.scoreGain,
         result.combo,
       )
-      lane1Ref.current = next
-      setLane1(next)
-      setBoardKey((k) => k + 1)
-      checkRoundEnd()
     },
-    [applyLaneScore, checkRoundEnd, running, selected],
+    [commitLaneSwap, running, selected],
   )
 
   const restartMatch = useCallback(() => {
     clearBot()
+    clearAnimTimers()
     endedRef.current = false
-    roundEndingRef.current = false
-    roundNumberRef.current = 1
+    matchEndingRef.current = false
     seedRef.current = 501 + Math.floor(Math.random() * 800)
     const l1 = createLane(1, seedRef.current)
     const l2 = createLane(2, seedRef.current + 99)
-    lane1Ref.current = l1
-    lane2Ref.current = l2
-    setLane1(l1)
-    setLane2(l2)
-    setRoundNumber(1)
-    setRoundTimeLeft(ROUND_SECONDS)
-    roundTimeRef.current = ROUND_SECONDS
-    setRoundMessage(null)
+    lane1Ref.current = { ...l1, cells: normalizeBoard(l1.cells) }
+    lane2Ref.current = { ...l2, cells: normalizeBoard(l2.cells) }
+    setLane1(lane1Ref.current)
+    setLane2(lane2Ref.current)
+    setTimeLeft(DUEL_SECONDS)
+    timeRef.current = DUEL_SECONDS
+    setMatchMessage(null)
     setWinner(null)
     setRunning(true)
     setSelected(null)
     setBoardKey((k) => k + 1)
     scheduleBotRef.current()
-  }, [clearBot])
+  }, [clearAnimTimers, clearBot])
 
   return {
     lane1,
     lane2,
     selected,
-    roundNumber,
-    roundTimeLeft,
-    roundMessage,
+    timeLeft,
+    duelSeconds: DUEL_SECONDS,
+    matchMessage,
     running,
     winner,
-    matchRounds: MATCH_ROUNDS,
-    roundTarget: ROUND_TARGET_SCORE,
     boardKey,
     tapCell,
     restartMatch,

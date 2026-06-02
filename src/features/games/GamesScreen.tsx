@@ -58,27 +58,19 @@ export function GamesScreen() {
   }, [navigate])
 
   const openColorMatch = useCallback(() => {
-    navigate('/games/color-match')
+    navigate('/games/color-match/play')
   }, [navigate])
 
   const openNeonCrush = useCallback(() => {
-    navigate('/games/neon-crush')
-  }, [navigate])
-
-  const openDartDuel = useCallback(() => {
-    navigate('/games/dart-duel')
+    navigate('/games/neon-crush/play')
   }, [navigate])
 
   const openSnakeDuel = useCallback(() => {
-    navigate('/games/snake-duel')
+    navigate('/games/snake-duel/play')
   }, [navigate])
 
   const openPongDuel = useCallback(() => {
     navigate('/games/pong-duel')
-  }, [navigate])
-
-  const openReflexDuel = useCallback(() => {
-    navigate('/games/reflex-duel')
   }, [navigate])
 
   const openSimonDuel = useCallback(() => {
@@ -310,20 +302,12 @@ export function GamesScreen() {
         openNeonCrush()
         return
       }
-      if (isDartDuelGame(game)) {
-        openDartDuel()
-        return
-      }
       if (isSnakeDuelGame(game)) {
         openSnakeDuel()
         return
       }
       if (isPongDuelGame(game)) {
         openPongDuel()
-        return
-      }
-      if (isReflexDuelGame(game)) {
-        openReflexDuel()
         return
       }
       if (isSimonDuelGame(game)) {
@@ -509,10 +493,8 @@ export function GamesScreen() {
       openMathDuel,
       openMemoryDuel,
       openNeonCrush,
-      openDartDuel,
       openSnakeDuel,
       openPongDuel,
-      openReflexDuel,
       openSimonDuel,
       openWhackDuel,
       openRhythmDuel,
@@ -806,20 +788,12 @@ function isNeonCrushGame(game: GamesMiniCard) {
   return game.id === 'neon-crush-duel' || game.id === 'neon-crush' || game.artKind === 'neon-crush'
 }
 
-function isDartDuelGame(game: GamesMiniCard) {
-  return game.id === 'dart-duel' || game.artKind === 'dart'
-}
-
 function isSnakeDuelGame(game: GamesMiniCard) {
   return game.id === 'snake-duel' || game.artKind === 'snake-duel' || game.artKind === 'snake'
 }
 
 function isPongDuelGame(game: GamesMiniCard) {
   return game.id === 'pong-duel' || game.artKind === 'pong-duel' || game.artKind === 'pong'
-}
-
-function isReflexDuelGame(game: GamesMiniCard) {
-  return game.id === 'reflex-duel' || game.artKind === 'reflex-duel'
 }
 
 function isSimonDuelGame(game: GamesMiniCard) {

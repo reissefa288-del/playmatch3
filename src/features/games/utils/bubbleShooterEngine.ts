@@ -27,14 +27,24 @@ export function setPlayfieldAspect(width: number, height: number) {
 export function bubbleDrawRadiusPx(canvasWidth: number) {
   return BUBBLE_RADIUS * canvasWidth * BUBBLE_DRAW_MULT
 }
-export const AIM_MIN = -2.75
-export const AIM_MAX = -0.38
+export const AIM_MIN = -2.88
+export const AIM_MAX = -0.32
 export const AIM_SPEED = 2.35
+export const AIM_HOLD_SPEED = 2.45
 export const SHOT_SPEED = 1.32
+/** Nişan önizlemesi ve gerçek atış — aynı adım */
+export const SHOT_PHYSICS_STEP = 0.007
 export const AIM_ACCEL = 14
 export const AIM_DAMP = 10
-export const AIM_SNAP_MAX_DIFF = 0.2
-export const AIM_SNAP_STRENGTH = 12
+export const AIM_SNAP_MAX_DIFF = 0.26
+export const AIM_SNAP_STRENGTH = 14
+
+/** Dokunmatik nişan — çarpışma mesafesiyle aynı dikey düzeltme */
+export function aimFromNormalizedPointer(nx: number, ny: number): number {
+  const dx = nx - SHOOTER_X
+  const dy = (ny - SHOOTER_Y) * playfieldAspect
+  return clamp(Math.atan2(dy, dx), AIM_MIN, AIM_MAX)
+}
 
 export type BubbleColor = 'cyan' | 'pink' | 'yellow' | 'green' | 'purple'
 
@@ -207,21 +217,22 @@ export function updateLane(
   }
 
   if (!next.projectile) {
-    // Daha akıcı nişan: hızlanma + damping (momentum)
-    const damp = Math.exp(-AIM_DAMP * dt)
-    next.aimVel *= damp
-    if (aimDir !== 0) next.aimVel += aimDir * AIM_ACCEL * dt
+    if (aimDir !== 0) {
+      next.aimVel = 0
+      next.aimAngle = clamp(next.aimAngle + aimDir * AIM_HOLD_SPEED * dt, AIM_MIN, AIM_MAX)
+    } else if (!fire) {
+      const damp = Math.exp(-AIM_DAMP * dt)
+      next.aimVel *= damp
+      next.aimAngle = clamp(next.aimAngle + next.aimVel * dt * AIM_SPEED, AIM_MIN, AIM_MAX)
 
-    next.aimAngle = clamp(next.aimAngle + next.aimVel * dt * AIM_SPEED, AIM_MIN, AIM_MAX)
-
-    // Hedefe tutunma (snap assist): küçük farklarda hücre merkezine yaklaştır
-    const target = predictAttachCell(next.grid, next.aimAngle)
-    if (target) {
-      const desired = aimAtCell(target.row, target.col)
-      const diff = wrapAngle(desired - next.aimAngle)
-      if (Math.abs(diff) <= AIM_SNAP_MAX_DIFF) {
-        const snap = 1 - Math.exp(-AIM_SNAP_STRENGTH * dt)
-        next.aimAngle = clamp(next.aimAngle + diff * snap, AIM_MIN, AIM_MAX)
+      const target = predictAttachCell(next.grid, next.aimAngle)
+      if (target) {
+        const desired = aimAtCell(target.row, target.col)
+        const diff = wrapAngle(desired - next.aimAngle)
+        if (Math.abs(diff) <= AIM_SNAP_MAX_DIFF) {
+          const snap = 1 - Math.exp(-AIM_SNAP_STRENGTH * dt)
+          next.aimAngle = clamp(next.aimAngle + diff * snap, AIM_MIN, AIM_MAX)
+        }
       }
     }
   }
@@ -290,45 +301,85 @@ function stepProjectile(
   lane: LaneState,
   dt: number,
 ): { row: number; col: number; color: BubbleColor; kind: BubbleKind; popped: number } | null {
-  const travel = SHOT_SPEED * dt
-  const steps = Math.max(4, Math.ceil(travel / (BUBBLE_RADIUS * 0.42)))
-  const subDt = dt / steps
-  for (let i = 0; i < steps; i += 1) {
-    const hit = stepProjectileOnce(lane, subDt)
+  let remaining = dt
+  while (remaining > 1e-6) {
+    const step = Math.min(remaining, SHOT_PHYSICS_STEP)
+    const hit = stepProjectileOnce(lane, step)
     if (hit) return hit
+    remaining -= step
   }
   return null
 }
 
 type GridHit = { x: number; y: number; row: number; col: number }
 
-function findProjectileGridHit(
-  lane: LaneState,
+function hitBubbleAt(grid: Map<string, BubbleColor>, x: number, y: number): GridHit | null {
+  for (const [key] of grid) {
+    const [row, col] = key.split(',').map(Number)
+    const pos = bubblePos(row, col)
+    if (bubbleDistance(x, y, pos.x, pos.y) < COLLISION_DISTANCE) {
+      return { x, y, row, col }
+    }
+  }
+  return null
+}
+
+function findGridHitOnSegment(
+  grid: Map<string, BubbleColor>,
   x0: number,
   y0: number,
   x1: number,
   y1: number,
 ): GridHit | null {
   const segLen = bubbleDistance(x0, y0, x1, y1)
-  const samples = Math.max(2, Math.ceil(segLen / (BUBBLE_RADIUS * 0.32)))
-  let best: GridHit | null = null
-  let bestT = Infinity
+  if (segLen <= 0) return hitBubbleAt(grid, x0, y0)
 
-  for (let i = 0; i <= samples; i += 1) {
-    const t = i / samples
+  const coarse = Math.max(4, Math.ceil(segLen / (BUBBLE_RADIUS * 0.22)))
+  let hitT = -1
+  let hitBubble: { row: number; col: number } | null = null
+
+  for (let i = 0; i <= coarse; i += 1) {
+    const t = i / coarse
     const x = x0 + (x1 - x0) * t
     const y = y0 + (y1 - y0) * t
-    for (const [key] of lane.grid) {
-      const [row, col] = key.split(',').map(Number)
-      const pos = bubblePos(row, col)
-      if (bubbleDistance(x, y, pos.x, pos.y) < COLLISION_DISTANCE && t < bestT) {
-        bestT = t
-        best = { x, y, row, col }
-      }
+    const hit = hitBubbleAt(grid, x, y)
+    if (hit && (hitT < 0 || t < hitT)) {
+      hitT = t
+      hitBubble = { row: hit.row, col: hit.col }
     }
   }
 
-  return best
+  if (hitT < 0 || !hitBubble) return null
+
+  let lo = Math.max(0, hitT - 1 / coarse)
+  let hi = hitT
+  for (let r = 0; r < 10; r += 1) {
+    const mid = (lo + hi) * 0.5
+    const x = x0 + (x1 - x0) * mid
+    const y = y0 + (y1 - y0) * mid
+    if (hitBubbleAt(grid, x, y)) hi = mid
+    else lo = mid
+  }
+
+  const x = x0 + (x1 - x0) * hi
+  const y = y0 + (y1 - y0) * hi
+  return { x, y, row: hitBubble.row, col: hitBubble.col }
+}
+
+function findFirstGridHitOnPath(
+  grid: Map<string, BubbleColor>,
+  x0: number,
+  y0: number,
+  x1: number,
+  y1: number,
+  bounce: { x: number; y: number } | null,
+): GridHit | null {
+  if (bounce) {
+    const first = findGridHitOnSegment(grid, x0, y0, bounce.x, bounce.y)
+    if (first) return first
+    return findGridHitOnSegment(grid, bounce.x, bounce.y, x1, y1)
+  }
+  return findGridHitOnSegment(grid, x0, y0, x1, y1)
 }
 
 function stepProjectileOnce(
@@ -338,24 +389,17 @@ function stepProjectileOnce(
   const p = lane.projectile!
   const startX = p.x
   const startY = p.y
-  let endX = p.x + p.vx * dt
-  let endY = p.y + p.vy * dt
+  const moved = advanceShotStep(p.x, p.y, p.vx, p.vy, dt)
+  p.x = moved.x
+  p.y = moved.y
+  p.vx = moved.vx
+  p.vy = moved.vy
 
-  if (endX <= GRID_H_MARGIN) {
-    endX = GRID_H_MARGIN
-    p.vx = Math.abs(p.vx)
-  } else if (endX >= 1 - GRID_H_MARGIN) {
-    endX = 1 - GRID_H_MARGIN
-    p.vx = -Math.abs(p.vx)
-  }
-
-  if (endY <= GRID_TOP + BUBBLE_RADIUS) {
-    p.x = endX
-    p.y = endY
+  if (p.y <= GRID_TOP + BUBBLE_RADIUS) {
     return attachAtCeiling(lane, p.x, p.color, p.kind)
   }
 
-  const gridHit = findProjectileGridHit(lane, startX, startY, endX, endY)
+  const gridHit = findFirstGridHitOnPath(lane.grid, startX, startY, p.x, p.y, moved.bounce)
   if (gridHit) {
     p.x = gridHit.x
     p.y = gridHit.y
@@ -363,9 +407,6 @@ function stepProjectileOnce(
     if (attached) return attached
     return forceAttachBubble(lane, p.x, p.y, p.color, p.kind)
   }
-
-  p.x = endX
-  p.y = endY
 
   if (p.y > 1.08) {
     lane.projectile = null
@@ -434,32 +475,27 @@ function attachAtCeiling(lane: LaneState, x: number, color: BubbleColor, kind: B
   return forceAttachBubble(lane, x, GRID_TOP + BUBBLE_RADIUS, color, kind)
 }
 
-function attachNear(
-  lane: LaneState,
+function pickAttachCell(
+  grid: Map<string, BubbleColor>,
   x: number,
   y: number,
-  color: BubbleColor,
-  kind: BubbleKind,
   hitRow: number,
   hitCol: number,
-): AttachResult | null {
+): AttachCell {
   const candidates = neighbors(hitRow, hitCol).filter(({ row, col }) => {
     const key = cellKey(row, col)
-    return row >= 0 && !lane.grid.has(key)
+    return row >= 0 && !grid.has(key)
   })
 
   if (candidates.length === 0) {
     const row = hitRow + 1
     const col = nearestColInRow(row, x)
     const key = cellKey(row, col)
-    if (!lane.grid.has(key)) {
-      const popped = placeBubbleAndResolve(lane, row, col, color, kind)
-      return { row, col, color, kind, popped }
-    }
-    return forceAttachBubble(lane, x, y, color, kind)
+    if (!grid.has(key)) return { row, col }
+    return pickForceAttachCell(grid, x, y)
   }
 
-  let best = candidates[0]
+  let best = candidates[0]!
   let bestDist = Infinity
   for (const c of candidates) {
     const pos = bubblePos(c.row, c.col)
@@ -470,8 +506,25 @@ function attachNear(
     }
   }
 
-  const popped = placeBubbleAndResolve(lane, best.row, best.col, color, kind)
-  return { row: best.row, col: best.col, color, kind, popped }
+  return { row: best.row, col: best.col }
+}
+
+function attachNear(
+  lane: LaneState,
+  x: number,
+  y: number,
+  color: BubbleColor,
+  kind: BubbleKind,
+  hitRow: number,
+  hitCol: number,
+): AttachResult | null {
+  const cell = pickAttachCell(lane.grid, x, y, hitRow, hitCol)
+  const key = cellKey(cell.row, cell.col)
+  if (!lane.grid.has(key)) {
+    const popped = placeBubbleAndResolve(lane, cell.row, cell.col, color, kind)
+    return { row: cell.row, col: cell.col, color, kind, popped }
+  }
+  return forceAttachBubble(lane, x, y, color, kind)
 }
 
 function placeBubbleAndResolve(
@@ -693,7 +746,7 @@ function mulberry32(seed: number) {
 
 export type AttachCell = { row: number; col: number }
 
-function predictForceAttach(grid: Map<string, BubbleColor>, x: number, y: number): AttachCell {
+function pickForceAttachCell(grid: Map<string, BubbleColor>, x: number, y: number): AttachCell {
   const candidates = listAttachCandidates(grid)
   if (candidates.length === 0) {
     return { row: 0, col: nearestColInRow(0, x) }
@@ -720,158 +773,143 @@ function predictAttachAtCeiling(grid: Map<string, BubbleColor>, x: number): Atta
   const col = nearestColInRow(row, x)
   const key = cellKey(row, col)
   if (!grid.has(key)) return { row, col }
-  const fallback = predictAttachNear(grid, x, GRID_TOP + BUBBLE_RADIUS, row, col)
-  if (fallback) return fallback
-  return predictForceAttach(grid, x, GRID_TOP + BUBBLE_RADIUS)
+  return pickAttachCell(grid, x, GRID_TOP + BUBBLE_RADIUS, row, col)
 }
 
-function predictAttachNear(
-  grid: Map<string, BubbleColor>,
+const AIM_GUIDE_DOT_SPACING = 0.036
+const SHOT_SIM_MAX_STEPS = 480
+
+type ShotSimResult = {
+  dots: { x: number; y: number }[]
+  pathVertices: { x: number; y: number }[]
+  target: AttachCell | null
+}
+
+function advanceShotStep(
   x: number,
   y: number,
-  hitRow: number,
-  hitCol: number,
-): AttachCell | null {
-  const candidates = neighbors(hitRow, hitCol).filter(({ row, col }) => {
-    const key = cellKey(row, col)
-    return row >= 0 && !grid.has(key)
-  })
+  vx: number,
+  vy: number,
+  step: number,
+): { x: number; y: number; vx: number; vy: number; bounce: { x: number; y: number } | null } {
+  let nx = x + vx * step
+  let ny = y + vy * step
+  let nvx = vx
+  let bounce: { x: number; y: number } | null = null
+  const left = GRID_H_MARGIN
+  const right = 1 - GRID_H_MARGIN
 
-  if (candidates.length === 0) {
-    const row = hitRow + 1
-    const col = nearestColInRow(row, x)
-    const key = cellKey(row, col)
-    if (!grid.has(key)) return { row, col }
-    return predictForceAttach(grid, x, y)
+  if (nx < left && vx < 0) {
+    const t = (left - x) / (nx - x)
+    const by = y + (ny - y) * t
+    bounce = { x: left, y: by }
+    nx = left + (left - nx)
+    nvx = -vx
+  } else if (nx > right && vx > 0) {
+    const t = (right - x) / (nx - x)
+    const by = y + (ny - y) * t
+    bounce = { x: right, y: by }
+    nx = right - (nx - right)
+    nvx = -vx
   }
 
-  let best = candidates[0]!
-  let bestDist = Infinity
-  for (const c of candidates) {
-    const pos = bubblePos(c.row, c.col)
-    const d = bubbleDistance(x, y, pos.x, pos.y)
-    if (d < bestDist) {
-      bestDist = d
-      best = c
+  return { x: nx, y: ny, vx: nvx, vy, bounce }
+}
+
+function sampleDotsAlongPath(vertices: { x: number; y: number }[], spacing: number) {
+  const dots: { x: number; y: number }[] = []
+  if (vertices.length === 0) return dots
+
+  let carry = spacing * 0.45
+  for (let v = 0; v < vertices.length - 1; v += 1) {
+    const ax = vertices[v]!.x
+    const ay = vertices[v]!.y
+    const bx = vertices[v + 1]!.x
+    const by = vertices[v + 1]!.y
+    const segLen = bubbleDistance(ax, ay, bx, by)
+    if (segLen <= 0) continue
+    let traveled = 0
+    while (traveled < segLen) {
+      const remain = carry > 0 ? carry : spacing
+      const stepAlong = Math.min(remain, segLen - traveled)
+      traveled += stepAlong
+      carry -= stepAlong
+      if (carry <= 0.0001) {
+        const t = traveled / segLen
+        dots.push({ x: ax + (bx - ax) * t, y: ay + (by - ay) * t })
+        carry = spacing
+      }
+    }
+  }
+  return dots
+}
+
+function simulateShotPath(
+  grid: Map<string, BubbleColor>,
+  aimAngle: number,
+  collectGuide: boolean,
+): ShotSimResult {
+  let x = SHOOTER_X
+  let y = SHOOTER_Y
+  let vx = Math.cos(aimAngle) * SHOT_SPEED
+  let vy = Math.sin(aimAngle) * SHOT_SPEED
+  const pathVertices: { x: number; y: number }[] = [{ x, y }]
+  let target: AttachCell | null = null
+
+  for (let i = 0; i < SHOT_SIM_MAX_STEPS; i += 1) {
+    const prevX = x
+    const prevY = y
+    const moved = advanceShotStep(x, y, vx, vy, SHOT_PHYSICS_STEP)
+    x = moved.x
+    y = moved.y
+    vx = moved.vx
+    vy = moved.vy
+
+    if (collectGuide && moved.bounce) {
+      pathVertices.push(moved.bounce)
+    }
+
+    if (y <= GRID_TOP + BUBBLE_RADIUS) {
+      target = predictAttachAtCeiling(grid, x)
+      if (collectGuide) {
+        pathVertices.push({ x, y })
+        pathVertices.push(bubblePos(target.row, target.col))
+      }
+      break
+    }
+
+    const gridHit = findFirstGridHitOnPath(grid, prevX, prevY, x, y, moved.bounce)
+    if (gridHit) {
+      target = pickAttachCell(grid, gridHit.x, gridHit.y, gridHit.row, gridHit.col)
+      if (collectGuide) {
+        pathVertices.push({ x: gridHit.x, y: gridHit.y })
+        pathVertices.push(bubblePos(target.row, target.col))
+      }
+      break
+    }
+
+    if (y > 1.08) {
+      if (collectGuide) pathVertices.push({ x, y })
+      break
     }
   }
 
-  return { row: best.row, col: best.col }
+  const dots = collectGuide ? sampleDotsAlongPath(pathVertices, AIM_GUIDE_DOT_SPACING) : []
+  return { dots, pathVertices, target }
 }
-
-const AIM_GUIDE_DOT_SPACING = 0.022
-const AIM_GUIDE_START_Y = SHOOTER_Y - 0.072
 
 /** Nişan çizgisi için atış yolundan eşit aralıklı noktalar */
 export function sampleAimGuideDots(
   grid: Map<string, BubbleColor>,
   aimAngle: number,
-): { dots: { x: number; y: number }[]; target: AttachCell | null } {
-  let x = SHOOTER_X
-  let y = AIM_GUIDE_START_Y
-  let vx = Math.cos(aimAngle) * SHOT_SPEED
-  let vy = Math.sin(aimAngle) * SHOT_SPEED
-  const step = 0.0095
-  const dots: { x: number; y: number }[] = []
-  let distToNextDot = 0
-  let prevX = x
-  let prevY = y
-
-  const addDotsOnSegment = (ax: number, ay: number, bx: number, by: number) => {
-    const segLen = bubbleDistance(ax, ay, bx, by)
-    if (segLen <= 0) return
-    let traveled = 0
-    while (traveled < segLen) {
-      const remain = distToNextDot > 0 ? distToNextDot : AIM_GUIDE_DOT_SPACING
-      const stepAlong = Math.min(remain, segLen - traveled)
-      traveled += stepAlong
-      distToNextDot -= stepAlong
-      if (distToNextDot <= 0.0001) {
-        const t = traveled / segLen
-        dots.push({
-          x: ax + (bx - ax) * t,
-          y: ay + (by - ay) * t,
-        })
-        distToNextDot = AIM_GUIDE_DOT_SPACING
-      }
-    }
-  }
-
-  for (let i = 0; i < 220; i += 1) {
-    prevX = x
-    prevY = y
-    x += vx * step
-    y += vy * step
-
-    if (x <= GRID_H_MARGIN) {
-      x = GRID_H_MARGIN
-      vx = Math.abs(vx)
-    } else if (x >= 1 - GRID_H_MARGIN) {
-      x = 1 - GRID_H_MARGIN
-      vx = -Math.abs(vx)
-    }
-
-    addDotsOnSegment(prevX, prevY, x, y)
-
-    if (y <= GRID_TOP + BUBBLE_RADIUS) {
-      const target = predictAttachAtCeiling(grid, x)
-      return { dots, target }
-    }
-
-    for (const [key] of grid) {
-      const [row, col] = key.split(',').map(Number)
-      const pos = bubblePos(row, col)
-      if (bubbleDistance(x, y, pos.x, pos.y) < COLLISION_DISTANCE) {
-        const attached = predictAttachNear(grid, x, y, row, col)
-        const target = attached ?? predictForceAttach(grid, x, y)
-        return { dots, target }
-      }
-    }
-
-    if (y > 1.08) return { dots, target: null }
-  }
-
-  return { dots, target: null }
+): { dots: { x: number; y: number }[]; pathVertices: { x: number; y: number }[]; target: AttachCell | null } {
+  const { dots, pathVertices, target } = simulateShotPath(grid, aimAngle, true)
+  return { dots, pathVertices, target }
 }
 
 /** Nişan açısında topun ızgarada oturacağı hücre (atışla aynı mantık) */
 export function predictAttachCell(grid: Map<string, BubbleColor>, aimAngle: number): AttachCell | null {
-  let x = SHOOTER_X
-  let y = SHOOTER_Y
-  let vx = Math.cos(aimAngle) * SHOT_SPEED
-  let vy = Math.sin(aimAngle) * SHOT_SPEED
-  const step = 0.0095
-
-  for (let i = 0; i < 220; i += 1) {
-    x += vx * step
-    y += vy * step
-
-    if (x <= GRID_H_MARGIN) {
-      x = GRID_H_MARGIN
-      vx = Math.abs(vx)
-    } else if (x >= 1 - GRID_H_MARGIN) {
-      x = 1 - GRID_H_MARGIN
-      vx = -Math.abs(vx)
-    }
-
-    if (y <= GRID_TOP + BUBBLE_RADIUS) {
-      return predictAttachAtCeiling(grid, x)
-    }
-
-    for (const [key] of grid) {
-      const [row, col] = key.split(',').map(Number)
-      const pos = bubblePos(row, col)
-      if (bubbleDistance(x, y, pos.x, pos.y) < COLLISION_DISTANCE) {
-        const attached = predictAttachNear(grid, x, y, row, col)
-        if (attached) return attached
-        return predictForceAttach(grid, x, y)
-      }
-    }
-
-    if (y > 1.08) return null
-  }
-
-  return null
+  return simulateShotPath(grid, aimAngle, false).target
 }
 
 export function listAttachCandidates(grid: Map<string, BubbleColor>) {
@@ -908,7 +946,9 @@ export function scorePlacement(
 
 export function aimAtCell(row: number, col: number): number {
   const pos = bubblePos(row, col)
-  return clamp(Math.atan2(pos.y - SHOOTER_Y, pos.x - SHOOTER_X), AIM_MIN, AIM_MAX)
+  const dx = pos.x - SHOOTER_X
+  const dy = (pos.y - SHOOTER_Y) * playfieldAspect
+  return clamp(Math.atan2(dy, dx), AIM_MIN, AIM_MAX)
 }
 
 function countRemovedAt(grid: Map<string, BubbleColor>, row: number, col: number): number {

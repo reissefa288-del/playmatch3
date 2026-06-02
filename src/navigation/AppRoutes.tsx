@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { BottomNavigation } from '../features/home/components/BottomNavigation'
 import { bottomNavigation } from '../features/home/data'
 import { MessageScreen } from '../features/chat/MessageScreen'
@@ -14,14 +14,9 @@ import { ColorMatchLobbyScreen } from '../features/games/ColorMatchLobbyScreen'
 import { ColorMatchDuelScreen } from '../features/games/ColorMatchDuelScreen'
 import { NeonCrushLobbyScreen } from '../features/games/NeonCrushLobbyScreen'
 import { NeonCrushDuelScreen } from '../features/games/NeonCrushDuelScreen'
-import { DartDuelLobbyScreen } from '../features/games/DartDuelLobbyScreen'
-import { DartDuelScreen } from '../features/games/DartDuelScreen'
-import { SnakeDuelLobbyScreen } from '../features/games/SnakeDuelLobbyScreen'
 import { SnakeDuelScreen } from '../features/games/SnakeDuelScreen'
 import { PongDuelLobbyScreen } from '../features/games/PongDuelLobbyScreen'
 import { PongDuelScreen } from '../features/games/PongDuelScreen'
-import { ReflexDuelLobbyScreen } from '../features/games/ReflexDuelLobbyScreen'
-import { ReflexDuelScreen } from '../features/games/ReflexDuelScreen'
 import { SimonDuelLobbyScreen } from '../features/games/SimonDuelLobbyScreen'
 import { SimonDuelScreen } from '../features/games/SimonDuelScreen'
 import { WhackDuelLobbyScreen } from '../features/games/WhackDuelLobbyScreen'
@@ -127,14 +122,10 @@ const COLOR_MATCH_LOBBY_PATH = /^\/games\/color-match$/
 const COLOR_MATCH_PLAY_PATH = /^\/games\/color-match\/play$/
 const NEON_CRUSH_LOBBY_PATH = /^\/games\/neon-crush$/
 const NEON_CRUSH_PLAY_PATH = /^\/games\/neon-crush\/play$/
-const DART_LOBBY_PATH = /^\/games\/dart-duel$/
-const DART_PLAY_PATH = /^\/games\/dart-duel\/play$/
 const SNAKE_LOBBY_PATH = /^\/games\/snake-duel$/
 const SNAKE_PLAY_PATH = /^\/games\/snake-duel\/play$/
 const PONG_LOBBY_PATH = /^\/games\/pong-duel$/
 const PONG_PLAY_PATH = /^\/games\/pong-duel\/play$/
-const REFLEX_LOBBY_PATH = /^\/games\/reflex-duel$/
-const REFLEX_PLAY_PATH = /^\/games\/reflex-duel\/play$/
 const SIMON_LOBBY_PATH = /^\/games\/simon-duel$/
 const SIMON_PLAY_PATH = /^\/games\/simon-duel\/play$/
 const WHACK_LOBBY_PATH = /^\/games\/whack-duel$/
@@ -237,14 +228,10 @@ export function AppRoutes() {
   const isColorMatchPlay = COLOR_MATCH_PLAY_PATH.test(path)
   const isNeonCrushLobby = NEON_CRUSH_LOBBY_PATH.test(path)
   const isNeonCrushPlay = NEON_CRUSH_PLAY_PATH.test(path)
-  const isDartLobby = DART_LOBBY_PATH.test(path)
-  const isDartPlay = DART_PLAY_PATH.test(path)
   const isSnakeLobby = SNAKE_LOBBY_PATH.test(path)
   const isSnakePlay = SNAKE_PLAY_PATH.test(path)
   const isPongLobby = PONG_LOBBY_PATH.test(path)
   const isPongPlay = PONG_PLAY_PATH.test(path)
-  const isReflexLobby = REFLEX_LOBBY_PATH.test(path)
-  const isReflexPlay = REFLEX_PLAY_PATH.test(path)
   const isSimonLobby = SIMON_LOBBY_PATH.test(path)
   const isSimonPlay = SIMON_PLAY_PATH.test(path)
   const isWhackLobby = WHACK_LOBBY_PATH.test(path)
@@ -345,14 +332,10 @@ export function AppRoutes() {
     isColorMatchPlay ||
     isNeonCrushLobby ||
     isNeonCrushPlay ||
-    isDartLobby ||
-    isDartPlay ||
     isSnakeLobby ||
     isSnakePlay ||
     isPongLobby ||
     isPongPlay ||
-    isReflexLobby ||
-    isReflexPlay ||
     isSimonLobby ||
     isSimonPlay ||
     isWhackLobby ||
@@ -475,14 +458,10 @@ export function AppRoutes() {
               <Route path="/games/color-match/play" element={<ColorMatchDuelScreen />} />
               <Route path="/games/neon-crush" element={<NeonCrushLobbyScreen />} />
               <Route path="/games/neon-crush/play" element={<NeonCrushDuelScreen />} />
-              <Route path="/games/dart-duel" element={<DartDuelLobbyScreen />} />
-              <Route path="/games/dart-duel/play" element={<DartDuelScreen />} />
-              <Route path="/games/snake-duel" element={<SnakeDuelLobbyScreen />} />
+              <Route path="/games/snake-duel" element={<Navigate to="/games/snake-duel/play" replace />} />
               <Route path="/games/snake-duel/play" element={<SnakeDuelScreen />} />
               <Route path="/games/pong-duel" element={<PongDuelLobbyScreen />} />
               <Route path="/games/pong-duel/play" element={<PongDuelScreen />} />
-              <Route path="/games/reflex-duel" element={<ReflexDuelLobbyScreen />} />
-              <Route path="/games/reflex-duel/play" element={<ReflexDuelScreen />} />
               <Route path="/games/simon-duel" element={<SimonDuelLobbyScreen />} />
               <Route path="/games/simon-duel/play" element={<SimonDuelScreen />} />
               <Route path="/games/whack-duel" element={<WhackDuelLobbyScreen />} />

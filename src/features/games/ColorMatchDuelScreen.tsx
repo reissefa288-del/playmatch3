@@ -1,9 +1,8 @@
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiClock, FiSettings } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import { ColorMatchGrid, ColorTargetSwatch } from './components/ColorMatchGrid'
+import { ColorMatchGrid } from './components/ColorMatchGrid'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useColorMatchDuel } from './useColorMatchDuel'
@@ -18,11 +17,21 @@ function formatScore(n: number) {
   return n.toLocaleString('tr-TR')
 }
 
+function RoundDots({ wins, max, variant }: { wins: number; max: number; variant: 'cyan' | 'pink' }) {
+  return (
+    <span className={`pm-cmatch-round-dots is-${variant}`} aria-label={`${wins} round galibiyeti`}>
+      {Array.from({ length: max }, (_, i) => (
+        <i key={i} className={i < wins ? 'is-won' : ''} />
+      ))}
+    </span>
+  )
+}
+
 export function ColorMatchDuelScreen() {
   const navigate = useNavigate()
   const game = useColorMatchDuel()
 
-  const handleBack = useCallback(() => navigate('/games/color-match'), [navigate])
+  const handleBack = useCallback(() => navigate('/games'), [navigate])
   const canPlay = game.running && !game.roundMessage
 
   const overlayMessage = !game.running
@@ -36,7 +45,7 @@ export function ColorMatchDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--cmatch">
       <div className="pm-artboard">
-        <motion.div className="pm-cmatch-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-cmatch-screen">
           <GameDuelBackdrop />
 
           <button type="button" className="pm-cmatch-back" onClick={handleBack} aria-label="Geri dön">
@@ -52,7 +61,7 @@ export function ColorMatchDuelScreen() {
                 <span className="is-violet">COLOR</span>
                 <span className="is-gold">MATCH</span>
               </h1>
-              <p className="pm-cmatch-header__sub">HEDEF RENGE DOKUN • KOMBO YAP</p>
+              <p className="pm-cmatch-header__sub">HEDEF RENKLERE DOKUN • HEPSİNİ EŞLEŞTİR</p>
             </header>
 
             <section className="pm-cmatch-hud">
@@ -75,7 +84,6 @@ export function ColorMatchDuelScreen() {
                     {game.roundNumber}/{game.matchRounds}
                   </strong>
                 </div>
-                <ColorTargetSwatch key={game.targetKey} color={game.target} />
               </div>
 
               <div className="pm-cmatch-hud__side is-p2">
@@ -86,32 +94,47 @@ export function ColorMatchDuelScreen() {
               </div>
             </section>
 
-            <section className="pm-cmatch-arena">
-              <div className="pm-cmatch-arena__lane">
-                <ColorMatchGrid
-                  lane={game.lane1}
-                  accent="cyan"
-                  interactive={canPlay}
-                  onTap={game.tapP1}
-                />
-              </div>
-              <div className="pm-cmatch-arena__lane">
-                <ColorMatchGrid lane={game.lane2} accent="pink" />
-              </div>
+            <section className="pm-cmatch-arena" aria-label="Oyun alanı">
+              <ColorMatchGrid
+                lane={game.lane1}
+                accent="cyan"
+                interactive={canPlay}
+                onTap={game.tapP1}
+              />
+              <ColorMatchGrid lane={game.lane2} accent="pink" />
             </section>
+
+            <footer className="pm-cmatch-footer">
+              <div className="pm-cmatch-footer__side is-cyan">
+                <span className="pm-cmatch-footer__label">SEN</span>
+                <RoundDots wins={game.lane1.matchPoints} max={game.winRounds} variant="cyan" />
+                <span className="pm-cmatch-footer__hint">Hedef renkleri bul</span>
+              </div>
+              <div className="pm-cmatch-footer__center">
+                <p className="pm-cmatch-footer__vs">VS</p>
+                <p className="pm-cmatch-footer__goal">
+                  İlk <strong>{game.winRounds}</strong> roundu alan maçı kazanır
+                </p>
+              </div>
+              <div className="pm-cmatch-footer__side is-pink">
+                <span className="pm-cmatch-footer__label">RAKİP</span>
+                <RoundDots wins={game.lane2.matchPoints} max={game.winRounds} variant="pink" />
+                <span className="pm-cmatch-footer__hint">Kendi hedefi</span>
+              </div>
+            </footer>
           </div>
 
           {overlayMessage ? (
-            <motion.div className="pm-cmatch-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
+            <div className="pm-cmatch-overlay" role="status">
               <p>{overlayMessage}</p>
               {!game.running ? (
                 <button type="button" onClick={game.restartMatch}>
                   Tekrar Oyna
                 </button>
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

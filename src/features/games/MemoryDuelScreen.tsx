@@ -6,6 +6,7 @@ import vsBadge from '../../reference/vs.png'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
+import { MemoryDuelAmbient } from './components/MemoryDuelAmbient'
 import { MemoryDuelGrid } from './components/MemoryDuelGrid'
 import { useMemoryDuel } from './useMemoryDuel'
 import { unlockMemoryDuelAudio } from './utils/memoryDuelSounds'
@@ -62,6 +63,7 @@ export function MemoryDuelScreen() {
           animate={{ opacity: 1 }}
         >
           <GameDuelBackdrop />
+          <MemoryDuelAmbient />
 
           <button type="button" className="pm-memory-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
@@ -127,7 +129,10 @@ export function MemoryDuelScreen() {
 
             <section className="pm-memory-arena" aria-label="Oyun alanı">
               <MemoryDuelGrid lane={game.lane1} accent="cyan" interactive onFlip={handleFlip} />
-              <img className="pm-memory-arena__vs" src={vsBadge} alt="" aria-hidden />
+              <span className="pm-memory-arena__vs-wrap" aria-hidden>
+                <span className="pm-memory-arena__vs-glow" />
+                <img className="pm-memory-arena__vs" src={vsBadge} alt="" />
+              </span>
               <MemoryDuelGrid lane={game.lane2} accent="pink" />
             </section>
 
@@ -143,8 +148,20 @@ export function MemoryDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div className="pm-memory-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
-              <p>{overlayMessage}</p>
+            <motion.div
+              className={`pm-memory-overlay${!game.running ? ' is-victory' : game.isRoundBreak ? ' is-round' : ''}`}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              role="status"
+            >
+              <span className="pm-memory-overlay__shine" aria-hidden />
+              <motion.p
+                initial={{ opacity: 0, y: 12, scale: 0.92 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+              >
+                {overlayMessage}
+              </motion.p>
               {!game.running ? (
                 <button type="button" onClick={handleRestart}>
                   Tekrar Oyna

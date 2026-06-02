@@ -253,6 +253,7 @@ export function useBubbleShooterDuel() {
       const forceUi =
         wantsFire ||
         wantsSwap ||
+        aimDirRef.current !== 0 ||
         r1.events.length > 0 ||
         r2.events.length > 0
       if (forceUi || syncUiTickRef.current % 2 === 0) {

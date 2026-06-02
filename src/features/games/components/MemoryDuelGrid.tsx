@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { SYMBOL_COLOR, SYMBOL_GLYPH, type LaneState, type MemorySymbol } from '../utils/memoryDuelEngine'
+import { MemoryMatchFx } from './MemoryMatchFx'
 
 type MemoryDuelGridProps = {
   lane: LaneState
@@ -11,46 +12,49 @@ type MemoryDuelGridProps = {
 export function MemoryDuelGrid({ lane, accent, interactive = false, onFlip }: MemoryDuelGridProps) {
   return (
     <motion.div
-      className={`pm-memory-grid is-${accent}`}
-      animate={lane.shake > 0 ? { x: [0, -2, 2, 0] } : { x: 0 }}
-      transition={{ duration: 0.18 }}
+      className={`pm-memory-grid is-${accent}${lane.shake > 0 ? ' is-miss-shake' : ''}`}
+      animate={lane.shake > 0 ? { x: [0, -3, 3, 0] } : { x: 0 }}
+      transition={{ duration: 0.22 }}
     >
       <div className="pm-memory-grid__cells">
-        {lane.cards.map((card, index) => (
-          <button
-            key={index}
-            type="button"
-            className={`pm-memory-card ${card.status}${card.pulse ? ' is-pulse' : ''}`}
-            disabled={!interactive || card.status !== 'hidden' || lane.inputLocked || lane.finished}
-            onClick={() => onFlip?.(index)}
-            aria-label={card.status === 'hidden' ? 'Kart çevir' : SYMBOL_GLYPH[card.symbol]}
-          >
-            <span className="pm-memory-card__inner">
-              <span className="pm-memory-card__face pm-memory-card__face--back" aria-hidden />
-              <span
-                className="pm-memory-card__face pm-memory-card__face--front"
-                style={{ ['--sym-color' as string]: SYMBOL_COLOR[card.symbol] }}
-              >
-                <span className="pm-memory-card__glyph-wrap">
-                  <MemorySymbolIcon symbol={card.symbol} />
+        {lane.cards.map((card, index) => {
+          const isMatchPulse = card.pulse && lane.lastMatchIndex === index
+          return (
+            <button
+              key={index}
+              type="button"
+              className={`pm-memory-card ${card.status}${card.pulse ? ' is-pulse' : ''}${isMatchPulse ? ' is-match-burst' : ''}`}
+              disabled={!interactive || card.status !== 'hidden' || lane.inputLocked || lane.finished}
+              onClick={() => onFlip?.(index)}
+              aria-label={card.status === 'hidden' ? 'Kart çevir' : SYMBOL_GLYPH[card.symbol]}
+            >
+              <span className="pm-memory-card__inner">
+                <span className="pm-memory-card__face pm-memory-card__face--back" aria-hidden />
+                <span
+                  className="pm-memory-card__face pm-memory-card__face--front"
+                  style={{ ['--sym-color' as string]: SYMBOL_COLOR[card.symbol] }}
+                >
+                  <span className="pm-memory-card__glyph-wrap">
+                    <MemorySymbolIcon symbol={card.symbol} />
+                  </span>
                 </span>
               </span>
-            </span>
-            {card.pulse && lane.lastMatchIndex === index ? (
-              <span className="pm-memory-card__ring" aria-hidden />
-            ) : null}
-          </button>
-        ))}
+              {isMatchPulse ? <MemoryMatchFx accent={accent} /> : null}
+              {card.pulse ? <span className="pm-memory-card__ring" aria-hidden /> : null}
+            </button>
+          )
+        })}
       </div>
 
       {lane.combo > 1 ? (
         <motion.span
           className="pm-memory-grid__combo"
-          initial={{ opacity: 0, y: 6 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, scale: 0.6, y: 8 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
           key={lane.combo}
         >
-          x{lane.combo}
+          <span className="pm-memory-grid__combo-label">COMBO</span>
+          <strong>x{lane.combo}</strong>
         </motion.span>
       ) : null}
     </motion.div>
@@ -83,10 +87,11 @@ function MemorySymbolIcon({ symbol }: { symbol: MemorySymbol }) {
           <path d="M4.4 12h15.2" opacity={0.35} />
         </svg>
       )
-    case 'bolt':
+    case 'gem':
       return (
         <svg {...common}>
-          <path d="M13 2L4.8 14H12l-1 8 8.2-12H12l1-8z" />
+          <path d="M12 3.2l6.8 6.8L12 20.8 5.2 10 12 3.2z" />
+          <path d="M5.2 10h13.6" opacity={0.35} />
         </svg>
       )
     case 'heart':

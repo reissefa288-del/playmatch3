@@ -5,17 +5,19 @@ import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortr
 import vsBadge from '../../reference/vs.png'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
-import { BubbleBackIcon } from './components/BubbleGameIcons'
-import { BubbleControlDock } from './components/BubbleControlDock'
+import {
+  BlockArrowLeftIcon,
+  BlockArrowRightIcon,
+  BlockBackIcon,
+  BlockLightningIcon,
+  BlockRotateIcon,
+} from './components/BlockGameIcons'
 import { BubbleShooterCanvas } from './components/BubbleShooterCanvas'
 import { useBubbleShooterDuel } from './useBubbleShooterDuel'
 import {
-  AIM_MAX,
-  AIM_MIN,
+  aimFromNormalizedPointer,
   COLOR_HEX,
   SPECIAL_KIND_META,
-  SHOOTER_X,
-  SHOOTER_Y,
   type BubbleColor,
   type BubbleKind,
 } from './utils/bubbleShooterEngine'
@@ -93,9 +95,7 @@ export function BubbleShooterScreen() {
       const rect = el.getBoundingClientRect()
       const nx = (e.clientX - rect.left) / Math.max(1, rect.width)
       const ny = (e.clientY - rect.top) / Math.max(1, rect.height)
-      const angle = Math.atan2(ny - SHOOTER_Y, nx - SHOOTER_X)
-      const clamped = Math.max(AIM_MIN, Math.min(AIM_MAX, angle))
-      game.setAimAngle(clamped)
+      game.setAimAngle(aimFromNormalizedPointer(nx, ny))
     },
     [game],
   )
@@ -143,6 +143,11 @@ export function BubbleShooterScreen() {
       <div className="pm-artboard">
         <div className="pm-bubble-screen" onPointerDown={interact}>
           <GameDuelBackdrop />
+
+          <button type="button" className="pm-bubble-back" onClick={handleBack} aria-label="Geri dön">
+            <BlockBackIcon />
+          </button>
+
           <div className="pm-bubble-screen__stack">
           <div className="pm-bubble-hud-band">
           <header className="pm-bubble-header" aria-label="Oyuncu bilgileri">
@@ -241,6 +246,61 @@ export function BubbleShooterScreen() {
             </div>
           </div>
 
+          <section className="pm-bubble-controls" aria-label="Kontroller">
+            <button
+              type="button"
+              className="pm-bubble-controls__btn is-cyan"
+              aria-label="Sola nişan"
+              disabled={!playing}
+              onPointerDown={pressLeft}
+              onPointerUp={release}
+              onPointerLeave={release}
+              onPointerCancel={release}
+            >
+              <BlockArrowLeftIcon />
+              <span>SOL</span>
+            </button>
+            <button
+              type="button"
+              className="pm-bubble-controls__btn is-pink"
+              aria-label="Balon değiştir"
+              disabled={!playing}
+              onPointerDown={(e) => {
+                e.preventDefault()
+                handleSwap()
+              }}
+            >
+              <BlockRotateIcon />
+              <span>DEĞİŞ</span>
+            </button>
+            <button
+              type="button"
+              className="pm-bubble-controls__btn is-gold"
+              aria-label="Ateş"
+              disabled={!playing}
+              onPointerDown={(e) => {
+                e.preventDefault()
+                handleFire()
+              }}
+            >
+              <BlockLightningIcon />
+              <span>ATEŞ</span>
+            </button>
+            <button
+              type="button"
+              className="pm-bubble-controls__btn is-cyan"
+              aria-label="Sağa nişan"
+              disabled={!playing}
+              onPointerDown={pressRight}
+              onPointerUp={release}
+              onPointerLeave={release}
+              onPointerCancel={release}
+            >
+              <BlockArrowRightIcon />
+              <span>SAĞ</span>
+            </button>
+          </section>
+
           <footer className="pm-bubble-footer">
             <div className="pm-bubble-footer__scores" aria-label="Tur skoru">
               <span className="pm-bubble-footer__points is-p1">{game.lane1.matchPoints}</span>
@@ -252,25 +312,6 @@ export function BubbleShooterScreen() {
                 aria-hidden
               />
               <span className="pm-bubble-footer__points is-p2">{game.lane2.matchPoints}</span>
-            </div>
-            <div className="pm-bubble-footer__controls">
-              <button type="button" className="pm-bubble-back" onClick={handleBack} aria-label="Geri dön">
-                <span className="pm-bubble-back__bezel" aria-hidden />
-                <span className="pm-bubble-back__face">
-                  <BubbleBackIcon />
-                </span>
-              </button>
-              <div className="pm-bubble-footer__dock-center">
-                <BubbleControlDock
-                  live={playing}
-                  onAimLeft={pressLeft}
-                  onAimRight={pressRight}
-                  onAimRelease={release}
-                  onSwap={handleSwap}
-                  onFire={handleFire}
-                />
-              </div>
-              <span className="pm-bubble-footer__controls-spacer" aria-hidden />
             </div>
           </footer>
           </div>

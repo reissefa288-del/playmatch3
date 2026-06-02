@@ -11,6 +11,7 @@ import {
   resolveRoundWinner,
   ROUND_BREAK_MS,
   ROUND_SECONDS,
+  shouldEndRoundEarly,
   startNewRound,
   TARGET_SCORE,
   tickActive,
@@ -67,6 +68,7 @@ export function useStackDuel() {
   }, [])
 
   const endRoundRef = useRef<() => void>(() => {})
+  const tryEndRoundEarlyRef = useRef<() => void>(() => {})
 
   const scheduleBot = useCallback(() => {
     if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
@@ -88,6 +90,7 @@ export function useStackDuel() {
               lane2Ref.current = result.lane
               playLaneEvent(result.event, result.lane.combo)
               if (result.lane.score >= TARGET_SCORE) queueMicrotask(() => endRoundRef.current())
+              else queueMicrotask(() => tryEndRoundEarlyRef.current())
               return result.lane
             })
           }, FALL_DURATION_MS + 40)
@@ -95,7 +98,7 @@ export function useStackDuel() {
       }
       scheduleBot()
     }, delay)
-  }, [])
+  }, [playLaneEvent])
 
   const endRound = useCallback(() => {
     if (roundEndingRef.current) return
@@ -164,6 +167,15 @@ export function useStackDuel() {
 
   endRoundRef.current = endRound
 
+  const tryEndRoundEarly = useCallback(() => {
+    if (roundEndingRef.current || !runningRef.current || endedRef.current) return
+    if (shouldEndRoundEarly(lane1Ref.current, lane2Ref.current)) {
+      endRoundRef.current()
+    }
+  }, [])
+
+  tryEndRoundEarlyRef.current = tryEndRoundEarly
+
   const commitDropP1 = useCallback(() => {
     const seed = roundSeedRef.current + roundNumberRef.current
     setLane1((l) => {
@@ -172,6 +184,7 @@ export function useStackDuel() {
       playLaneEvent(result.event, result.lane.combo)
       lane1Ref.current = result.lane
       if (result.lane.score >= TARGET_SCORE) queueMicrotask(() => endRoundRef.current())
+      else queueMicrotask(() => tryEndRoundEarlyRef.current())
       return result.lane
     })
     clearPopLater()
@@ -192,10 +205,9 @@ export function useStackDuel() {
   }, [])
 
   useEffect(() => {
-    if ((lane1.lives <= 0 || lane2.lives <= 0) && !roundEndingRef.current && runningRef.current) {
-      endRound()
-    }
-  }, [lane1.lives, lane2.lives, endRound])
+    if (!runningRef.current || roundEndingRef.current) return
+    if (shouldEndRoundEarly(lane1, lane2)) endRound()
+  }, [lane1.lives, lane1.finished, lane2.lives, lane2.finished, endRound])
 
   useEffect(() => {
     const id = window.setInterval(() => {

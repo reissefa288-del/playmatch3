@@ -80,6 +80,42 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
         ctx.restore()
       }
 
+      if (lane.fusionFlash && lane.fusionFlash > 0.02) {
+        ctx.save()
+        ctx.globalAlpha = lane.fusionFlash * 0.28
+        const g = ctx.createRadialGradient(
+          padX + innerW * 0.5,
+          padY + innerH * 0.55,
+          0,
+          padX + innerW * 0.5,
+          padY + innerH * 0.55,
+          innerW * 0.55,
+        )
+        g.addColorStop(0, 'rgba(74, 140, 255, 0.9)')
+        g.addColorStop(1, 'transparent')
+        ctx.fillStyle = g
+        ctx.fillRect(padX, padY, innerW, innerH)
+        ctx.restore()
+      }
+
+      if (lane.fusionCharge != null && lane.fusionCharge > 0.04) {
+        const barW = innerW * 0.42
+        const barH = 3 * dpr
+        const bx = padX + (innerW - barW) * 0.5
+        const by = padY + innerH - barH - 4 * dpr
+        ctx.save()
+        ctx.fillStyle = 'rgba(8, 12, 28, 0.75)'
+        roundRect(ctx, bx, by, barW, barH, barH)
+        ctx.fill()
+        ctx.fillStyle =
+          accent === 'cyan'
+            ? `rgba(34, 212, 255, ${0.45 + lane.fusionCharge * 0.55})`
+            : `rgba(255, 58, 120, ${0.45 + lane.fusionCharge * 0.55})`
+        roundRect(ctx, bx, by, barW * lane.fusionCharge, barH, barH)
+        ctx.fill()
+        ctx.restore()
+      }
+
       for (let row = 0; row < BLOCK_ROWS; row += 1) {
         for (let col = 0; col < BLOCK_COLS; col += 1) {
           const color = lane.grid[row]?.[col]
@@ -103,17 +139,21 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
         }
       }
 
-      if (lane.ghostPiece?.cells.length) {
-        for (const cell of lane.ghostPiece.cells) {
-          drawGhost(
-            ctx,
-            padX + cell.col * cellW + cellW * 0.5,
-            padY + cell.row * cellH + cellH * 0.5,
-            Math.min(cellW, cellH) * 0.88,
-            cell.color,
-            dpr,
-          )
-        }
+      if (lane.landBeam) {
+        const { row, colMin, colMax } = lane.landBeam
+        const y = padY + row * cellH + cellH * 0.92
+        const x0 = padX + colMin * cellW + cellW * 0.08
+        const x1 = padX + (colMax + 1) * cellW - cellW * 0.08
+        ctx.save()
+        ctx.strokeStyle =
+          accent === 'cyan' ? 'rgba(34, 212, 255, 0.55)' : 'rgba(255, 58, 120, 0.55)'
+        ctx.lineWidth = 1.6 * dpr
+        ctx.setLineDash([5 * dpr, 4 * dpr])
+        ctx.beginPath()
+        ctx.moveTo(x0, y)
+        ctx.lineTo(x1, y)
+        ctx.stroke()
+        ctx.restore()
       }
 
       if (lane.activePiece) {
@@ -127,18 +167,26 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
           if (trail) {
             const minRow = Math.min(...cells.map((c) => c.row))
             if (Number.isFinite(minRow) && minRow > 0) {
-              const trailCol = cells[0]?.col ?? 4
-              for (let row = 0; row < minRow; row += 1) {
-                const alpha = 0.06 + (row / minRow) * 0.2
-                drawTrail(
-                  ctx,
-                  padX + trailCol * cellW + cellW * 0.5,
-                  padY + row * cellH + cellH * 0.5,
-                  Math.min(cellW, cellH) * 0.32,
-                  cells[0]?.color ?? 'cyan',
-                  alpha,
-                  dpr,
-                )
+              const cols = [...new Set(cells.map((c) => c.col))]
+              for (const col of cols) {
+                let surface = -1
+                for (let row = 0; row < minRow; row += 1) {
+                  if (lane.grid[row]?.[col]) surface = row
+                }
+                const start = surface + 1
+                for (let row = start; row < minRow; row += 1) {
+                  const span = Math.max(1, minRow - start)
+                  const alpha = 0.08 + ((row - start) / span) * 0.22
+                  drawTrail(
+                    ctx,
+                    padX + col * cellW + cellW * 0.5,
+                    padY + row * cellH + cellH * 0.5,
+                    Math.min(cellW, cellH) * 0.28,
+                    cells.find((c) => c.col === col)?.color ?? 'cyan',
+                    alpha,
+                    dpr,
+                  )
+                }
               }
             }
           }
@@ -194,8 +242,8 @@ function drawParticle(
   ctx.fillStyle = hex
   ctx.shadowColor = COLOR_GLOW[particle.color]
   ctx.shadowBlur = 10 * dpr * particle.size
-  ctx.beginPath()
-  ctx.arc(x, y, Math.min(cellW, cellH) * 0.22 * particle.size, 0, Math.PI * 2)
+  const pr = Math.min(cellW, cellH) * 0.2 * particle.size
+  roundRect(ctx, x - pr, y - pr, pr * 2, pr * 2, pr * 0.25)
   ctx.fill()
   ctx.restore()
 }
@@ -226,7 +274,7 @@ function drawNextPanel(
   ctx.fillStyle = 'rgba(200, 220, 255, 0.75)'
   ctx.font = `600 ${Math.max(7, 7 * dpr)}px Inter, system-ui, sans-serif`
   ctx.textAlign = 'center'
-  ctx.fillText('NEXT', x + panelW * 0.5, y + 10 * dpr)
+  ctx.fillText('SIRADAKİ', x + panelW * 0.5, y + 10 * dpr)
 
   const cell = Math.min(panelW, panelH) * 0.14
   const kinds = queue.slice(0, 3)
@@ -301,28 +349,6 @@ function drawBoardBg(ctx: CanvasRenderingContext2D, w: number, h: number, accent
   }
 }
 
-function drawGhost(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  size: number,
-  color: BlockColor,
-  dpr: number,
-) {
-  const hex = COLOR_HEX[color]
-  const r = size * 0.45
-  ctx.save()
-  ctx.strokeStyle = hexToRgba(hex, 0.55)
-  ctx.lineWidth = 1.4 * dpr
-  ctx.setLineDash([3 * dpr, 3 * dpr])
-  roundRect(ctx, x - r, y - r, r * 2, r * 2, r * 0.2)
-  ctx.stroke()
-  ctx.fillStyle = hexToRgba(hex, 0.12)
-  roundRect(ctx, x - r, y - r, r * 2, r * 2, r * 0.2)
-  ctx.fill()
-  ctx.restore()
-}
-
 function drawTrail(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -332,18 +358,16 @@ function drawTrail(
   alpha: number,
   dpr: number,
 ) {
-  const hex = COLOR_HEX[color]
+  const fill = COLOR_HEX[color]
+  ctx.save()
   ctx.globalAlpha = alpha
-  ctx.fillStyle = hex
-  ctx.shadowColor = COLOR_GLOW[color]
-  ctx.shadowBlur = 8 * dpr
-  ctx.beginPath()
-  ctx.arc(x, y, r, 0, Math.PI * 2)
+  ctx.fillStyle = hexToRgba(fill, 0.65)
+  roundRect(ctx, x - r, y - r, r * 2, r * 2, Math.max(1.5, 1.8 * dpr))
   ctx.fill()
-  ctx.shadowBlur = 0
-  ctx.globalAlpha = 1
+  ctx.restore()
 }
 
+/** Tek hücre — birim küp (üst + yan + ön yüz), gem değil */
 function drawBlock(
   ctx: CanvasRenderingContext2D,
   x: number,
@@ -354,50 +378,61 @@ function drawBlock(
   active: boolean,
   isGarbage: boolean,
 ) {
-  const hex = isGarbage ? '#7a4ad4' : COLOR_HEX[color]
-  const r = size * 0.5
+  const fill = isGarbage ? '#7a4ad4' : COLOR_HEX[color]
+  const s = size * 0.9
+  const depth = s * 0.2
+  const half = s * 0.5
+  const left = x - half
+  const top = y - half + depth * 0.35
 
   ctx.save()
 
   if (active) {
     ctx.shadowColor = COLOR_GLOW[color]
-    ctx.shadowBlur = 14 * dpr
+    ctx.shadowBlur = 12 * dpr
+  } else if (isGarbage) {
+    ctx.shadowColor = 'rgba(122, 74, 212, 0.45)'
+    ctx.shadowBlur = 5 * dpr
   }
 
-  if (isGarbage) {
-    ctx.shadowColor = 'rgba(122, 74, 212, 0.6)'
-    ctx.shadowBlur = 6 * dpr
-  }
+  const faceW = s - depth
+  const faceH = s - depth
 
-  const halo = ctx.createRadialGradient(x, y, r * 0.2, x, y, r * 1.15)
-  halo.addColorStop(0, hexToRgba(hex, isGarbage ? 0.28 : 0.4))
-  halo.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.fillStyle = halo
+  ctx.fillStyle = darken(fill, isGarbage ? 0.32 : 0.22)
   ctx.beginPath()
-  ctx.arc(x, y, r * 1.1, 0, Math.PI * 2)
+  ctx.moveTo(left + faceW, top)
+  ctx.lineTo(left + faceW + depth, top - depth * 0.85)
+  ctx.lineTo(left + faceW + depth, top + faceH - depth * 0.85)
+  ctx.lineTo(left + faceW, top + faceH)
+  ctx.closePath()
   ctx.fill()
 
-  const body = ctx.createLinearGradient(x - r, y - r, x + r, y + r)
-  body.addColorStop(0, lighten(hex, isGarbage ? 0.15 : 0.35))
-  body.addColorStop(0.35, hex)
-  body.addColorStop(0.75, darken(hex, 0.12))
-  body.addColorStop(1, darken(hex, isGarbage ? 0.35 : 0.28))
-  ctx.fillStyle = body
-  roundRect(ctx, x - r * 0.92, y - r * 0.92, r * 1.84, r * 1.84, r * 0.22)
+  ctx.fillStyle = lighten(fill, isGarbage ? 0.08 : 0.18)
+  ctx.beginPath()
+  ctx.moveTo(left, top)
+  ctx.lineTo(left + faceW, top)
+  ctx.lineTo(left + faceW + depth, top - depth * 0.85)
+  ctx.lineTo(left + depth, top - depth * 0.85)
+  ctx.closePath()
   ctx.fill()
 
-  ctx.strokeStyle = isGarbage ? 'rgba(180, 140, 255, 0.45)' : 'rgba(255,255,255,0.35)'
-  ctx.lineWidth = 0.8 * dpr
-  roundRect(ctx, x - r * 0.88, y - r * 0.88, r * 1.76, r * 1.76, r * 0.2)
+  const front = ctx.createLinearGradient(left, top, left + faceW, top + faceH)
+  front.addColorStop(0, lighten(fill, isGarbage ? 0.12 : 0.28))
+  front.addColorStop(0.45, fill)
+  front.addColorStop(1, darken(fill, isGarbage ? 0.28 : 0.14))
+  ctx.fillStyle = front
+  const corner = Math.max(2, 2.8 * dpr)
+  roundRect(ctx, left, top, faceW, faceH, corner)
+  ctx.fill()
+
+  ctx.strokeStyle = isGarbage ? 'rgba(200, 170, 255, 0.4)' : 'rgba(255, 255, 255, 0.32)'
+  ctx.lineWidth = 0.75 * dpr
+  roundRect(ctx, left + 0.5 * dpr, top + 0.5 * dpr, faceW - dpr, faceH - dpr, corner * 0.85)
   ctx.stroke()
 
   if (!isGarbage) {
-    const spec = ctx.createRadialGradient(x - r * 0.3, y - r * 0.35, 0, x - r * 0.15, y - r * 0.2, r * 0.5)
-    spec.addColorStop(0, 'rgba(255,255,255,0.9)')
-    spec.addColorStop(1, 'rgba(255,255,255,0)')
-    ctx.fillStyle = spec
-    ctx.beginPath()
-    ctx.arc(x - r * 0.22, y - r * 0.28, r * 0.22, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)'
+    roundRect(ctx, left + faceW * 0.12, top + faceH * 0.1, faceW * 0.28, faceH * 0.14, dpr)
     ctx.fill()
   }
 

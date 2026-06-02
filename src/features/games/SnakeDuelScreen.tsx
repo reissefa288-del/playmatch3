@@ -19,7 +19,7 @@ export function SnakeDuelScreen() {
   const navigate = useNavigate()
   const game = useSnakeDuel()
 
-  const handleBack = useCallback(() => navigate('/games/snake-duel'), [navigate])
+  const handleBack = useCallback(() => navigate('/games'), [navigate])
   const canPlay = game.running && !game.roundMessage
 
   const overlayMessage = !game.running
@@ -83,15 +83,14 @@ export function SnakeDuelScreen() {
             </section>
 
             <section className="pm-snake-arena">
-              <div className="pm-snake-arena__p1">
-                <SnakeDuelGrid lane={game.lane1} accent="cyan" />
-                <SnakeDuelControls disabled={!canPlay} onDirection={game.setDirection} />
-              </div>
+              <SnakeDuelGrid lane={game.lane1} accent="cyan" />
               <span className="pm-snake-vs" aria-hidden>
                 VS
               </span>
               <SnakeDuelGrid lane={game.lane2} accent="pink" />
             </section>
+
+            <SnakeDuelControls disabled={!canPlay} onDirection={game.setDirection} />
           </div>
 
           {overlayMessage ? (

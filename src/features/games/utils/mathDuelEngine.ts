@@ -24,6 +24,11 @@ export type MathProblem = {
 
 export type MathFeedback = 'correct' | 'wrong' | null
 
+export type MathFeedbackToast = {
+  variant: 'correct' | 'wrong' | 'shield'
+  points: number
+}
+
 export type MathPowerupId = 'time' | 'double' | 'shield' | 'erase'
 
 export type MathLaneState = {
@@ -35,7 +40,7 @@ export type MathLaneState = {
   selectedIndex: number | null
   feedback: MathFeedback
   feedbackPoints: number
-  feedbackPop: string | null
+  feedbackToast: MathFeedbackToast | null
   activeBuff: 'double' | 'shield' | null
   buffLabel: string | null
   powerups: Record<MathPowerupId, number>
@@ -72,11 +77,15 @@ function evalExpr(nums: number[], ops: MathOp[]): number {
   return acc
 }
 
-function buildChoices(answer: number, rand: () => number): { choices: number[]; correctIndex: number } {
+function buildChoices(
+  answer: number,
+  rand: () => number,
+  tier: number,
+): { choices: number[]; correctIndex: number } {
   const deltas = new Set<number>()
   deltas.add(0)
   while (deltas.size < 4) {
-    const spread = Math.max(3, Math.floor(Math.abs(answer) * 0.15) + 2)
+    const spread = Math.max(3, Math.floor(Math.abs(answer) * 0.16) + (tier >= 2 ? 3 : 4))
     const d = Math.floor(rand() * spread * 2 + 1) * (rand() > 0.5 ? 1 : -1)
     if (d === 0) continue
     deltas.add(d)
@@ -94,22 +103,27 @@ function buildChoices(answer: number, rand: () => number): { choices: number[]; 
 export function createProblem(seed: number, round: number, id: number): MathProblem {
   const rand = mulberry32(seed + round * 31 + id * 7)
   const tier = Math.min(3, Math.floor(round / 3))
-  const termCount = tier >= 2 && rand() > 0.35 ? 3 : 2
   const ops: MathOp[] = []
   const nums: number[] = []
 
-  const maxNum = tier === 0 ? 28 : tier === 1 ? 45 : 72
-  const allowMul = tier >= 1 && rand() > 0.55
+  const maxNum = tier === 0 ? 24 : tier === 1 ? 38 : tier === 2 ? 52 : 68
+  const minNum = 4
+  const allowMul = tier >= 1
+
+  const termCount = tier >= 2 && rand() > 0.55 ? 3 : 2
 
   for (let i = 0; i < termCount; i++) {
-    nums.push(5 + Math.floor(rand() * maxNum))
+    nums.push(minNum + Math.floor(rand() * (maxNum - minNum + 1)))
     if (i < termCount - 1) {
-      if (allowMul && rand() > 0.72) ops.push('×')
-      else ops.push(rand() > 0.42 ? '+' : '-')
+      if (allowMul && rand() > 0.68) ops.push('×')
+      else ops.push(rand() > 0.45 ? '+' : '-')
     }
   }
 
-  const answer = evalExpr(nums, ops)
+  let answer = evalExpr(nums, ops)
+  if (answer < 0) {
+    return createProblem(seed + 99, round, id + 1000)
+  }
   const tokens: MathToken[] = []
   nums.forEach((n, i) => {
     tokens.push({ kind: 'num', value: String(n) })
@@ -123,7 +137,7 @@ export function createProblem(seed: number, round: number, id: number): MathProb
     }
   })
 
-  const { choices, correctIndex } = buildChoices(answer, rand)
+  const { choices, correctIndex } = buildChoices(answer, rand, tier)
   return { id, tokens, answer, choices, correctIndex }
 }
 
@@ -137,7 +151,7 @@ export function createLane(laneId: number): MathLaneState {
     selectedIndex: null,
     feedback: null,
     feedbackPoints: 0,
-    feedbackPop: null,
+    feedbackToast: null,
     activeBuff: null,
     buffLabel: null,
     powerups: { time: 3, double: 2, shield: 2, erase: 3 },
@@ -152,7 +166,7 @@ export function resetLaneForRound(lane: MathLaneState): MathLaneState {
     selectedIndex: null,
     feedback: null,
     feedbackPoints: 0,
-    feedbackPop: null,
+    feedbackToast: null,
     activeBuff: null,
     buffLabel: null,
     answered: false,
@@ -160,12 +174,12 @@ export function resetLaneForRound(lane: MathLaneState): MathLaneState {
 }
 
 export function decayLaneFx(lane: MathLaneState): MathLaneState {
-  if (!lane.feedbackPop && !lane.feedback) return lane
+  if (!lane.feedbackToast && !lane.feedback) return lane
   return {
     ...lane,
     feedback: null,
     feedbackPoints: 0,
-    feedbackPop: null,
+    feedbackToast: null,
     selectedIndex: null,
   }
 }
@@ -212,11 +226,11 @@ export function applyAnswer(
     comboFill = 0.12
   }
 
-  const feedbackPop = correct
-    ? `✓ DOĞRU! +${points}`
+  const feedbackToast: MathFeedbackToast | null = correct
+    ? { variant: 'correct', points }
     : shielded && !correct
-      ? 'KORUNDU'
-      : `✕ YANLIŞ! ${points}`
+      ? { variant: 'shield', points: 0 }
+      : { variant: 'wrong', points: Math.abs(points) }
 
   const next: MathLaneState = {
     ...lane,
@@ -227,7 +241,7 @@ export function applyAnswer(
     selectedIndex: choiceIndex,
     feedback: correct ? 'correct' : 'wrong',
     feedbackPoints: points,
-    feedbackPop,
+    feedbackToast,
     activeBuff,
     buffLabel,
     answered: true,

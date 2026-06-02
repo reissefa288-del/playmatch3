@@ -73,8 +73,8 @@ export const featuredGames: FeaturedGame[] = [
   },
   {
     id: 'block-duel',
-    title: 'BLOCK DUEL',
-    mode: 'Ranked · 2v2',
+    title: 'CUBE DUEL',
+    mode: 'Küp puzzle düellosu',
     players: '2.3K oyuncu',
     playersShort: '2.3K',
     activity: 'Canlı lobi',
@@ -105,7 +105,7 @@ export const featuredGames: FeaturedGame[] = [
 export const gamesGrid: HubGame[] = [
   {
     id: 'block-duel',
-    title: 'Block Duel',
+    title: 'Cube Duel',
     players: '3.8k aktif',
     playersShort: '3.8k',
     activity: 'Lobi dolu',
@@ -231,7 +231,6 @@ export type GamesMiniCard = {
     | 'block-duel'
     | 'pong'
     | 'pong-duel'
-    | 'reflex-duel'
     | 'simon-duel'
     | 'whack-duel'
     | 'rhythm-duel'
@@ -282,7 +281,6 @@ export type GamesMiniCard = {
     | 'stack'
     | 'color-match'
     | 'neon-crush'
-    | 'dart'
     | 'snake-duel'
     | 'math'
     | 'math-duel'
@@ -319,7 +317,7 @@ export const popularGamesCards: GamesMiniCard[] = [
   },
   {
     id: 'block-duel',
-    title: 'BLOCK DUEL',
+    title: 'CUBE DUEL',
     icon: FiGrid,
     artKind: 'block-duel',
     badge: 'Duel',
@@ -373,15 +371,6 @@ export const popularGamesCards: GamesMiniCard[] = [
     color: 'is-pink',
   },
   {
-    id: 'dart-duel',
-    title: 'DART DUEL',
-    icon: LuSwords,
-    artKind: 'dart',
-    badge: 'Duel',
-    players: '520',
-    color: 'is-orange',
-  },
-  {
     id: 'snake-duel',
     title: 'SNAKE DUEL',
     icon: IoRocketOutline,
@@ -398,15 +387,6 @@ export const popularGamesCards: GamesMiniCard[] = [
     badge: 'Duel',
     players: '760',
     color: 'is-blue',
-  },
-  {
-    id: 'reflex-duel',
-    title: 'REFLEX DUEL',
-    icon: FiZap,
-    artKind: 'reflex-duel',
-    badge: 'YENİ',
-    players: '640',
-    color: 'is-orange',
   },
   {
     id: 'simon-duel',

@@ -141,6 +141,8 @@ export function useBrickBreakDuel() {
       const prevLives1 = lane1Ref.current.lives
       const prevScore1 = lane1Ref.current.score
       const prevScore2 = lane2Ref.current.score
+      const prevPickupBanner1 = lane1Ref.current.pickupBanner?.label ?? null
+      const prevPickupBanner2 = lane2Ref.current.pickupBanner?.label ?? null
 
       const r1 = updateLane(lane1Ref.current, p1DirRef.current, dt, speedMult)
       playEvents(r1.events)
@@ -165,7 +167,11 @@ export function useBrickBreakDuel() {
         r2.events.length > 0 ||
         r1.lane.lives !== prevLives1 ||
         r1.lane.score !== prevScore1 ||
-        r2.lane.score !== prevScore2
+        r2.lane.score !== prevScore2 ||
+        (r1.lane.pickupBanner?.label ?? null) !== prevPickupBanner1 ||
+        (r2.lane.pickupBanner?.label ?? null) !== prevPickupBanner2 ||
+        !!r1.lane.pickupBanner ||
+        !!r2.lane.pickupBanner
       if (forceUi || syncUiTickRef.current % 4 === 0) {
         syncHud(r1.lane, r2.lane, timeLeftRef.current)
       }

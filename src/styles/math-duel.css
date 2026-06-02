@@ -8,6 +8,7 @@
   --math-red: #ff5a6a;
   --math-pad: clamp(10px, 3vw, 14px);
   position: relative;
+  isolation: isolate;
   flex: 1 1 auto;
   min-height: 0;
   height: 100%;
@@ -91,15 +92,11 @@
   text-shadow: 0 0 16px rgba(255, 45, 154, 0.5);
 }
 
-.pm-math-header__bolt {
-  font-size: 0.9em;
-  filter: drop-shadow(0 0 8px rgba(255, 220, 80, 0.8));
-  animation: pm-math-bolt 1.2s ease-in-out infinite;
-}
-
-@keyframes pm-math-bolt {
-  0%, 100% { opacity: 0.7; transform: scale(0.95); }
-  50% { opacity: 1; transform: scale(1.05); }
+.pm-math-header__dot {
+  font-size: 1.1em;
+  color: var(--math-gold);
+  opacity: 0.85;
+  text-shadow: 0 0 10px rgba(255, 215, 106, 0.5);
 }
 
 /* HUD */
@@ -129,7 +126,10 @@
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  background: rgba(4, 8, 24, 0.88);
+  background:
+    linear-gradient(165deg, rgba(255, 255, 255, 0.08), transparent 48%),
+    rgba(4, 8, 24, 0.88);
+  backdrop-filter: blur(12px);
 }
 
 .pm-math-hud__panel.is-cyan {
@@ -224,17 +224,34 @@
 }
 
 .pm-math-vs {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 215, 106, 0.7);
+  position: relative;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
+}
+
+.pm-math-vs__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 215, 106, 0.65);
+  box-shadow: 0 0 18px rgba(255, 215, 106, 0.35);
+  animation: pm-math-vs-ring 4s ease-in-out infinite;
+}
+
+.pm-math-vs__label {
+  position: relative;
+  z-index: 1;
   font-size: 0.5rem;
   font-weight: 900;
   color: var(--math-gold);
-  box-shadow: 0 0 18px rgba(255, 215, 106, 0.35);
-  background: rgba(4, 8, 24, 0.9);
+  text-shadow: 0 0 10px rgba(255, 215, 106, 0.55);
+}
+
+@keyframes pm-math-vs-ring {
+  0%, 100% { opacity: 0.75; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.04); }
 }
 
 .pm-math-hud__stat {
@@ -303,16 +320,37 @@
 }
 
 .pm-math-problem {
+  position: relative;
+  overflow: hidden;
   width: min(100%, 320px);
   border-radius: 14px;
   border: 2px solid rgba(120, 150, 255, 0.45);
   background:
-    linear-gradient(180deg, rgba(20, 30, 60, 0.9), rgba(4, 8, 24, 0.95)),
-    rgba(4, 8, 24, 0.9);
+    linear-gradient(165deg, rgba(255, 255, 255, 0.09), transparent 45%),
+    linear-gradient(180deg, rgba(20, 30, 60, 0.92), rgba(4, 8, 24, 0.96));
   padding: clamp(10px, 3vw, 14px) clamp(12px, 3.5vw, 16px);
   box-shadow:
-    0 0 24px rgba(80, 120, 255, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    0 0 28px rgba(80, 120, 255, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.pm-math-problem__shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 60%
+  );
+  animation: pm-math-problem-shine 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pm-math-problem-shine {
+  from { transform: translateX(-120%); }
+  to { transform: translateX(120%); }
 }
 
 .pm-math-problem__expr {
@@ -352,19 +390,36 @@
 
 .pm-math-arena__divider {
   align-self: stretch;
+  position: relative;
   display: grid;
   place-items: center;
-  font-size: 1.1rem;
-  color: var(--math-gold);
+  width: 4px;
+  min-width: 4px;
+  z-index: 3;
+}
+
+.pm-math-arena__beam {
+  position: absolute;
+  inset: 4% 0;
+  width: 100%;
+  border-radius: 4px;
   background: linear-gradient(
     180deg,
     transparent,
-    rgba(255, 215, 106, 0.25) 20%,
-    rgba(255, 215, 106, 0.25) 80%,
+    rgba(0, 232, 255, 0.45) 18%,
+    rgba(255, 255, 255, 0.55) 50%,
+    rgba(255, 45, 154, 0.45) 82%,
     transparent
   );
-  filter: drop-shadow(0 0 10px rgba(255, 220, 80, 0.7));
-  z-index: 3;
+  box-shadow:
+    0 0 16px rgba(0, 232, 255, 0.35),
+    0 0 16px rgba(255, 45, 154, 0.3);
+  animation: pm-math-arena-beam 2.4s ease-in-out infinite;
+}
+
+@keyframes pm-math-arena-beam {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
 }
 
 .pm-math-side {
@@ -428,26 +483,104 @@
 .pm-math-grid.is-cyan .pm-math-grid__buff { color: var(--math-cyan); border-color: rgba(0, 232, 255, 0.45); }
 .pm-math-grid.is-pink .pm-math-grid__buff { color: var(--math-pink); border-color: rgba(255, 45, 154, 0.45); }
 
-.pm-math-grid__banner {
-  font-size: clamp(0.32rem, 2.2vw, 0.38rem);
+/* Geri bildirim toast */
+.pm-math-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent 55%),
+    rgba(6, 10, 28, 0.94);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.pm-math-toast__icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+}
+
+.pm-math-toast__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.pm-math-toast__title {
+  font-size: clamp(0.72rem, 3.6vw, 0.88rem);
   font-weight: 800;
+  letter-spacing: 0.04em;
+  line-height: 1.2;
+}
+
+.pm-math-toast__detail {
+  font-size: clamp(0.62rem, 3.1vw, 0.76rem);
+  font-weight: 600;
   letter-spacing: 0.06em;
-  padding: 4px 8px;
-  border-radius: 8px;
-  white-space: nowrap;
+  opacity: 0.92;
 }
 
-.pm-math-grid__banner.is-correct {
+.pm-math-toast.is-correct {
+  border-color: rgba(92, 255, 138, 0.5);
+  box-shadow: 0 0 20px rgba(92, 255, 138, 0.2);
+}
+
+.pm-math-toast.is-correct .pm-math-toast__icon {
+  color: #0a1a12;
+  background: linear-gradient(145deg, #7dffb0, var(--math-green));
+}
+
+.pm-math-toast.is-correct .pm-math-toast__title {
   color: var(--math-green);
-  background: rgba(92, 255, 138, 0.12);
-  border: 1px solid rgba(92, 255, 138, 0.45);
-  box-shadow: 0 0 12px rgba(92, 255, 138, 0.25);
 }
 
-.pm-math-grid__banner.is-wrong {
+.pm-math-toast.is-correct .pm-math-toast__detail {
+  color: var(--math-gold);
+}
+
+.pm-math-toast.is-wrong {
+  border-color: rgba(255, 90, 106, 0.5);
+  box-shadow: 0 0 18px rgba(255, 90, 106, 0.18);
+}
+
+.pm-math-toast.is-wrong .pm-math-toast__icon {
+  color: #fff;
+  background: linear-gradient(145deg, #ff8a96, var(--math-red));
+}
+
+.pm-math-toast.is-wrong .pm-math-toast__title {
+  color: #ffb4bc;
+}
+
+.pm-math-toast.is-wrong .pm-math-toast__detail {
   color: var(--math-red);
-  background: rgba(255, 90, 106, 0.12);
-  border: 1px solid rgba(255, 90, 106, 0.45);
+}
+
+.pm-math-toast.is-shield {
+  border-color: rgba(120, 180, 255, 0.45);
+}
+
+.pm-math-toast.is-shield .pm-math-toast__icon {
+  color: #e8f4ff;
+  background: linear-gradient(145deg, #6eb8ff, #3a7fd4);
+}
+
+.pm-math-toast.is-shield .pm-math-toast__title {
+  color: #b8d4ff;
+}
+
+.pm-math-toast.is-shield .pm-math-toast__detail {
+  color: rgba(200, 220, 255, 0.85);
 }
 
 .pm-math-grid__cells {
@@ -462,21 +595,137 @@
 
 .pm-math-cell {
   position: relative;
+  overflow: hidden;
   min-height: 0;
   height: 100%;
+  container-type: size;
+  container-name: math-cell;
   border-radius: 14px;
-  border: 2px solid rgba(120, 150, 255, 0.4);
+  border: 2px solid rgba(160, 190, 255, 0.65);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 48%),
-    rgba(8, 12, 32, 0.94);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 58%),
+    linear-gradient(180deg, #243060 0%, #101830 100%);
   color: #fff;
-  font-family: inherit;
-  font-size: clamp(0.95rem, 5.5vw, 1.25rem);
-  font-weight: 800;
   cursor: pointer;
   display: grid;
   place-items: center;
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+}
+
+.pm-math-cell__edge {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.pm-math-grid.is-cyan .pm-math-cell:not(:disabled):hover .pm-math-cell__edge {
+  opacity: 1;
+  box-shadow: inset 0 0 16px rgba(0, 232, 255, 0.2);
+}
+
+.pm-math-cell__value {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.4em;
+  padding: 0.18em 0.32em;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: Inter, 'Segoe UI', system-ui, sans-serif;
+  font-size: clamp(1.55rem, 58cqmin, 2.35rem);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: #ffffff;
+  -webkit-font-smoothing: antialiased;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.55),
+    0 0 24px rgba(255, 255, 255, 0.35);
+}
+
+.pm-math-grid.is-cyan .pm-math-cell__value {
+  color: #f0fcff;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 18px rgba(0, 232, 255, 0.35);
+}
+
+.pm-math-grid.is-pink .pm-math-cell__value {
+  color: #fff5fb;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.5),
+    0 0 18px rgba(255, 45, 154, 0.28);
+}
+
+.pm-math-cell__tag {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 5;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: clamp(0.48rem, 2.4vw, 0.58rem);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #0a1a12;
+  background: var(--math-green);
+  box-shadow: 0 0 10px rgba(92, 255, 138, 0.45);
+}
+
+.pm-math-cell.is-reveal {
+  border-color: var(--math-green);
+  box-shadow:
+    0 0 22px rgba(92, 255, 138, 0.45),
+    inset 0 0 14px rgba(92, 255, 138, 0.12);
+}
+
+.pm-math-grid.has-toast .pm-math-cell:not(.is-selected):not(.is-reveal) {
+  filter: saturate(0.75) brightness(0.88);
+}
+
+.pm-math-grid.has-toast .pm-math-cell.is-selected .pm-math-cell__value,
+.pm-math-grid.has-toast .pm-math-cell.is-reveal .pm-math-cell__value {
+  filter: none;
+}
+
+.pm-math-cell.is-hit {
+  animation: pm-math-cell-hit 0.4s cubic-bezier(0.34, 1.35, 0.48, 1);
+}
+
+.pm-math-cell.is-miss {
+  animation: pm-math-cell-miss 0.35s ease-out;
+}
+
+@keyframes pm-math-cell-hit {
+  0% { transform: scale(0.94); filter: brightness(1.4); }
+  100% { transform: scale(1.02); filter: brightness(1.1); }
+}
+
+@keyframes pm-math-cell-miss {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.pm-math-grid.is-shake {
+  animation: pm-math-grid-shake 0.32s ease-out;
+}
+
+@keyframes pm-math-grid-shake {
+  0%, 100% { transform: translateX(0); }
+  33% { transform: translateX(-3px); }
+  66% { transform: translateX(3px); }
 }
 
 .pm-math-grid.is-cyan .pm-math-cell:not(:disabled):hover {
@@ -490,26 +739,27 @@
 
 .pm-math-cell.is-selected.is-hit {
   border-color: var(--math-green);
-  box-shadow: 0 0 20px rgba(92, 255, 138, 0.45);
-  transform: scale(1.02);
+  box-shadow:
+    0 0 24px rgba(92, 255, 138, 0.5),
+    inset 0 0 12px rgba(92, 255, 138, 0.15);
 }
 
 .pm-math-cell.is-selected.is-miss {
   border-color: var(--math-red);
-  box-shadow: 0 0 16px rgba(255, 90, 106, 0.35);
+  box-shadow: 0 0 20px rgba(255, 90, 106, 0.4);
 }
 
 .pm-math-cell:disabled {
-  opacity: 0.85;
   cursor: default;
 }
 
-.pm-math-cell__hand {
-  position: absolute;
-  bottom: -4px;
-  right: -2px;
-  font-size: 1rem;
-  pointer-events: none;
+.pm-math-cell:disabled:not(.is-selected):not(.is-reveal) {
+  opacity: 0.78;
+}
+
+.pm-math-cell.is-selected:disabled,
+.pm-math-cell.is-reveal:disabled {
+  opacity: 1;
 }
 
 /* Powers */
@@ -690,5 +940,324 @@
 
   .pm-math-grid__cells {
     min-height: clamp(120px, 34vh, 180px);
+  }
+}
+
+/* ── Ambient & polish ── */
+.pm-math-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.pm-math-ambient__bloom {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 85% 45% at 50% 0%, rgba(0, 232, 255, 0.1), transparent 55%),
+    radial-gradient(ellipse 50% 35% at 10% 80%, rgba(0, 232, 255, 0.05), transparent 50%),
+    radial-gradient(ellipse 50% 35% at 90% 80%, rgba(255, 45, 154, 0.05), transparent 50%);
+}
+
+.pm-math-ambient__fog {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 35%, rgba(2, 4, 14, 0.4) 100%);
+}
+
+.pm-math-ambient__particles i {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: rgba(220, 235, 255, 0.8);
+  left: calc((var(--p) * 21 + 6) % 100 * 1%);
+  top: calc((var(--p) * 17 + 4) % 100 * 1%);
+  animation: pm-math-particle 5s ease-in-out infinite;
+  animation-delay: calc(var(--p) * -0.5s);
+}
+
+@keyframes pm-math-particle {
+  0%, 100% { opacity: 0.2; transform: translateY(0); }
+  50% { opacity: 0.7; transform: translateY(-10px); }
+}
+
+.pm-math-portrait-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.pm-math-portrait-wrap__aura {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  filter: blur(12px);
+  opacity: 0.5;
+  animation: pm-math-aura 2.8s ease-in-out infinite;
+}
+
+.pm-math-portrait-wrap.is-cyan .pm-math-portrait-wrap__aura {
+  background: radial-gradient(circle, rgba(0, 232, 255, 0.4), transparent 70%);
+}
+
+.pm-math-portrait-wrap.is-pink .pm-math-portrait-wrap__aura {
+  background: radial-gradient(circle, rgba(255, 45, 154, 0.38), transparent 70%);
+}
+
+@keyframes pm-math-aura {
+  0%, 100% { opacity: 0.4; transform: scale(0.96); }
+  50% { opacity: 0.7; transform: scale(1.04); }
+}
+
+.pm-math-arena {
+  backdrop-filter: blur(4px);
+  box-shadow:
+    0 0 32px rgba(60, 100, 200, 0.12),
+    inset 0 0 24px rgba(0, 0, 0, 0.25);
+}
+
+.pm-math-hud__stat strong {
+  animation: pm-math-timer-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pm-math-timer-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.88; }
+}
+
+.pm-math-footer {
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.pm-math-overlay {
+  backdrop-filter: blur(8px);
+}
+
+.pm-math-overlay.is-end p {
+  text-shadow: 0 0 20px rgba(255, 215, 106, 0.45);
+}
+
+/* ── Soru girişi & ekran flaşı ── */
+.pm-math-problem__pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  opacity: 0;
+  animation: pm-math-problem-pulse 2.4s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes pm-math-problem-pulse {
+  0% { opacity: 0; transform: scale(0.98); }
+  40% { opacity: 0.35; transform: scale(1.02); }
+  100% { opacity: 0; transform: scale(1.06); }
+}
+
+.pm-math-screen {
+  position: relative;
+}
+
+.pm-math-screen__flash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  animation: pm-math-screen-flash 0.45s ease-out forwards;
+}
+
+.pm-math-screen__flash.is-correct {
+  background: radial-gradient(ellipse 80% 60% at 50% 45%, rgba(92, 255, 138, 0.22), transparent 70%);
+}
+
+.pm-math-screen__flash.is-wrong {
+  background: radial-gradient(ellipse 80% 60% at 50% 45%, rgba(255, 90, 106, 0.18), transparent 70%);
+}
+
+@keyframes pm-math-screen-flash {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.pm-math-screen.is-screen-correct .pm-math-arena {
+  box-shadow: 0 0 40px rgba(92, 255, 138, 0.15), inset 0 0 24px rgba(0, 0, 0, 0.25);
+}
+
+.pm-math-screen.is-screen-wrong .pm-math-arena {
+  box-shadow: 0 0 28px rgba(255, 90, 106, 0.12), inset 0 0 24px rgba(0, 0, 0, 0.25);
+}
+
+.pm-math-side.is-feedback-correct .pm-math-problem {
+  box-shadow: 0 0 24px rgba(92, 255, 138, 0.2);
+}
+
+.pm-math-side.is-feedback-wrong .pm-math-problem {
+  box-shadow: 0 0 20px rgba(255, 90, 106, 0.15);
+}
+
+/* ── Cevap patlaması (değerin altında) ── */
+
+.pm-math-cell__glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pm-math-cell.is-hit .pm-math-cell__glow {
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.35), transparent 65%);
+  animation: pm-math-cell-glow 0.5s ease-out forwards;
+}
+
+@keyframes pm-math-cell-glow {
+  0% { opacity: 0; transform: scale(0.8); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: scale(1.15); }
+}
+
+.pm-math-answer-fx {
+  position: absolute;
+  inset: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.pm-math-answer-fx__ring,
+.pm-math-answer-fx__burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+}
+
+.pm-math-answer-fx__ring {
+  width: 120%;
+  height: 120%;
+  border: 2px solid transparent;
+  animation: pm-math-answer-ring 0.55s ease-out forwards;
+}
+
+.pm-math-answer-fx.is-hit.is-cyan .pm-math-answer-fx__ring {
+  border-color: rgba(0, 232, 255, 0.7);
+  box-shadow: 0 0 16px rgba(0, 232, 255, 0.5);
+}
+
+.pm-math-answer-fx.is-hit.is-pink .pm-math-answer-fx__ring {
+  border-color: rgba(255, 45, 154, 0.7);
+  box-shadow: 0 0 16px rgba(255, 45, 154, 0.45);
+}
+
+.pm-math-answer-fx.is-miss .pm-math-answer-fx__ring {
+  border-color: rgba(255, 90, 106, 0.65);
+}
+
+.pm-math-answer-fx__burst {
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  animation: pm-math-answer-burst 0.45s ease-out forwards;
+}
+
+.pm-math-answer-fx.is-hit.is-cyan .pm-math-answer-fx__burst {
+  background: radial-gradient(circle, rgba(0, 232, 255, 0.45), transparent 70%);
+}
+
+.pm-math-answer-fx.is-hit.is-pink .pm-math-answer-fx__burst {
+  background: radial-gradient(circle, rgba(255, 45, 154, 0.4), transparent 70%);
+}
+
+.pm-math-answer-fx.is-miss .pm-math-answer-fx__burst {
+  background: radial-gradient(circle, rgba(255, 90, 106, 0.35), transparent 70%);
+}
+
+.pm-math-answer-fx__spark {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  animation: pm-math-answer-spark 0.5s ease-out forwards;
+  animation-delay: calc(var(--i) * 0.02s);
+}
+
+.pm-math-answer-fx.is-cyan .pm-math-answer-fx__spark {
+  box-shadow: 0 0 6px rgba(0, 232, 255, 0.9);
+}
+
+.pm-math-answer-fx.is-pink .pm-math-answer-fx__spark {
+  box-shadow: 0 0 6px rgba(255, 45, 154, 0.85);
+}
+
+@keyframes pm-math-answer-ring {
+  0% { opacity: 1; transform: translate(-50%, -50%) scale(0.3); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.4); }
+}
+
+@keyframes pm-math-answer-burst {
+  0% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.2); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); }
+}
+
+@keyframes pm-math-answer-spark {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 60deg)) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(calc(var(--i) * 60deg)) translateY(-28px);
+  }
+}
+
+.pm-math-grid.is-celebrate .pm-math-grid__cells {
+  animation: pm-math-grid-celebrate 0.4s ease-out;
+}
+
+@keyframes pm-math-grid-celebrate {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.pm-math-combo.is-hot span {
+  animation: pm-math-combo-hot 0.6s ease-in-out infinite;
+  text-shadow: 0 0 12px currentColor;
+}
+
+@keyframes pm-math-combo-hot {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-math-ambient__particles i,
+  .pm-math-problem__shine,
+  .pm-math-problem__pulse,
+  .pm-math-screen__flash,
+  .pm-math-arena__beam,
+  .pm-math-portrait-wrap__aura,
+  .pm-math-vs__ring,
+  .pm-math-hud__stat strong,
+  .pm-math-cell.is-hit,
+  .pm-math-cell.is-miss,
+  .pm-math-cell.is-hit .pm-math-cell__glow,
+  .pm-math-answer-fx__ring,
+  .pm-math-answer-fx__burst,
+  .pm-math-answer-fx__spark,
+  .pm-math-grid.is-shake,
+  .pm-math-grid.is-celebrate .pm-math-grid__cells,
+  .pm-math-combo.is-hot span {
+    animation: none !important;
   }
 }

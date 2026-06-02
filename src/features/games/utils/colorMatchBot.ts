@@ -1,12 +1,12 @@
-import type { ColorId, ColorLaneState } from './colorMatchEngine'
-import { findTargetIndex } from './colorMatchEngine'
+import type { ColorLaneState } from './colorMatchEngine'
+import { findNextMatchIndex } from './colorMatchEngine'
 
 export function botThinkDelayMs(combo: number) {
-  return Math.max(500, 1000 - combo * 50)
+  return Math.max(750, 1200 - combo * 40)
 }
 
-export function pickBotTapIndex(lane: ColorLaneState, target: ColorId, seed: number): number {
-  const correct = findTargetIndex(lane.cells, target)
+export function pickBotTapIndex(lane: ColorLaneState, seed: number): number {
+  const correct = findNextMatchIndex(lane)
   if (correct >= 0) return correct
-  return seed % 9
+  return seed % lane.cells.length
 }

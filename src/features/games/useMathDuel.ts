@@ -101,7 +101,7 @@ export function useMathDuel() {
       selectedIndex: null,
       feedback: null,
       feedbackPoints: 0,
-      feedbackPop: null,
+      feedbackToast: null,
       answered: false,
       buffLabel: null,
     }))
@@ -119,7 +119,7 @@ export function useMathDuel() {
       selectedIndex: null,
       feedback: null,
       feedbackPoints: 0,
-      feedbackPop: null,
+      feedbackToast: null,
       answered: false,
       buffLabel: null,
     }))
@@ -176,7 +176,7 @@ export function useMathDuel() {
       selectedIndex: null,
       feedback: null,
       feedbackPoints: 0,
-      feedbackPop: null,
+      feedbackToast: null,
       answered: false,
       buffLabel: null,
     }))
@@ -185,7 +185,7 @@ export function useMathDuel() {
       selectedIndex: null,
       feedback: null,
       feedbackPoints: 0,
-      feedbackPop: null,
+      feedbackToast: null,
       answered: false,
       buffLabel: null,
     }))

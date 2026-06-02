@@ -17,13 +17,19 @@ import {
 } from './utils/blockEngine'
 import { createBlockBot, updateBlockBotLane, type BlockBotBrain } from './utils/blockBot'
 import { playBlockSound } from './utils/blockSounds'
+import type { BlockComboFlash } from './components/BlockComboDock'
 
 type MatchResult = 'p1' | 'p2' | 'draw'
 type RoundWinner = 'p1' | 'p2' | 'draw'
 
+function freshMatchSeed() {
+  return Math.floor(Math.random() * 900_001) + 100_003
+}
+
 export function useBlockDuel() {
-  const [lane1, setLane1] = useState<BlockLaneState>(() => createBlockLane(11, 1))
-  const [lane2, setLane2] = useState<BlockLaneState>(() => createBlockLane(22, 1))
+  const [matchSeed] = useState(() => freshMatchSeed())
+  const [lane1, setLane1] = useState<BlockLaneState>(() => createBlockLane(matchSeed * 2 + 1, 1))
+  const [lane2, setLane2] = useState<BlockLaneState>(() => createBlockLane(matchSeed * 2 + 2, 1))
   const [matchPoints, setMatchPoints] = useState({ p1: 0, p2: 0 })
   const [roundNumber, setRoundNumber] = useState(1)
   const [roundTimeLeft, setRoundTimeLeft] = useState(ROUND_SECONDS)
@@ -31,7 +37,7 @@ export function useBlockDuel() {
   const [winner, setWinner] = useState<MatchResult | null>(null)
   const [shakeKey, setShakeKey] = useState(0)
   const [roundIntro, setRoundIntro] = useState(2.4)
-  const [comboBanner, setComboBanner] = useState<string | null>(null)
+  const [comboFlash, setComboFlash] = useState<BlockComboFlash | null>(null)
 
   const lane1Ref = useRef(lane1)
   const lane2Ref = useRef(lane2)
@@ -46,7 +52,7 @@ export function useBlockDuel() {
   const inputRef = useRef<BlockInput>({})
   const botRef = useRef<BlockBotBrain>(createBlockBot(0))
   const syncTickRef = useRef(0)
-  const roundSeedRef = useRef(5)
+  const roundSeedRef = useRef(matchSeed)
   const dasRef = useRef({ left: false, right: false, down: false, leftAccum: 0, rightAccum: 0 })
 
   const roundIntroRef = useRef(2.4)
@@ -75,21 +81,31 @@ export function useBlockDuel() {
       else if (event === 'rotate') playBlockSound('rotate')
       else if (event === 'drop') playBlockSound('drop')
       else if (event === 'lock') playBlockSound('lock')
-      else if (event === 'hold') playBlockSound('hold')
-      else if (event === 'line') {
-        playBlockSound('line')
+      else if (event === 'fusion') {
+        playBlockSound('fusion')
         if (side === 'p1') setShakeKey((k) => k + 1)
+        if (side === 'p1' && lane) {
+          setComboFlash({ text: 'FÜZYON!', combo: lane.combo, kind: 'fusion' })
+          comboBannerRef.current = 1.5 + lane.combo * 0.15
+        }
+      } else if (event === 'surge') {
+        playBlockSound('surge')
+        if (side === 'p1') setShakeKey((k) => k + 1)
+        if (side === 'p1' && lane) {
+          setComboFlash({ text: 'DALGA!', combo: lane.combo, kind: 'surge' })
+          comboBannerRef.current = 1.65
+        }
       } else if (event === 'combo') {
         playBlockSound('combo')
-        if (side === 'p1' && lane) {
-          setComboBanner(`COMBO x${lane.combo}!`)
-          comboBannerRef.current = 1.4
+        if (side === 'p1' && lane && lane.combo >= 2) {
+          setComboFlash({ text: `ZİNCİR ×${lane.combo}`, combo: lane.combo, kind: 'combo' })
+          comboBannerRef.current = 1.35 + lane.combo * 0.22
         }
-      } else if (event === 'tetris') {
-        playBlockSound('tetris')
-        if (side === 'p1') {
-          setComboBanner('TETRIS!')
-          comboBannerRef.current = 1.6
+      } else if (event === 'nova') {
+        playBlockSound('nova')
+        if (side === 'p1' && lane) {
+          setComboFlash({ text: 'NOVA!', combo: Math.max(lane.combo, 3), kind: 'nova' })
+          comboBannerRef.current = 2.1
         }
       } else if (event === 'attack') playBlockSound('attack')
       else if (event === 'gameover') playBlockSound('gameover')
@@ -200,7 +216,7 @@ export function useBlockDuel() {
 
       if (comboBannerRef.current > 0) {
         comboBannerRef.current = Math.max(0, comboBannerRef.current - dt)
-        if (comboBannerRef.current <= 0) setComboBanner(null)
+        if (comboBannerRef.current <= 0) setComboFlash(null)
       }
 
       if (roundIntroRef.current > 0) {
@@ -270,6 +286,7 @@ export function useBlockDuel() {
         r2.events.length > 0 ||
         r1.attackSent > 0 ||
         r2.attackSent > 0 ||
+        comboBannerRef.current > 0 ||
         input.left ||
         input.right ||
         input.down ||
@@ -353,12 +370,13 @@ export function useBlockDuel() {
     runningRef.current = true
     roundEndingRef.current = false
     roundNumberRef.current = 1
-    roundSeedRef.current = 5
+    const seed = freshMatchSeed()
+    roundSeedRef.current = seed
     roundTimeRef.current = ROUND_SECONDS
     matchPointsRef.current = { p1: 0, p2: 0 }
     dasRef.current = { left: false, right: false, down: false, leftAccum: 0, rightAccum: 0 }
-    const l1 = createBlockLane(11, 1)
-    const l2 = createBlockLane(22, 1)
+    const l1 = createBlockLane(seed * 2 + 1, 1)
+    const l2 = createBlockLane(seed * 2 + 2, 1)
     lane1Ref.current = l1
     lane2Ref.current = l2
     botRef.current = createBlockBot(performance.now() / 1000)
@@ -370,7 +388,7 @@ export function useBlockDuel() {
     setShakeKey(0)
     roundIntroRef.current = 2.4
     setRoundIntro(2.4)
-    setComboBanner(null)
+    setComboFlash(null)
     comboBannerRef.current = 0
     syncLanes(l1, l2, ROUND_SECONDS)
   }, [syncLanes])
@@ -394,7 +412,7 @@ export function useBlockDuel() {
     matchRounds: MATCH_ROUNDS,
     running: running && !winner && lane1.alive && roundIntro <= 0,
     roundIntro,
-    comboBanner,
+    comboFlash,
     winner,
     shakeKey,
     attackMeter,

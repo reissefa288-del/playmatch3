@@ -406,6 +406,167 @@
   z-index: 2;
 }
 
+.pm-brick-pickup-banner-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.pm-brick-pickup-banner {
+  position: relative;
+  margin: 0;
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1.5px solid rgba(0, 232, 255, 0.65);
+  background: linear-gradient(180deg, rgba(10, 22, 48, 0.96), rgba(4, 10, 26, 0.98));
+  box-shadow:
+    0 0 22px rgba(0, 232, 255, 0.28),
+    0 0 40px rgba(0, 232, 255, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.5);
+  animation: pm-brick-pickup-pulse 1.35s ease-in-out infinite;
+}
+
+.pm-brick-pickup-banner.is-pink {
+  border-color: rgba(255, 45, 154, 0.65);
+  background: linear-gradient(180deg, rgba(36, 10, 32, 0.96), rgba(14, 4, 22, 0.98));
+  box-shadow:
+    0 0 22px rgba(255, 45, 154, 0.28),
+    0 0 40px rgba(255, 45, 154, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.5);
+  animation-name: pm-brick-pickup-pulse-pink;
+}
+
+.pm-brick-pickup-banner__ring {
+  position: absolute;
+  inset: -5px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 232, 255, 0.35);
+  animation: pm-brick-pickup-ring 1.6s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.pm-brick-pickup-banner.is-pink .pm-brick-pickup-banner__ring {
+  border-color: rgba(255, 45, 154, 0.35);
+  animation-name: pm-brick-pickup-ring-pink;
+}
+
+.pm-brick-pickup-banner__shine {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pm-brick-pickup-banner__shine::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.22) 48%,
+    transparent 100%
+  );
+  animation: pm-brick-pickup-shine 2.2s ease-in-out infinite;
+}
+
+.pm-brick-pickup-banner__text {
+  position: relative;
+  z-index: 1;
+  display: block;
+  color: var(--brick-cyan);
+  font-family: Orbitron, Inter, system-ui, sans-serif;
+  font-size: clamp(0.58rem, 3.2vw, 0.74rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow:
+    0 0 10px rgba(0, 232, 255, 0.55),
+    0 0 22px rgba(0, 232, 255, 0.28);
+}
+
+.pm-brick-pickup-banner.is-pink .pm-brick-pickup-banner__text {
+  color: var(--brick-pink);
+  text-shadow:
+    0 0 10px rgba(255, 45, 154, 0.55),
+    0 0 22px rgba(255, 45, 154, 0.28);
+}
+
+@keyframes pm-brick-pickup-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 18px rgba(0, 232, 255, 0.22),
+      0 0 32px rgba(0, 232, 255, 0.1),
+      0 8px 20px rgba(0, 0, 0, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 0 28px rgba(0, 232, 255, 0.42),
+      0 0 48px rgba(0, 232, 255, 0.2),
+      0 10px 26px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes pm-brick-pickup-pulse-pink {
+  0%,
+  100% {
+    box-shadow:
+      0 0 18px rgba(255, 45, 154, 0.22),
+      0 0 32px rgba(255, 45, 154, 0.1),
+      0 8px 20px rgba(0, 0, 0, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 0 28px rgba(255, 45, 154, 0.42),
+      0 0 48px rgba(255, 45, 154, 0.2),
+      0 10px 26px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes pm-brick-pickup-ring {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes pm-brick-pickup-ring-pink {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.95;
+    transform: scale(1.06);
+  }
+}
+
+@keyframes pm-brick-pickup-shine {
+  0%,
+  28%,
+  100% {
+    left: -120%;
+  }
+  48% {
+    left: 140%;
+  }
+}
+
 /* —— Kontroller: ortada, aralıklı —— */
 .pm-brick-controls {
   position: relative;
@@ -492,7 +653,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pm-brick-arena__shine {
+  .pm-brick-arena__shine,
+  .pm-brick-pickup-banner,
+  .pm-brick-pickup-banner__ring,
+  .pm-brick-pickup-banner__shine::after {
     animation: none !important;
   }
 }

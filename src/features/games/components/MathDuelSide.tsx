@@ -12,7 +12,9 @@ type MathDuelSideProps = {
 
 export function MathDuelSide({ lane, problem, accent, interactive, onPick }: MathDuelSideProps) {
   return (
-    <div className={`pm-math-side is-${accent}`}>
+    <div
+      className={`pm-math-side is-${accent}${lane.feedback ? ` is-feedback-${lane.feedback}` : ''}`}
+    >
       <MathDuelProblem problem={problem} compact />
       <MathDuelAnswerGrid
         lane={lane}

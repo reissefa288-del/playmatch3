@@ -3,15 +3,15 @@ type BlockSoundId =
   | 'rotate'
   | 'drop'
   | 'lock'
-  | 'line'
+  | 'fusion'
+  | 'surge'
   | 'attack'
   | 'round'
   | 'win'
   | 'lose'
   | 'gameover'
-  | 'hold'
   | 'combo'
-  | 'tetris'
+  | 'nova'
 
 let audioCtx: AudioContext | null = null
 let unlocked = false
@@ -58,15 +58,15 @@ const MIN_GAP: Record<BlockSoundId, number> = {
   rotate: 90,
   drop: 40,
   lock: 120,
-  line: 280,
+  fusion: 280,
+  surge: 300,
   attack: 320,
   round: 400,
   win: 900,
   lose: 900,
   gameover: 900,
-  hold: 180,
   combo: 350,
-  tetris: 500,
+  nova: 500,
 }
 
 export function playBlockSound(id: BlockSoundId) {
@@ -87,24 +87,23 @@ export function playBlockSound(id: BlockSoundId) {
     case 'lock':
       tone(220, 0.08, 'triangle', 0.045, 160)
       break
-    case 'line':
-      tone(523, 0.08, 'sine', 0.05)
-      tone(784, 0.1, 'sine', 0.045, undefined, 0.08)
-      tone(988, 0.12, 'sine', 0.04, undefined, 0.16)
+    case 'fusion':
+      tone(523, 0.07, 'sine', 0.05)
+      tone(784, 0.09, 'sine', 0.042, undefined, 0.06)
+      break
+    case 'surge':
+      tone(320, 0.1, 'sawtooth', 0.05, 180)
+      tone(240, 0.12, 'sawtooth', 0.04, 120, 0.08)
       break
     case 'combo':
       tone(660, 0.07, 'triangle', 0.05)
       tone(880, 0.1, 'triangle', 0.045, undefined, 0.07)
       break
-    case 'tetris':
+    case 'nova':
       tone(440, 0.08, 'sawtooth', 0.05)
       tone(660, 0.1, 'sawtooth', 0.045, undefined, 0.08)
       tone(880, 0.14, 'sawtooth', 0.04, undefined, 0.16)
       tone(1100, 0.16, 'sine', 0.035, undefined, 0.24)
-      break
-    case 'hold':
-      tone(360, 0.06, 'sine', 0.04, 520)
-      tone(480, 0.08, 'sine', 0.035, undefined, 0.05)
       break
     case 'attack':
       tone(180, 0.1, 'sawtooth', 0.05, 90)

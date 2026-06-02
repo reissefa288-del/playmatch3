@@ -9,6 +9,7 @@ import {
   SLIDE_TOP_PX,
   type StackLaneState,
 } from '../utils/stackDuelEngine'
+import { StackHitReaction } from './StackHitReaction'
 
 type StackDuelTowerProps = {
   lane: StackLaneState
@@ -59,12 +60,18 @@ export function StackDuelTower({
     onLand?.()
   }
 
+  const reacting = Boolean(lane.perfectPop && lane.lastEvent && lane.lastEvent !== 'over')
+  const reactionClass = reacting ? ` is-reacting is-reacting--${lane.lastEvent}` : ''
+
   return (
     <motion.div
-      className={`pm-stack-tower is-${accent}${interactive ? ' is-interactive' : ''}`}
-      animate={lane.shake > 0 ? { x: [0, -4, 4, 0] } : { x: 0 }}
-      transition={{ duration: 0.22 }}
+      className={`pm-stack-tower is-${accent}${interactive ? ' is-interactive' : ''}${reactionClass}`}
+      animate={lane.shake > 0 ? { x: [0, -5, 5, -3, 0] } : { x: 0 }}
+      transition={{ duration: 0.28, ease: 'easeOut' }}
     >
+      <span className="pm-stack-tower__bloom" aria-hidden />
+      <span className="pm-stack-tower__volumetric" aria-hidden />
+      <span className="pm-stack-tower__ssr" aria-hidden />
       <span className="pm-stack-tower__aura" aria-hidden />
       <span className="pm-stack-tower__corner pm-stack-tower__corner--tl" aria-hidden />
       <span className="pm-stack-tower__corner pm-stack-tower__corner--tr" aria-hidden />
@@ -85,9 +92,13 @@ export function StackDuelTower({
       >
         <span className="pm-stack-tower__grid" aria-hidden />
         <span className="pm-stack-tower__vignette" aria-hidden />
+        <span className="pm-stack-tower__stage-bloom" aria-hidden />
+        <span className="pm-stack-tower__motion-blur" aria-hidden />
 
         <div className="pm-stack-tower__slide-zone" style={{ height: dropPx + blockH + 24 }}>
+          <span className="pm-stack-tower__rail-glow" aria-hidden />
           <span className="pm-stack-tower__rail" aria-hidden />
+          <span className="pm-stack-tower__energy-trail" aria-hidden />
         </div>
 
         <div className="pm-stack-tower__stack">
@@ -186,21 +197,39 @@ export function StackDuelTower({
           </>
         ) : null}
 
+        <span className="pm-stack-tower__platform-ring" aria-hidden />
         <span className="pm-stack-tower__platform" aria-hidden />
+        <span className="pm-stack-tower__landing-glow" aria-hidden />
       </div>
+
+      {reacting && lane.lastEvent ? (
+        <StackHitReaction event={lane.lastEvent} accent={accent} />
+      ) : null}
 
       {lane.perfectPop ? (
         <motion.span
-          className="pm-stack-tower__perfect"
-          initial={{ opacity: 0, y: 8, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
+          className={`pm-stack-tower__perfect is-${lane.lastEvent ?? 'place'}`}
+          initial={{ opacity: 0, y: 16, scale: 0.5 }}
+          animate={{ opacity: 1, y: -8, scale: 1 }}
+          transition={{ type: 'spring', stiffness: 420, damping: 22 }}
         >
-          {lane.perfectPop}
+          <span className="pm-stack-tower__perfect-glow" aria-hidden />
+          <span className="pm-stack-tower__perfect-text">{lane.perfectPop}</span>
         </motion.span>
       ) : null}
 
       {lane.combo > 1 ? (
-        <span className="pm-stack-tower__combo">KOMBO x{lane.combo}</span>
+        <motion.span
+          className={`pm-stack-tower__combo${lane.combo >= 4 ? ' is-mega' : lane.combo >= 2 ? ' is-hot' : ''}`}
+          key={lane.combo}
+          initial={{ opacity: 0, scale: 0.4, y: 12 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+        >
+          <span className="pm-stack-tower__combo-streak" aria-hidden />
+          <span className="pm-stack-tower__combo-label">COMBO</span>
+          <strong>x{lane.combo}</strong>
+        </motion.span>
       ) : null}
     </motion.div>
   )

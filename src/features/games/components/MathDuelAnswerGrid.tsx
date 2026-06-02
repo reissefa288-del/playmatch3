@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
 import type { MathLaneState, MathProblem } from '../utils/mathDuelEngine'
+import { MathAnswerFx } from './MathAnswerFx'
+import { MathFeedbackToast } from './MathFeedbackToast'
 
 type MathDuelAnswerGridProps = {
   lane: MathLaneState
@@ -16,19 +18,15 @@ export function MathDuelAnswerGrid({
   interactive = false,
   onPick,
 }: MathDuelAnswerGridProps) {
-  const feedbackClass =
-    lane.feedback === 'correct' ? 'is-correct' : lane.feedback === 'wrong' ? 'is-wrong' : ''
+  const showReveal =
+    interactive && lane.answered && lane.feedback === 'wrong' && lane.lives >= 0
 
   return (
-    <div className={`pm-math-grid is-${accent}${interactive ? ' is-interactive' : ''}`}>
-      {lane.feedbackPop ? (
-        <motion.span
-          className={`pm-math-grid__banner ${feedbackClass}`}
-          initial={{ opacity: 0, y: -6 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          {lane.feedbackPop}
-        </motion.span>
+    <div
+      className={`pm-math-grid is-${accent}${interactive ? ' is-interactive' : ''}${lane.feedback === 'wrong' ? ' is-shake' : ''}${lane.feedback === 'correct' ? ' is-celebrate' : ''}${lane.feedbackToast ? ' has-toast' : ''}`}
+    >
+      {lane.feedbackToast ? (
+        <MathFeedbackToast toast={lane.feedbackToast} accent={accent} />
       ) : null}
 
       <div className="pm-math-grid__cells" role="group" aria-label="Cevap seçenekleri">
@@ -36,21 +34,31 @@ export function MathDuelAnswerGrid({
           const selected = lane.selectedIndex === index
           const correctPick = selected && index === problem.correctIndex
           const wrongPick = selected && index !== problem.correctIndex
+          const revealCorrect = showReveal && index === problem.correctIndex
           return (
-            <button
+            <motion.button
               key={`${problem.id}-${index}`}
               type="button"
-              className={`pm-math-cell${selected ? ' is-selected' : ''}${correctPick ? ' is-hit' : ''}${wrongPick ? ' is-miss' : ''}`}
+              className={`pm-math-cell${selected ? ' is-selected' : ''}${correctPick ? ' is-hit' : ''}${wrongPick ? ' is-miss' : ''}${revealCorrect ? ' is-reveal' : ''}`}
+              aria-label={`Cevap ${value}`}
               disabled={!interactive || lane.answered || !lane.lives}
               onClick={() => onPick?.(index)}
+              initial={{ opacity: 0, scale: 0.9, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: index * 0.04, type: 'spring', stiffness: 400, damping: 22 }}
             >
-              <span>{value}</span>
-              {interactive && selected && correctPick ? (
-                <span className="pm-math-cell__hand" aria-hidden>
-                  👆
+              <span className="pm-math-cell__edge" aria-hidden />
+              <span className="pm-math-cell__glow" aria-hidden />
+              {correctPick || wrongPick ? (
+                <MathAnswerFx kind={correctPick ? 'hit' : 'miss'} accent={accent} />
+              ) : null}
+              <span className="pm-math-cell__value">{value}</span>
+              {revealCorrect ? (
+                <span className="pm-math-cell__tag" aria-hidden>
+                  Doğru
                 </span>
               ) : null}
-            </button>
+            </motion.button>
           )
         })}
       </div>

@@ -5,13 +5,13 @@ export const PAIR_COUNT = CARD_COUNT / 2
 export const WIN_ROUNDS = 3
 export const MATCH_ROUNDS = 5
 export const ROUND_BREAK_MS = 2600
-export const FLIP_BACK_MS = 680
-export const ROUND_SECONDS = 90
+export const FLIP_BACK_MS = 920
+export const ROUND_SECONDS = 105
 
 export type MemorySymbol =
   | 'star'
   | 'diamond'
-  | 'bolt'
+  | 'gem'
   | 'heart'
   | 'clover'
   | 'flame'
@@ -25,7 +25,7 @@ export type MemorySymbol =
 export const MEMORY_SYMBOLS: MemorySymbol[] = [
   'star',
   'diamond',
-  'bolt',
+  'gem',
   'heart',
   'clover',
   'flame',
@@ -40,7 +40,7 @@ export const MEMORY_SYMBOLS: MemorySymbol[] = [
 export const SYMBOL_GLYPH: Record<MemorySymbol, string> = {
   star: '★',
   diamond: '◆',
-  bolt: '⚡',
+  gem: '◆',
   heart: '♥',
   clover: '♣',
   flame: '🔥',
@@ -55,7 +55,7 @@ export const SYMBOL_GLYPH: Record<MemorySymbol, string> = {
 export const SYMBOL_COLOR: Record<MemorySymbol, string> = {
   star: '#ffb347',
   diamond: '#7ecbff',
-  bolt: '#ffd76a',
+  gem: '#c8a8ff',
   heart: '#ff5a9a',
   clover: '#5cff8a',
   flame: '#ff8a4a',

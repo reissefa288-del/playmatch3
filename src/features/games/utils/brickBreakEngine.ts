@@ -16,7 +16,7 @@ export const BRICK_COLORS = ['#ff6b2c', '#ffb020', '#4cd964', '#32ade6', '#7b61f
 
 export type BrickPower = 'none' | 'charged' | 'armored' | 'bonus'
 export type BallPower = 'none' | 'fast' | 'wide' | 'pierce'
-export type DropKind = Exclude<BallPower, 'none'> | 'life'
+export type DropKind = Exclude<BallPower, 'none'>
 
 export type PowerDrop = {
   x: number
@@ -59,6 +59,11 @@ export type BrickParticle = {
 
 export type LaneEvent = 'paddle' | 'brick' | 'charge' | 'bonus' | 'armor' | 'life' | 'powerup'
 
+export type PickupBanner = {
+  label: string
+  ttl: number
+}
+
 export type LaneState = {
   paddleX: number
   ball: BallState
@@ -70,6 +75,23 @@ export type LaneState = {
   trail: TrailPoint[]
   serveCooldown: number
   drops: PowerDrop[]
+  pickupBanner: PickupBanner | null
+}
+
+const PICKUP_BANNER_DURATION = 2.35
+
+/** Düşen güçlendirme — toplandığında gösterilecek isim */
+export function dropKindLabel(kind: DropKind): string {
+  switch (kind) {
+    case 'wide':
+      return 'GENİŞ RAKET'
+    case 'fast':
+      return 'HIZLI TOP'
+    case 'pierce':
+      return 'DELİCİ TOP'
+    default:
+      return 'GÜÇLENDİRME'
+  }
 }
 
 export function createBrickGrid(seed = 0): BrickGrid {
@@ -123,6 +145,7 @@ export function createLane(seed = 0): LaneState {
     trail: [],
     serveCooldown: 0.45,
     drops: [],
+    pickupBanner: null,
   }
 }
 
@@ -165,6 +188,12 @@ export function updateLane(
   speedMult = 1,
 ): { lane: LaneState; events: LaneEvent[] } {
   const events: LaneEvent[] = []
+  let pickupBanner = lane.pickupBanner
+  if (pickupBanner) {
+    const ttl = pickupBanner.ttl - dt
+    pickupBanner = ttl > 0 ? { ...pickupBanner, ttl } : null
+  }
+
   const effectivePaddleW =
     lane.ball.power === 'wide' && lane.ball.powerTimer > 0
       ? PADDLE_WIDTH * 1.38
@@ -195,6 +224,7 @@ export function updateLane(
       y: drop.y + dt * DROP_FALL_SPEED,
       wobble: drop.wobble + dt * 5,
     })),
+    pickupBanner,
   }
 
   next.drops = next.drops.filter((drop) => drop.y < 1.06)
@@ -450,9 +480,8 @@ function maybeSpawnPowerDrop(lane: LaneState, x: number, y: number, brickPower: 
 
   const roll = Math.random()
   let kind: DropKind
-  if (roll < 0.1) kind = 'life'
-  else if (roll < 0.4) kind = 'wide'
-  else if (roll < 0.7) kind = 'fast'
+  if (roll < 0.34) kind = 'wide'
+  else if (roll < 0.67) kind = 'fast'
   else kind = 'pierce'
 
   lane.drops.push({
@@ -476,16 +505,13 @@ function collectPowerDrops(lane: LaneState, paddleW: number, events: LaneEvent[]
     if (!inX || !inY) return true
 
     applyDropKind(lane, drop.kind)
+    lane.pickupBanner = { label: dropKindLabel(drop.kind), ttl: PICKUP_BANNER_DURATION }
     events.push('powerup')
     return false
   })
 }
 
 function applyDropKind(lane: LaneState, kind: DropKind) {
-  if (kind === 'life') {
-    lane.lives = Math.min(MAX_LIVES, lane.lives + 1)
-    return
-  }
   applyBallPower(lane, kind)
 }
 

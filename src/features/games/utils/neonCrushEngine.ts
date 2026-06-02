@@ -1,16 +1,38 @@
 export const COLS = 5
-export const ROWS = 7
+export const ROWS = 8
 export const GRID_SIZE = COLS * ROWS
-export const MATCH_ROUNDS = 3
-export const WIN_ROUNDS = 2
-export const ROUND_SECONDS = 80
-export const ROUND_TARGET_SCORE = 5000
+/** Tek düello: 1:30 — en yüksek skor kazanır */
+export const DUEL_SECONDS = 90
+export const MATCH_ROUNDS = 1
+export const WIN_ROUNDS = 1
 export const ROUND_BREAK_MS = 2400
+export const MATCH_ANIM_MS = 420
+export const SETTLE_ANIM_MS = 380
 
-export const GEM_IDS = ['heart', 'diamond', 'star', 'club', 'flame', 'moon'] as const
+/** a1–a5 referans PNG’leri ile birebir */
+export const GEM_IDS = ['a1', 'a2', 'a3', 'a4', 'a5'] as const
 export type GemId = (typeof GEM_IDS)[number]
 
 export type NeonBoard = GemId[]
+
+export type MatchSegment = {
+  orientation: 'h' | 'v'
+  indices: number[]
+}
+
+export type NeonLaneFx = {
+  popIndices: number[]
+  segments: MatchSegment[]
+  scoreGain: number
+  combo: number
+  tick: number
+  swap?: [number, number]
+}
+
+export type NeonLaneSettle = {
+  indices: number[]
+  tick: number
+}
 
 export type NeonLaneState = {
   laneId: 1 | 2
@@ -20,6 +42,8 @@ export type NeonLaneState = {
   comboMult: number
   matchPoints: number
   roundScore: number
+  fx: NeonLaneFx | null
+  settle: NeonLaneSettle | null
 }
 
 export function idx(col: number, row: number) {
@@ -46,6 +70,21 @@ function mulberry32(seed: number) {
 
 export function pickRandomGem(rand: () => number): GemId {
   return GEM_IDS[Math.floor(rand() * GEM_IDS.length)]!
+}
+
+export function normalizeBoard(cells: readonly string[]): NeonBoard {
+  const legacy: Record<string, GemId> = {
+    star: 'a1',
+    moon: 'a2',
+    diamond: 'a3',
+    club: 'a4',
+    flame: 'a5',
+    heart: 'a1',
+  }
+  return cells.map((g) => {
+    if (GEM_IDS.includes(g as GemId)) return g as GemId
+    return legacy[g] ?? pickRandomGem(() => Math.random())
+  }) as NeonBoard
 }
 
 export function findMatches(board: NeonBoard): Set<number> {
@@ -78,6 +117,48 @@ export function findMatches(board: NeonBoard): Set<number> {
   return matched
 }
 
+export function findMatchSegments(board: NeonBoard): MatchSegment[] {
+  const segments: MatchSegment[] = []
+
+  for (let row = 0; row < ROWS; row++) {
+    let col = 0
+    while (col < COLS) {
+      const start = col
+      const gem = board[idx(col, row)]
+      while (col < COLS && board[idx(col, row)] === gem) col++
+      if (col - start >= 3) {
+        const indices: number[] = []
+        for (let c = start; c < col; c++) indices.push(idx(c, row))
+        segments.push({ orientation: 'h', indices })
+      }
+    }
+  }
+
+  for (let col = 0; col < COLS; col++) {
+    let row = 0
+    while (row < ROWS) {
+      const start = row
+      const gem = board[idx(col, row)]
+      while (row < ROWS && board[idx(col, row)] === gem) row++
+      if (row - start >= 3) {
+        const indices: number[] = []
+        for (let r = start; r < row; r++) indices.push(idx(col, r))
+        segments.push({ orientation: 'v', indices })
+      }
+    }
+  }
+
+  return segments
+}
+
+export function computeSpawnIndices(before: NeonBoard, after: NeonBoard) {
+  const spawn: number[] = []
+  for (let i = 0; i < GRID_SIZE; i++) {
+    if (before[i] !== after[i]) spawn.push(i)
+  }
+  return spawn
+}
+
 function fillGravity(cells: (GemId | null)[], rand: () => number): NeonBoard {
   const out: GemId[] = new Array(GRID_SIZE)
   for (let col = 0; col < COLS; col++) {
@@ -102,11 +183,19 @@ function fillGravity(cells: (GemId | null)[], rand: () => number): NeonBoard {
 export function resolveBoard(
   board: NeonBoard,
   rand: () => number,
-): { board: NeonBoard; cleared: number; maxCombo: number } {
+): {
+  board: NeonBoard
+  cleared: number
+  maxCombo: number
+  popIndices: number[]
+  segments: MatchSegment[]
+} {
   let current = [...board]
   let totalCleared = 0
   let maxCombo = 0
   let chain = 0
+  const popIndices: number[] = []
+  const segments: MatchSegment[] = []
 
   while (true) {
     const matched = findMatches(current)
@@ -114,11 +203,13 @@ export function resolveBoard(
     chain++
     maxCombo = Math.max(maxCombo, chain)
     totalCleared += matched.size
+    matched.forEach((i) => popIndices.push(i))
+    findMatchSegments(current).forEach((seg) => segments.push(seg))
     const next: (GemId | null)[] = current.map((gem, i) => (matched.has(i) ? null : gem))
     current = fillGravity(next, rand)
   }
 
-  return { board: current, cleared: totalCleared, maxCombo }
+  return { board: current, cleared: totalCleared, maxCombo, popIndices, segments }
 }
 
 export function comboMultiplier(combo: number) {
@@ -152,16 +243,32 @@ export function trySwap(
   a: number,
   b: number,
   rand: () => number,
-): { ok: true; board: NeonBoard; scoreGain: number; combo: number } | { ok: false; board: NeonBoard } {
+):
+  | {
+      ok: true
+      previewBoard: NeonBoard
+      board: NeonBoard
+      scoreGain: number
+      combo: number
+      popIndices: number[]
+      segments: MatchSegment[]
+      swap: [number, number]
+    }
+  | { ok: false; board: NeonBoard } {
   if (!areAdjacent(a, b)) return { ok: false, board }
   const swapped = swapCells(board, a, b)
   if (findMatches(swapped).size === 0) return { ok: false, board }
   const resolved = resolveBoard(swapped, rand)
+  const previewSegments = findMatchSegments(swapped)
   return {
     ok: true,
+    previewBoard: swapped,
     board: resolved.board,
     scoreGain: scoreForClear(resolved.cleared, resolved.maxCombo),
     combo: resolved.maxCombo,
+    popIndices: resolved.popIndices,
+    segments: previewSegments.length > 0 ? previewSegments : resolved.segments,
+    swap: [a, b],
   }
 }
 
@@ -185,6 +292,8 @@ export function createLane(laneId: 1 | 2, seed: number): NeonLaneState {
     comboMult: 1,
     matchPoints: 0,
     roundScore: 0,
+    fx: null,
+    settle: null,
   }
 }
 

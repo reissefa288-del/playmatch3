@@ -241,7 +241,6 @@ function drawPowerDrop(
     wide: { fill: '#4cd964', glow: 'rgba(76, 217, 100, 0.9)', label: 'W' },
     fast: { fill: '#ffd76a', glow: 'rgba(255, 215, 106, 0.9)', label: '⚡' },
     pierce: { fill: '#7b61ff', glow: 'rgba(123, 97, 255, 0.9)', label: 'P' },
-    life: { fill: '#ff5a8a', glow: 'rgba(255, 90, 138, 0.9)', label: '+' },
   }
   const style = colors[kind]
   const px = x + Math.sin(wobble * 1.4) * 3 * dpr

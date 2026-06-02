@@ -1,10 +1,15 @@
 import {
   BLOCK_COLS,
   BLOCK_ROWS,
+  cellCount,
   hardDropLane,
   previewPiecePlacement,
+  rotationCount,
+  spawnColFor,
   type BlockInput,
   type BlockLaneState,
+  type PieceKind,
+  type PlacementScore,
   updateBlockLane,
 } from './blockEngine'
 
@@ -21,7 +26,7 @@ export type BlockBotBrain = {
 export function createBlockBot(nowSec: number): BlockBotBrain {
   return {
     targetRot: 0,
-    targetCol: 4,
+    targetCol: spawnColFor('prism', 0),
     hardDrop: false,
     thinkAt: nowSec + 0.1,
     pending: {},
@@ -37,42 +42,48 @@ function stackHeight(lane: BlockLaneState): number {
   return 0
 }
 
-function scorePlacement(
-  cleared: number,
-  aggregateHeight: number,
-  holes: number,
-  bumpiness: number,
-): number {
+function scorePlacement(kind: PieceKind, score: PlacementScore): number {
+  const cells = cellCount(kind)
+  const heightPenalty = cells >= 5 ? 10 : 7
+
   return (
-    cleared * 8200 -
-    aggregateHeight * 8 -
-    holes * 420 -
-    bumpiness * 14 +
-    (cleared >= 2 ? 600 : 0) +
-    (cleared >= 4 ? 2400 : 0)
+    score.fusionCells * 1400 +
+    score.surgeCount * 3200 +
+    score.cleared * 350 -
+    score.aggregateHeight * heightPenalty -
+    score.holes * 480 -
+    score.bumpiness * 16 +
+    (score.fusionCells >= 4 ? 900 : 0) +
+    (score.surgeCount >= 1 ? 700 : 0) +
+    (score.fusionCells + score.surgeCount >= 6 ? 1200 : 0)
   )
 }
 
 function findBestPlacement(lane: BlockLaneState): { rot: number; col: number; hardDrop: boolean } {
-  if (!lane.active) return { rot: 0, col: 4, hardDrop: false }
+  if (!lane.active) {
+    return { rot: 0, col: spawnColFor('prism', 0), hardDrop: false }
+  }
 
   let bestScore = -Infinity
   let best = { rot: lane.active.rotation, col: lane.active.col, hardDrop: false }
   const kind = lane.active.kind
+  const height = stackHeight(lane)
 
-  for (let rot = 0; rot < (kind === 'O' ? 1 : 4); rot += 1) {
-    for (let col = -2; col < BLOCK_COLS; col += 1) {
+  for (let rot = 0; rot < rotationCount(kind); rot += 1) {
+    const minCol = -1
+    const maxCol = BLOCK_COLS
+    for (let col = minCol; col < maxCol; col += 1) {
       const preview = previewPiecePlacement(lane.grid, kind, rot, col)
       if (!preview) continue
-      const score = scorePlacement(
-        preview.cleared,
-        preview.aggregateHeight,
-        preview.holes,
-        preview.bumpiness,
-      )
-      if (score > bestScore) {
-        bestScore = score
-        best = { rot, col, hardDrop: preview.cleared >= 2 || stackHeight(lane) > 11 }
+      const total = preview.fusionCells + preview.surgeCount
+      const placementScore = scorePlacement(kind, preview)
+      if (placementScore > bestScore) {
+        bestScore = placementScore
+        best = {
+          rot,
+          col,
+          hardDrop: total >= 3 || (total >= 1 && height > 10) || height > 12,
+        }
       }
     }
   }
@@ -103,7 +114,7 @@ export function updateBlockBotLane(
   const events: ReturnType<typeof updateBlockLane>['events'] = []
 
   if (nowSec >= bot.thinkAt || !lane.active) {
-    bot.thinkAt = nowSec + 0.045 + Math.random() * 0.035
+    bot.thinkAt = nowSec + 0.04 + Math.random() * 0.03
     const best = findBestPlacement(lane)
     bot.targetRot = best.rot
     bot.targetCol = best.col

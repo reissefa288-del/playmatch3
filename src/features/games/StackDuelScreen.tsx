@@ -14,6 +14,7 @@ import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
+import { StackDuelCinematic } from './components/StackDuelCinematic'
 import { StackDuelTower } from './components/StackDuelTower'
 import { useStackDuel } from './useStackDuel'
 import { unlockStackDuelAudio } from './utils/stackDuelSounds'
@@ -58,6 +59,7 @@ export function StackDuelScreen() {
       <div className="pm-artboard">
         <motion.div className="pm-stack-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <GameDuelBackdrop />
+          <StackDuelCinematic />
 
           <button type="button" className="pm-stack-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
@@ -178,7 +180,10 @@ export function StackDuelScreen() {
             <div className="pm-stack-footer__combo">
               <span>KOMBO GÜCÜ</span>
               <div className="pm-stack-footer__combo-bar">
-                <span style={{ width: '75%' }} />
+                <span
+                  className={game.lane1.combo >= 4 ? 'is-mega' : game.lane1.combo >= 2 ? 'is-hot' : ''}
+                  style={{ width: `${Math.min(100, 12 + game.lane1.combo * 14)}%` }}
+                />
               </div>
             </div>
             <button type="button" className="pm-stack-footer__btn" aria-label="Menü">

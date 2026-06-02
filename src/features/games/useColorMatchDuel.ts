@@ -2,30 +2,25 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { botThinkDelayMs, pickBotTapIndex } from './utils/colorMatchBot'
 import {
   applyHit,
-  buildGrid,
-  COLOR_IDS,
+  BOARD_CLEAR_MS,
   createLane,
   MATCH_ROUNDS,
+  refreshLaneBoard,
+  remainingMatches,
   resolveRoundWinner,
   ROUND_BREAK_MS,
   ROUND_SECONDS,
   TARGET_TIMEOUT_MS,
   WIN_ROUNDS,
-  type ColorId,
   type ColorLaneState,
 } from './utils/colorMatchEngine'
 
 type MatchWinner = 'p1' | 'p2' | 'draw'
-
-function pickTarget(seed: number): ColorId {
-  return COLOR_IDS[seed % COLOR_IDS.length]!
-}
+type LaneId = 1 | 2
 
 export function useColorMatchDuel() {
   const [lane1, setLane1] = useState<ColorLaneState>(() => createLane(1))
   const [lane2, setLane2] = useState<ColorLaneState>(() => createLane(2))
-  const [target, setTarget] = useState<ColorId>('cyan')
-  const [targetKey, setTargetKey] = useState(0)
   const [roundNumber, setRoundNumber] = useState(1)
   const [roundTimeLeft, setRoundTimeLeft] = useState(ROUND_SECONDS)
   const [roundMessage, setRoundMessage] = useState<string | null>(null)
@@ -34,7 +29,6 @@ export function useColorMatchDuel() {
 
   const lane1Ref = useRef(lane1)
   const lane2Ref = useRef(lane2)
-  const targetRef = useRef(target)
   const roundNumberRef = useRef(1)
   const roundTimeRef = useRef(ROUND_SECONDS)
   const roundEndingRef = useRef(false)
@@ -42,48 +36,75 @@ export function useColorMatchDuel() {
   const endedRef = useRef(false)
   const seedRef = useRef(401)
   const botTimerRef = useRef<number | null>(null)
-  const targetTimerRef = useRef<number | null>(null)
+  const targetTimer1Ref = useRef<number | null>(null)
+  const targetTimer2Ref = useRef<number | null>(null)
   const scheduleBotRef = useRef<() => void>(() => {})
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
-  targetRef.current = target
+
+  const setLane = useCallback((lane: LaneId, next: ColorLaneState) => {
+    if (lane === 1) {
+      lane1Ref.current = next
+      setLane1(next)
+    } else {
+      lane2Ref.current = next
+      setLane2(next)
+    }
+  }, [])
 
   const clearBot = useCallback(() => {
     if (botTimerRef.current != null) window.clearTimeout(botTimerRef.current)
     botTimerRef.current = null
   }, [])
 
-  const clearTargetTimer = useCallback(() => {
-    if (targetTimerRef.current != null) window.clearTimeout(targetTimerRef.current)
-    targetTimerRef.current = null
+  const clearTargetTimer = useCallback((lane: LaneId) => {
+    const ref = lane === 1 ? targetTimer1Ref : targetTimer2Ref
+    if (ref.current != null) window.clearTimeout(ref.current)
+    ref.current = null
   }, [])
 
-  const spawnTarget = useCallback((seedBump = 1) => {
-    seedRef.current += seedBump
-    const nextTarget = pickTarget(seedRef.current)
-    targetRef.current = nextTarget
-    setTarget(nextTarget)
-    setTargetKey((k) => k + 1)
+  const clearAllTargetTimers = useCallback(() => {
+    clearTargetTimer(1)
+    clearTargetTimer(2)
+  }, [clearTargetTimer])
 
-    const g1 = buildGrid(seedRef.current + 11, nextTarget)
-    const g2 = buildGrid(seedRef.current + 29, nextTarget)
-    setLane1((l) => ({ ...l, cells: g1, lastFx: null }))
-    setLane2((l) => ({ ...l, cells: g2, lastFx: null }))
-    lane1Ref.current = { ...lane1Ref.current, cells: g1, lastFx: null }
-    lane2Ref.current = { ...lane2Ref.current, cells: g2, lastFx: null }
-  }, [])
+  const respawnLaneBoard = useCallback(
+    (lane: LaneId, seedBump = 1) => {
+      seedRef.current += seedBump
+      const current = lane === 1 ? lane1Ref.current : lane2Ref.current
+      const next = refreshLaneBoard(current, seedRef.current)
+      setLane(lane, next)
+    },
+    [setLane],
+  )
 
-  const scheduleTargetTimeout = useCallback(() => {
-    clearTargetTimer()
-    targetTimerRef.current = window.setTimeout(() => {
-      if (endedRef.current || roundEndingRef.current) return
-      setLane1((l) => ({ ...l, combo: 0, comboMult: 1, lastFx: 'miss' }))
-      setLane2((l) => ({ ...l, combo: 0, comboMult: 1, lastFx: null }))
-      spawnTarget(3)
-      scheduleBotRef.current()
-    }, TARGET_TIMEOUT_MS)
-  }, [clearTargetTimer, spawnTarget])
+  const scheduleTargetTimeout = useCallback(
+    (lane: LaneId) => {
+      clearTargetTimer(lane)
+      const ref = lane === 1 ? targetTimer1Ref : targetTimer2Ref
+      ref.current = window.setTimeout(() => {
+        if (endedRef.current || roundEndingRef.current) return
+        const current = lane === 1 ? lane1Ref.current : lane2Ref.current
+        setLane(lane, { ...current, combo: 0, comboMult: 1, lastFx: 'miss' })
+        respawnLaneBoard(lane, 2)
+        if (lane === 2) scheduleBotRef.current()
+      }, TARGET_TIMEOUT_MS)
+    },
+    [clearTargetTimer, respawnLaneBoard, setLane],
+  )
+
+  const onBoardCleared = useCallback(
+    (lane: LaneId) => {
+      window.setTimeout(() => {
+        if (endedRef.current || roundEndingRef.current) return
+        respawnLaneBoard(lane, 2)
+        scheduleTargetTimeout(lane)
+        if (lane === 2) scheduleBotRef.current()
+      }, BOARD_CLEAR_MS)
+    },
+    [respawnLaneBoard, scheduleTargetTimeout],
+  )
 
   const scheduleBot = useCallback(() => {
     clearBot()
@@ -91,31 +112,25 @@ export function useColorMatchDuel() {
     const delay = botThinkDelayMs(lane2Ref.current.combo)
     botTimerRef.current = window.setTimeout(() => {
       if (endedRef.current || roundEndingRef.current) return
-      const idx = pickBotTapIndex(lane2Ref.current, targetRef.current, seedRef.current)
-      const next = applyHit(lane2Ref.current, idx, targetRef.current)
-      lane2Ref.current = next
-      setLane2(next)
-      if (next.lastFx === 'hit') {
-        spawnTarget(2)
-        scheduleTargetTimeout()
+      const idx = pickBotTapIndex(lane2Ref.current, seedRef.current)
+      const hit = applyHit(lane2Ref.current, idx)
+      lane2Ref.current = hit
+      setLane2(hit)
+      if (hit.lastFx === 'hit' && remainingMatches(hit) === 0) {
+        onBoardCleared(2)
+        return
       }
       scheduleBotRef.current()
     }, delay)
-  }, [clearBot, spawnTarget, scheduleTargetTimeout])
+  }, [clearBot, onBoardCleared])
 
   scheduleBotRef.current = scheduleBot
-
-  const afterHit = useCallback(() => {
-    spawnTarget(2)
-    scheduleTargetTimeout()
-    scheduleBotRef.current()
-  }, [spawnTarget, scheduleTargetTimeout])
 
   const endRound = useCallback(() => {
     if (roundEndingRef.current) return
     roundEndingRef.current = true
     clearBot()
-    clearTargetTimer()
+    clearAllTargetTimers()
 
     const rw = resolveRoundWinner(lane1Ref.current, lane2Ref.current)
     let l1 = lane1Ref.current
@@ -143,8 +158,8 @@ export function useColorMatchDuel() {
       }
       roundNumberRef.current += 1
       setRoundNumber(roundNumberRef.current)
-      const reset1 = createLane(1)
-      const reset2 = createLane(2)
+      const reset1 = createLane(1, seedRef.current + 3)
+      const reset2 = createLane(2, seedRef.current + 5)
       reset1.matchPoints = l1.matchPoints
       reset2.matchPoints = l2.matchPoints
       lane1Ref.current = reset1
@@ -155,21 +170,21 @@ export function useColorMatchDuel() {
       setRoundTimeLeft(ROUND_SECONDS)
       roundEndingRef.current = false
       setRoundMessage(null)
-      spawnTarget(5)
-      scheduleTargetTimeout()
+      scheduleTargetTimeout(1)
+      scheduleTargetTimeout(2)
       scheduleBotRef.current()
     }, ROUND_BREAK_MS)
-  }, [clearBot, clearTargetTimer, spawnTarget, scheduleTargetTimeout])
+  }, [clearAllTargetTimers, clearBot, scheduleTargetTimeout])
 
   useEffect(() => {
-    spawnTarget(0)
-    scheduleTargetTimeout()
+    scheduleTargetTimeout(1)
+    scheduleTargetTimeout(2)
     scheduleBotRef.current()
     return () => {
       clearBot()
-      clearTargetTimer()
+      clearAllTargetTimers()
     }
-  }, [clearBot, clearTargetTimer, scheduleTargetTimeout, spawnTarget])
+  }, [clearAllTargetTimers, clearBot, scheduleTargetTimeout])
 
   useEffect(() => {
     if (!running || endedRef.current) return
@@ -186,23 +201,26 @@ export function useColorMatchDuel() {
   const tapP1 = useCallback(
     (index: number) => {
       if (!running || roundEndingRef.current || endedRef.current) return
-      const next = applyHit(lane1Ref.current, index, targetRef.current)
+      const next = applyHit(lane1Ref.current, index)
+      if (next.lastFx === null) return
       lane1Ref.current = next
       setLane1(next)
-      if (next.lastFx === 'hit') afterHit()
+      if (next.lastFx === 'hit' && remainingMatches(next) === 0) {
+        onBoardCleared(1)
+      }
     },
-    [afterHit, running],
+    [onBoardCleared, running],
   )
 
   const restartMatch = useCallback(() => {
     clearBot()
-    clearTargetTimer()
+    clearAllTargetTimers()
     endedRef.current = false
     roundEndingRef.current = false
     roundNumberRef.current = 1
     seedRef.current = 401 + Math.floor(Math.random() * 500)
-    const l1 = createLane(1)
-    const l2 = createLane(2)
+    const l1 = createLane(1, seedRef.current)
+    const l2 = createLane(2, seedRef.current + 2)
     lane1Ref.current = l1
     lane2Ref.current = l2
     setLane1(l1)
@@ -213,22 +231,21 @@ export function useColorMatchDuel() {
     setRoundMessage(null)
     setWinner(null)
     setRunning(true)
-    spawnTarget(1)
-    scheduleTargetTimeout()
+    scheduleTargetTimeout(1)
+    scheduleTargetTimeout(2)
     scheduleBotRef.current()
-  }, [clearBot, clearTargetTimer, scheduleTargetTimeout, spawnTarget])
+  }, [clearAllTargetTimers, clearBot, scheduleTargetTimeout])
 
   return {
     lane1,
     lane2,
-    target,
-    targetKey,
     roundNumber,
     roundTimeLeft,
     roundMessage,
     running,
     winner,
     matchRounds: MATCH_ROUNDS,
+    winRounds: WIN_ROUNDS,
     tapP1,
     restartMatch,
   }

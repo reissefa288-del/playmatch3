@@ -177,25 +177,37 @@ function drawAimTrajectory(
   dpr: number,
   bubbleR: number,
 ) {
-  const { dots, target } = sampleAimGuideDots(lane.grid, lane.aimAngle)
-  if (!target) return
-
-  const pos = bubblePos(target.row, target.col)
-  const tx = pos.x * w
-  const ty = pos.y * h
-  const dotR = Math.max(1.1 * dpr, bubbleR * 0.11)
-  const outerR = bubbleR * 0.92
-  const midR = bubbleR * 0.58
+  const { dots, pathVertices, target } = sampleAimGuideDots(lane.grid, lane.aimAngle)
+  const dotR = Math.max(1.2 * dpr, bubbleR * 0.11)
+  const outerR = bubbleR * 0.95
+  const midR = bubbleR * 0.62
 
   ctx.save()
 
-  // Noktalı nişan yolu — referans: soluk, küçük, seyrek noktalar
-  const stopDist = outerR * 0.9
+  ctx.lineCap = 'round'
+  ctx.lineJoin = 'round'
+  ctx.strokeStyle = trail
+  ctx.shadowColor = trail
+  ctx.shadowBlur = 5 * dpr
+
+  if (pathVertices.length >= 2) {
+    ctx.setLineDash([5 * dpr, 9 * dpr])
+    ctx.globalAlpha = 0.5
+    ctx.lineWidth = 1.75 * dpr
+    ctx.beginPath()
+    ctx.moveTo(pathVertices[0]!.x * w, pathVertices[0]!.y * h)
+    for (let i = 1; i < pathVertices.length; i += 1) {
+      ctx.lineTo(pathVertices[i]!.x * w, pathVertices[i]!.y * h)
+    }
+    ctx.stroke()
+    ctx.setLineDash([])
+  }
+
+  ctx.shadowBlur = 3 * dpr
   for (let i = 0; i < dots.length; i += 1) {
     const px = dots[i]!.x * w
     const py = dots[i]!.y * h
-    if (Math.hypot(px - tx, py - ty) < stopDist) continue
-    const fade = 0.2 + (i / Math.max(1, dots.length)) * 0.2
+    const fade = 0.42 + (i / Math.max(1, dots.length)) * 0.45
     ctx.globalAlpha = fade
     ctx.fillStyle = trail
     ctx.beginPath()
@@ -203,29 +215,34 @@ function drawAimTrajectory(
     ctx.fill()
   }
 
-  // Hedef göstergesi — ince halka + orta nokta (bullseye)
-  ctx.shadowColor = ring
-  ctx.shadowBlur = 10 * dpr
+  if (target) {
+    const pos = bubblePos(target.row, target.col)
+    const tx = pos.x * w
+    const ty = pos.y * h
 
-  ctx.globalAlpha = 0.42
-  ctx.strokeStyle = ring
-  ctx.lineWidth = 1.1 * dpr
-  ctx.beginPath()
-  ctx.arc(tx, ty, outerR, 0, Math.PI * 2)
-  ctx.stroke()
+    ctx.shadowColor = ring
+    ctx.shadowBlur = 12 * dpr
 
-  ctx.globalAlpha = 0.72
-  ctx.lineWidth = 1.35 * dpr
-  ctx.beginPath()
-  ctx.arc(tx, ty, midR, 0, Math.PI * 2)
-  ctx.stroke()
+    ctx.globalAlpha = 0.55
+    ctx.strokeStyle = ring
+    ctx.lineWidth = 1.4 * dpr
+    ctx.beginPath()
+    ctx.arc(tx, ty, outerR, 0, Math.PI * 2)
+    ctx.stroke()
 
-  ctx.shadowBlur = 4 * dpr
-  ctx.globalAlpha = 0.95
-  ctx.fillStyle = bright
-  ctx.beginPath()
-  ctx.arc(tx, ty, 2.2 * dpr, 0, Math.PI * 2)
-  ctx.fill()
+    ctx.globalAlpha = 0.82
+    ctx.lineWidth = 1.65 * dpr
+    ctx.beginPath()
+    ctx.arc(tx, ty, midR, 0, Math.PI * 2)
+    ctx.stroke()
+
+    ctx.shadowBlur = 5 * dpr
+    ctx.globalAlpha = 1
+    ctx.fillStyle = bright
+    ctx.beginPath()
+    ctx.arc(tx, ty, 2.6 * dpr, 0, Math.PI * 2)
+    ctx.fill()
+  }
 
   ctx.shadowBlur = 0
   ctx.restore()
