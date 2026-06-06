@@ -12,8 +12,9 @@ export function PongDuelScreen() {
   const navigate = useNavigate()
   const duel = usePongDuel()
 
-  const handleBack = useCallback(() => navigate('/games/pong-duel'), [navigate])
+  const handleBack = useCallback(() => navigate('/games'), [navigate])
   const canPlay = duel.running && !duel.roundMessage
+  const fireBall = duel.ballHeat >= 0.52
 
   const overlayMessage = !duel.running
     ? duel.winner === 'draw'
@@ -42,8 +43,10 @@ export function PongDuelScreen() {
                 <span className="is-cyan">PONG</span>
                 <span className="is-pink">DUEL</span>
               </h1>
-              <p className="pm-pong-header__sub">
-                İLK {duel.pointsToWin} SAYI • ROUND {duel.roundNumber}/{duel.matchRounds}
+              <p className={`pm-pong-header__sub ${fireBall ? 'is-fire' : ''}`}>
+                {fireBall
+                  ? '🔥 ALEVLİ TOP — RAKETE VURDUKÇA HIZLANIR'
+                  : `İLK ${duel.pointsToWin} SAYI • ROUND ${duel.roundNumber}/${duel.matchRounds}`}
               </p>
             </header>
 

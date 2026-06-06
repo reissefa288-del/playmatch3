@@ -7,9 +7,9 @@ export const PADDLE_Y = 0.905
 export const BRICK_ZONE_TOP = 0.07
 export const BRICK_ZONE_HEIGHT = 0.32
 export const MAX_LIVES = 3
-export const PADDLE_SPEED = 2.4
-export const BASE_BALL_SPEED = 0.7
-export const TRAIL_LENGTH = 4
+export const PADDLE_SPEED = 2.95
+export const BASE_BALL_SPEED = 0.92
+export const TRAIL_LENGTH = 5
 export const MATCH_SECONDS = 90
 
 export const BRICK_COLORS = ['#ff6b2c', '#ffb020', '#4cd964', '#32ade6', '#7b61ff', '#ff2d9a'] as const
@@ -175,10 +175,20 @@ export function computeSpeedMultiplier(opts: {
   bricksBroken: number
 }): number {
   const elapsedRatio = 1 - opts.timeLeft / opts.roundSeconds
-  const timeBoost = elapsedRatio * 0.45
-  const roundBoost = (opts.round - 1) * 0.08
-  const brickBoost = Math.min(0.28, opts.bricksBroken * 0.0035)
+  const timeBoost = elapsedRatio * 0.58
+  const roundBoost = (opts.round - 1) * 0.11
+  const brickBoost = Math.min(0.4, opts.bricksBroken * 0.0045)
   return 1 + timeBoost + roundBoost + brickBoost
+}
+
+/** 0 = soğuk, 1 = alevli (hız arttıkça) */
+export function getBallHeat(vx: number, vy: number, power: BallPower): number {
+  const speed = Math.hypot(vx, vy)
+  if (speed < 0.02) return 0
+  const floor = BASE_BALL_SPEED * 0.58
+  const ceil = BASE_BALL_SPEED * 1.45 * (power === 'fast' ? 1.28 : 1)
+  if (speed <= floor) return 0
+  return Math.min(1, (speed - floor) / (ceil - floor))
 }
 
 export function updateLane(
@@ -216,7 +226,8 @@ export function updateLane(
         vy: p.vy + dt * 0.35,
         life: p.life - dt,
       }))
-      .filter((p) => p.life > 0),
+      .filter((p) => p.life > 0)
+      .slice(-26),
     trail: [...lane.trail],
     serveCooldown: Math.max(0, lane.serveCooldown - dt),
     drops: lane.drops.map((drop) => ({
@@ -247,15 +258,15 @@ export function updateLane(
   let { x, y, vx, vy } = next.ball
   const ballSpeed = Math.hypot(vx, vy)
   let targetSpeed = BASE_BALL_SPEED * speedMult
-  if (next.ball.power === 'fast' && next.ball.powerTimer > 0) targetSpeed *= 1.22
+  if (next.ball.power === 'fast' && next.ball.powerTimer > 0) targetSpeed *= 1.28
 
   if (ballSpeed > 0.001) {
-    if (ballSpeed < targetSpeed * 0.92) {
+    if (ballSpeed < targetSpeed * 0.9) {
       const scale = targetSpeed / ballSpeed
       vx *= scale
       vy *= scale
-    } else if (ballSpeed > targetSpeed * 1.4) {
-      const scale = (targetSpeed * 1.4) / ballSpeed
+    } else if (ballSpeed > targetSpeed * 1.55) {
+      const scale = (targetSpeed * 1.55) / ballSpeed
       vx *= scale
       vy *= scale
     }
@@ -521,7 +532,7 @@ function applyBallPower(lane: LaneState, power: Exclude<BallPower, 'none'>) {
 }
 
 function spawnBrickParticles(x: number, y: number, color: string): BrickParticle[] {
-  return Array.from({ length: 10 }, () => ({
+  return Array.from({ length: 7 }, () => ({
     x,
     y,
     vx: (Math.random() - 0.5) * 0.55,
@@ -582,4 +593,11 @@ export function getMatchWinner(lane1: LaneState, lane2: LaneState): 'p1' | 'p2' 
   if (lane1.score > lane2.score) return 'p1'
   if (lane2.score > lane1.score) return 'p2'
   return 'draw'
+}
+
+/** Canlar bitince veya süre dolunca maç sonucu */
+export function resolveMatchResult(lane1: LaneState, lane2: LaneState): 'p1' | 'p2' | 'draw' {
+  if (lane1.lives <= 0 && lane2.lives > 0) return 'p2'
+  if (lane2.lives <= 0 && lane1.lives > 0) return 'p1'
+  return getMatchWinner(lane1, lane2)
 }

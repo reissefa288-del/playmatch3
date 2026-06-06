@@ -1,10 +1,11 @@
 type NeonGemPopFxProps = {
   accent: 'cyan' | 'pink'
+  mega?: boolean
 }
 
-export function NeonGemPopFx({ accent }: NeonGemPopFxProps) {
+export function NeonGemPopFx({ accent, mega = false }: NeonGemPopFxProps) {
   return (
-    <span className={`pm-ncrush-gem__pop is-${accent}`} aria-hidden>
+    <span className={`pm-ncrush-gem__pop is-${accent}${mega ? ' is-mega' : ''}`} aria-hidden>
       <span className="pm-ncrush-gem__pop-ring" />
       <span className="pm-ncrush-gem__pop-burst" />
       {Array.from({ length: 6 }, (_, i) => (

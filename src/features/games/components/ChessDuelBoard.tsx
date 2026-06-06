@@ -1,20 +1,5 @@
 import type { Board, ChessMove, Piece } from '../utils/chessDuelEngine'
-
-const GLYPH: Record<Piece, string> = {
-  '.': '',
-  K: '♔',
-  Q: '♕',
-  R: '♖',
-  B: '♗',
-  N: '♘',
-  P: '♙',
-  k: '♚',
-  q: '♛',
-  r: '♜',
-  b: '♝',
-  n: '♞',
-  p: '♟',
-}
+import { ChessDuelPiece } from './ChessDuelPiece'
 
 type Props = {
   board: Board
@@ -49,8 +34,7 @@ export function ChessDuelBoard({
             const isTarget = legalTargets.includes(sq)
             const isLast =
               lastMove != null && (lastMove.from === sq || lastMove.to === sq)
-            const isKingInCheck =
-              inCheck && (piece === 'K' || piece === 'k')
+            const isKingInCheck = inCheck && (piece === 'K' || piece === 'k')
 
             return (
               <button
@@ -76,7 +60,7 @@ export function ChessDuelBoard({
                     className={`pm-chess-board__piece ${piece === piece.toUpperCase() ? 'is-white' : 'is-black'}`}
                     aria-hidden
                   >
-                    {GLYPH[piece]}
+                    <ChessDuelPiece piece={piece as Exclude<Piece, '.'>} />
                   </span>
                 ) : null}
               </button>

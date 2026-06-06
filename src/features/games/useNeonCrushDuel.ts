@@ -1,18 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { botThinkDelayMs, pickBotSwap } from './utils/neonCrushBot'
+import { recordNeonCrushScore } from './utils/neonCrushLeaderboard'
 import {
   comboMultiplier,
   computeSpawnIndices,
   createBoard,
   createLane,
+  duelLeader,
   DUEL_SECONDS,
+  FINAL_RUSH_SCORE_MULT,
+  FINAL_RUSH_SECONDS,
+  injectOpponentPressure,
   normalizeBoard,
   MATCH_ANIM_MS,
+  pressureFromPlayerHit,
+  pressureLabel,
+  PRESSURE_COOLDOWN_MS,
   resolveRoundWinner,
+  scoreRacePercents,
   SETTLE_ANIM_MS,
   trySwap,
   type NeonLaneFx,
   type NeonLaneState,
+  type PressureIntensity,
 } from './utils/neonCrushEngine'
 import { playNeonCrushSound } from './utils/neonCrushSounds'
 
@@ -55,6 +65,7 @@ export function useNeonCrushDuel() {
   const [running, setRunning] = useState(true)
   const [winner, setWinner] = useState<MatchWinner | null>(null)
   const [boardKey, setBoardKey] = useState(0)
+  const [pressureToast, setPressureToast] = useState<string | null>(null)
 
   const lane1Ref = useRef(lane1)
   const lane2Ref = useRef(lane2)
@@ -66,6 +77,8 @@ export function useNeonCrushDuel() {
   const p1AnimTimerRef = useRef<number | null>(null)
   const p2AnimTimerRef = useRef<number | null>(null)
   const scheduleBotRef = useRef<() => void>(() => {})
+  const lastPressureAtRef = useRef(0)
+  const pressureTimerRef = useRef<number | null>(null)
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
@@ -82,14 +95,55 @@ export function useNeonCrushDuel() {
     p2AnimTimerRef.current = null
   }, [])
 
+  const clearPressureTimer = useCallback(() => {
+    if (pressureTimerRef.current != null) window.clearTimeout(pressureTimerRef.current)
+    pressureTimerRef.current = null
+  }, [])
+
+  const applyOpponentPressure = useCallback(
+    (intensity: PressureIntensity) => {
+      if (endedRef.current || matchEndingRef.current) return
+      const now = Date.now()
+      if (now - lastPressureAtRef.current < PRESSURE_COOLDOWN_MS) return
+      lastPressureAtRef.current = now
+
+      const rand = mulberry32(seedRef.current++)
+      const { board, indices } = injectOpponentPressure(lane2Ref.current.cells, intensity, rand)
+      if (indices.length === 0) return
+
+      const label = pressureLabel(intensity)
+      const pressured: NeonLaneState = {
+        ...lane2Ref.current,
+        cells: board,
+        pressure: { indices, tick: now, label },
+        settle: { indices, tick: now },
+      }
+      lane2Ref.current = pressured
+      setLane2(pressured)
+      setPressureToast(label)
+      playNeonCrushSound('pressure')
+      setBoardKey((k) => k + 1)
+
+      clearPressureTimer()
+      pressureTimerRef.current = window.setTimeout(() => {
+        setPressureToast(null)
+        const cleared = { ...lane2Ref.current, pressure: null, settle: null }
+        lane2Ref.current = cleared
+        setLane2(cleared)
+        pressureTimerRef.current = null
+      }, 900)
+    },
+    [clearPressureTimer],
+  )
+
   const bumpBoards = useCallback((seedBump: number) => {
     seedRef.current += seedBump
     const b1 = createBoard(seedRef.current + 3)
     const b2 = createBoard(seedRef.current + 17)
-    setLane1((l) => ({ ...l, cells: b1, combo: 0, comboMult: 1, fx: null, settle: null }))
-    setLane2((l) => ({ ...l, cells: b2, combo: 0, comboMult: 1, fx: null, settle: null }))
-    lane1Ref.current = { ...lane1Ref.current, cells: b1, combo: 0, comboMult: 1, fx: null, settle: null }
-    lane2Ref.current = { ...lane2Ref.current, cells: b2, combo: 0, comboMult: 1, fx: null, settle: null }
+    setLane1((l) => ({ ...l, cells: b1, combo: 0, comboMult: 1, fx: null, settle: null, pressure: null }))
+    setLane2((l) => ({ ...l, cells: b2, combo: 0, comboMult: 1, fx: null, settle: null, pressure: null }))
+    lane1Ref.current = { ...lane1Ref.current, cells: b1, combo: 0, comboMult: 1, fx: null, settle: null, pressure: null }
+    lane2Ref.current = { ...lane2Ref.current, cells: b2, combo: 0, comboMult: 1, fx: null, settle: null, pressure: null }
     setBoardKey((k) => k + 1)
   }, [])
 
@@ -116,12 +170,19 @@ export function useNeonCrushDuel() {
 
       timerRef.current = window.setTimeout(() => {
         const previewCells = (lane === 1 ? lane1Ref.current : lane2Ref.current).cells
+        const rushMult =
+          lane === 1 &&
+          timeRef.current > 0 &&
+          timeRef.current <= FINAL_RUSH_SECONDS
+            ? FINAL_RUSH_SCORE_MULT
+            : 1
+        const adjustedGain = Math.round(scoreGain * rushMult)
         const next = applyLaneScore(
           {
             ...(lane === 1 ? lane1Ref.current : lane2Ref.current),
             cells: normalizeBoard(finalBoard),
           },
-          scoreGain,
+          adjustedGain,
           combo,
         )
         const spawnIndices = computeSpawnIndices(previewCells, finalBoard)
@@ -152,9 +213,19 @@ export function useNeonCrushDuel() {
             }
           }, SETTLE_ANIM_MS)
         }
+
+        if (lane === 1) {
+          const hit = pressureFromPlayerHit(
+            adjustedGain,
+            combo,
+            fx.burst,
+            fx.specialActivate,
+          )
+          if (hit) applyOpponentPressure(hit)
+        }
       }, MATCH_ANIM_MS)
     },
-    [],
+    [applyOpponentPressure],
   )
 
   const endMatchRef = useRef<() => void>(() => {})
@@ -170,9 +241,8 @@ export function useNeonCrushDuel() {
     setWinner(rw)
     setRunning(false)
     endedRef.current = true
-    setMatchMessage(
-      rw === 'draw' ? 'BERABERE' : rw === 'p1' ? 'KAZANDIN!' : 'KAYBETTİN',
-    )
+    setMatchMessage(null)
+    recordNeonCrushScore(lane1Ref.current.roundScore)
     playNeonCrushSound(rw === 'p1' ? 'win' : rw === 'p2' ? 'lose' : 'round')
   }, [clearAnimTimers, clearBot])
 
@@ -196,7 +266,12 @@ export function useNeonCrushDuel() {
         scheduleBotRef.current()
         return
       }
-      playNeonCrushSound(result.combo >= 3 ? 'combo' : 'match')
+      if (result.specialActivate?.kind === 'prism') playNeonCrushSound('prism')
+      else if (result.specialActivate) playNeonCrushSound('special')
+      else if (result.burst?.tier === 5) playNeonCrushSound('mega')
+      else if (result.burst?.tier === 4) playNeonCrushSound('line4')
+      else playNeonCrushSound(result.combo >= 3 ? 'combo' : 'match')
+      if (result.specialSpawn) playNeonCrushSound('special')
       const fx: NeonLaneFx = {
         popIndices: result.popIndices,
         segments: result.segments,
@@ -204,6 +279,9 @@ export function useNeonCrushDuel() {
         combo: result.combo,
         tick: Date.now(),
         swap: result.swap,
+        burst: result.burst,
+        specialSpawn: result.specialSpawn,
+        specialActivate: result.specialActivate,
       }
       commitLaneSwap(
         2,
@@ -224,8 +302,9 @@ export function useNeonCrushDuel() {
     return () => {
       clearBot()
       clearAnimTimers()
+      clearPressureTimer()
     }
-  }, [clearAnimTimers, clearBot])
+  }, [clearAnimTimers, clearBot, clearPressureTimer])
 
   useEffect(() => {
     if (!running || endedRef.current) return
@@ -233,6 +312,7 @@ export function useNeonCrushDuel() {
       if (matchEndingRef.current) return
       timeRef.current = Math.max(0, timeRef.current - 1)
       setTimeLeft(timeRef.current)
+      if (timeRef.current === FINAL_RUSH_SECONDS) playNeonCrushSound('rush')
       if (timeRef.current === 0) endMatchRef.current()
     }, 1000)
     return () => window.clearInterval(timer)
@@ -261,7 +341,12 @@ export function useNeonCrushDuel() {
       }
 
       playNeonCrushSound('swap')
-      playNeonCrushSound(result.combo >= 3 ? 'combo' : 'match')
+      if (result.specialActivate?.kind === 'prism') playNeonCrushSound('prism')
+      else if (result.specialActivate) playNeonCrushSound('special')
+      else if (result.burst?.tier === 5) playNeonCrushSound('mega')
+      else if (result.burst?.tier === 4) playNeonCrushSound('line4')
+      else playNeonCrushSound(result.combo >= 3 ? 'combo' : 'match')
+      if (result.specialSpawn) playNeonCrushSound('special')
       const fx: NeonLaneFx = {
         popIndices: result.popIndices,
         segments: result.segments,
@@ -269,6 +354,9 @@ export function useNeonCrushDuel() {
         combo: result.combo,
         tick: Date.now(),
         swap: result.swap,
+        burst: result.burst,
+        specialSpawn: result.specialSpawn,
+        specialActivate: result.specialActivate,
       }
       commitLaneSwap(
         1,
@@ -285,6 +373,7 @@ export function useNeonCrushDuel() {
   const restartMatch = useCallback(() => {
     clearBot()
     clearAnimTimers()
+    clearPressureTimer()
     endedRef.current = false
     matchEndingRef.current = false
     seedRef.current = 501 + Math.floor(Math.random() * 800)
@@ -298,11 +387,16 @@ export function useNeonCrushDuel() {
     timeRef.current = DUEL_SECONDS
     setMatchMessage(null)
     setWinner(null)
+    setPressureToast(null)
     setRunning(true)
     setSelected(null)
     setBoardKey((k) => k + 1)
     scheduleBotRef.current()
-  }, [clearAnimTimers, clearBot])
+  }, [clearAnimTimers, clearBot, clearPressureTimer])
+
+  const leader = duelLeader(lane1.roundScore, lane2.roundScore)
+  const scoreRace = scoreRacePercents(lane1.roundScore, lane2.roundScore)
+  const isFinalRush = running && timeLeft > 0 && timeLeft <= FINAL_RUSH_SECONDS
 
   return {
     lane1,
@@ -314,6 +408,10 @@ export function useNeonCrushDuel() {
     running,
     winner,
     boardKey,
+    leader,
+    scoreRace,
+    isFinalRush,
+    pressureToast,
     tapCell,
     restartMatch,
   }

@@ -10,8 +10,9 @@ export function rememberCard(memory: BotMemory, index: number, symbol: string) {
   memory.set(index, symbol)
 }
 
-export function botThinkDelayMs(combo: number): number {
-  return 620 + Math.random() * 480 - combo * 10
+export function botThinkDelayMs(combo: number, hasOneOpen = false): number {
+  if (hasOneOpen) return 340 + Math.random() * 260
+  return 280 + Math.random() * 240 - combo * 8
 }
 
 function hiddenIndices(lane: LaneState): number[] {
@@ -41,7 +42,7 @@ function pickRandomHidden(lane: LaneState, exclude: number[] = []): number | nul
 }
 
 export function pickBotFlip(lane: LaneState, memory: BotMemory, _seed: number): number | null {
-  const hesitate = Math.random() < 0.34
+  const hesitate = Math.random() < 0.1
 
   if (lane.openIndices.length === 1 && !hesitate) {
     const first = lane.openIndices[0]

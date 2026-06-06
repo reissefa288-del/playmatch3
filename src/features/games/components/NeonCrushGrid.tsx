@@ -1,11 +1,15 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import { useMemo } from 'react'
 import type { CSSProperties } from 'react'
-import type { GemId } from '../utils/neonCrushEngine'
+import type { GemId, NeonCell, SpecialKind } from '../utils/neonCrushEngine'
 import type { NeonLaneState } from '../utils/neonCrushEngine'
-import { comboFill, rowOf } from '../utils/neonCrushEngine'
+import { comboFill, rowOf, specialLabel } from '../utils/neonCrushEngine'
 import { GEM_ART, normalizeGemId } from './NeonGemIcon'
+import { NeonFloatingScores } from './NeonFloatingScores'
 import { NeonGemPopFx } from './NeonGemPopFx'
 import { NeonMatchLines } from './NeonMatchLines'
+import { NeonMatchParticles } from './NeonMatchParticles'
+import { NeonSpecialGemShader } from './NeonSpecialGemShader'
 
 const GEM_NAMES: Record<string, string> = {
   a1: 'Altın yıldız',
@@ -17,6 +21,12 @@ const GEM_NAMES: Record<string, string> = {
 
 const PREMIUM_GEMS = new Set<GemId>(['a4', 'a5'])
 
+const SPECIAL_CLASS: Record<SpecialKind, string> = {
+  'stripe-h': 'is-special-stripe-h',
+  'stripe-v': 'is-special-stripe-v',
+  prism: 'is-special-prism',
+}
+
 type Props = {
   lane: NeonLaneState
   accent: 'cyan' | 'pink'
@@ -25,13 +35,29 @@ type Props = {
   onTap?: (index: number) => void
 }
 
+function lineTierByIndex(lane: NeonLaneState): Map<number, 4 | 5> {
+  const map = new Map<number, 4 | 5>()
+  for (const seg of lane.fx?.segments ?? []) {
+    if (seg.tier !== 4 && seg.tier !== 5) continue
+    for (const i of seg.indices) map.set(i, seg.tier)
+  }
+  return map
+}
+
 export function NeonCrushGrid({ lane, accent, interactive = false, selected = null, onTap }: Props) {
   const comboPct = Math.round(comboFill(lane.combo) * 100)
   const popSet = new Set(lane.fx?.popIndices ?? [])
   const spawnSet = new Set(lane.settle?.indices ?? [])
-  const showComboBurst = (lane.fx?.combo ?? 0) >= 2
+  const pressureSet = new Set(lane.pressure?.indices ?? [])
+  const isPressureBoard = lane.pressure != null
+  const burst = lane.fx?.burst ?? null
+  const showComboBurst = (lane.fx?.combo ?? 0) >= 2 || burst != null
   const fxTick = lane.fx?.tick ?? 0
   const isOpponentFx = !interactive && Boolean(lane.fx)
+  const lineTiers = useMemo(() => lineTierByIndex(lane), [lane.fx?.segments, lane.fx?.tick])
+  const swapPair = lane.fx?.swap ?? null
+  const specialSpawn = lane.fx?.specialSpawn ?? null
+  const specialActivate = lane.fx?.specialActivate ?? null
 
   return (
     <div
@@ -39,13 +65,40 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
         'pm-ncrush-board',
         `is-${accent}`,
         lane.fx ? 'has-fx' : '',
+        isPressureBoard ? 'is-pressure-hit' : '',
         showComboBurst ? 'is-combo-hot' : '',
+        burst ? `is-line-burst-${burst.tier}` : '',
         isOpponentFx ? 'is-opponent-fx' : '',
         selected != null ? 'has-selection' : '',
       ]
         .filter(Boolean)
         .join(' ')}
     >
+      {burst ? <span className={`pm-ncrush-board__line-shader is-tier-${burst.tier}`} aria-hidden /> : null}
+      <span className="pm-ncrush-board__chrome" aria-hidden>
+        <i className="pm-ncrush-board__chrome-corner pm-ncrush-board__chrome-corner--tl" />
+        <i className="pm-ncrush-board__chrome-corner pm-ncrush-board__chrome-corner--tr" />
+        <i className="pm-ncrush-board__chrome-corner pm-ncrush-board__chrome-corner--bl" />
+        <i className="pm-ncrush-board__chrome-corner pm-ncrush-board__chrome-corner--br" />
+        <i className="pm-ncrush-board__chrome-scan" />
+      </span>
+
+      <AnimatePresence>
+        {burst ? (
+          <motion.div
+            key={`burst-${fxTick}`}
+            className={`pm-ncrush-board__line-burst is-tier-${burst.tier} is-${accent}`}
+            initial={{ opacity: 0, scale: 0.6, y: 12 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.85, y: -8 }}
+            transition={{ type: 'spring', stiffness: 480, damping: 22 }}
+          >
+            <span className="pm-ncrush-board__line-burst-title">{burst.label}</span>
+            <span className="pm-ncrush-board__line-burst-combo">{burst.comboLabel}</span>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
       <AnimatePresence>
         {lane.fx && lane.fx.scoreGain > 0 ? (
           <motion.div
@@ -57,7 +110,38 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
             transition={{ type: 'spring', stiffness: 420, damping: 24 }}
           >
             +{lane.fx.scoreGain.toLocaleString('tr-TR')}
-            {lane.fx.combo >= 2 ? <small>COMBO ×{lane.fx.combo}</small> : null}
+            {burst ? (
+              <small className={`is-tier-${burst.tier}`}>{burst.comboLabel}</small>
+            ) : lane.fx.combo >= 2 ? (
+              <small>COMBO ×{lane.fx.combo}</small>
+            ) : null}
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {specialActivate ? (
+          <motion.div
+            key={`act-${fxTick}`}
+            className={`pm-ncrush-board__special-toast is-activate is-${accent}`}
+            initial={{ opacity: 0, scale: 0.75, y: 6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -6 }}
+            transition={{ type: 'spring', stiffness: 460, damping: 24 }}
+          >
+            {specialActivate.label}
+          </motion.div>
+        ) : null}
+        {specialSpawn && !specialActivate ? (
+          <motion.div
+            key={`spawn-${fxTick}`}
+            className={`pm-ncrush-board__special-toast is-spawn is-${accent}`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28 }}
+          >
+            {specialLabel(specialSpawn.kind)}
           </motion.div>
         ) : null}
       </AnimatePresence>
@@ -67,13 +151,31 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
           {lane.fx && lane.fx.segments.length > 0 ? (
             <NeonMatchLines segments={lane.fx.segments} swap={lane.fx.swap} accent={accent} />
           ) : null}
+          {lane.fx && lane.fx.segments.length > 0 ? (
+            <NeonMatchParticles segments={lane.fx.segments} accent={accent} tick={fxTick} />
+          ) : null}
+          {lane.fx && lane.fx.scoreGain > 0 ? (
+            <NeonFloatingScores
+              indices={lane.fx.popIndices}
+              total={lane.fx.scoreGain}
+              accent={accent}
+              tier={burst?.tier ?? null}
+              tick={fxTick}
+            />
+          ) : null}
 
-          {lane.cells.map((gem, index) => {
-            const gemId = normalizeGemId(gem)
+          {lane.cells.map((cell: NeonCell, index) => {
+            const gemId = normalizeGemId(cell.gem)
+            const special = cell.special
             const isPopping = popSet.has(index)
             const isSpawning = spawnSet.has(index)
+            const isPressureGem = pressureSet.has(index)
             const isSelected = selected === index
+            const isSwapPulse = swapPair != null && (swapPair[0] === index || swapPair[1] === index)
+            const lineTier = lineTiers.get(index)
             const isPremiumPop = isPopping && PREMIUM_GEMS.has(gemId)
+            const isLinePop = isPopping && (lineTier === 4 || lineTier === 5)
+            const isSpecialBorn = specialSpawn?.index === index
             const spawnRow = rowOf(index)
 
             const style: CSSProperties | undefined = isSpawning
@@ -88,10 +190,16 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
                 className={[
                   'pm-ncrush-gem',
                   `is-${gemId}`,
+                  special ? SPECIAL_CLASS[special] : '',
+                  isSpecialBorn ? 'is-special-born' : '',
                   isSelected ? 'is-selected' : '',
+                  isSwapPulse ? 'is-swap-pulse' : '',
                   isPopping ? 'is-popping' : '',
                   isPremiumPop ? 'is-premium-pop' : '',
+                  isLinePop && lineTier === 4 ? 'is-line-pop-4' : '',
+                  isLinePop && lineTier === 5 ? 'is-line-pop-5' : '',
                   isSpawning ? 'is-spawning' : '',
+                  isPressureGem ? 'is-pressure-gem' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -100,6 +208,7 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
                 onClick={() => onTap?.(index)}
                 aria-label={GEM_NAMES[gemId] ?? gemId}
               >
+                {isSelected ? <span className="pm-ncrush-gem__select-orbit" aria-hidden /> : null}
                 <img
                   className="pm-ncrush-gem__img"
                   src={GEM_ART[gemId]}
@@ -107,14 +216,25 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
                   draggable={false}
                   decoding="async"
                 />
-                {isPremiumPop ? (
-                  <span className={`pm-ncrush-gem__shader is-${gemId}`} aria-hidden>
+                {special ? <NeonSpecialGemShader kind={special} accent={accent} /> : null}
+                {isLinePop || isPremiumPop ? (
+                  <span
+                    className={[
+                      'pm-ncrush-gem__shader',
+                      `is-${gemId}`,
+                      lineTier === 5 ? 'is-line-5' : lineTier === 4 ? 'is-line-4' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    aria-hidden
+                  >
                     <i className="pm-ncrush-gem__shader-core" />
                     <i className="pm-ncrush-gem__shader-ring" />
                     <i className="pm-ncrush-gem__shader-rays" />
+                    {lineTier === 5 ? <i className="pm-ncrush-gem__shader-flare" /> : null}
                   </span>
                 ) : null}
-                {isPopping ? <NeonGemPopFx accent={accent} /> : null}
+                {isPopping ? <NeonGemPopFx accent={accent} mega={lineTier === 5} /> : null}
               </button>
             )
           })}
@@ -123,13 +243,14 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
 
       <div className={`pm-ncrush-board__footer is-${accent}`}>
         <div className="pm-ncrush-board__footer-top">
-          <span className={`pm-ncrush-board__combo${lane.combo >= 2 ? ' is-hot' : ''}`}>
-            COMBO ×{lane.combo}
+          <span className={`pm-ncrush-board__combo${lane.combo >= 2 || burst ? ' is-hot' : ''}`}>
+            {burst ? burst.comboLabel : `COMBO ×${lane.combo}`}
           </span>
           <strong className="pm-ncrush-board__round">{lane.roundScore.toLocaleString('tr-TR')}</strong>
         </div>
         <div className="pm-ncrush-board__bar" aria-hidden>
           <motion.i
+            className={burst ? `is-tier-${burst.tier}` : ''}
             animate={{ width: `${comboPct}%` }}
             transition={{ type: 'spring', stiffness: 320, damping: 26 }}
           />

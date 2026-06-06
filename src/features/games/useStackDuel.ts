@@ -23,6 +23,7 @@ import {
 import { playStackDuelSound } from './utils/stackDuelSounds'
 
 type MatchResult = 'p1' | 'p2' | 'draw'
+type RoundScoreSummary = { p1: number; p2: number; winner: MatchResult }
 
 export function useStackDuel() {
   const [lane1, setLane1] = useState<StackLaneState>(() => createLane(1, 42))
@@ -30,6 +31,7 @@ export function useStackDuel() {
   const [roundNumber, setRoundNumber] = useState(1)
   const [roundTimeLeft, setRoundTimeLeft] = useState(ROUND_SECONDS)
   const [roundMessage, setRoundMessage] = useState<string | null>(null)
+  const [roundScoreSummary, setRoundScoreSummary] = useState<RoundScoreSummary | null>(null)
   const [isRoundBreak, setIsRoundBreak] = useState(false)
   const [running, setRunning] = useState(true)
   const [winner, setWinner] = useState<MatchResult | null>(null)
@@ -89,6 +91,7 @@ export function useStackDuel() {
               const result = commitFall(l, seed + 7)
               lane2Ref.current = result.lane
               playLaneEvent(result.event, result.lane.combo)
+              if (result.lifeRecovered) playStackDuelSound('life')
               if (result.lane.score >= TARGET_SCORE) queueMicrotask(() => endRoundRef.current())
               else queueMicrotask(() => tryEndRoundEarlyRef.current())
               return result.lane
@@ -104,8 +107,11 @@ export function useStackDuel() {
     if (roundEndingRef.current) return
     roundEndingRef.current = true
     const rw = resolveRoundWinner(lane1Ref.current, lane2Ref.current)
+    const s1 = lane1Ref.current.score
+    const s2 = lane2Ref.current.score
+    setRoundScoreSummary({ p1: s1, p2: s2, winner: rw })
     const msg =
-      rw === 'p1' ? 'ROUND — EMİR' : rw === 'p2' ? 'ROUND — ZEYNEP' : 'ROUND BERABERE'
+      rw === 'p1' ? 'EMİR KAZANDI' : rw === 'p2' ? 'ZEYNEP KAZANDI' : 'ROUND BERABERE'
     setRoundMessage(msg)
     playStackDuelSound('round')
     roundBreakUntilRef.current = performance.now() + ROUND_BREAK_MS
@@ -124,6 +130,7 @@ export function useStackDuel() {
           setWinner(next.p1 > next.p2 ? 'p1' : next.p2 > next.p1 ? 'p2' : 'draw')
           playStackDuelSound(next.p1 > next.p2 ? 'win' : 'lose')
           setRoundMessage(null)
+          setRoundScoreSummary(null)
           setIsRoundBreak(false)
           roundEndingRef.current = false
           roundBreakUntilRef.current = 0
@@ -137,6 +144,7 @@ export function useStackDuel() {
           setWinner(final)
           playStackDuelSound(final === 'p1' ? 'win' : 'lose')
           setRoundMessage(null)
+          setRoundScoreSummary(null)
           setIsRoundBreak(false)
           roundEndingRef.current = false
           roundBreakUntilRef.current = 0
@@ -158,6 +166,7 @@ export function useStackDuel() {
         roundBreakUntilRef.current = 0
         setIsRoundBreak(false)
         setRoundMessage(null)
+        setRoundScoreSummary(null)
         scheduleBot()
       }, ROUND_BREAK_MS)
 
@@ -182,6 +191,7 @@ export function useStackDuel() {
       if (!l.falling) return l
       const result = commitFall(l, seed)
       playLaneEvent(result.event, result.lane.combo)
+      if (result.lifeRecovered) playStackDuelSound('life')
       lane1Ref.current = result.lane
       if (result.lane.score >= TARGET_SCORE) queueMicrotask(() => endRoundRef.current())
       else queueMicrotask(() => tryEndRoundEarlyRef.current())
@@ -293,6 +303,7 @@ export function useStackDuel() {
     setMatchPoints({ p1: 0, p2: 0 })
     setWinner(null)
     setRoundMessage(null)
+    setRoundScoreSummary(null)
     setIsRoundBreak(false)
     setRunning(true)
     const l1 = createLane(1, roundSeedRef.current)
@@ -310,6 +321,7 @@ export function useStackDuel() {
     roundNumber,
     roundTimeLeft,
     roundMessage,
+    roundScoreSummary,
     isRoundBreak,
     running,
     winner,

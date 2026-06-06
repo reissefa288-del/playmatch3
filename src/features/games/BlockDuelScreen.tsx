@@ -10,12 +10,9 @@ import {
   BlockArrowLeftIcon,
   BlockArrowRightIcon,
   BlockBackIcon,
-  BlockLightningIcon,
   BlockRotateIcon,
   BlockTrophyIcon,
 } from './components/BlockGameIcons'
-import { BlockComboDock } from './components/BlockComboDock'
-import { COLUMN_SURGE_MIN, FUSION_MIN } from './utils/blockEngine'
 import { useBlockDuel } from './useBlockDuel'
 import { unlockBlockAudio } from './utils/blockSounds'
 
@@ -182,27 +179,7 @@ export function BlockDuelScreen() {
               <div className={`pm-block-arena is-p2 ${!game.lane2.alive ? 'is-dead' : ''}`}>
                 <BlockBoardCanvas laneRef={game.lane2ViewRef} accent="pink" />
               </div>
-              <BlockComboDock
-                flash={game.comboFlash}
-                combo={game.lane1.combo}
-                fusions={game.lane1.fusions}
-                surges={game.lane1.lines}
-              />
             </motion.section>
-
-            <section className="pm-block-attack" aria-label="Saldırı göstergesi">
-              <span className="pm-block-attack__label">KÜP BASKI</span>
-              <div className="pm-block-attack__track">
-                <span className="pm-block-attack__fill is-p1" style={{ width: `${game.attackMeter}%` }} />
-                <span
-                  className="pm-block-attack__fill is-p2"
-                  style={{ width: `${100 - game.attackMeter}%` }}
-                />
-                <span className="pm-block-attack__bolt">
-                  <BlockLightningIcon size={18} />
-                </span>
-              </div>
-            </section>
 
             <section className="pm-block-controls" aria-label="Kontroller">
               <button
@@ -264,8 +241,8 @@ export function BlockDuelScreen() {
                   </motion.strong>
                 </div>
                 <div>
-                  <span>DALGA</span>
-                  <strong>{game.lane1.lines}</strong>
+                  <span>ZİNCİR</span>
+                  <strong>{game.lane1.combo > 1 ? `×${game.lane1.combo}` : '—'}</strong>
                 </div>
               </div>
               <div className="pm-block-stats__panel is-p2">
@@ -274,15 +251,11 @@ export function BlockDuelScreen() {
                   <strong>{game.lane2.fusions}</strong>
                 </div>
                 <div>
-                  <span>DALGA</span>
-                  <strong>{game.lane2.lines}</strong>
+                  <span>ZİNCİR</span>
+                  <strong>{game.lane2.combo > 1 ? `×${game.lane2.combo}` : '—'}</strong>
                 </div>
               </div>
             </footer>
-
-            <p className="pm-block-footer__hint">
-              {FUSION_MIN}+ aynı renk füzyon · {COLUMN_SURGE_MIN}+ sütun dalga · ENTER hızlı iniş
-            </p>
           </div>
 
           {game.roundIntro > 0 && !overlayMessage ? (

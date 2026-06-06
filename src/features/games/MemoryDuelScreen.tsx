@@ -85,12 +85,8 @@ export function MemoryDuelScreen() {
 
             <section className="pm-memory-hud" aria-label="Oyuncu bilgileri">
               <div className="pm-memory-hud__side is-p1">
-                <div className="pm-memory-player-card is-cyan">
-                  <div className="pm-memory-player-card__photo">
-                    <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={game.running} />
-                  </div>
-                  <div className="pm-memory-player-card__name">EMİR</div>
-                </div>
+                <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={game.running} />
+                <p className="pm-memory-hud__name">EMİR</p>
                 <div className="pm-memory-score-card is-cyan">
                   <span>PUAN</span>
                   <strong>{game.lane1.score}</strong>
@@ -114,12 +110,8 @@ export function MemoryDuelScreen() {
               </div>
 
               <div className="pm-memory-hud__side is-p2">
-                <div className="pm-memory-player-card is-pink">
-                  <div className="pm-memory-player-card__photo">
-                    <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={game.running} />
-                  </div>
-                  <div className="pm-memory-player-card__name">ZEYNEP</div>
-                </div>
+                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={game.running} />
+                <p className="pm-memory-hud__name">ZEYNEP</p>
                 <div className="pm-memory-score-card is-pink">
                   <span>PUAN</span>
                   <strong>{game.lane2.score}</strong>
@@ -128,7 +120,12 @@ export function MemoryDuelScreen() {
             </section>
 
             <section className="pm-memory-arena" aria-label="Oyun alanı">
-              <MemoryDuelGrid lane={game.lane1} accent="cyan" interactive onFlip={handleFlip} />
+              <MemoryDuelGrid
+                lane={game.lane1}
+                accent="cyan"
+                interactive={game.running && !game.isRoundBreak}
+                onFlip={handleFlip}
+              />
               <span className="pm-memory-arena__vs-wrap" aria-hidden>
                 <span className="pm-memory-arena__vs-glow" />
                 <img className="pm-memory-arena__vs" src={vsBadge} alt="" />

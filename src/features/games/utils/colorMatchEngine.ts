@@ -28,6 +28,7 @@ export type ColorLaneState = {
   hits: number
   misses: number
   lastFx: 'hit' | 'miss' | null
+  lastTapIndex: number | null
 }
 
 function mulberry32(seed: number) {
@@ -103,6 +104,7 @@ export function createLane(laneId: 1 | 2, seed = laneId * 97): ColorLaneState {
     hits: 0,
     misses: 0,
     lastFx: null,
+    lastTapIndex: null,
   }
 }
 
@@ -131,6 +133,7 @@ export function applyHit(lane: ColorLaneState, index: number): ColorLaneState {
       comboMult: 1,
       misses: lane.misses + 1,
       lastFx: 'miss',
+      lastTapIndex: index,
     }
   }
 
@@ -147,6 +150,7 @@ export function applyHit(lane: ColorLaneState, index: number): ColorLaneState {
     score: lane.score + gain,
     hits: lane.hits + 1,
     lastFx: 'hit',
+    lastTapIndex: index,
   }
 }
 
@@ -158,6 +162,7 @@ export function refreshLaneBoard(lane: ColorLaneState, seed: number): ColorLaneS
     targetKey: lane.targetKey + 1,
     cells: buildGrid(seed + lane.laneId * 17, targets),
     lastFx: null,
+    lastTapIndex: null,
   }
 }
 

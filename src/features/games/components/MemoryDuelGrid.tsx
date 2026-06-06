@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { memo } from 'react'
 import { SYMBOL_COLOR, SYMBOL_GLYPH, type LaneState, type MemorySymbol } from '../utils/memoryDuelEngine'
 import { MemoryMatchFx } from './MemoryMatchFx'
 
@@ -9,27 +9,33 @@ type MemoryDuelGridProps = {
   onFlip?: (index: number) => void
 }
 
-export function MemoryDuelGrid({ lane, accent, interactive = false, onFlip }: MemoryDuelGridProps) {
+function MemoryDuelGridInner({ lane, accent, interactive = false, onFlip }: MemoryDuelGridProps) {
   return (
-    <motion.div
+    <div
       className={`pm-memory-grid is-${accent}${lane.shake > 0 ? ' is-miss-shake' : ''}`}
-      animate={lane.shake > 0 ? { x: [0, -3, 3, 0] } : { x: 0 }}
-      transition={{ duration: 0.22 }}
     >
       <div className="pm-memory-grid__cells">
         {lane.cards.map((card, index) => {
           const isMatchPulse = card.pulse && lane.lastMatchIndex === index
+          const isOpen = card.status === 'shown' || card.status === 'matched'
           return (
             <button
               key={index}
               type="button"
-              className={`pm-memory-card ${card.status}${card.pulse ? ' is-pulse' : ''}${isMatchPulse ? ' is-match-burst' : ''}`}
-              disabled={!interactive || card.status !== 'hidden' || lane.inputLocked || lane.finished}
+              className={`pm-memory-card ${card.status}${card.pulse ? ' is-pulse' : ''}${isMatchPulse ? ' is-match-burst' : ''}${isOpen ? ' is-open' : ''}`}
+              disabled={
+                !interactive ||
+                card.status !== 'hidden' ||
+                lane.inputLocked ||
+                lane.flipBackPending ||
+                lane.finished
+              }
+              aria-pressed={isOpen}
               onClick={() => onFlip?.(index)}
               aria-label={card.status === 'hidden' ? 'Kart çevir' : SYMBOL_GLYPH[card.symbol]}
             >
-              <span className="pm-memory-card__inner">
-                <span className="pm-memory-card__face pm-memory-card__face--back" aria-hidden />
+              <span className="pm-memory-card__inner" aria-hidden={!isOpen}>
+                <span className="pm-memory-card__face pm-memory-card__face--back" />
                 <span
                   className="pm-memory-card__face pm-memory-card__face--front"
                   style={{ ['--sym-color' as string]: SYMBOL_COLOR[card.symbol] }}
@@ -47,19 +53,16 @@ export function MemoryDuelGrid({ lane, accent, interactive = false, onFlip }: Me
       </div>
 
       {lane.combo > 1 ? (
-        <motion.span
-          className="pm-memory-grid__combo"
-          initial={{ opacity: 0, scale: 0.6, y: 8 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          key={lane.combo}
-        >
+        <span className="pm-memory-grid__combo pm-memory-grid__combo--pop" key={lane.combo}>
           <span className="pm-memory-grid__combo-label">COMBO</span>
           <strong>x{lane.combo}</strong>
-        </motion.span>
+        </span>
       ) : null}
-    </motion.div>
+    </div>
   )
 }
+
+export const MemoryDuelGrid = memo(MemoryDuelGridInner)
 
 function MemorySymbolIcon({ symbol }: { symbol: MemorySymbol }) {
   const common = {

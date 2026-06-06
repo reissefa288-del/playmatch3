@@ -470,8 +470,9 @@
   border-radius: clamp(8px, 2vw, 12px);
   border: 2px solid rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  transition: transform 0.14s ease, filter 0.14s ease;
+  transition: filter 0.14s ease, box-shadow 0.14s ease;
   position: relative;
+  overflow: visible;
   appearance: none;
   -webkit-appearance: none;
   background-color: #3a4a6b;
@@ -483,8 +484,143 @@
   opacity: 1;
 }
 
-.pm-cmatch-cell:not(:disabled):active {
-  transform: scale(0.92);
+.pm-cmatch-cell.is-tap-hit {
+  animation: pm-cmatch-cell-hit 0.48s cubic-bezier(0.34, 1.25, 0.48, 1) forwards;
+  z-index: 2;
+}
+
+.pm-cmatch-cell.is-tap-miss {
+  animation: pm-cmatch-cell-miss 0.42s ease forwards;
+  z-index: 2;
+}
+
+.pm-cmatch-cell__ring,
+.pm-cmatch-cell__burst,
+.pm-cmatch-cell__ripple,
+.pm-cmatch-cell__spark {
+  position: absolute;
+  pointer-events: none;
+}
+
+.pm-cmatch-cell__ring {
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  animation: pm-cmatch-ring 0.48s ease-out forwards;
+}
+
+.pm-cmatch-cell__burst {
+  inset: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  animation: pm-cmatch-burst 0.5s ease-out forwards;
+}
+
+.pm-cmatch-cell__spark {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+}
+
+.pm-cmatch-cell__spark--1 {
+  top: 8%;
+  left: 50%;
+  animation: pm-cmatch-spark 0.45s ease-out forwards;
+}
+
+.pm-cmatch-cell__spark--2 {
+  bottom: 12%;
+  left: 18%;
+  animation: pm-cmatch-spark 0.5s ease-out 0.04s forwards;
+}
+
+.pm-cmatch-cell__spark--3 {
+  bottom: 20%;
+  right: 14%;
+  animation: pm-cmatch-spark 0.46s ease-out 0.08s forwards;
+}
+
+.pm-cmatch-cell__ripple.is-miss {
+  inset: -2px;
+  border-radius: inherit;
+  border: 2px solid rgba(255, 70, 90, 0.85);
+  background: rgba(255, 40, 70, 0.22);
+  animation: pm-cmatch-ripple-miss 0.42s ease-out forwards;
+}
+
+@keyframes pm-cmatch-cell-hit {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+    box-shadow: 0 0 0 transparent;
+  }
+  40% {
+    transform: scale(1.14);
+    filter: brightness(1.35);
+    box-shadow: 0 0 22px rgba(255, 255, 255, 0.55);
+  }
+  100% {
+    transform: scale(0.88);
+    filter: grayscale(0.65) brightness(0.85);
+    box-shadow: none;
+  }
+}
+
+@keyframes pm-cmatch-cell-miss {
+  0%, 100% { transform: translateX(0) scale(1); }
+  20% { transform: translateX(-5px) scale(0.96); }
+  40% { transform: translateX(5px) scale(0.96); }
+  60% { transform: translateX(-3px) scale(0.98); }
+  80% { transform: translateX(3px) scale(0.98); }
+}
+
+@keyframes pm-cmatch-ring {
+  0% {
+    opacity: 1;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes pm-cmatch-burst {
+  0% {
+    opacity: 0.95;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(5);
+  }
+}
+
+@keyframes pm-cmatch-spark {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.2) translateY(-14px);
+  }
+}
+
+@keyframes pm-cmatch-ripple-miss {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.2);
+  }
 }
 
 .pm-cmatch-cell.is-violet { background-color: var(--cm-violet); }
@@ -502,6 +638,13 @@
   filter: grayscale(0.65) brightness(0.85);
   border-color: rgba(255, 255, 255, 0.08);
   pointer-events: none;
+}
+
+.pm-cmatch-cell.is-cleared.is-tap-hit {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  animation: pm-cmatch-cell-hit 0.48s cubic-bezier(0.34, 1.25, 0.48, 1) forwards;
 }
 
 .pm-cmatch-grid.has-shake {

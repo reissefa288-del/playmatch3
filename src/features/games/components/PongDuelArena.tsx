@@ -1,5 +1,12 @@
 import type { PointerEvent } from 'react'
-import { BALL_R, PADDLE_H, PADDLE_W, type PongState } from '../utils/pongDuelEngine'
+import {
+  BALL_R,
+  PADDLE_H,
+  PADDLE_W,
+  ballHeatLevel,
+  isFireBall,
+  type PongState,
+} from '../utils/pongDuelEngine'
 
 type Props = {
   game: PongState
@@ -18,10 +25,12 @@ export function PongDuelArena({ game, interactive = false, onMove }: Props) {
   const ball = game.ball
   const p1 = game.paddle1
   const p2 = game.paddle2
+  const heat = ballHeatLevel(game.speedMul)
+  const fire = isFireBall(game.speedMul)
 
   return (
     <div
-      className="pm-pong-arena"
+      className={['pm-pong-arena', fire ? 'is-fire-glow' : ''].filter(Boolean).join(' ')}
       onPointerDown={handlePointer}
       onPointerMove={handlePointer}
       role="application"
@@ -48,14 +57,24 @@ export function PongDuelArena({ game, interactive = false, onMove }: Props) {
       />
 
       <span
-        className="pm-pong-ball"
+        className={[
+          'pm-pong-ball',
+          fire ? 'is-fire' : '',
+          heat >= 0.82 ? 'is-fire-intense' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         style={{
           left: `${ball.x * 100}%`,
           top: `${ball.y * 100}%`,
           width: `${BALL_R * 200}%`,
           height: `${BALL_R * 200}%`,
+          ['--pong-heat' as string]: String(heat),
         }}
-      />
+      >
+        {fire ? <span className="pm-pong-ball__flame" aria-hidden /> : null}
+        {fire ? <span className="pm-pong-ball__trail" aria-hidden /> : null}
+      </span>
     </div>
   )
 }

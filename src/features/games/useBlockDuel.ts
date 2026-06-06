@@ -4,7 +4,6 @@ import {
   getLaneView,
   hardDropLane,
   MATCH_ROUNDS,
-  queueGarbage,
   resolveRoundWinner,
   ROUND_SECONDS,
   tickLanePresentation,
@@ -17,7 +16,6 @@ import {
 } from './utils/blockEngine'
 import { createBlockBot, updateBlockBotLane, type BlockBotBrain } from './utils/blockBot'
 import { playBlockSound } from './utils/blockSounds'
-import type { BlockComboFlash } from './components/BlockComboDock'
 
 type MatchResult = 'p1' | 'p2' | 'draw'
 type RoundWinner = 'p1' | 'p2' | 'draw'
@@ -37,7 +35,6 @@ export function useBlockDuel() {
   const [winner, setWinner] = useState<MatchResult | null>(null)
   const [shakeKey, setShakeKey] = useState(0)
   const [roundIntro, setRoundIntro] = useState(2.4)
-  const [comboFlash, setComboFlash] = useState<BlockComboFlash | null>(null)
 
   const lane1Ref = useRef(lane1)
   const lane2Ref = useRef(lane2)
@@ -56,7 +53,6 @@ export function useBlockDuel() {
   const dasRef = useRef({ left: false, right: false, down: false, leftAccum: 0, rightAccum: 0 })
 
   const roundIntroRef = useRef(2.4)
-  const comboBannerRef = useRef(0)
   const DAS_DELAY = 0.07
   const DAS_REPEAT = 0.022
 
@@ -75,7 +71,7 @@ export function useBlockDuel() {
     lane2ViewRef.current = getLaneView(l2)
   }, [])
 
-  const playEvents = useCallback((events: BlockLaneEvent[], side: 'p1' | 'p2', lane?: BlockLaneState) => {
+  const playEvents = useCallback((events: BlockLaneEvent[], side: 'p1' | 'p2') => {
     for (const event of events) {
       if (event === 'move') playBlockSound('move')
       else if (event === 'rotate') playBlockSound('rotate')
@@ -84,40 +80,10 @@ export function useBlockDuel() {
       else if (event === 'fusion') {
         playBlockSound('fusion')
         if (side === 'p1') setShakeKey((k) => k + 1)
-        if (side === 'p1' && lane) {
-          setComboFlash({ text: 'FÜZYON!', combo: lane.combo, kind: 'fusion' })
-          comboBannerRef.current = 1.5 + lane.combo * 0.15
-        }
-      } else if (event === 'surge') {
-        playBlockSound('surge')
-        if (side === 'p1') setShakeKey((k) => k + 1)
-        if (side === 'p1' && lane) {
-          setComboFlash({ text: 'DALGA!', combo: lane.combo, kind: 'surge' })
-          comboBannerRef.current = 1.65
-        }
-      } else if (event === 'combo') {
-        playBlockSound('combo')
-        if (side === 'p1' && lane && lane.combo >= 2) {
-          setComboFlash({ text: `ZİNCİR ×${lane.combo}`, combo: lane.combo, kind: 'combo' })
-          comboBannerRef.current = 1.35 + lane.combo * 0.22
-        }
-      } else if (event === 'nova') {
-        playBlockSound('nova')
-        if (side === 'p1' && lane) {
-          setComboFlash({ text: 'NOVA!', combo: Math.max(lane.combo, 3), kind: 'nova' })
-          comboBannerRef.current = 2.1
-        }
-      } else if (event === 'attack') playBlockSound('attack')
+      } else if (event === 'combo') playBlockSound('combo')
+      else if (event === 'nova') playBlockSound('nova')
       else if (event === 'gameover') playBlockSound('gameover')
     }
-  }, [])
-
-  const applyAttack = useCallback((l1: BlockLaneState, l2: BlockLaneState, p1Sent: number, p2Sent: number) => {
-    let next1 = l1
-    let next2 = l2
-    if (p1Sent > 0) next2 = queueGarbage(l2, p1Sent)
-    if (p2Sent > 0) next1 = queueGarbage(l1, p2Sent)
-    return { next1, next2 }
   }, [])
 
   const endMatch = useCallback((result: MatchResult) => {
@@ -214,11 +180,6 @@ export function useBlockDuel() {
       last = now
       const nowSec = now / 1000
 
-      if (comboBannerRef.current > 0) {
-        comboBannerRef.current = Math.max(0, comboBannerRef.current - dt)
-        if (comboBannerRef.current <= 0) setComboFlash(null)
-      }
-
       if (roundIntroRef.current > 0) {
         roundIntroRef.current = Math.max(0, roundIntroRef.current - dt)
         setRoundIntro(roundIntroRef.current)
@@ -262,21 +223,19 @@ export function useBlockDuel() {
       }
 
       const r1 = updateBlockLane(lane1Ref.current, dt, input)
-      playEvents(r1.events, 'p1', r1.lane)
+      playEvents(r1.events, 'p1')
+      lane1Ref.current = r1.lane
 
       const r2 = updateBlockBotLane(lane2Ref.current, dt, nowSec, botRef.current)
-      playEvents(r2.events, 'p2', r2.lane)
+      playEvents(r2.events, 'p2')
+      lane2Ref.current = r2.lane
 
-      const attacked = applyAttack(r1.lane, r2.lane, r1.attackSent, r2.attackSent)
-      lane1Ref.current = attacked.next1
-      lane2Ref.current = attacked.next2
-
-      if (!attacked.next1.alive) {
-        handleKnockout('p1', attacked.next1, attacked.next2)
+      if (!lane1Ref.current.alive) {
+        handleKnockout('p1', lane1Ref.current, lane2Ref.current)
         return
       }
-      if (!attacked.next2.alive) {
-        handleKnockout('p2', attacked.next1, attacked.next2)
+      if (!lane2Ref.current.alive) {
+        handleKnockout('p2', lane1Ref.current, lane2Ref.current)
         return
       }
 
@@ -284,20 +243,17 @@ export function useBlockDuel() {
       const forceUi =
         r1.events.length > 0 ||
         r2.events.length > 0 ||
-        r1.attackSent > 0 ||
-        r2.attackSent > 0 ||
-        comboBannerRef.current > 0 ||
         input.left ||
         input.right ||
         input.down ||
         input.rotate
       if (forceUi || syncTickRef.current % 4 === 0) {
-        syncLanes(attacked.next1, attacked.next2, roundTimeRef.current)
+        syncLanes(lane1Ref.current, lane2Ref.current, roundTimeRef.current)
       }
 
       if (roundTimeRef.current <= 0 && !roundEndingRef.current) {
         roundEndingRef.current = true
-        handleTimeUp(attacked.next1, attacked.next2)
+        handleTimeUp(lane1Ref.current, lane2Ref.current)
         return
       }
 
@@ -306,7 +262,7 @@ export function useBlockDuel() {
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [running, winner, roundNumber, playEvents, applyAttack, handleKnockout, handleTimeUp, syncLanes])
+  }, [running, winner, roundNumber, playEvents, handleKnockout, handleTimeUp, syncLanes])
 
   const pressLeft = useCallback(() => {
     inputRef.current.left = true
@@ -352,17 +308,13 @@ export function useBlockDuel() {
   const hardDrop = useCallback(() => {
     if (!runningRef.current || endedRef.current) return
     const result = hardDropLane(lane1Ref.current)
-    playEvents(result.events, 'p1', result.lane)
-    let l2 = lane2Ref.current
-    let l1 = result.lane
-    if (result.attackSent > 0) l2 = queueGarbage(l2, result.attackSent)
-    lane1Ref.current = l1
-    lane2Ref.current = l2
-    if (!l1.alive) {
-      handleKnockout('p1', l1, l2)
+    playEvents(result.events, 'p1')
+    lane1Ref.current = result.lane
+    if (!result.lane.alive) {
+      handleKnockout('p1', result.lane, lane2Ref.current)
       return
     }
-    syncLanes(l1, l2, roundTimeRef.current)
+    syncLanes(result.lane, lane2Ref.current, roundTimeRef.current)
   }, [handleKnockout, playEvents, syncLanes])
 
   const restart = useCallback(() => {
@@ -388,17 +340,10 @@ export function useBlockDuel() {
     setShakeKey(0)
     roundIntroRef.current = 2.4
     setRoundIntro(2.4)
-    setComboFlash(null)
-    comboBannerRef.current = 0
     syncLanes(l1, l2, ROUND_SECONDS)
   }, [syncLanes])
 
   const formatTime = `${String(Math.floor(roundTimeLeft / 60)).padStart(2, '0')}:${String(roundTimeLeft % 60).padStart(2, '0')}`
-
-  const attackMeter =
-    lane1.attack + lane2.attack === 0
-      ? 50
-      : Math.round((lane1.attack / (lane1.attack + lane2.attack)) * 100)
 
   return {
     lane1,
@@ -412,10 +357,8 @@ export function useBlockDuel() {
     matchRounds: MATCH_ROUNDS,
     running: running && !winner && lane1.alive && roundIntro <= 0,
     roundIntro,
-    comboFlash,
     winner,
     shakeKey,
-    attackMeter,
     pressLeft,
     pressRight,
     pressDown,

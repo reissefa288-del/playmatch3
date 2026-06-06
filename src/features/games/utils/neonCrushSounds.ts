@@ -1,4 +1,19 @@
-type NeonSoundId = 'select' | 'swap' | 'match' | 'combo' | 'fall' | 'invalid' | 'round' | 'win' | 'lose'
+type NeonSoundId =
+  | 'select'
+  | 'swap'
+  | 'match'
+  | 'combo'
+  | 'line4'
+  | 'mega'
+  | 'special'
+  | 'prism'
+  | 'pressure'
+  | 'rush'
+  | 'fall'
+  | 'invalid'
+  | 'round'
+  | 'win'
+  | 'lose'
 
 let audioCtx: AudioContext | null = null
 let unlocked = false
@@ -52,6 +67,12 @@ const MIN_GAP: Record<NeonSoundId, number> = {
   swap: 80,
   match: 120,
   combo: 200,
+  line4: 180,
+  mega: 280,
+  special: 220,
+  prism: 320,
+  pressure: 240,
+  rush: 400,
   fall: 90,
   invalid: 160,
   round: 500,
@@ -79,6 +100,33 @@ export function playNeonCrushSound(id: NeonSoundId) {
       tone(660, 0.08, 'square', 0.04, 920)
       tone(920, 0.1, 'triangle', 0.045, 1240, 0.07)
       tone(1240, 0.12, 'sine', 0.03, 1480, 0.14)
+      break
+    case 'line4':
+      tone(580, 0.09, 'triangle', 0.05, 880)
+      tone(1040, 0.11, 'sine', 0.04, 1320, 0.06)
+      break
+    case 'mega':
+      tone(440, 0.1, 'sawtooth', 0.035, 660)
+      tone(880, 0.12, 'square', 0.045, 1320, 0.08)
+      tone(1320, 0.14, 'sine', 0.05, 1760, 0.16)
+      tone(1760, 0.1, 'triangle', 0.03, 2200, 0.24)
+      break
+    case 'special':
+      tone(620, 0.08, 'triangle', 0.045, 940)
+      tone(1040, 0.1, 'sine', 0.04, 1480, 0.06)
+      break
+    case 'prism':
+      tone(520, 0.09, 'sawtooth', 0.04, 780)
+      tone(980, 0.11, 'square', 0.045, 1480, 0.07)
+      tone(1480, 0.13, 'sine', 0.05, 1980, 0.14)
+      break
+    case 'pressure':
+      tone(180, 0.12, 'sawtooth', 0.05, 90)
+      tone(320, 0.1, 'square', 0.04, 520, 0.05)
+      break
+    case 'rush':
+      tone(740, 0.08, 'triangle', 0.04, 1100)
+      tone(1100, 0.1, 'sine', 0.045, 1540, 0.06)
       break
     case 'fall':
       tone(240, 0.05, 'sine', 0.025, 360)

@@ -1,13 +1,12 @@
-import { useEffect, useRef, type RefObject } from 'react'
+import { useEffect, useRef, type MutableRefObject, type RefObject } from 'react'
 import {
   BUBBLE_RADIUS,
-  COLOR_HEX,
   DANGER_LINE_Y,
+  getDangerProximity,
   GRID_H_MARGIN,
   GRID_TOP,
   SHOOTER_X,
   SHOOTER_Y,
-  SPECIAL_KIND_META,
   bubbleDrawRadiusPx,
   bubblePos,
   sampleAimGuideDots,
@@ -16,6 +15,23 @@ import {
   type BubbleKind,
   type LaneState,
 } from '../utils/bubbleShooterEngine'
+import {
+  BUBBLE_RENDER_HEX,
+  canvasDpr,
+  createBubbleVisualState,
+  drawBubbleCached,
+  drawBubbleLive,
+  drawPopEffects,
+  drawSparkParticles,
+  placementScale,
+  prepareCanvasCtx,
+  syncBubbleVisuals,
+} from '../utils/bubbleCanvasVisuals'
+import {
+  drawSpecialImpactPulse,
+  drawSpecialProjectileAura,
+  drawSpecialShotTrail,
+} from '../utils/bubbleSpecialFx'
 
 type BubbleShooterCanvasProps = {
   laneRef: RefObject<LaneState>
@@ -23,6 +39,7 @@ type BubbleShooterCanvasProps = {
   showShooterExtras?: boolean
   active?: boolean
   showAimGuide?: boolean
+  showRivalAim?: boolean
 }
 
 const ACCENT = {
@@ -50,53 +67,95 @@ export function BubbleShooterCanvas({
   showShooterExtras = false,
   active = true,
   showAimGuide = true,
+  showRivalAim = false,
 }: BubbleShooterCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const accentRef = useRef(accent)
   const extrasRef = useRef(showShooterExtras)
   const aimGuideRef = useRef(showAimGuide)
+  const rivalAimRef = useRef(showRivalAim)
+  const visualRef = useRef(createBubbleVisualState())
+  const sizeRef = useRef({ cssW: 0, cssH: 0, w: 0, h: 0, dpr: 1 })
+  const frameRef = useRef(0)
+  const aimTargetRef = useRef<{ row: number; col: number } | null>(null)
   accentRef.current = accent
   extrasRef.current = showShooterExtras
   aimGuideRef.current = showAimGuide
+  rivalAimRef.current = showRivalAim
 
   useEffect(() => {
+    if (!active) return
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
 
     let raf = 0
 
-    const draw = () => {
-      if (!active) {
-        raf = requestAnimationFrame(draw)
-        return
-      }
-
-      const lane = laneRef.current
-      if (!lane) {
-        raf = requestAnimationFrame(draw)
-        return
-      }
-
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const resize = () => {
+      const dpr = canvasDpr()
       const rect = canvas.getBoundingClientRect()
-      const w = Math.max(1, Math.floor(rect.width * dpr))
-      const h = Math.max(1, Math.floor(rect.height * dpr))
+      const cssW = Math.max(1, rect.width)
+      const cssH = Math.max(1, rect.height)
+      const w = Math.max(1, Math.floor(cssW * dpr))
+      const h = Math.max(1, Math.floor(cssH * dpr))
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w
         canvas.height = h
       }
-      setPlayfieldAspect(rect.width, rect.height)
+      sizeRef.current = { cssW, cssH, w, h, dpr }
+      setPlayfieldAspect(cssW, cssH)
+    }
+
+    resize()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null
+    ro?.observe(canvas)
+
+    const draw = () => {
+      const lane = laneRef.current
+      if (!lane) return
+
+      const { w, h, dpr } = sizeRef.current
+      if (w < 1 || h < 1) return
+
+      frameRef.current += 1
+      prepareCanvasCtx(ctx)
+      syncBubbleVisuals(visualRef.current, lane, w, h)
 
       const bubbleR = bubbleDrawRadiusPx(w)
       const palette = ACCENT[accentRef.current]
+      const hasFx =
+        visualRef.current.pops.length > 0 ||
+        visualRef.current.placements.size > 0 ||
+        lane.particles.length > 0 ||
+        lane.fxPulse != null ||
+        lane.projectile?.active
+
       ctx.clearRect(0, 0, w, h)
       drawArenaDepth(ctx, w, h, palette.floor)
-      drawDangerLine(ctx, w, h, palette.danger, dpr)
+      const dangerNear = getDangerProximity(lane)
+      drawDangerLine(ctx, w, h, palette.danger, dpr, dangerNear, frameRef.current)
+
       if (aimGuideRef.current && !lane.projectile?.active && lane.canShoot) {
-        drawAimTrajectory(ctx, lane, w, h, palette.trail, palette.dot, palette.ring, dpr, bubbleR)
+        drawAimTrajectory(
+          ctx,
+          lane,
+          w,
+          h,
+          palette.trail,
+          palette.ring,
+          dpr,
+          bubbleR,
+          aimTargetRef,
+        )
+      } else {
+        aimTargetRef.current = null
       }
+
+      if (rivalAimRef.current && !lane.projectile?.active && lane.canShoot) {
+        drawRivalAimLine(ctx, lane, w, h, palette.trail, dpr, bubbleR)
+      }
+
       ctx.save()
       ctx.beginPath()
       ctx.rect(
@@ -108,35 +167,31 @@ export function BubbleShooterCanvas({
       ctx.clip()
 
       for (const [key, color] of lane.grid) {
-        const [row, col] = key.split(',').map(Number)
+        const comma = key.indexOf(',')
+        const row = Number(key.slice(0, comma))
+        const col = Number(key.slice(comma + 1))
         const pos = bubblePos(row, col)
-        drawBubble(ctx, pos.x * w, pos.y * h, bubbleR, color, dpr, false)
+        const bx = pos.x * w
+        const by = pos.y * h
+        const br = bubbleR * placementScale(key, visualRef.current)
+        drawBubbleCached(ctx, bx, by, br, color)
       }
 
-      for (const particle of lane.particles) {
-        const alpha = Math.min(1, particle.life * 2.2)
-        ctx.globalAlpha = alpha
-        ctx.fillStyle = particle.color
-        ctx.shadowColor = particle.color
-        ctx.shadowBlur = 6 * dpr * alpha
-        ctx.beginPath()
-        ctx.arc(particle.x * w, particle.y * h, (1.8 + alpha * 2) * dpr, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.shadowBlur = 0
-        ctx.globalAlpha = 1
+      if (hasFx) {
+        drawPopEffects(ctx, visualRef.current.pops, bubbleR, dpr)
+        drawSparkParticles(ctx, lane.particles, w, h, dpr)
+        if (lane.fxPulse) {
+          drawSpecialImpactPulse(ctx, lane.fxPulse, w, h, dpr, frameRef.current)
+        }
       }
 
       if (lane.projectile?.active) {
-        drawBubble(
-          ctx,
-          lane.projectile.x * w,
-          lane.projectile.y * h,
-          bubbleR,
-          lane.projectile.color,
-          dpr,
-          true,
-          lane.projectile.kind,
-        )
+        const proj = lane.projectile
+        if (proj.kind !== 'normal') {
+          drawSpecialShotTrail(ctx, proj, w, h, bubbleR, frameRef.current)
+          drawSpecialProjectileAura(ctx, proj, w, h, bubbleR, frameRef.current)
+        }
+        drawBubbleLive(ctx, proj.x * w, proj.y * h, bubbleR, proj.color, proj.kind)
       }
 
       drawShooter(
@@ -155,15 +210,48 @@ export function BubbleShooterCanvas({
       )
       drawFloorReflection(ctx, SHOOTER_X * w, SHOOTER_Y * h, w, h, lane.currentColor, dpr)
       ctx.restore()
-
-      raf = requestAnimationFrame(draw)
     }
 
-    raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
-  }, [active, laneRef, showAimGuide])
+    const loop = () => {
+      draw()
+      raf = requestAnimationFrame(loop)
+    }
+    raf = requestAnimationFrame(loop)
+    return () => {
+      cancelAnimationFrame(raf)
+      ro?.disconnect()
+    }
+  }, [active, laneRef, showAimGuide, showRivalAim])
 
   return <canvas ref={canvasRef} className="pm-bubble-arena__canvas" />
+}
+
+type AimTarget = { row: number; col: number }
+
+function resolveStableAimTarget(
+  raw: AimTarget | null,
+  stableRef: MutableRefObject<AimTarget | null>,
+): AimTarget | null {
+  if (!raw) {
+    stableRef.current = null
+    return null
+  }
+  const prev = stableRef.current
+  if (!prev) {
+    stableRef.current = { row: raw.row, col: raw.col }
+    return stableRef.current
+  }
+  if (prev.row === raw.row && prev.col === raw.col) {
+    return prev
+  }
+  const prevPos = bubblePos(prev.row, prev.col)
+  const nextPos = bubblePos(raw.row, raw.col)
+  const dist = Math.hypot(nextPos.x - prevPos.x, nextPos.y - prevPos.y)
+  if (dist > 0.055) {
+    stableRef.current = { row: raw.row, col: raw.col }
+    return stableRef.current
+  }
+  return prev
 }
 
 function drawAimTrajectory(
@@ -172,28 +260,25 @@ function drawAimTrajectory(
   w: number,
   h: number,
   trail: string,
-  bright: string,
   ring: string,
   dpr: number,
   bubbleR: number,
+  stableTargetRef: MutableRefObject<AimTarget | null>,
 ) {
-  const { dots, pathVertices, target } = sampleAimGuideDots(lane.grid, lane.aimAngle)
-  const dotR = Math.max(1.2 * dpr, bubbleR * 0.11)
-  const outerR = bubbleR * 0.95
-  const midR = bubbleR * 0.62
+  const { dots, pathVertices, target: rawTarget } = sampleAimGuideDots(lane.grid, lane.aimAngle)
+  const target = resolveStableAimTarget(rawTarget, stableTargetRef)
+  const dotR = Math.max(1.1 * dpr, bubbleR * 0.1)
+  const ringR = bubbleR * 0.92
 
   ctx.save()
-
   ctx.lineCap = 'round'
   ctx.lineJoin = 'round'
   ctx.strokeStyle = trail
-  ctx.shadowColor = trail
-  ctx.shadowBlur = 5 * dpr
 
   if (pathVertices.length >= 2) {
     ctx.setLineDash([5 * dpr, 9 * dpr])
-    ctx.globalAlpha = 0.5
-    ctx.lineWidth = 1.75 * dpr
+    ctx.globalAlpha = 0.45
+    ctx.lineWidth = 1.5 * dpr
     ctx.beginPath()
     ctx.moveTo(pathVertices[0]!.x * w, pathVertices[0]!.y * h)
     for (let i = 1; i < pathVertices.length; i += 1) {
@@ -203,13 +288,11 @@ function drawAimTrajectory(
     ctx.setLineDash([])
   }
 
-  ctx.shadowBlur = 3 * dpr
+  ctx.globalAlpha = 0.5
+  ctx.fillStyle = trail
   for (let i = 0; i < dots.length; i += 1) {
     const px = dots[i]!.x * w
     const py = dots[i]!.y * h
-    const fade = 0.42 + (i / Math.max(1, dots.length)) * 0.45
-    ctx.globalAlpha = fade
-    ctx.fillStyle = trail
     ctx.beginPath()
     ctx.arc(px, py, dotR, 0, Math.PI * 2)
     ctx.fill()
@@ -220,182 +303,15 @@ function drawAimTrajectory(
     const tx = pos.x * w
     const ty = pos.y * h
 
-    ctx.shadowColor = ring
-    ctx.shadowBlur = 12 * dpr
-
-    ctx.globalAlpha = 0.55
+    ctx.globalAlpha = 0.72
     ctx.strokeStyle = ring
-    ctx.lineWidth = 1.4 * dpr
+    ctx.lineWidth = 1.5 * dpr
     ctx.beginPath()
-    ctx.arc(tx, ty, outerR, 0, Math.PI * 2)
+    ctx.arc(tx, ty, ringR, 0, Math.PI * 2)
     ctx.stroke()
-
-    ctx.globalAlpha = 0.82
-    ctx.lineWidth = 1.65 * dpr
-    ctx.beginPath()
-    ctx.arc(tx, ty, midR, 0, Math.PI * 2)
-    ctx.stroke()
-
-    ctx.shadowBlur = 5 * dpr
-    ctx.globalAlpha = 1
-    ctx.fillStyle = bright
-    ctx.beginPath()
-    ctx.arc(tx, ty, 2.6 * dpr, 0, Math.PI * 2)
-    ctx.fill()
   }
 
-  ctx.shadowBlur = 0
-  ctx.restore()
-}
-
-function drawBubble(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  r: number,
-  color: BubbleColor,
-  dpr: number,
-  active: boolean,
-  kind: BubbleKind = 'normal',
-) {
-  const hex = COLOR_HEX[color]
-
-  ctx.save()
-
-  // Neon halo — referans: yumuşak bloom, opak değil
-  const halo = ctx.createRadialGradient(x, y, r * 0.55, x, y, r * 1.08)
-  halo.addColorStop(0, hexToRgba(hex, 0.28))
-  halo.addColorStop(0.65, hexToRgba(hex, 0.1))
-  halo.addColorStop(1, 'rgba(0,0,0,0)')
-  ctx.fillStyle = halo
-  ctx.beginPath()
-  ctx.arc(x, y, r * 1.05, 0, Math.PI * 2)
-  ctx.fill()
-
-  if (active) {
-    ctx.shadowColor = hex
-    ctx.shadowBlur = 10 * dpr
-  }
-
-  // Cam küre gövdesi — parlak, doygun, referans 3D
-  const bodyGrad = ctx.createRadialGradient(x - r * 0.28, y - r * 0.32, r * 0.04, x + r * 0.05, y + r * 0.08, r)
-  bodyGrad.addColorStop(0, 'rgba(255,255,255,0.98)')
-  bodyGrad.addColorStop(0.14, lighten(hex, 0.28))
-  bodyGrad.addColorStop(0.42, hex)
-  bodyGrad.addColorStop(0.72, darken(hex, 0.12))
-  bodyGrad.addColorStop(0.92, darken(hex, 0.22))
-  bodyGrad.addColorStop(1, darken(hex, 0.32))
-
-  ctx.fillStyle = bodyGrad
-  ctx.beginPath()
-  ctx.arc(x, y, r, 0, Math.PI * 2)
-  ctx.fill()
-  ctx.shadowBlur = 0
-
-  // Alt yarı iç gölge — hacim
-  const innerShade = ctx.createRadialGradient(x, y + r * 0.15, r * 0.1, x, y, r)
-  innerShade.addColorStop(0, 'rgba(0,0,0,0)')
-  innerShade.addColorStop(0.7, 'rgba(0,0,0,0)')
-  innerShade.addColorStop(1, 'rgba(0,0,0,0.28)')
-  ctx.fillStyle = innerShade
-  ctx.beginPath()
-  ctx.arc(x, y, r * 0.96, 0, Math.PI * 2)
-  ctx.fill()
-
-  // Rim highlight
-  ctx.strokeStyle = 'rgba(255,255,255,0.32)'
-  ctx.lineWidth = 0.9 * dpr
-  ctx.beginPath()
-  ctx.arc(x, y, r * 0.94, -Math.PI * 0.85, Math.PI * 0.15)
-  ctx.stroke()
-
-  // Ana specular — sol üst parlak nokta
-  const specGrad = ctx.createRadialGradient(x - r * 0.34, y - r * 0.36, 0, x - r * 0.2, y - r * 0.22, r * 0.42)
-  specGrad.addColorStop(0, 'rgba(255,255,255,0.95)')
-  specGrad.addColorStop(0.35, 'rgba(255,255,255,0.35)')
-  specGrad.addColorStop(1, 'rgba(255,255,255,0)')
-  ctx.fillStyle = specGrad
-  ctx.beginPath()
-  ctx.arc(x - r * 0.24, y - r * 0.28, r * 0.3, 0, Math.PI * 2)
-  ctx.fill()
-
-  // İkincil küçük yansıma
-  ctx.fillStyle = 'rgba(255,255,255,0.55)'
-  ctx.beginPath()
-  ctx.arc(x + r * 0.18, y + r * 0.12, r * 0.08, 0, Math.PI * 2)
-  ctx.fill()
-
-  if (kind !== 'normal') drawSpecialKind(ctx, x, y, r, kind, dpr)
-
-  ctx.restore()
-}
-
-function drawSpecialKind(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  r: number,
-  kind: Exclude<BubbleKind, 'normal'>,
-  dpr: number,
-) {
-  const meta = SPECIAL_KIND_META[kind]
-  ctx.save()
-  ctx.shadowColor = meta.glow
-  ctx.shadowBlur = 12 * dpr
-
-  if (kind === 'fire') {
-    const ring = ctx.createRadialGradient(x, y, r * 0.55, x, y, r * 1.05)
-    ring.addColorStop(0, 'rgba(255, 120, 40, 0)')
-    ring.addColorStop(0.7, meta.glow)
-    ring.addColorStop(1, 'rgba(255, 80, 20, 0.85)')
-    ctx.strokeStyle = ring
-    ctx.lineWidth = 2.4 * dpr
-    ctx.beginPath()
-    ctx.arc(x, y, r * 0.92, 0, Math.PI * 2)
-    ctx.stroke()
-    ctx.fillStyle = meta.hex
-    ctx.beginPath()
-    ctx.moveTo(x, y - r * 0.42)
-    ctx.quadraticCurveTo(x + r * 0.28, y - r * 0.05, x, y + r * 0.2)
-    ctx.quadraticCurveTo(x - r * 0.28, y - r * 0.05, x, y - r * 0.42)
-    ctx.fill()
-  } else if (kind === 'bomb') {
-    ctx.strokeStyle = meta.hex
-    ctx.lineWidth = 2.2 * dpr
-    ctx.beginPath()
-    ctx.arc(x, y, r * 0.38, 0, Math.PI * 2)
-    ctx.stroke()
-    ctx.fillStyle = meta.hex
-    ctx.beginPath()
-    ctx.moveTo(x - r * 0.12, y - r * 0.55)
-    ctx.lineTo(x + r * 0.05, y - r * 0.72)
-    ctx.lineTo(x + r * 0.18, y - r * 0.48)
-    ctx.fill()
-    for (let i = 0; i < 8; i += 1) {
-      const a = (i / 8) * Math.PI * 2
-      ctx.beginPath()
-      ctx.moveTo(x + Math.cos(a) * r * 0.5, y + Math.sin(a) * r * 0.5)
-      ctx.lineTo(x + Math.cos(a) * r * 0.72, y + Math.sin(a) * r * 0.72)
-      ctx.stroke()
-    }
-  } else {
-    const arc = ctx.createLinearGradient(x - r, y - r, x + r, y + r)
-    arc.addColorStop(0, '#ff6b9d')
-    arc.addColorStop(0.35, '#ffd54a')
-    arc.addColorStop(0.65, '#42f090')
-    arc.addColorStop(1, '#22c8ff')
-    ctx.strokeStyle = arc
-    ctx.lineWidth = 2.6 * dpr
-    ctx.beginPath()
-    ctx.arc(x, y, r * 0.88, 0, Math.PI * 2)
-    ctx.stroke()
-    ctx.fillStyle = 'rgba(255,255,255,0.75)'
-    ctx.beginPath()
-    ctx.arc(x, y, r * 0.14, 0, Math.PI * 2)
-    ctx.fill()
-  }
-
-  ctx.shadowBlur = 0
+  ctx.globalAlpha = 1
   ctx.restore()
 }
 
@@ -421,7 +337,6 @@ function drawShooter(
 
   ctx.save()
 
-  // Taban platform
   ctx.fillStyle = 'rgba(0,0,0,0.35)'
   ctx.beginPath()
   ctx.ellipse(x, y + ph * 0.35, pw * 0.55, ph * 0.55, 0, 0, Math.PI * 2)
@@ -429,12 +344,9 @@ function drawShooter(
 
   ctx.strokeStyle = palette.ring
   ctx.lineWidth = 1.6 * dpr
-  ctx.shadowColor = palette.ring
-  ctx.shadowBlur = 8 * dpr
   ctx.beginPath()
   ctx.arc(x, cy, ringR, 0, Math.PI * 2)
   ctx.stroke()
-  ctx.shadowBlur = 0
 
   const bodyGrad = ctx.createLinearGradient(x - pw / 2, cy, x + pw / 2, cy)
   bodyGrad.addColorStop(0, palette.shooter[0])
@@ -448,11 +360,11 @@ function drawShooter(
   roundRect(ctx, x - pw / 2 + 3 * dpr, cy - ph * 0.28, pw - 6 * dpr, ph * 0.32, ph * 0.18)
   ctx.fill()
 
-  drawBubble(ctx, x, cy - ph * 0.72, BUBBLE_RADIUS * w * 2, color, dpr, true, currentKind)
+  drawBubbleLive(ctx, x, cy - ph * 0.72, BUBBLE_RADIUS * w * 2, color, currentKind)
 
   const nx = x + ringR * 1.08
   const ny = cy
-  drawBubble(ctx, nx, ny, BUBBLE_RADIUS * w * 1.42, nextColor, dpr, false, nextKind)
+  drawBubbleLive(ctx, nx, ny, BUBBLE_RADIUS * w * 1.42, nextColor, nextKind)
 
   if (showExtras) {
     drawSwapRing(ctx, nx, ny + ringR * 0.95, BUBBLE_RADIUS * w * 1.55, palette.ring, dpr)
@@ -508,9 +420,9 @@ function drawFloorReflection(
   color: BubbleColor,
   dpr: number,
 ) {
-  const hex = COLOR_HEX[color]
+  const hex = BUBBLE_RENDER_HEX[color]
   const grad = ctx.createLinearGradient(0, y, 0, y + w * 0.12)
-  grad.addColorStop(0, hexToRgba(hex, 0.12))
+  grad.addColorStop(0, hexToRgba(hex, 0.14))
   grad.addColorStop(1, 'rgba(0,0,0,0)')
   ctx.fillStyle = grad
   ctx.beginPath()
@@ -524,20 +436,65 @@ function drawDangerLine(
   h: number,
   stroke: string,
   dpr: number,
+  proximity: number,
+  frame: number,
 ) {
   const y = DANGER_LINE_Y * h
+  const pulse = proximity > 0 ? 0.55 + Math.sin(frame * 0.14) * 0.25 * proximity : 0
+  const alpha = 0.42 + proximity * 0.48 + pulse * proximity
+  const width = (1.2 + proximity * 1.4) * dpr
+
   ctx.save()
-  ctx.setLineDash([5 * dpr, 7 * dpr])
+  if (proximity > 0.35) {
+    const glow = ctx.createLinearGradient(0, y - 8 * dpr, 0, y + 10 * dpr)
+    glow.addColorStop(0, 'rgba(255, 70, 100, 0)')
+    glow.addColorStop(1, `rgba(255, 70, 100, ${(proximity * 0.22).toFixed(3)})`)
+    ctx.fillStyle = glow
+    ctx.fillRect(GRID_H_MARGIN * w * 0.5, y, w * (1 - GRID_H_MARGIN), h - y)
+  }
+  ctx.setLineDash(proximity > 0.2 ? [4 * dpr, 5 * dpr] : [5 * dpr, 7 * dpr])
   ctx.strokeStyle = stroke
-  ctx.lineWidth = 1.4 * dpr
-  ctx.globalAlpha = 0.72
-  ctx.shadowColor = stroke
-  ctx.shadowBlur = 6 * dpr
+  ctx.lineWidth = width
+  ctx.globalAlpha = alpha
   ctx.beginPath()
   ctx.moveTo(GRID_H_MARGIN * w * 0.55, y)
   ctx.lineTo(w * (1 - GRID_H_MARGIN * 0.55), y)
   ctx.stroke()
   ctx.setLineDash([])
+  ctx.restore()
+}
+
+function drawRivalAimLine(
+  ctx: CanvasRenderingContext2D,
+  lane: LaneState,
+  w: number,
+  h: number,
+  trail: string,
+  dpr: number,
+  bubbleR: number,
+) {
+  const sx = SHOOTER_X * w
+  const sy = SHOOTER_Y * h
+  const len = Math.min(w, h) * 0.32
+  const ex = sx + Math.cos(lane.aimAngle) * len
+  const ey = sy + Math.sin(lane.aimAngle) * len
+
+  ctx.save()
+  ctx.strokeStyle = trail
+  ctx.lineWidth = 2 * dpr
+  ctx.globalAlpha = 0.55
+  ctx.setLineDash([6 * dpr, 8 * dpr])
+  ctx.beginPath()
+  ctx.moveTo(sx, sy)
+  ctx.lineTo(ex, ey)
+  ctx.stroke()
+  ctx.setLineDash([])
+  ctx.beginPath()
+  ctx.arc(ex, ey, bubbleR * 0.35, 0, Math.PI * 2)
+  ctx.strokeStyle = 'rgba(255, 120, 180, 0.75)'
+  ctx.lineWidth = 1.5 * dpr
+  ctx.globalAlpha = 0.7
+  ctx.stroke()
   ctx.restore()
 }
 
@@ -555,22 +512,6 @@ function hexToRgba(hex: string, alpha: number) {
   const g = (n >> 8) & 255
   const b = n & 255
   return `rgba(${r},${g},${b},${alpha})`
-}
-
-function lighten(hex: string, amount: number) {
-  const n = parseInt(hex.slice(1), 16)
-  const r = Math.min(255, ((n >> 16) & 255) + 255 * amount)
-  const g = Math.min(255, ((n >> 8) & 255) + 255 * amount)
-  const b = Math.min(255, (n & 255) + 255 * amount)
-  return `rgb(${r},${g},${b})`
-}
-
-function darken(hex: string, amount: number) {
-  const n = parseInt(hex.slice(1), 16)
-  const r = Math.max(0, ((n >> 16) & 255) * (1 - amount))
-  const g = Math.max(0, ((n >> 8) & 255) * (1 - amount))
-  const b = Math.max(0, (n & 255) * (1 - amount))
-  return `rgb(${r},${g},${b})`
 }
 
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, rw: number, rh: number, r: number) {

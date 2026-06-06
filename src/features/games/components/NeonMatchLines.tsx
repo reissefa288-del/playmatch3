@@ -27,6 +27,9 @@ export function NeonMatchLines({ segments, swap, accent }: NeonMatchLinesProps) 
         const cellH = 100 / ROWS
         const pad = 0.35
 
+        const tierClass =
+          seg.tier === 5 ? 'is-tier-5' : seg.tier === 4 ? 'is-tier-4' : 'is-tier-3'
+
         if (seg.orientation === 'h') {
           const y = minR * cellH + cellH / 2
           const x = minC * cellW + pad
@@ -34,7 +37,7 @@ export function NeonMatchLines({ segments, swap, accent }: NeonMatchLinesProps) 
           return (
             <line
               key={`h-${i}-${seg.indices.join('-')}`}
-              className="pm-ncrush-match-lines__stroke"
+              className={`pm-ncrush-match-lines__stroke ${tierClass}`}
               x1={x}
               y1={y}
               x2={x + w}
@@ -49,7 +52,7 @@ export function NeonMatchLines({ segments, swap, accent }: NeonMatchLinesProps) 
         return (
           <line
             key={`v-${i}-${seg.indices.join('-')}`}
-            className="pm-ncrush-match-lines__stroke"
+            className={`pm-ncrush-match-lines__stroke ${tierClass}`}
             x1={x}
             y1={y}
             x2={x}

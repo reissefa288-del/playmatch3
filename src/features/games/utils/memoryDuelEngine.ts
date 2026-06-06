@@ -4,9 +4,15 @@ export const CARD_COUNT = GRID_COLS * GRID_ROWS
 export const PAIR_COUNT = CARD_COUNT / 2
 export const WIN_ROUNDS = 3
 export const MATCH_ROUNDS = 5
-export const ROUND_BREAK_MS = 2600
-export const FLIP_BACK_MS = 920
-export const ROUND_SECONDS = 105
+export const ROUND_BREAK_MS = 1600
+/** Kart çevirme animasyonu (CSS ile senkron) */
+export const CARD_FLIP_MS = 340
+/** Eşleşmeyen kartların açık kalma süresi (animasyon bittikten sonra) */
+export const CARD_PEEK_MS = 650
+export const FLIP_BACK_MS = CARD_FLIP_MS + CARD_PEEK_MS
+/** İlk kart çevrildikten sonra ikinci kart için minimum bekleme */
+export const SECOND_FLIP_COOLDOWN_MS = 120
+export const ROUND_SECONDS = 85
 
 export type MemorySymbol =
   | 'star'
@@ -97,6 +103,8 @@ export type LaneState = {
   particles: MatchParticle[]
   shake: number
   lastMatchIndex: number | null
+  lastMatchAt: number
+  lastFlipAt: number
   finished: boolean
 }
 
@@ -135,6 +143,8 @@ export function createLane(laneId: number, seed = 11): LaneState {
     particles: [],
     shake: 0,
     lastMatchIndex: null,
+    lastMatchAt: 0,
+    lastFlipAt: 0,
     finished: false,
   }
 }
@@ -144,17 +154,43 @@ export function startNewRound(lane: LaneState, seed: number): LaneState {
   return { ...next, matchPoints: lane.matchPoints, score: lane.score }
 }
 
-export function decayLaneFx(lane: LaneState, dt: number): LaneState {
+export function laneHasActiveFx(lane: LaneState, now = performance.now()): boolean {
+  return (
+    lane.particles.length > 0 ||
+    lane.shake > 0.02 ||
+    (lane.lastMatchAt > 0 && now - lane.lastMatchAt <= 850)
+  )
+}
+
+export function decayLaneFx(lane: LaneState, dt: number, now = performance.now()): LaneState {
+  if (!laneHasActiveFx(lane, now)) return lane
+
   const particles = lane.particles
     .map((p) => ({ ...p, life: p.life - dt }))
     .filter((p) => p.life > 0)
-  const shake = Math.max(0, lane.shake - dt * 2.4)
-  return { ...lane, particles, shake }
+  const shake = Math.max(0, lane.shake - dt * 3.2)
+  const clearPulse = lane.lastMatchAt > 0 && now - lane.lastMatchAt > 850
+  const cards = clearPulse
+    ? lane.cards.map((c) => (c.pulse ? { ...c, pulse: false } : c))
+    : lane.cards
+  return { ...lane, cards, particles, shake }
 }
 
-export function flipCard(lane: LaneState, index: number): { lane: LaneState; events: LaneEvent[] } {
+export function canFlipCard(lane: LaneState, now = performance.now()): boolean {
+  if (lane.finished || lane.inputLocked || lane.flipBackPending) return false
+  if (lane.openIndices.length === 1 && now - lane.lastFlipAt < SECOND_FLIP_COOLDOWN_MS) {
+    return false
+  }
+  return true
+}
+
+export function flipCard(
+  lane: LaneState,
+  index: number,
+  now = performance.now(),
+): { lane: LaneState; events: LaneEvent[] } {
   const events: LaneEvent[] = []
-  if (lane.finished || lane.inputLocked || lane.flipBackPending) return { lane, events }
+  if (!canFlipCard(lane, now)) return { lane, events }
   const card = lane.cards[index]
   if (!card || card.status !== 'hidden') return { lane, events }
 
@@ -163,12 +199,15 @@ export function flipCard(lane: LaneState, index: number): { lane: LaneState; eve
   events.push('flip')
 
   if (openIndices.length < 2) {
-    return { lane: { ...lane, cards, openIndices }, events }
+    return {
+      lane: { ...lane, cards, openIndices, lastFlipAt: now },
+      events,
+    }
   }
 
   const [a, b] = openIndices
-  const symA = cards[a].symbol
-  const symB = cards[b].symbol
+  const symA = cards[a]!.symbol
+  const symB = cards[b]!.symbol
 
   if (symA === symB) {
     const matched = cards.map((c, i) =>
@@ -190,10 +229,12 @@ export function flipCard(lane: LaneState, index: number): { lane: LaneState; eve
         score,
         finished,
         lastMatchIndex: b,
+        lastMatchAt: now,
+        lastFlipAt: now,
         shake: 0.35,
         particles: [
           ...lane.particles,
-          { id: performance.now(), x: 50, y: 50, life: 0.55 },
+          { id: now, x: 50, y: 50, life: 0.65 },
         ],
       },
       events,
@@ -210,7 +251,8 @@ export function flipCard(lane: LaneState, index: number): { lane: LaneState; eve
       combo: 0,
       inputLocked: true,
       flipBackPending: true,
-      shake: 0.2,
+      lastFlipAt: now,
+      shake: 0.28,
     },
     events,
   }
@@ -226,6 +268,13 @@ export function applyFlipBack(lane: LaneState): LaneState {
     inputLocked: false,
     flipBackPending: false,
   }
+}
+
+/** Zamanlayıcı kaçırılırsa takılı kalan şeridi kurtarır */
+export function recoverStaleFlipBack(lane: LaneState, now = performance.now()): LaneState {
+  if (!lane.flipBackPending) return lane
+  if (now - lane.lastFlipAt < FLIP_BACK_MS + 80) return lane
+  return applyFlipBack(lane)
 }
 
 export function resolveRoundWinner(l1: LaneState, l2: LaneState): 'p1' | 'p2' | 'draw' {

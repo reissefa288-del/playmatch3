@@ -1,53 +1,55 @@
 import {
-  colOf,
-  COLS,
-  idx,
   isOpposite,
-  rowOf,
-  ROWS,
+  manhattan,
+  nextCellIndex,
+  resolveMoveDirection,
+  willHitSelf,
   type Direction,
   type SnakeLaneState,
 } from './snakeDuelEngine'
 
 const DIRS: Direction[] = ['up', 'down', 'left', 'right']
-
-function nextIndex(head: number, dir: Direction) {
-  const c = colOf(head)
-  const r = rowOf(head)
-  if (dir === 'up') return idx(c, r - 1)
-  if (dir === 'down') return idx(c, r + 1)
-  if (dir === 'left') return idx(c - 1, r)
-  return idx(c + 1, r)
-}
+const MISTAKE_CHANCE = 0.12
 
 function isSafe(lane: SnakeLaneState, dir: Direction) {
-  if (isOpposite(lane.queuedDir, dir)) return false
+  if (isOpposite(resolveMoveDirection(lane), dir)) return false
   const head = lane.body[0]!
-  const next = nextIndex(head, dir)
-  const c = colOf(next)
-  const r = rowOf(next)
-  if (c < 0 || c >= COLS || r < 0 || r >= ROWS) return false
-  return !lane.body.includes(next)
+  const next = nextCellIndex(head, dir)
+  const willGrow = next === lane.food
+  return !willHitSelf(lane.body, next, willGrow)
 }
 
-export function pickBotDirection(lane: SnakeLaneState): Direction {
+function scoreDirection(lane: SnakeLaneState, dir: Direction) {
+  if (!isSafe(lane, dir)) return -999
   const head = lane.body[0]!
-  const fc = colOf(lane.food)
-  const fr = rowOf(lane.food)
-  const hc = colOf(head)
-  const hr = rowOf(head)
+  const next = nextCellIndex(head, dir)
+  let score = 0
 
-  const preferred: Direction[] = []
-  if (fr < hr) preferred.push('up')
-  if (fr > hr) preferred.push('down')
-  if (fc < hc) preferred.push('left')
-  if (fc > hc) preferred.push('right')
+  if (lane.diamond !== null) {
+    if (next === lane.diamond) score += 120
+    else score += (manhattan(head, lane.diamond) - manhattan(next, lane.diamond)) * 11
+    if (lane.diamondTicks <= 8) score += 25
+  }
 
-  for (const d of preferred) {
-    if (isSafe(lane, d)) return d
+  if (next === lane.food) score += 75
+  else score += (manhattan(head, lane.food) - manhattan(next, lane.food)) * 9
+
+  return score
+}
+
+export function pickBotDirection(lane: SnakeLaneState, rand: () => number = Math.random): Direction {
+  const options = DIRS.map((d) => ({ dir: d, score: scoreDirection(lane, d) })).filter((o) => o.score > -900)
+
+  if (options.length === 0) return lane.queuedDir
+
+  if (options.length > 1 && rand() < MISTAKE_CHANCE) {
+    const pick = options[Math.floor(rand() * options.length)]!
+    return pick.dir
   }
-  for (const d of DIRS) {
-    if (isSafe(lane, d)) return d
+
+  let best = options[0]!
+  for (const opt of options) {
+    if (opt.score > best.score) best = opt
   }
-  return lane.queuedDir
+  return best.dir
 }

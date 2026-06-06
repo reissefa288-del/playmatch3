@@ -4,7 +4,7 @@ import {
   bricksRemaining,
   computeSpeedMultiplier,
   createLane,
-  getMatchWinner,
+  resolveMatchResult,
   MATCH_SECONDS,
   MAX_LIVES,
   refillLaneBricks,
@@ -111,13 +111,16 @@ export function useBrickBreakDuel() {
     if (endedRef.current) return
     endedRef.current = true
     runningRef.current = false
-    const result =
-      lane1Ref.current.lives <= 0 ? 'p2' : getMatchWinner(lane1Ref.current, lane2Ref.current)
+    const l1 = lane1Ref.current
+    const l2 = lane2Ref.current
+    const result = resolveMatchResult(l1, l2)
+    setLane1(l1)
+    setLane2(l2)
     setWinner(result)
     setRunning(false)
-    persistBest('p1', lane1Ref.current.score)
-    persistBest('p2', lane2Ref.current.score)
-    playBrickBreakSound('win')
+    persistBest('p1', l1.score)
+    persistBest('p2', l2.score)
+    playBrickBreakSound(result === 'draw' ? 'life' : 'win')
   }, [persistBest])
 
   const syncHud = useCallback((l1: LaneState, l2: LaneState, timeDisplay: number) => {
@@ -150,7 +153,9 @@ export function useBrickBreakDuel() {
       lane1RenderRef.current = r1.lane
 
       if (r1.lane.lives <= 0) {
+        syncHud(r1.lane, lane2Ref.current, timeLeftRef.current)
         endMatch()
+        return
       }
 
       const target = botPaddleTarget(lane2Ref.current)
@@ -160,6 +165,12 @@ export function useBrickBreakDuel() {
       playEvents(r2.events)
       lane2Ref.current = r2.lane
       lane2RenderRef.current = r2.lane
+
+      if (r2.lane.lives <= 0) {
+        syncHud(lane1Ref.current, r2.lane, timeLeftRef.current)
+        endMatch()
+        return
+      }
 
       syncUiTickRef.current += 1
       const forceUi =
@@ -172,7 +183,7 @@ export function useBrickBreakDuel() {
         (r2.lane.pickupBanner?.label ?? null) !== prevPickupBanner2 ||
         !!r1.lane.pickupBanner ||
         !!r2.lane.pickupBanner
-      if (forceUi || syncUiTickRef.current % 4 === 0) {
+      if (forceUi || syncUiTickRef.current % 6 === 0) {
         syncHud(r1.lane, r2.lane, timeLeftRef.current)
       }
 

@@ -12,7 +12,7 @@ import {
 
 const COLOR_HEX: Record<BlockColor, string> = {
   purple: '#9d6cff',
-  red: '#ff4a6a',
+  pink: '#ff4ab8',
   orange: '#ff8c3a',
   yellow: '#ffd54a',
   green: '#42f090',
@@ -22,7 +22,7 @@ const COLOR_HEX: Record<BlockColor, string> = {
 
 const COLOR_GLOW: Record<BlockColor, string> = {
   purple: 'rgba(157, 108, 255, 0.55)',
-  red: 'rgba(255, 74, 106, 0.55)',
+  pink: 'rgba(255, 74, 184, 0.55)',
   orange: 'rgba(255, 140, 58, 0.55)',
   yellow: 'rgba(255, 213, 74, 0.5)',
   green: 'rgba(66, 240, 144, 0.5)',

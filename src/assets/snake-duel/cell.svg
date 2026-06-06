@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="cellFloor" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1c2a48"/>
+      <stop offset="1" stop-color="#080e1c"/>
+    </linearGradient>
+    <linearGradient id="cellEdge" x1="32" y1="6" x2="32" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3a5078" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#141c30" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="10" fill="#060a14"/>
+  <rect x="4" y="4" width="56" height="56" rx="10" fill="url(#cellFloor)"/>
+  <rect x="4" y="4" width="56" height="56" rx="10" fill="url(#cellEdge)" opacity="0.5"/>
+  <rect x="8" y="7" width="22" height="12" rx="6" fill="#fff" opacity="0.07"/>
+  <rect x="4" y="4" width="56" height="56" rx="10" stroke="#2a4068" stroke-width="1"/>
+  <path d="M32 14v36M14 32h36" stroke="#1a2844" stroke-width="0.6" opacity="0.35"/>
+</svg>

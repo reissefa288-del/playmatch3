@@ -38,13 +38,15 @@ export function BrickBreakScreen() {
   const score2 = String(game.lane2.score).padStart(4, '0')
 
   const overlayMessage = !game.running
-    ? game.lane1.lives <= 0
-      ? 'CANLAR BİTTİ — OYUNCU 2 KAZANDI'
-      : game.winner === 'draw'
-        ? 'BERABERE'
-        : game.winner === 'p1'
-          ? 'OYUNCU 1 KAZANDI'
-          : 'OYUNCU 2 KAZANDI'
+    ? game.winner === 'draw'
+      ? 'BERABERE'
+      : game.lane1.lives <= 0 && game.winner === 'p2'
+        ? 'CANLAR BİTTİ — OYUNCU 2 KAZANDI'
+        : game.lane2.lives <= 0 && game.winner === 'p1'
+          ? 'RAKİP CANLARI BİTTİ — OYUNCU 1 KAZANDI'
+          : game.winner === 'p1'
+            ? 'OYUNCU 1 KAZANDI'
+            : 'OYUNCU 2 KAZANDI'
     : null
 
   useEffect(() => {

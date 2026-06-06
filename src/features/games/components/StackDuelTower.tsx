@@ -4,7 +4,13 @@ import {
   blockHeightForCount,
   calcDropDistancePx,
   FALL_DURATION_MS,
+  isLaneEliminated,
+  isLaneInDanger,
   landingBottomPx,
+  laneSpeedTier,
+  LIFE_RECOVERY_PERFECTS,
+  LIVES,
+  MEGA_COMBO_AT,
   previewLanding,
   SLIDE_TOP_PX,
   type StackLaneState,
@@ -43,6 +49,9 @@ export function StackDuelTower({
   const mover = lane.falling ?? lane.active
 
   const preview = useMemo(() => previewLanding(lane), [lane])
+  const inDanger = isLaneInDanger(lane)
+  const eliminated = isLaneEliminated(lane)
+  const speedTier = laneSpeedTier(lane)
 
   useLayoutEffect(() => {
     const el = stageRef.current
@@ -65,7 +74,7 @@ export function StackDuelTower({
 
   return (
     <motion.div
-      className={`pm-stack-tower is-${accent}${interactive ? ' is-interactive' : ''}${reactionClass}`}
+      className={`pm-stack-tower is-${accent}${interactive ? ' is-interactive' : ''}${reactionClass}${inDanger ? ' is-danger' : ''}${eliminated ? ' is-eliminated' : ''}`}
       animate={lane.shake > 0 ? { x: [0, -5, 5, -3, 0] } : { x: 0 }}
       transition={{ duration: 0.28, ease: 'easeOut' }}
     >
@@ -84,6 +93,27 @@ export function StackDuelTower({
       </div>
 
       <p className="pm-stack-tower__live-score">{formatScore(liveScore)}</p>
+
+      <div
+        className={`pm-stack-tower__lives${lane.perfectStreak > 0 && lane.lives < LIVES ? ' is-streaking' : ''}`}
+        aria-label={`${lane.lives} can kaldı${lane.perfectStreak > 0 ? `, ${lane.perfectStreak} perfect serisi` : ''}`}
+      >
+        {Array.from({ length: LIVES }, (_, i) => (
+          <i key={i} className={i < lane.lives ? 'is-full' : 'is-empty'} aria-hidden />
+        ))}
+        {lane.perfectStreak > 0 && lane.lives < LIVES ? (
+          <span className="pm-stack-tower__life-streak">
+            {lane.perfectStreak}/{LIFE_RECOVERY_PERFECTS}
+          </span>
+        ) : null}
+      </div>
+
+      {speedTier > 0 ? (
+        <span className="pm-stack-tower__speed-tier">HIZ {speedTier + 1}</span>
+      ) : null}
+
+      {eliminated ? <span className="pm-stack-tower__eliminated">ELENDİ</span> : null}
+      {inDanger && !eliminated ? <span className="pm-stack-tower__danger-tag">TEHLİKE</span> : null}
 
       <div
         ref={stageRef}
@@ -215,6 +245,16 @@ export function StackDuelTower({
         >
           <span className="pm-stack-tower__perfect-glow" aria-hidden />
           <span className="pm-stack-tower__perfect-text">{lane.perfectPop}</span>
+        </motion.span>
+      ) : null}
+
+      {lane.combo >= MEGA_COMBO_AT ? (
+        <motion.span
+          className="pm-stack-tower__mega-badge"
+          initial={{ opacity: 0, scale: 0.6 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          x2 PUAN
         </motion.span>
       ) : null}
 

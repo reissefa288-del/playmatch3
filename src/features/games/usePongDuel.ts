@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { updateBotPaddle } from './utils/pongDuelBot'
 import {
+  ballHeatLevel,
   createPongState,
   MATCH_ROUNDS,
   POINTS_TO_WIN,
@@ -147,6 +148,7 @@ export function usePongDuel() {
     winner,
     matchRounds: MATCH_ROUNDS,
     pointsToWin: POINTS_TO_WIN,
+    ballHeat: ballHeatLevel(game.speedMul),
     movePaddle,
     restartMatch,
   }

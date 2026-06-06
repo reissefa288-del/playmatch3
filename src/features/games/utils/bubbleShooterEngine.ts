@@ -1,4 +1,5 @@
 export const BUBBLE_RADIUS = 0.036
+export const SPECIAL_IMPACT_LIFE = 0.62
 /** Yatay kenar boşluğu — çizim halo’su için merkezler içeride kalır */
 export const GRID_H_MARGIN = 0.052
 export const GRID_COLS_EVEN = 8
@@ -29,16 +30,13 @@ export function bubbleDrawRadiusPx(canvasWidth: number) {
 }
 export const AIM_MIN = -2.88
 export const AIM_MAX = -0.32
-export const AIM_SPEED = 2.35
-export const AIM_HOLD_SPEED = 2.45
-export const SHOT_SPEED = 1.32
+export const AIM_SPEED = 2.95
+export const AIM_HOLD_SPEED = 2.85
+export const SHOT_SPEED = 1.68
 /** Nişan önizlemesi ve gerçek atış — aynı adım */
-export const SHOT_PHYSICS_STEP = 0.007
+export const SHOT_PHYSICS_STEP = 0.009
 export const AIM_ACCEL = 14
 export const AIM_DAMP = 10
-export const AIM_SNAP_MAX_DIFF = 0.26
-export const AIM_SNAP_STRENGTH = 14
-
 /** Dokunmatik nişan — çarpışma mesafesiyle aynı dikey düzeltme */
 export function aimFromNormalizedPointer(nx: number, ny: number): number {
   const dx = nx - SHOOTER_X
@@ -48,7 +46,7 @@ export function aimFromNormalizedPointer(nx: number, ny: number): number {
 
 export type BubbleColor = 'cyan' | 'pink' | 'yellow' | 'green' | 'purple'
 
-export type BubbleKind = 'normal' | 'fire' | 'bomb' | 'rainbow'
+export type BubbleKind = 'normal' | 'fire' | 'bomb' | 'rainbow' | 'ice'
 
 export type BubbleSlot = {
   color: BubbleColor
@@ -64,6 +62,7 @@ export const SPECIAL_KIND_META: Record<
   fire: { label: 'ATEŞ', hex: '#ff6b35', glow: 'rgba(255, 107, 53, 0.55)' },
   bomb: { label: 'BOMBA', hex: '#ff3a78', glow: 'rgba(255, 58, 120, 0.5)' },
   rainbow: { label: 'GÖK', hex: '#e8f0ff', glow: 'rgba(200, 220, 255, 0.55)' },
+  ice: { label: 'BUZ', hex: '#a8e8ff', glow: 'rgba(120, 220, 255, 0.5)' },
 }
 
 export const COLOR_HEX: Record<BubbleColor, string> = {
@@ -85,6 +84,10 @@ export const COLOR_GLOW: Record<BubbleColor, string> = {
 
 export type LaneEvent =
   | 'shoot'
+  | 'shoot_fire'
+  | 'shoot_bomb'
+  | 'shoot_rainbow'
+  | 'shoot_ice'
   | 'pop'
   | 'drop'
   | 'swap'
@@ -135,6 +138,17 @@ export type LaneState = {
   canShoot: boolean
   /** Balonlar tehlike çizgisini geçince tur kaybı */
   overflowed: boolean
+  /** Ardışık isabetli atış zinciri */
+  combo: number
+  /** Özel top çarpma efekti (normalize) */
+  fxPulse: {
+    kind: Exclude<BubbleKind, 'normal'>
+    x: number
+    y: number
+    life: number
+  } | null
+  /** Bu tur garanti özel top (sadece oyuncu şeridi) */
+  roundMission: Exclude<BubbleKind, 'normal'> | null
 }
 
 export function createLane(seed = 0): LaneState {
@@ -157,6 +171,9 @@ export function createLane(seed = 0): LaneState {
     particles: [],
     canShoot: true,
     overflowed: false,
+    combo: 0,
+    fxPulse: null,
+    roundMission: null,
   }
 }
 
@@ -170,6 +187,9 @@ export function startNewRound(lane: LaneState, seed: number): LaneState {
     score: 0,
     missStreak: 0,
     overflowed: false,
+    combo: 0,
+    fxPulse: null,
+    roundMission: null,
   }
 }
 
@@ -202,9 +222,11 @@ export function updateLane(
         life: p.life - dt,
       }))
       .filter((p) => p.life > 0)
-      .slice(-72),
+      .slice(-34),
     projectile: lane.projectile ? { ...lane.projectile } : null,
+    fxPulse: lane.fxPulse ? { ...lane.fxPulse, life: lane.fxPulse.life - dt } : null,
   }
+  if (next.fxPulse && next.fxPulse.life <= 0) next.fxPulse = null
 
   if (swap && !next.projectile && next.canShoot) {
     const tempColor = next.currentColor
@@ -224,16 +246,6 @@ export function updateLane(
       const damp = Math.exp(-AIM_DAMP * dt)
       next.aimVel *= damp
       next.aimAngle = clamp(next.aimAngle + next.aimVel * dt * AIM_SPEED, AIM_MIN, AIM_MAX)
-
-      const target = predictAttachCell(next.grid, next.aimAngle)
-      if (target) {
-        const desired = aimAtCell(target.row, target.col)
-        const diff = wrapAngle(desired - next.aimAngle)
-        if (Math.abs(diff) <= AIM_SNAP_MAX_DIFF) {
-          const snap = 1 - Math.exp(-AIM_SNAP_STRENGTH * dt)
-          next.aimAngle = clamp(next.aimAngle + diff * snap, AIM_MIN, AIM_MAX)
-        }
-      }
     }
   }
 
@@ -256,7 +268,10 @@ export function updateLane(
     next.nextKind = rolled.kind
     next.canShoot = false
     events.push('shoot')
-    if (shotKind !== 'normal') events.push('special')
+    if (shotKind === 'fire') events.push('shoot_fire')
+    else if (shotKind === 'bomb') events.push('shoot_bomb')
+    else if (shotKind === 'rainbow') events.push('shoot_rainbow')
+    else if (shotKind === 'ice') events.push('shoot_ice')
   }
 
   if (next.projectile?.active) {
@@ -268,11 +283,13 @@ export function updateLane(
         next.score += gained
         next.totalScore += gained
         next.missStreak = 0
+        next.combo = lane.combo + 1
         if (hit.popped >= 4) events.push('burst')
-        if (hit.popped >= 6) events.push('combo')
+        if (hit.popped >= 6 || next.combo >= 3) events.push('combo')
         if (next.grid.size === 0) events.push('clear')
       } else {
         next.missStreak += 1
+        next.combo = 0
       }
       next.projectile = null
       next.canShoot = true
@@ -295,6 +312,20 @@ export function checkDangerLine(lane: LaneState): boolean {
     if (pos.y + BUBBLE_RADIUS >= DANGER_LINE_Y) return true
   }
   return false
+}
+
+/** 0 = güvenli, 1 = tehlike çizgisine çok yakın */
+export function getDangerProximity(lane: LaneState): number {
+  const span = 0.11
+  let minGap = span
+  for (const key of lane.grid.keys()) {
+    const [row, col] = key.split(',').map(Number)
+    const pos = bubblePos(row, col)
+    const gap = DANGER_LINE_Y - (pos.y + BUBBLE_RADIUS)
+    if (gap < minGap) minGap = Math.max(0, gap)
+  }
+  if (minGap >= span) return 0
+  return 1 - minGap / span
 }
 
 function stepProjectile(
@@ -536,7 +567,12 @@ function placeBubbleAndResolve(
 ): number {
   const key = cellKey(row, col)
   lane.grid.set(key, color)
-  spawnParticles(lane, bubblePos(row, col), color, kind === 'normal' ? 8 : 14)
+  const pos = bubblePos(row, col)
+  spawnParticles(lane, pos, color, kind === 'normal' ? 5 : 8)
+  if (kind !== 'normal') {
+    spawnKindBurstParticles(lane, pos, kind)
+    lane.fxPulse = { kind, x: pos.x, y: pos.y, life: SPECIAL_IMPACT_LIFE }
+  }
   return resolveAttachmentWithKind(lane, row, col, kind)
 }
 
@@ -546,6 +582,9 @@ function resolveAttachmentWithKind(lane: LaneState, row: number, col: number, ki
   }
   if (kind === 'rainbow') {
     return popRainbowAt(lane, row, col)
+  }
+  if (kind === 'ice') {
+    return popIceAt(lane, row, col)
   }
   if (kind === 'fire') {
     const cluster = floodColor(lane.grid, row, col)
@@ -695,7 +734,7 @@ function createInitialGrid(seed: number) {
   return grid
 }
 
-function spawnParticles(lane: LaneState, pos: { x: number; y: number }, color: BubbleColor, count = 8) {
+function spawnParticles(lane: LaneState, pos: { x: number; y: number }, color: BubbleColor, count = 5) {
   const hex = COLOR_HEX[color]
   lane.particles.push(
     ...Array.from({ length: count }, () => ({
@@ -707,6 +746,54 @@ function spawnParticles(lane: LaneState, pos: { x: number; y: number }, color: B
       color: hex,
     })),
   )
+}
+
+const KIND_BURST_COLORS: Record<Exclude<BubbleKind, 'normal'>, string[]> = {
+  fire: ['#ff8a45', '#ffb347', '#ff5a20'],
+  bomb: ['#ff5a9a', '#ff9ac0', '#ffffff'],
+  rainbow: ['#e8f4ff', '#9ec8ff', '#d8b0ff'],
+  ice: ['#d8f4ff', '#a0e0ff', '#ffffff'],
+}
+
+function spawnKindBurstParticles(
+  lane: LaneState,
+  pos: { x: number; y: number },
+  kind: Exclude<BubbleKind, 'normal'>,
+) {
+  const palette = KIND_BURST_COLORS[kind]
+  const count = kind === 'bomb' ? 16 : 13
+  lane.particles.push(
+    ...Array.from({ length: count }, () => {
+      const angle = Math.random() * Math.PI * 2
+      const speed = 0.3 + Math.random() * 0.55
+      const lift = kind === 'fire' ? -0.25 - Math.random() * 0.2 : kind === 'ice' ? -0.08 : 0
+      return {
+        x: pos.x + (Math.random() - 0.5) * 0.015,
+        y: pos.y + (Math.random() - 0.5) * 0.015,
+        vx: Math.cos(angle) * speed * 0.5,
+        vy: Math.sin(angle) * speed * 0.5 + lift,
+        life: 0.38 + Math.random() * 0.35,
+        color: palette[Math.floor(Math.random() * palette.length)]!,
+      }
+    }),
+  )
+}
+
+function popIceAt(lane: LaneState, row: number, col: number): number {
+  let removed = 0
+  const toPop = new Set<string>([cellKey(row, col)])
+  for (const n of neighbors(row, col)) {
+    toPop.add(cellKey(n.row, n.col))
+  }
+  for (const key of toPop) {
+    if (!lane.grid.has(key)) continue
+    const [r, c] = key.split(',').map(Number)
+    spawnKindBurstParticles(lane, bubblePos(r, c), 'ice')
+    spawnParticles(lane, bubblePos(r, c), lane.grid.get(key)!, 6)
+    lane.grid.delete(key)
+    removed += 1
+  }
+  return removed + popFloating(lane)
 }
 
 function pickColor(seed: number): BubbleColor {
@@ -725,13 +812,6 @@ function cellKey(row: number, col: number) {
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value))
-}
-
-function wrapAngle(angle: number) {
-  let a = angle
-  while (a > Math.PI) a -= Math.PI * 2
-  while (a < -Math.PI) a += Math.PI * 2
-  return a
 }
 
 function mulberry32(seed: number) {
@@ -981,9 +1061,10 @@ function rollShooterBubble(grid: Map<string, BubbleColor>, seed: number): Bubble
   const rng = mulberry32(seed * 313)
   const color = pickColorForLane(grid, Math.floor(rng() * 999))
   const roll = rng()
-  if (roll < 0.08) return { color, kind: 'fire' }
-  if (roll < 0.14) return { color, kind: 'bomb' }
-  if (roll < 0.2) return { color, kind: 'rainbow' }
+  if (roll < 0.065) return { color, kind: 'fire' }
+  if (roll < 0.13) return { color, kind: 'bomb' }
+  if (roll < 0.195) return { color, kind: 'rainbow' }
+  if (roll < 0.26) return { color, kind: 'ice' }
   return { color, kind: 'normal' }
 }
 

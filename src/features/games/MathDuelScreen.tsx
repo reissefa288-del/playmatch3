@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
-import { FiArrowLeft, FiAward, FiClock, FiSettings, FiVolume2 } from 'react-icons/fi'
+import { FiArrowLeft, FiAward, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
@@ -104,15 +104,6 @@ export function MathDuelScreen() {
           <button type="button" className="pm-math-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <div className="pm-math-top-actions">
-            <button type="button" className="pm-math-icon-btn" aria-label="Ses">
-              <FiVolume2 />
-            </button>
-            <button type="button" className="pm-math-icon-btn" aria-label="Ayarlar">
-              <FiSettings />
-            </button>
-          </div>
-
           <header className="pm-math-header">
             <h1 className="pm-math-header__title">
               <span className="is-cyan">MATH</span>

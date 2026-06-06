@@ -356,6 +356,21 @@
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
+.pm-memory-grid__combo--pop {
+  animation: pm-memory-combo-pop 0.32s cubic-bezier(0.34, 1.2, 0.48, 1);
+}
+
+@keyframes pm-memory-combo-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.72) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 .pm-memory-card {
   position: relative;
   display: block;
@@ -365,17 +380,34 @@
   padding: 0;
   background: transparent;
   cursor: pointer;
-  perspective: 480px;
+  perspective: 720px;
   transition: transform 0.16s ease, filter 0.16s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.pm-memory-card:not(:disabled):not(.shown):not(.matched):hover {
+.pm-memory-card:not(:disabled):not(.shown):not(.matched):not(.is-open):hover {
   transform: scale(1.04);
   z-index: 4;
 }
 
 .pm-memory-card:disabled {
   cursor: default;
+  opacity: 1;
+}
+
+.pm-memory-card.shown,
+.pm-memory-card.matched,
+.pm-memory-card.is-open {
+  z-index: 3;
+}
+
+.pm-memory-card.is-open .pm-memory-card__face--front,
+.pm-memory-card.shown .pm-memory-card__face--front,
+.pm-memory-card.matched .pm-memory-card__face--front {
+  box-shadow:
+    0 0 16px color-mix(in srgb, var(--sym-color, #7ecbff) 45%, transparent),
+    0 4px 14px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .pm-memory-card__inner {
@@ -384,9 +416,10 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.4s cubic-bezier(0.34, 1.2, 0.48, 1);
+  transition: transform 0.34s cubic-bezier(0.34, 1.15, 0.48, 1);
 }
 
+.pm-memory-card.is-open .pm-memory-card__inner,
 .pm-memory-card.shown .pm-memory-card__inner,
 .pm-memory-card.matched .pm-memory-card__inner {
   transform: rotateY(180deg);
@@ -399,10 +432,10 @@
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   overflow: hidden;
-  transform: translateZ(0);
 }
 
 .pm-memory-card__face--back {
+  transform: rotateY(0deg);
   /* Çerçevesiz “mesh” arka yüz (kenarda vinyet/border hissi yok) */
   background:
     repeating-linear-gradient(
@@ -463,10 +496,10 @@
   display: grid;
   place-items: center;
   background: linear-gradient(168deg, rgba(8, 12, 28, 0.98), rgba(2, 4, 14, 0.99));
-  border: 2px solid var(--sym-color);
+  border: 2px solid var(--sym-color, #7ecbff);
   box-shadow:
-    0 0 16px color-mix(in srgb, var(--sym-color) 45%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 0 16px color-mix(in srgb, var(--sym-color, #7ecbff) 45%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 .pm-memory-card__glyph-wrap {
@@ -485,8 +518,13 @@
     drop-shadow(0 0 22px color-mix(in srgb, var(--sym-color) 40%, transparent));
 }
 
-.pm-memory-card.matched {
-  animation: pm-memory-match-pop 0.65s cubic-bezier(0.34, 1.4, 0.48, 1);
+.pm-memory-card.matched .pm-memory-card__glyph-wrap,
+.pm-memory-card.is-match-burst .pm-memory-card__glyph-wrap {
+  animation: pm-memory-match-pop 0.85s cubic-bezier(0.34, 1.4, 0.48, 1);
+}
+
+.pm-memory-card.shown {
+  pointer-events: none;
 }
 
 .pm-memory-card.is-match-burst {
@@ -498,12 +536,16 @@
     filter: brightness(1);
     transform: scale(1);
   }
-  35% {
-    filter: brightness(1.45);
-    transform: scale(1.08);
+  30% {
+    filter: brightness(1.55);
+    transform: scale(1.12);
+  }
+  55% {
+    filter: brightness(1.35);
+    transform: scale(1.05);
   }
   100% {
-    filter: brightness(1.1);
+    filter: brightness(1.12);
     transform: scale(1);
   }
 }
@@ -516,7 +558,7 @@
   box-shadow:
     0 0 20px rgba(255, 255, 255, 0.5),
     0 0 40px rgba(0, 232, 255, 0.35);
-  animation: pm-memory-ring 0.55s ease-out forwards;
+  animation: pm-memory-ring 0.75s ease-out forwards;
   pointer-events: none;
   z-index: 10;
 }
@@ -655,7 +697,7 @@
   inset: 10%;
   border-radius: 50%;
   border: 2px solid rgba(255, 255, 255, 0.7);
-  animation: pm-memory-fx-ring 0.5s ease-out forwards;
+  animation: pm-memory-fx-ring 0.72s ease-out forwards;
 }
 
 .pm-memory-match-fx.is-cyan .pm-memory-match-fx__ring {
@@ -686,17 +728,22 @@
   inset: 0;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.5), transparent 65%);
-  animation: pm-memory-fx-burst 0.45s ease-out forwards;
+  opacity: 0.92;
+  animation: pm-memory-fx-burst 0.68s ease-out forwards;
 }
 
 @keyframes pm-memory-fx-burst {
-  from {
-    opacity: 0.9;
-    transform: scale(0.3);
-  }
-  to {
+  0% {
     opacity: 0;
-    transform: scale(1.5);
+    transform: scale(0.4);
+  }
+  35% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.35);
   }
 }
 
@@ -708,19 +755,23 @@
   background: #fff;
   left: 50%;
   top: 50%;
-  transform: rotate(calc(var(--spark-i) * 45deg)) translateY(-140%);
-  animation: pm-memory-fx-spark 0.45s ease-out forwards;
+  transform: rotate(calc(var(--spark-i) * 45deg)) translateY(-130%);
+  animation: pm-memory-fx-spark 0.55s ease-out forwards;
   animation-delay: calc(var(--spark-i) * 0.02s);
+  will-change: transform, opacity;
 }
 
 @keyframes pm-memory-fx-spark {
-  from {
-    opacity: 1;
-    transform: rotate(calc(var(--spark-i) * 45deg)) translateY(-40%) scale(1);
-  }
-  to {
+  0% {
     opacity: 0;
-    transform: rotate(calc(var(--spark-i) * 45deg)) translateY(-160%) scale(0.2);
+    transform: rotate(calc(var(--spark-i) * 45deg)) translateY(-20%) scale(0.3);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--spark-i) * 45deg)) translateY(-160%) scale(1.2);
   }
 }
 
@@ -748,12 +799,18 @@
 @media (prefers-reduced-motion: reduce) {
   .pm-memory-card__inner,
   .pm-memory-card__ring,
-  .pm-memory-card.matched,
+  .pm-memory-card__glyph-wrap,
   .pm-memory-match-fx__ring,
   .pm-memory-match-fx__burst,
   .pm-memory-match-fx__spark {
     animation: none !important;
     transition: none !important;
+  }
+
+  .pm-memory-card.is-open .pm-memory-card__inner,
+  .pm-memory-card.shown .pm-memory-card__inner,
+  .pm-memory-card.matched .pm-memory-card__inner {
+    transform: rotateY(180deg);
   }
 
   .pm-memory-card:not(:disabled):hover {
@@ -781,82 +838,27 @@
   gap: 6px;
 }
 
-.pm-memory-hud__name,
 .pm-memory-hud__score-box,
 .pm-memory-hud__trophy,
 .pm-memory-hud__stat {
   display: none;
 }
 
-.pm-memory-player-card {
-  width: min(100%, 128px);
-  border-radius: 16px;
-  overflow: hidden;
-  background: rgba(6, 10, 28, 0.78);
-  backdrop-filter: blur(8px);
-  border: 2px solid rgba(120, 160, 255, 0.25);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35);
+/* Paylaşılan portre boyutu — game-portrait.css ile aynı */
+.pm-memory-hud__side .pm-game-portrait {
+  width: clamp(62px, 18vw, 84px);
+  height: clamp(62px, 18vw, 84px);
 }
 
-.pm-memory-player-card.is-cyan {
-  border-color: rgba(0, 232, 255, 0.65);
-  box-shadow: 0 0 22px rgba(0, 232, 255, 0.16), 0 10px 26px rgba(0, 0, 0, 0.35);
-}
-
-.pm-memory-player-card.is-pink {
-  border-color: rgba(255, 45, 154, 0.65);
-  box-shadow: 0 0 22px rgba(255, 45, 154, 0.14), 0 10px 26px rgba(0, 0, 0, 0.35);
-}
-
-.pm-memory-player-card__photo {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: rgba(10, 16, 42, 0.65);
-}
-
-/* GamePlayerPortrait inside player card */
-.pm-memory-player-card__photo .pm-game-portrait {
-  width: 100%;
-  height: 100%;
-  border-radius: 0;
-  border-width: 0;
-  box-shadow: none;
-  background: transparent;
-}
-
-.pm-memory-player-card__photo .pm-game-portrait__photo {
-  filter: saturate(1.06) contrast(1.03);
-}
-
-.pm-memory-player-card__name {
-  height: 30px;
-  display: grid;
-  place-items: center;
-  font-family: Orbitron, system-ui, sans-serif;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  font-size: 0.62rem;
-  color: #eef4ff;
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 40%),
-    rgba(6, 10, 28, 0.88);
-}
-
-.pm-memory-player-card.is-cyan .pm-memory-player-card__name {
-  background:
-    linear-gradient(180deg, rgba(0, 232, 255, 0.16), transparent 45%),
-    rgba(6, 10, 28, 0.9);
-}
-
-.pm-memory-player-card.is-pink .pm-memory-player-card__name {
-  background:
-    linear-gradient(180deg, rgba(255, 45, 154, 0.16), transparent 45%),
-    rgba(6, 10, 28, 0.9);
+@media (max-width: 360px) {
+  .pm-memory-hud__side .pm-game-portrait {
+    width: clamp(56px, 16vw, 72px);
+    height: clamp(56px, 16vw, 72px);
+  }
 }
 
 .pm-memory-score-card {
-  width: min(100%, 128px);
+  width: min(100%, clamp(92px, 26vw, 118px));
   border-radius: 14px;
   padding: 10px 10px 9px;
   display: grid;
@@ -1033,17 +1035,8 @@
   50% { transform: translateY(-3px); }
 }
 
-.pm-memory-card__inner {
-  transition: transform 0.48s cubic-bezier(0.34, 1.15, 0.48, 1);
-}
-
-.pm-memory-card:not(:disabled):active .pm-memory-card__inner {
+.pm-memory-card:not(.is-open):not(.shown):not(.matched):not(:disabled):active {
   transform: scale(0.97);
-}
-
-.pm-memory-card.shown .pm-memory-card__inner,
-.pm-memory-card.matched .pm-memory-card__inner {
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
 }
 
 .pm-memory-grid.is-miss-shake {
@@ -1054,16 +1047,6 @@
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-4px); }
   75% { transform: translateX(4px); }
-}
-
-.pm-memory-match-fx__burst {
-  opacity: 0.85;
-}
-
-.pm-memory-match-fx__spark {
-  width: 3px;
-  height: 3px;
-  transform: rotate(calc(var(--spark-i) * 90deg)) translateY(-120%);
 }
 
 .pm-memory-overlay {

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <circle cx="32" cy="32" r="28" fill="#0c1020" stroke="#54e291" stroke-width="2"/>
+  <circle cx="32" cy="32" r="24" fill="url(#vg)" opacity="0.9"/>
+  <text x="32" y="38" text-anchor="middle" font-family="Orbitron,Arial,sans-serif" font-size="18" font-weight="900" fill="#fff" letter-spacing="2">VS</text>
+  <defs>
+    <radialGradient id="vg" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(24 20) rotate(90) scale(28)">
+      <stop stop-color="#1a2848"/>
+      <stop offset="1" stop-color="#080c18"/>
+    </radialGradient>
+  </defs>
+</svg>

@@ -6,7 +6,7 @@ export function MemoryDuelAmbient() {
       <span className="pm-memory-ambient__fog" />
       <span className="pm-memory-ambient__vignette" />
       <span className="pm-memory-ambient__particles">
-        {Array.from({ length: 12 }, (_, i) => (
+        {Array.from({ length: 6 }, (_, i) => (
           <i key={i} style={{ ['--p' as string]: i }} />
         ))}
       </span>

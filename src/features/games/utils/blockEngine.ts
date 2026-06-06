@@ -1,27 +1,23 @@
-export type BlockColor = 'purple' | 'red' | 'orange' | 'yellow' | 'green' | 'cyan' | 'blue'
+export type BlockColor = 'purple' | 'pink' | 'orange' | 'yellow' | 'green' | 'cyan' | 'blue'
 
-/** Tetris 10×20 dışı; 9×16 küp kuyusu — pentomino/trimino seti */
+/** 9×16 küp kuyusu — 7 klasik tetromino */
 export const BLOCK_COLS = 9
 export const BLOCK_ROWS = 16
 const BUFFER_ROWS = 2
 const TOTAL_ROWS = BLOCK_ROWS + BUFFER_ROWS
 
-/** Pentomino + trimino — klasik 4’lü tetromino yok */
 export type PieceKind =
-  | 'flare'
-  | 'prism'
-  | 'crest'
-  | 'arch'
-  | 'bolt'
-  | 'ripple'
-  | 'dash'
-  | 'knob'
+  | 'aquaLine'
+  | 'luna'
+  | 'solar'
+  | 'oro'
+  | 'verda'
+  | 'zeta'
+  | 'novaT'
 
-/** Oynanabilirlik sabitleri — 9×16 küp kuyusu + 5/3 hücre parçalar */
-export const FUSION_MIN = 4
-export const COLUMN_SURGE_MIN = 6
+/** Oynanabilirlik — yalnızca aynı renk küme temizliği (satır / sütun yok) */
+export const FUSION_MIN = 5
 export const NOVA_FUSION_CELLS = 10
-const NOVA_SURGE_COUNT = 2
 
 export type BlockCell = BlockColor | null
 
@@ -49,13 +45,9 @@ export type BlockLaneState = {
   nextKind: PieceKind
   nextQueue: PieceKind[]
   bag: PieceKind[]
-  /** Sütun dalgası (dikey surge) sayısı */
-  lines: number
   /** Füzyonla silinen hücre toplamı */
   fusions: number
   fusionCharge: number
-  attack: number
-  incomingGarbage: number
   alive: boolean
   dropAccum: number
   lockAccum: number
@@ -98,8 +90,6 @@ export type BlockLaneEvent =
   | 'drop'
   | 'lock'
   | 'fusion'
-  | 'surge'
-  | 'attack'
   | 'gameover'
   | 'combo'
   | 'nova'
@@ -112,85 +102,72 @@ export const DROP_INTERVAL = 0.56
 export const SOFT_DROP_INTERVAL = 0.011
 export const LOCK_DELAY = 0.42
 const MAX_LOCK_RESETS = 12
-const FUSION_SPEED_BONUS = 0.0009
-const SURGE_SPEED_BONUS = 0.022
+const FUSION_SPEED_BONUS = 0.0012
 const MAX_SPEED_BONUS = 0.38
 
 export const PIECE_COLOR: Record<PieceKind, BlockColor> = {
-  flare: 'purple',
-  prism: 'cyan',
-  crest: 'yellow',
-  arch: 'green',
-  bolt: 'orange',
-  ripple: 'red',
-  dash: 'blue',
-  knob: 'orange',
+  aquaLine: 'cyan',
+  luna: 'purple',
+  solar: 'orange',
+  oro: 'yellow',
+  verda: 'green',
+  zeta: 'pink',
+  novaT: 'blue',
 }
 
 export const PIECE_LABEL: Record<PieceKind, string> = {
-  flare: 'KÖŞE-5',
-  prism: 'TABAN',
-  crest: 'DİK-5',
-  arch: 'KAPI',
-  bolt: 'L-5',
-  ripple: 'MERDİVEN',
-  dash: 'ÇUBUK-3',
-  knob: 'KÖŞE-3',
+  aquaLine: 'AQUA LINE',
+  luna: 'LUNA',
+  solar: 'SOLAR',
+  oro: 'ORO',
+  verda: 'VERDA',
+  zeta: 'ZETA',
+  novaT: 'NOVA T',
 }
 
 type CellOffset = [number, number]
 
 const BASE_SHAPES: Record<PieceKind, CellOffset[]> = {
-  flare: [
+  aquaLine: [
+    [0, 0],
     [0, 1],
     [0, 2],
+    [0, 3],
+  ],
+  luna: [
+    [0, 0],
     [1, 0],
-    [1, 1],
+    [2, 0],
     [2, 1],
   ],
-  prism: [
+  solar: [
+    [0, 1],
+    [1, 1],
+    [2, 1],
+    [2, 0],
+  ],
+  oro: [
     [0, 0],
     [0, 1],
     [1, 0],
     [1, 1],
-    [2, 0],
   ],
-  crest: [
-    [0, 0],
-    [1, 0],
-    [2, 0],
-    [3, 0],
-    [2, 1],
-  ],
-  arch: [
-    [0, 0],
-    [0, 1],
-    [1, 0],
-    [1, 1],
-    [0, 2],
-  ],
-  bolt: [
-    [0, 0],
-    [1, 0],
-    [2, 0],
-    [2, 1],
-    [2, 2],
-  ],
-  ripple: [
+  verda: [
     [0, 0],
     [0, 1],
     [1, 1],
     [1, 2],
-    [2, 2],
   ],
-  dash: [
+  zeta: [
+    [0, 1],
+    [0, 2],
+    [1, 0],
+    [1, 1],
+  ],
+  novaT: [
     [0, 0],
     [0, 1],
     [0, 2],
-  ],
-  knob: [
-    [0, 0],
-    [1, 0],
     [1, 1],
   ],
 }
@@ -226,29 +203,29 @@ const PIECE_ROTATIONS: Record<PieceKind, CellOffset[][]> = Object.fromEntries(
   (Object.keys(BASE_SHAPES) as PieceKind[]).map((kind) => [kind, buildRotations(BASE_SHAPES[kind])]),
 ) as Record<PieceKind, CellOffset[][]>
 
-const PENTOMINO_KINDS: PieceKind[] = ['flare', 'prism', 'crest', 'arch', 'bolt', 'ripple']
-const TRIMINO_KINDS: PieceKind[] = ['dash', 'knob']
-const KINDS: PieceKind[] = [...PENTOMINO_KINDS, ...TRIMINO_KINDS]
+const KINDS: PieceKind[] = ['aquaLine', 'luna', 'solar', 'oro', 'verda', 'zeta', 'novaT']
 
-const ROTATION_NUDGES_TRIM: [number, number][] = [
+const ROTATION_NUDGES_BASE: [number, number][] = [
   [0, 0],
+  [0, -1],
+  [0, -2],
+  [0, -3],
   [1, 0],
   [-1, 0],
-  [0, -1],
   [1, -1],
   [-1, -1],
+  [1, -2],
+  [-1, -2],
+  [2, 0],
+  [-2, 0],
 ]
 
-const ROTATION_NUDGES_PENTA: [number, number][] = [
-  ...ROTATION_NUDGES_TRIM,
-  [0, 1],
-  [-2, 0],
-  [2, 0],
-  [-1, 1],
-  [1, 1],
-  [-2, -1],
-  [2, -1],
-]
+function rotationKicksFor(kind: PieceKind): [number, number][] {
+  if (cellCount(kind) <= 4 && kind !== 'oro') {
+    return ROTATION_NUDGES_BASE
+  }
+  return ROTATION_NUDGES_BASE.slice(0, 8)
+}
 
 export function rotationCount(kind: PieceKind): number {
   return PIECE_ROTATIONS[kind].length
@@ -256,10 +233,6 @@ export function rotationCount(kind: PieceKind): number {
 
 export function cellCount(kind: PieceKind): number {
   return BASE_SHAPES[kind].length
-}
-
-export function isTrimino(kind: PieceKind): boolean {
-  return TRIMINO_KINDS.includes(kind)
 }
 
 function pieceExtent(kind: PieceKind, rotation: number) {
@@ -306,11 +279,8 @@ export function createBlockLane(seed = 1, roundIndex = 1): BlockLaneState {
     nextKind: first.kind,
     nextQueue: [],
     bag,
-    lines: 0,
     fusions: 0,
     fusionCharge: 0,
-    attack: 0,
-    incomingGarbage: 0,
     alive: true,
     dropAccum: 0,
     lockAccum: 0,
@@ -332,14 +302,13 @@ export function updateBlockLane(
   lane: BlockLaneState,
   dt: number,
   input: BlockInput,
-): { lane: BlockLaneState; events: BlockLaneEvent[]; attackSent: number } {
-  if (!lane.alive) return { lane: decayFx(lane, dt), events: [], attackSent: 0 }
+): { lane: BlockLaneState; events: BlockLaneEvent[] } {
+  if (!lane.alive) return { lane: decayFx(lane, dt), events: [] }
 
   let next = decayFx(lane, dt)
   const events: BlockLaneEvent[] = []
-  let attackSent = 0
 
-  if (!next.active) return { lane: next, events, attackSent: 0 }
+  if (!next.active) return { lane: next, events }
 
   next = { ...next, grid: next.grid.map((row) => [...row]), active: { ...next.active! } }
 
@@ -349,6 +318,7 @@ export function updateBlockLane(
       next = rotated
       events.push('rotate')
       next = resetLock(next)
+      next.dropAccum = 0
     }
   }
   if (input.left) {
@@ -368,10 +338,7 @@ export function updateBlockLane(
     }
   }
 
-  const speedBonus = Math.min(
-    next.fusions * FUSION_SPEED_BONUS + next.lines * SURGE_SPEED_BONUS,
-    MAX_SPEED_BONUS,
-  )
+  const speedBonus = Math.min(next.fusions * FUSION_SPEED_BONUS, MAX_SPEED_BONUS)
   const dropStep = input.down ? SOFT_DROP_INTERVAL : DROP_INTERVAL - speedBonus
   next.dropAccum += dt
 
@@ -382,13 +349,8 @@ export function updateBlockLane(
       next = moved
       if (input.down) events.push('drop')
     } else if (next.active) {
-      next = nudgeActiveIntoPlayfield(next)
-      if (!next.active) break
-      if (isPieceGrounded(next) && isFullyInPlayfield(next.active)) {
-        next.locking = true
-      } else if (isPieceGrounded(next)) {
-        next = { ...next, alive: false, active: null }
-        events.push('gameover')
+      if (!next.locking) {
+        next = { ...next, locking: true, lockAccum: 0 }
       }
       break
     }
@@ -402,7 +364,6 @@ export function updateBlockLane(
       events.push('lock')
       applyClearEvents(locked, events)
       next = locked.lane
-      attackSent = locked.attackSent
       if (!next.alive) events.push('gameover')
       else if (next.active) {
         next.dropAccum = 0
@@ -411,13 +372,12 @@ export function updateBlockLane(
     }
   }
 
-  return { lane: next, events, attackSent }
+  return { lane: next, events }
 }
 
-export function hardDropLane(lane: BlockLaneState): { lane: BlockLaneState; events: BlockLaneEvent[]; attackSent: number } {
-  if (!lane.alive || !lane.active) return { lane, events: [], attackSent: 0 }
+export function hardDropLane(lane: BlockLaneState): { lane: BlockLaneState; events: BlockLaneEvent[] } {
+  if (!lane.alive || !lane.active) return { lane, events: [] }
   const events: BlockLaneEvent[] = ['drop']
-  let attackSent = 0
   let next: BlockLaneState = {
     ...lane,
     grid: lane.grid.map((row) => [...row]),
@@ -434,22 +394,29 @@ export function hardDropLane(lane: BlockLaneState): { lane: BlockLaneState; even
     moved = tryMove(next, 0, 1)
   }
 
+  if (!next.active) return { lane: next, events }
+
+  const dropped = dropPieceToFloor(next.grid, next.active)
+  next = { ...next, active: dropped }
+
+  if (isStackOverflow(dropped) || !canPlace(next.grid, pieceCells(dropped))) {
+    return { lane: { ...next, active: null, alive: false }, events: [...events, 'gameover'] }
+  }
+
   const locked = lockActive(next)
   next = locked.lane
   events.push('lock')
   applyClearEvents(locked, events)
   next = locked.lane
-  attackSent = locked.attackSent
   if (!next.alive) events.push('gameover')
   else if (next.active) next.spawnPulse = 1
 
-  return { lane: next, events, attackSent }
+  return { lane: next, events }
 }
 
 export type PlacementScore = {
   cleared: number
   fusionCells: number
-  surgeCount: number
   aggregateHeight: number
   holes: number
   bumpiness: number
@@ -470,49 +437,31 @@ export function previewPiecePlacement(
   }
   if (!canPlace(grid, pieceCells(piece))) return null
 
-  while (canPlace(grid, pieceCells({ ...piece, row: piece.row + 1 }))) {
-    piece = { ...piece, row: piece.row + 1 }
-  }
+  piece = dropPieceToFloor(grid, piece)
+  if (isStackOverflow(piece)) return null
 
   const merged = grid.map((row) => [...row])
   for (const { row, col: c } of pieceCells(piece)) {
-    if (row >= 0) merged[row]![c] = piece.color
+    if (row >= BUFFER_ROWS) merged[row]![c] = piece.color
   }
 
   const scratch = merged.map((row) => [...row])
   const result = resolveCrystalClears(scratch)
-  const cleared = result.fusionCells + result.surgeCount
   return {
-    cleared,
+    cleared: result.fusionCells,
     fusionCells: result.fusionCells,
-    surgeCount: result.surgeCount,
     ...boardMetrics(scratch),
   }
 }
 
-/** Rakibe gidecek tek-küp saldırı sayısı */
-export function calcAttackGarbage(
-  fusionCells: number,
-  surgeCount: number,
-  combo: number,
-): number {
-  let cubes = Math.floor(fusionCells / FUSION_MIN)
-  if (fusionCells >= 8) cubes += 1
-  if (fusionCells >= 12) cubes += 1
-  cubes += surgeCount * 2
-  if (combo >= 3) cubes += 1
-  if (combo >= 5) cubes += 2
-  return Math.min(cubes, 9)
-}
-
-export function queueGarbage(lane: BlockLaneState, rows: number): BlockLaneState {
-  if (rows <= 0) return lane
-  return { ...lane, incomingGarbage: lane.incomingGarbage + rows }
+function laneClearScore(lane: BlockLaneState): number {
+  const chainBonus = lane.combo >= 2 ? (lane.combo - 1) * 3 : 0
+  return lane.fusions + chainBonus
 }
 
 export function resolveRoundWinner(l1: BlockLaneState, l2: BlockLaneState): 'p1' | 'p2' | 'draw' {
-  const score1 = l1.fusions + l1.lines * 12 + l1.attack
-  const score2 = l2.fusions + l2.lines * 12 + l2.attack
+  const score1 = laneClearScore(l1)
+  const score2 = laneClearScore(l2)
   if (score1 > score2) return 'p1'
   if (score2 > score1) return 'p2'
   return 'draw'
@@ -520,6 +469,14 @@ export function resolveRoundWinner(l1: BlockLaneState, l2: BlockLaneState): 'p1'
 
 export function getLaneView(lane: BlockLaneState): BlockLaneView {
   const visible = sliceVisibleGrid(lane.grid)
+
+  if (lane.active) {
+    for (const { row, col } of pieceCells(lane.active)) {
+      const viewRow = row - BUFFER_ROWS
+      if (viewRow >= 0 && viewRow < BLOCK_ROWS) visible[viewRow]![col] = null
+    }
+  }
+
   const spawnScale = 1 + lane.spawnPulse * 0.12
   const view: BlockLaneView = {
     grid: visible,
@@ -541,7 +498,7 @@ export function getLaneView(lane: BlockLaneState): BlockLaneView {
     .filter((c) => c.row >= 0 && c.row < BLOCK_ROWS)
 
   if (activeCells.length > 0) {
-    view.activePiece = { cells: activeCells, trail: true, scale: spawnScale }
+    view.activePiece = { cells: activeCells, trail: true, scale: spawnScale > 1.02 ? spawnScale : 1 }
     if (isPieceGrounded(lane)) {
       const beam = computeLandBeam(lane)
       if (beam) view.landBeam = beam
@@ -678,9 +635,7 @@ function stabilizeGrid(grid: BlockCell[][]) {
 
 function buildStartingStack(grid: BlockCell[][], seed: number, round: number) {
   const mix = mulberry32(seed * 4177 + round * 911)
-  const minRows = 2
-  const maxRows = Math.min(BLOCK_ROWS - 5, 3 + Math.min(round, 3))
-  const rowCount = minRows + Math.floor(mix() * (maxRows - minRows + 1))
+  const rowCount = 2 + Math.floor(mix() * 2)
   const startRow = BUFFER_ROWS + BLOCK_ROWS - rowCount
   let holeCol = Math.floor(mix() * BLOCK_COLS)
   const wander = mix() < 0.5 ? -1 : 1
@@ -749,26 +704,9 @@ function shuffleKinds(rng: () => number, kinds: PieceKind[]): PieceKind[] {
   return bag
 }
 
-/** Her 8 parçada 2 trimino — büyük küp seti dengeli gelir */
+/** Klasik 7-parça çantası */
 function refillMasterBag(rng: () => number): PieceKind[] {
-  const penta = shuffleKinds(rng, PENTOMINO_KINDS)
-  const trim = shuffleKinds(rng, TRIMINO_KINDS)
-  const bag: PieceKind[] = []
-  let pi = 0
-  let ti = 0
-  for (let i = 0; i < KINDS.length; i += 1) {
-    if (i % 4 === 3 && ti < trim.length) {
-      bag.push(trim[ti]!)
-      ti += 1
-    } else if (pi < penta.length) {
-      bag.push(penta[pi]!)
-      pi += 1
-    } else if (ti < trim.length) {
-      bag.push(trim[ti]!)
-      ti += 1
-    }
-  }
-  return bag
+  return shuffleKinds(rng, KINDS)
 }
 
 function drawFromBag(bag: PieceKind[], rng: () => number): { kind: PieceKind; bag: PieceKind[] } {
@@ -828,9 +766,13 @@ function pieceCells(piece: ActivePiece) {
 }
 
 function canPlace(grid: BlockCell[][], cells: { row: number; col: number }[]) {
+  const seen = new Set<string>()
   for (const { row, col } of cells) {
-    if (col < 0 || col >= BLOCK_COLS || row >= TOTAL_ROWS) return false
-    if (row >= 0 && grid[row]![col]) return false
+    if (col < 0 || col >= BLOCK_COLS || row < 0 || row >= TOTAL_ROWS) return false
+    const key = `${row},${col}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    if (grid[row]![col]) return false
   }
   return true
 }
@@ -848,7 +790,12 @@ function tryRotate(lane: BlockLaneState): BlockLaneState | null {
   const fromRot = lane.active.rotation % limit
   const toRot = (fromRot + 1) % limit
 
-  const kicks = isTrimino(lane.active.kind) ? ROTATION_NUDGES_TRIM : ROTATION_NUDGES_PENTA
+  const oldBottom = Math.max(...pieceCells(lane.active).map((c) => c.row))
+  const kicks = rotationKicksFor(lane.active.kind)
+
+  let best: BlockLaneState | null = null
+  let bestScore = Infinity
+
   for (const [dx, dy] of kicks) {
     const rotated: ActivePiece = {
       ...lane.active,
@@ -856,103 +803,84 @@ function tryRotate(lane: BlockLaneState): BlockLaneState | null {
       col: lane.active.col + dx,
       row: lane.active.row + dy,
     }
-    if (canPlace(lane.grid, pieceCells(rotated))) {
-      return { ...lane, active: rotated }
+    if (!canPlace(lane.grid, pieceCells(rotated))) continue
+
+    const newBottom = Math.max(...pieceCells(rotated).map((c) => c.row))
+    const drop = newBottom - oldBottom
+    const score = drop > 0 ? 100 + drop : drop
+
+    if (score < bestScore) {
+      bestScore = score
+      best = { ...lane, active: rotated }
     }
   }
-  return null
+
+  return best
 }
 
 type LockResult = {
   lane: BlockLaneState
   cleared: number
   fusionCells: number
-  surgeCount: number
-  attackRows: number
-  attackSent: number
 }
 
 function applyClearEvents(result: LockResult, events: BlockLaneEvent[]) {
   const { lane } = result
   if (result.cleared <= 0) return
   if (result.fusionCells > 0) events.push('fusion')
-  if (result.surgeCount > 0) events.push('surge')
-  if (result.fusionCells >= NOVA_FUSION_CELLS || result.surgeCount >= NOVA_SURGE_COUNT) {
-    events.push('nova')
-  }
+  if (result.fusionCells >= NOVA_FUSION_CELLS) events.push('nova')
   else if (lane.combo >= 2) events.push('combo')
-  if (result.attackRows > 0) events.push('attack')
 }
 
 function lockActive(lane: BlockLaneState): LockResult {
   if (!lane.active) {
-    return { lane, cleared: 0, fusionCells: 0, surgeCount: 0, attackRows: 0, attackSent: 0 }
-  }
-  if (!isFullyInPlayfield(lane.active)) {
-    return { lane: { ...lane, locking: false, lockAccum: 0 }, cleared: 0, fusionCells: 0, surgeCount: 0, attackRows: 0, attackSent: 0 }
+    return { lane, cleared: 0, fusionCells: 0 }
   }
 
-  const rng = mulberry32(lane.lines * 31 + lane.incomingGarbage * 7 + lane.combo * 13)
-  const afterGarbage = applyIncomingGarbage(lane, rng)
-  if (!afterGarbage.alive) {
-    return { lane: afterGarbage, cleared: 0, fusionCells: 0, surgeCount: 0, attackRows: 0, attackSent: 0 }
-  }
-
-  let settled = afterGarbage
-  if (afterGarbage.active) settled = nudgeActiveIntoPlayfield(afterGarbage)
-
-  const active = settled.active
-  if (!active || !isFullyInPlayfield(active) || !isPieceGrounded(settled)) {
+  const active = dropPieceToFloor(lane.grid, lane.active)
+  if (isStackOverflow(active)) {
     return {
-      lane: { ...settled, locking: false, lockAccum: 0, alive: false, active: null },
+      lane: { ...lane, active: null, alive: false, locking: false, lockAccum: 0 },
       cleared: 0,
       fusionCells: 0,
-      surgeCount: 0,
-      attackRows: 0,
-      attackSent: 0,
     }
   }
 
-  const grid = settled.grid.map((row) => [...row])
+  const rng = mulberry32(lane.fusions * 31 + lane.combo * 13)
+
+  const grid = lane.grid.map((row) => [...row])
+  if (!canPlace(grid, pieceCells(active))) {
+    return {
+      lane: { ...lane, active: null, alive: false, locking: false, lockAccum: 0 },
+      cleared: 0,
+      fusionCells: 0,
+    }
+  }
+
   for (const { row, col } of pieceCells(active)) {
-    if (row < 0 || row >= TOTAL_ROWS || col < 0 || col >= BLOCK_COLS) continue
-    if (grid[row]![col]) continue
+    if (row < BUFFER_ROWS || row >= TOTAL_ROWS || col < 0 || col >= BLOCK_COLS) continue
     grid[row]![col] = active.color
   }
 
-  stabilizeGrid(grid)
-
   const clearResult = resolveCrystalClears(grid)
   const particles = spawnParticles(clearResult.burstCells, rng)
-  const totalClear = clearResult.fusionCells + clearResult.surgeCount
-  const newCombo = totalClear > 0 ? settled.combo + 1 : 0
-  const attackGarbage = calcAttackGarbage(
-    clearResult.fusionCells,
-    clearResult.surgeCount,
-    newCombo,
-  )
-  const fusionCharge = Math.min(
-    1,
-    settled.fusionCharge + clearResult.fusionCells * 0.07 + clearResult.surgeCount * 0.14,
-  )
+  const totalClear = clearResult.fusionCells
+  const newCombo = totalClear > 0 ? lane.combo + 1 : 0
+  const fusionCharge = Math.min(1, lane.fusionCharge + clearResult.fusionCells * 0.08)
 
   const afterSpawn = spawnPiece(
     {
-      ...settled,
+      ...lane,
       grid,
       active: null,
       locking: false,
       lockAccum: 0,
-      incomingGarbage: 0,
-      lines: settled.lines + clearResult.surgeCount,
-      fusions: settled.fusions + clearResult.fusionCells,
+      fusions: lane.fusions + clearResult.fusionCells,
       fusionCharge,
-      fusionFlash: clearResult.fusionCells > 0 ? 1 : settled.fusionFlash,
-      lineFlash: clearResult.surgeCount > 0 ? 1 : settled.lineFlash,
+      fusionFlash: clearResult.fusionCells > 0 ? 1 : lane.fusionFlash,
       combo: newCombo,
       lastClearCount: totalClear,
-      attack: settled.attack + attackGarbage,
-      clearParticles: [...settled.clearParticles, ...particles],
+      clearParticles: [...lane.clearParticles, ...particles],
     },
     rng,
   )
@@ -961,9 +889,6 @@ function lockActive(lane: BlockLaneState): LockResult {
     lane: afterSpawn,
     cleared: totalClear,
     fusionCells: clearResult.fusionCells,
-    surgeCount: clearResult.surgeCount,
-    attackRows: attackGarbage,
-    attackSent: attackGarbage,
   }
 }
 
@@ -982,8 +907,17 @@ function spawnParticles(
   }))
 }
 
-function isFullyInPlayfield(active: ActivePiece): boolean {
-  return pieceCells(active).every((cell) => cell.row >= 0)
+function dropPieceToFloor(grid: BlockCell[][], piece: ActivePiece): ActivePiece {
+  let current = piece
+  while (canPlace(grid, pieceCells({ ...current, row: current.row + 1 }))) {
+    current = { ...current, row: current.row + 1 }
+  }
+  return current
+}
+
+/** Tahta doldu — parça görünür alana inemeden sıkıştı */
+function isStackOverflow(active: ActivePiece): boolean {
+  return pieceCells(active).some((cell) => cell.row < BUFFER_ROWS)
 }
 
 function isPieceGrounded(lane: BlockLaneState): boolean {
@@ -991,99 +925,13 @@ function isPieceGrounded(lane: BlockLaneState): boolean {
   return !canPlace(lane.grid, pieceCells({ ...lane.active, row: lane.active.row + 1 }))
 }
 
-function nudgeActiveIntoPlayfield(lane: BlockLaneState): BlockLaneState {
-  if (!lane.active) return lane
-  let active = lane.active
-  for (let i = 0; i < BUFFER_ROWS + 3; i += 1) {
-    if (isFullyInPlayfield(active)) break
-    const lower: ActivePiece = { ...active, row: active.row + 1 }
-    if (!canPlace(lane.grid, pieceCells(lower))) break
-    active = lower
-  }
-  if (!isFullyInPlayfield(active)) {
-    return { ...lane, active: null, alive: false }
-  }
-  return { ...lane, active }
-}
-
-/** Grid yukarı kayınca aktif parçayı hizala ve zemine oturt. */
-function settleActiveAfterGridChange(
-  grid: BlockCell[][],
-  active: ActivePiece,
-  rowsShiftedUp: number,
-): ActivePiece | null {
-  let piece: ActivePiece = { ...active, row: active.row - rowsShiftedUp }
-
-  if (!canPlace(grid, pieceCells(piece))) {
-    let placed: ActivePiece | null = null
-    for (let up = 1; up <= 4; up += 1) {
-      const candidate = { ...piece, row: piece.row - up }
-      if (canPlace(grid, pieceCells(candidate))) {
-        placed = candidate
-        break
-      }
-    }
-    if (!placed) return null
-    piece = placed
-  }
-
-  while (canPlace(grid, pieceCells({ ...piece, row: piece.row + 1 }))) {
-    piece = { ...piece, row: piece.row + 1 }
-  }
-
-  return isFullyInPlayfield(piece) ? piece : null
-}
-
-/** Rakibe giden tek küp parçacıkları — tam satır çöpü değil */
-function applyIncomingGarbage(lane: BlockLaneState, rng: () => number): BlockLaneState {
-  if (lane.incomingGarbage <= 0) return lane
-
-  const grid = lane.grid.map((row) => [...row])
-  let placed = 0
-  while (placed < lane.incomingGarbage) {
-    const col = Math.floor(rng() * BLOCK_COLS)
-    let row = TOTAL_ROWS - 1
-    while (row >= BUFFER_ROWS && grid[row]![col]) row -= 1
-    if (row < BUFFER_ROWS) break
-    const colors: BlockColor[] = ['purple', 'cyan', 'green', 'orange']
-    grid[row]![col] = colors[Math.floor(rng() * colors.length)]!
-    placed += 1
-  }
-  stabilizeGrid(grid)
-
-  if (lane.active) {
-    const settled = settleActiveAfterGridChange(grid, lane.active, 0)
-    if (!settled) {
-      return { ...lane, grid, incomingGarbage: 0, active: null, alive: false }
-    }
-    return { ...lane, grid, active: settled, incomingGarbage: 0 }
-  }
-
-  for (let rot = 0; rot < rotationCount(lane.nextKind); rot += 1) {
-    const probe: ActivePiece = {
-      kind: lane.nextKind,
-      rotation: rot,
-      col: spawnColFor(lane.nextKind, rot),
-      row: 0,
-      color: PIECE_COLOR[lane.nextKind],
-    }
-    if (canPlace(grid, pieceCells(probe))) {
-      return { ...lane, grid, incomingGarbage: 0 }
-    }
-  }
-
-  return { ...lane, grid, incomingGarbage: 0, active: null, alive: false }
-}
-
 type CrystalClearResult = {
   fusionCells: number
-  surgeCount: number
   burstCells: { row: number; col: number; color: BlockColor }[]
 }
 
 function resolveCrystalClears(grid: BlockCell[][]): CrystalClearResult {
   let fusionCells = 0
-  let surgeCount = 0
   const burstCells: { row: number; col: number; color: BlockColor }[] = []
   let chain = true
 
@@ -1096,16 +944,9 @@ function resolveCrystalClears(grid: BlockCell[][]): CrystalClearResult {
       stabilizeGrid(grid)
       chain = true
     }
-    const surge = clearColumnSurges(grid)
-    if (surge.count > 0) {
-      surgeCount += surge.count
-      burstCells.push(...surge.burstCells)
-      stabilizeGrid(grid)
-      chain = true
-    }
   }
 
-  return { fusionCells, surgeCount, burstCells }
+  return { fusionCells, burstCells }
 }
 
 function clearFusionClusters(grid: BlockCell[][]): {
@@ -1158,33 +999,6 @@ function clearFusionClusters(grid: BlockCell[][]): {
   for (const key of toRemove) {
     const [r, c] = key.split(',').map(Number)
     grid[r!]![c!] = null
-  }
-
-  return { count, burstCells }
-}
-
-function clearColumnSurges(grid: BlockCell[][]): {
-  count: number
-  burstCells: { row: number; col: number; color: BlockColor }[]
-} {
-  let count = 0
-  const burstCells: { row: number; col: number; color: BlockColor }[] = []
-
-  for (let col = 0; col < BLOCK_COLS; col += 1) {
-    let streak = 0
-    const cells: { row: number; color: BlockColor }[] = []
-    for (let row = TOTAL_ROWS - 1; row >= BUFFER_ROWS; row -= 1) {
-      const color = grid[row]![col]
-      if (!color) break
-      streak += 1
-      cells.push({ row, color })
-    }
-    if (streak < COLUMN_SURGE_MIN) continue
-    count += 1
-    for (const cell of cells) {
-      burstCells.push({ row: cell.row, col, color: cell.color })
-      grid[cell.row]![col] = null
-    }
   }
 
   return { count, burstCells }

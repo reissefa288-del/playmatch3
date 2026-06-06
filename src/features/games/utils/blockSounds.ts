@@ -5,6 +5,7 @@ type BlockSoundId =
   | 'lock'
   | 'fusion'
   | 'surge'
+  | 'signature'
   | 'attack'
   | 'round'
   | 'win'
@@ -60,6 +61,7 @@ const MIN_GAP: Record<BlockSoundId, number> = {
   lock: 120,
   fusion: 280,
   surge: 300,
+  signature: 260,
   attack: 320,
   round: 400,
   win: 900,
@@ -94,6 +96,10 @@ export function playBlockSound(id: BlockSoundId) {
     case 'surge':
       tone(320, 0.1, 'sawtooth', 0.05, 180)
       tone(240, 0.12, 'sawtooth', 0.04, 120, 0.08)
+      break
+    case 'signature':
+      tone(480, 0.06, 'triangle', 0.045, 640)
+      tone(720, 0.08, 'sine', 0.038, undefined, 0.05)
       break
     case 'combo':
       tone(660, 0.07, 'triangle', 0.05)

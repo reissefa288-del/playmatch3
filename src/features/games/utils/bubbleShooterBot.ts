@@ -68,13 +68,13 @@ function countSameNeighbors(
 }
 
 export function smoothBotAim(current: number, target: number, dt: number, quality: number): number {
-  const speed = quality > 5 ? 2.6 : quality > 2 ? 2 : 1.5
+  const speed = quality > 5 ? 3.1 : quality > 2 ? 2.45 : 1.85
   const delta = target - current
   const step = Math.sign(delta) * Math.min(Math.abs(delta), speed * dt)
   return current + step
 }
 
 export function botFireDelay(quality: number, rng = Math.random): number {
-  const base = quality > 5 ? 0.48 : quality > 2 ? 0.58 : 0.72
-  return base + rng() * 0.22
+  const base = quality > 5 ? 0.4 : quality > 2 ? 0.5 : 0.62
+  return base + rng() * 0.18
 }

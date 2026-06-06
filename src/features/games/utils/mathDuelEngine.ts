@@ -1,5 +1,5 @@
-export const MATCH_ROUNDS = 10
-export const WIN_ROUNDS = 6
+export const MATCH_ROUNDS = 5
+export const WIN_ROUNDS = 3
 export const ROUND_SECONDS = 88
 export const ROUND_BREAK_MS = 2600
 export const QUESTION_MS = 14_000
@@ -66,15 +66,44 @@ function mulberry32(seed: number) {
 }
 
 function evalExpr(nums: number[], ops: MathOp[]): number {
-  let acc = nums[0]!
-  for (let i = 0; i < ops.length; i++) {
-    const n = nums[i + 1]!
-    const op = ops[i]!
+  const values = [...nums]
+  const operators = [...ops]
+
+  for (let i = operators.length - 1; i >= 0; i -= 1) {
+    if (operators[i] !== '×') continue
+    values[i] = values[i]! * values[i + 1]!
+    values.splice(i + 1, 1)
+    operators.splice(i, 1)
+  }
+
+  let acc = values[0]!
+  for (let i = 0; i < operators.length; i += 1) {
+    const n = values[i + 1]!
+    const op = operators[i]!
     if (op === '+') acc += n
-    else if (op === '-') acc -= n
-    else acc *= n
+    else acc -= n
   }
   return acc
+}
+
+function pickOp(rand: () => number, round: number): MathOp {
+  const r = rand()
+  if (round <= 2) {
+    if (r < 0.36) return '×'
+    return r < 0.68 ? '+' : '-'
+  }
+  if (r < 0.4) return '×'
+  return r < 0.65 ? '+' : '-'
+}
+
+function randNum(rand: () => number, tier: number, forMul: boolean): number {
+  if (forMul) {
+    const max = tier === 0 ? 9 : tier === 1 ? 12 : tier === 2 ? 14 : 16
+    return 2 + Math.floor(rand() * (max - 1))
+  }
+  const maxNum = tier === 0 ? 24 : tier === 1 ? 38 : tier === 2 ? 52 : 68
+  const minNum = 4
+  return minNum + Math.floor(rand() * (maxNum - minNum + 1))
 }
 
 function buildChoices(
@@ -106,18 +135,13 @@ export function createProblem(seed: number, round: number, id: number): MathProb
   const ops: MathOp[] = []
   const nums: number[] = []
 
-  const maxNum = tier === 0 ? 24 : tier === 1 ? 38 : tier === 2 ? 52 : 68
-  const minNum = 4
-  const allowMul = tier >= 1
-
-  const termCount = tier >= 2 && rand() > 0.55 ? 3 : 2
+  const termCount = tier >= 2 && rand() > 0.5 ? 3 : 2
 
   for (let i = 0; i < termCount; i++) {
-    nums.push(minNum + Math.floor(rand() * (maxNum - minNum + 1)))
-    if (i < termCount - 1) {
-      if (allowMul && rand() > 0.68) ops.push('×')
-      else ops.push(rand() > 0.45 ? '+' : '-')
-    }
+    const nextOp = i < termCount - 1 ? pickOp(rand, round) : null
+    const useMulSize = nextOp === '×' || (i > 0 && ops[i - 1] === '×')
+    nums.push(randNum(rand, tier, useMulSize))
+    if (nextOp) ops.push(nextOp)
   }
 
   let answer = evalExpr(nums, ops)

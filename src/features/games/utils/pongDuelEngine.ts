@@ -6,6 +6,10 @@ export const PADDLE_H = 0.24
 export const PADDLE_W = 0.028
 export const BALL_R = 0.022
 export const BALL_SPEED = 0.014
+export const BALL_SPEED_MAX_MUL = 2.15
+export const SPEED_RAMP_PER_TICK = 0.000028
+export const SPEED_RAMP_ON_PADDLE = 0.055
+export const FIRE_HEAT_THRESHOLD = 0.52
 
 export type Paddle = { y: number }
 export type Ball = { x: number; y: number; vx: number; vy: number }
@@ -24,6 +28,34 @@ export type PongState = {
   lane2: PongLaneState
   serving: 1 | 2
   lastScorer: 1 | 2 | null
+  /** Rally boyutu; 1 = başlangıç hızı */
+  speedMul: number
+}
+
+export function clampSpeedMul(mul: number) {
+  return Math.max(1, Math.min(BALL_SPEED_MAX_MUL, mul))
+}
+
+export function ballHeatLevel(speedMul: number) {
+  return Math.min(1, Math.max(0, (speedMul - 1) / (BALL_SPEED_MAX_MUL - 1)))
+}
+
+export function isFireBall(speedMul: number) {
+  return ballHeatLevel(speedMul) >= FIRE_HEAT_THRESHOLD
+}
+
+function targetBallSpeed(speedMul: number) {
+  return BALL_SPEED * clampSpeedMul(speedMul)
+}
+
+function setBallSpeed(ball: Ball, speed: number): Ball {
+  const current = Math.hypot(ball.vx, ball.vy)
+  if (current < 1e-6) {
+    const dir = ball.vx >= 0 ? 1 : -1
+    return { ...ball, vx: dir * speed, vy: 0 }
+  }
+  const ratio = speed / current
+  return { ...ball, vx: ball.vx * ratio, vy: ball.vy * ratio }
 }
 
 function clamp(v: number, min: number, max: number) {
@@ -56,6 +88,7 @@ export function createPongState(seed: number): PongState {
     lane2: { laneId: 2, score: 0, matchPoints: 0 },
     serving: 1,
     lastScorer: null,
+    speedMul: 1,
   }
 }
 
@@ -70,6 +103,7 @@ export function resetBall(state: PongState, toward: 1 | 2, seed: number): PongSt
       vy: (rand() - 0.5) * BALL_SPEED * 0.75,
     },
     serving: toward === 1 ? 2 : 1,
+    speedMul: 1,
   }
 }
 
@@ -93,11 +127,12 @@ function reflectBallOnPaddle(
   ball: Ball,
   paddleY: number,
   paddleSide: 'left' | 'right',
+  speedMul: number,
 ): Ball {
   const half = PADDLE_H / 2
   const rel = (ball.y - paddleY) / half
   const angle = rel * 0.75
-  const speed = Math.hypot(ball.vx, ball.vy) || BALL_SPEED
+  const speed = targetBallSpeed(speedMul)
   const dir = paddleSide === 'left' ? 1 : -1
   return {
     x: paddleSide === 'left' ? PADDLE_W + BALL_R + 0.01 : 1 - PADDLE_W - BALL_R - 0.01,
@@ -115,6 +150,8 @@ export type TickResult = {
 export function tickPong(state: PongState): TickResult {
   let { ball } = state
   let scored: 1 | 2 | null = null
+  let speedMul = clampSpeedMul(state.speedMul + SPEED_RAMP_PER_TICK)
+  let paddleHit = false
 
   ball = {
     ...ball,
@@ -135,11 +172,19 @@ export function tickPong(state: PongState): TickResult {
   const p2Bot = state.paddle2.y + PADDLE_H / 2
 
   if (ball.x - BALL_R <= PADDLE_W && ball.vx < 0 && ball.y >= p1Top && ball.y <= p1Bot) {
-    ball = reflectBallOnPaddle(ball, state.paddle1.y, 'left')
+    speedMul = clampSpeedMul(speedMul + SPEED_RAMP_ON_PADDLE)
+    ball = reflectBallOnPaddle(ball, state.paddle1.y, 'left', speedMul)
+    paddleHit = true
   }
 
   if (ball.x + BALL_R >= 1 - PADDLE_W && ball.vx > 0 && ball.y >= p2Top && ball.y <= p2Bot) {
-    ball = reflectBallOnPaddle(ball, state.paddle2.y, 'right')
+    speedMul = clampSpeedMul(speedMul + SPEED_RAMP_ON_PADDLE)
+    ball = reflectBallOnPaddle(ball, state.paddle2.y, 'right', speedMul)
+    paddleHit = true
+  }
+
+  if (!paddleHit) {
+    ball = setBallSpeed(ball, targetBallSpeed(speedMul))
   }
 
   let lane1 = state.lane1
@@ -154,7 +199,7 @@ export function tickPong(state: PongState): TickResult {
   }
 
   return {
-    state: { ...state, ball, lane1, lane2, lastScorer: scored },
+    state: { ...state, ball, lane1, lane2, lastScorer: scored, speedMul },
     scored,
   }
 }

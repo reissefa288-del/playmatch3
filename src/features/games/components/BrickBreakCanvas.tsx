@@ -6,6 +6,7 @@ import {
   BRICK_ROWS,
   BRICK_ZONE_HEIGHT,
   BRICK_ZONE_TOP,
+  getBallHeat,
   PADDLE_HEIGHT,
   PADDLE_WIDTH,
   PADDLE_Y,
@@ -20,6 +21,23 @@ type BrickBreakCanvasProps = {
   active?: boolean
 }
 
+const SIZE_CACHE = { w: 0, h: 0, dpr: 1 }
+
+/** İki arena da pembe ekrandaki gibi parlak top */
+const BALL_SKIN = {
+  highlight: '#ffffff',
+  shell: '#fff4fa',
+  body: '#ff6eb5',
+  deep: '#ff2d9a',
+  rim: 'rgba(160, 20, 90, 0.45)',
+  glow: 'rgba(255, 45, 154, 0.95)',
+  trail: 'rgba(255, 130, 190, 0.55)',
+} as const
+
+function canvasDpr() {
+  return Math.min(window.devicePixelRatio || 1, 1.5)
+}
+
 export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const accentRef = useRef(accent)
@@ -28,18 +46,18 @@ export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakC
   activeRef.current = active
 
   useEffect(() => {
+    if (!active) return
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { alpha: true })
     if (!ctx) return
 
     let raf = 0
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'low'
 
-    const drawFrame = () => {
-      const lane = laneRef.current
-      if (!lane) return
-
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    const resize = () => {
+      const dpr = canvasDpr()
       const rect = canvas.getBoundingClientRect()
       const w = Math.max(1, Math.floor(rect.width * dpr))
       const h = Math.max(1, Math.floor(rect.height * dpr))
@@ -47,18 +65,33 @@ export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakC
         canvas.width = w
         canvas.height = h
       }
+      SIZE_CACHE.w = w
+      SIZE_CACHE.h = h
+      SIZE_CACHE.dpr = dpr
+    }
+
+    resize()
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(resize) : null
+    ro?.observe(canvas)
+
+    const drawFrame = () => {
+      const lane = laneRef.current
+      if (!lane) return
+
+      const { w, h, dpr } = SIZE_CACHE
+      if (w < 1 || h < 1) return
 
       ctx.clearRect(0, 0, w, h)
 
-      const paddleColor = accentRef.current === 'cyan' ? '#00e8ff' : '#ff2d9a'
-      const paddleGlow = accentRef.current === 'cyan' ? 'rgba(0, 232, 255, 0.9)' : 'rgba(255, 45, 154, 0.9)'
-      const ballColor = accentRef.current === 'cyan' ? '#e8feff' : '#ffe8f7'
+      const accentNow = accentRef.current
+      const paddleColor = accentNow === 'cyan' ? '#00e8ff' : '#ff2d9a'
+      const paddleGlow = accentNow === 'cyan' ? 'rgba(0, 232, 255, 0.9)' : 'rgba(255, 45, 154, 0.9)'
       const brickZoneTop = h * BRICK_ZONE_TOP
       const brickZoneH = h * BRICK_ZONE_HEIGHT
       const rowH = brickZoneH / BRICK_ROWS
       const colW = w / BRICK_COLS
 
-      drawArenaDepth(ctx, w, h, accentRef.current)
+      drawArenaDepth(ctx, w, h, accentNow)
 
       for (let row = 0; row < BRICK_ROWS; row += 1) {
         for (let col = 0; col < BRICK_COLS; col += 1) {
@@ -70,23 +103,24 @@ export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakC
       }
 
       for (const drop of lane.drops) {
-        drawPowerDrop(ctx, drop.x * w, drop.y * h, drop.kind, drop.wobble, accentRef.current, dpr)
+        drawPowerDrop(ctx, drop.x * w, drop.y * h, drop.kind, drop.wobble, accentNow, dpr)
       }
 
-      for (const particle of lane.particles) {
-        const px = particle.x * w
-        const py = particle.y * h
+      const particleMax = Math.min(lane.particles.length, 22)
+      for (let i = 0; i < particleMax; i += 1) {
+        const particle = lane.particles[i]!
         const alpha = Math.min(1, particle.life * 2.5)
-        ctx.fillStyle = particle.color
+        if (alpha < 0.06) continue
         ctx.globalAlpha = alpha
-        ctx.shadowColor = particle.color
-        ctx.shadowBlur = 6 * dpr
-        ctx.beginPath()
-        ctx.rect(px - 1.2 * dpr, py - 1.2 * dpr, 2.4 * dpr, 2.4 * dpr)
-        ctx.fill()
-        ctx.globalAlpha = 1
-        ctx.shadowBlur = 0
+        ctx.fillStyle = particle.color
+        ctx.fillRect(
+          particle.x * w - 1.2 * dpr,
+          particle.y * h - 1.2 * dpr,
+          2.4 * dpr,
+          2.4 * dpr,
+        )
       }
+      ctx.globalAlpha = 1
 
       const paddleW =
         lane.ball.power === 'wide' && lane.ball.powerTimer > 0 ? PADDLE_WIDTH * 1.38 * w : PADDLE_WIDTH * w
@@ -98,35 +132,16 @@ export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakC
         h * PADDLE_HEIGHT,
         paddleColor,
         paddleGlow,
-        accentRef.current,
+        accentNow,
         dpr,
       )
 
       if (lane.ball.active) {
-        const bx = lane.ball.x * w
-        const by = lane.ball.y * h
-        const r = BALL_RADIUS * w * 2.35
-        drawBallTrail(ctx, lane, w, h, accentRef.current, dpr)
-
-        const ballGrad = ctx.createRadialGradient(bx - r * 0.25, by - r * 0.25, 0, bx, by, r * 1.15)
-        ballGrad.addColorStop(0, '#ffffff')
-        ballGrad.addColorStop(0.3, ballColor)
-        ballGrad.addColorStop(0.75, paddleColor)
-        ballGrad.addColorStop(
-          1,
-          accentRef.current === 'cyan' ? 'rgba(0, 120, 160, 0.35)' : 'rgba(160, 20, 90, 0.35)',
-        )
-        ctx.fillStyle = ballGrad
-        ctx.shadowColor = lane.ball.power === 'fast' ? '#ffd76a' : paddleGlow
-        ctx.shadowBlur = lane.ball.power !== 'none' ? 32 * dpr : 20 * dpr
-        ctx.beginPath()
-        ctx.arc(bx, by, r, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.fillStyle = 'rgba(255,255,255,0.85)'
-        ctx.beginPath()
-        ctx.arc(bx - r * 0.28, by - r * 0.28, r * 0.2, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.shadowBlur = 0
+        const heat = getBallHeat(lane.ball.vx, lane.ball.vy, lane.ball.power)
+        const powerHeat = lane.ball.power === 'fast' && lane.ball.powerTimer > 0 ? 0.35 : 0
+        const totalHeat = Math.min(1, heat + powerHeat)
+        drawBallTrail(ctx, lane, w, h, dpr, totalHeat)
+        drawBall(ctx, lane, w, h, dpr, totalHeat)
       } else if (lane.lives > 0 && lane.serveCooldown > 0) {
         const bx = lane.paddleX * w
         const by = lane.ball.y * h
@@ -134,7 +149,7 @@ export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakC
         ctx.globalAlpha = alpha
         ctx.fillStyle = paddleColor
         ctx.shadowColor = paddleGlow
-        ctx.shadowBlur = 14 * dpr
+        ctx.shadowBlur = 12 * dpr
         ctx.beginPath()
         ctx.arc(bx, by, BALL_RADIUS * w * 1.5, 0, Math.PI * 2)
         ctx.fill()
@@ -144,21 +159,73 @@ export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakC
     }
 
     const loop = () => {
+      if (!activeRef.current) return
       drawFrame()
       raf = requestAnimationFrame(loop)
     }
-
-    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => drawFrame()) : null
-    ro?.observe(canvas)
 
     raf = requestAnimationFrame(loop)
     return () => {
       cancelAnimationFrame(raf)
       ro?.disconnect()
     }
-  }, [laneRef])
+  }, [active, laneRef])
 
   return <canvas ref={canvasRef} className="pm-brick-arena__canvas" />
+}
+
+function drawBall(
+  ctx: CanvasRenderingContext2D,
+  lane: LaneState,
+  w: number,
+  h: number,
+  dpr: number,
+  heat: number,
+) {
+  const bx = lane.ball.x * w
+  const by = lane.ball.y * h
+  const r = BALL_RADIUS * w * 2.35
+  const hotCore = heat > 0.2
+  const blazing = heat > 0.55
+
+  if (heat > 0.35) {
+    const aura = ctx.createRadialGradient(bx, by, r * 0.25, bx, by, r * (1.8 + heat * 0.8))
+    aura.addColorStop(0, `rgba(255, 220, 160, ${0.28 + heat * 0.35})`)
+    aura.addColorStop(0.5, `rgba(255, 100, 30, ${0.15 + heat * 0.2})`)
+    aura.addColorStop(1, 'rgba(255, 40, 0, 0)')
+    ctx.fillStyle = aura
+    ctx.beginPath()
+    ctx.arc(bx, by, r * (1.8 + heat * 0.8), 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  const ballGrad = ctx.createRadialGradient(bx - r * 0.28, by - r * 0.3, 0, bx, by, r * 1.12)
+  if (hotCore) {
+    ballGrad.addColorStop(0, '#fffef5')
+    ballGrad.addColorStop(0.2, `rgba(255, ${210 + heat * 45}, ${140 - heat * 50}, 1)`)
+    ballGrad.addColorStop(0.5, `rgba(255, ${110 + heat * 90}, 50, 0.98)`)
+    ballGrad.addColorStop(0.82, BALL_SKIN.deep)
+    ballGrad.addColorStop(1, 'rgba(255, 60, 20, 0.45)')
+  } else {
+    ballGrad.addColorStop(0, BALL_SKIN.highlight)
+    ballGrad.addColorStop(0.28, BALL_SKIN.shell)
+    ballGrad.addColorStop(0.58, BALL_SKIN.body)
+    ballGrad.addColorStop(0.82, BALL_SKIN.deep)
+    ballGrad.addColorStop(1, BALL_SKIN.rim)
+  }
+
+  ctx.fillStyle = ballGrad
+  ctx.shadowColor = blazing ? '#ff5500' : lane.ball.power === 'fast' ? '#ffd76a' : BALL_SKIN.glow
+  ctx.shadowBlur = (blazing ? 36 : hotCore ? 24 : 22) * dpr
+  ctx.beginPath()
+  ctx.arc(bx, by, r, 0, Math.PI * 2)
+  ctx.fill()
+
+  ctx.fillStyle = `rgba(255,255,255,${0.82 + heat * 0.15})`
+  ctx.beginPath()
+  ctx.arc(bx - r * 0.3, by - r * 0.3, r * (0.2 + heat * 0.05), 0, Math.PI * 2)
+  ctx.fill()
+  ctx.shadowBlur = 0
 }
 
 function drawBrick(
@@ -181,12 +248,13 @@ function drawBrick(
   const baseColor = power === 'bonus' ? '#ffd76a' : power === 'armored' ? '#9aa8c8' : color
 
   ctx.save()
-  if (power === 'charged') {
+  const heavyGlow = power === 'charged' || power === 'bonus'
+  if (heavyGlow) {
     ctx.shadowColor = '#ffffff'
-    ctx.shadowBlur = 16 * dpr
+    ctx.shadowBlur = 12 * dpr
   } else {
     ctx.shadowColor = baseColor
-    ctx.shadowBlur = 12 * dpr
+    ctx.shadowBlur = 6 * dpr
   }
 
   const grad = ctx.createLinearGradient(bx, by, bx, by + brickH)
@@ -248,7 +316,7 @@ function drawPowerDrop(
   ctx.save()
   ctx.translate(px, y + bob)
   ctx.shadowColor = style.glow
-  ctx.shadowBlur = 14 * dpr
+  ctx.shadowBlur = 10 * dpr
 
   const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, size)
   grad.addColorStop(0, '#ffffff')
@@ -277,24 +345,153 @@ function drawBallTrail(
   lane: LaneState,
   w: number,
   h: number,
-  accent: 'cyan' | 'pink',
   dpr: number,
+  heat: number,
 ) {
-  const points = lane.trail
+  const { ball, trail } = lane
+  const points = trail
+  if (!ball.active) return
+
+  const bx = ball.x * w
+  const by = ball.y * h
+  const speed = Math.hypot(ball.vx, ball.vy)
+  const dotR = Math.max(1.2 * dpr, BALL_RADIUS * w * 0.34)
+
+  if (heat > 0.08 && speed > 0.04) {
+    drawFlameWake(ctx, ball, points, w, h, dpr, heat)
+  }
+
   if (points.length < 2) return
 
-  const glow = accent === 'cyan' ? 'rgba(0, 232, 255, 0.45)' : 'rgba(255, 45, 154, 0.45)'
-  const dotR = Math.max(1 * dpr, BALL_RADIUS * w * 0.35)
-
   for (let i = 1; i < points.length; i += 1) {
-    const alpha = 0.12 + (i / points.length) * 0.28
-    ctx.globalAlpha = alpha
-    ctx.fillStyle = glow
+    const t = i / points.length
+    const alpha = 0.14 + t * 0.32
+    const warm = heat * (1 - t * 0.35)
+    ctx.globalAlpha = Math.min(1, alpha * (1 + heat * 0.4))
+    if (warm > 0.12) {
+      ctx.fillStyle = `rgba(255, ${150 + warm * 90}, ${70 - warm * 25}, ${0.45 + warm * 0.45})`
+    } else {
+      ctx.fillStyle = BALL_SKIN.trail
+    }
     ctx.beginPath()
-    ctx.arc(points[i]!.x * w, points[i]!.y * h, dotR, 0, Math.PI * 2)
+    ctx.arc(points[i]!.x * w, points[i]!.y * h, dotR * (0.9 + warm * 0.4), 0, Math.PI * 2)
     ctx.fill()
   }
   ctx.globalAlpha = 1
+
+  if (heat > 0.15 && points.length >= 2) {
+    ctx.save()
+    ctx.globalCompositeOperation = 'lighter'
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    ctx.moveTo(points[points.length - 1]!.x * w, points[points.length - 1]!.y * h)
+    for (let i = points.length - 2; i >= 0; i -= 1) {
+      ctx.lineTo(points[i]!.x * w, points[i]!.y * h)
+    }
+    ctx.lineTo(bx, by)
+    const streak = ctx.createLinearGradient(
+      points[points.length - 1]!.x * w,
+      points[points.length - 1]!.y * h,
+      bx,
+      by,
+    )
+    streak.addColorStop(0, 'rgba(255, 80, 20, 0)')
+    streak.addColorStop(0.55, `rgba(255, 120, 40, ${0.2 + heat * 0.25})`)
+    streak.addColorStop(1, `rgba(255, 220, 160, ${0.35 + heat * 0.35})`)
+    ctx.strokeStyle = streak
+    ctx.lineWidth = dotR * (0.8 + heat * 1.4)
+    ctx.stroke()
+    ctx.restore()
+  }
+}
+
+function drawFlameWake(
+  ctx: CanvasRenderingContext2D,
+  ball: LaneState['ball'],
+  trail: LaneState['trail'],
+  w: number,
+  h: number,
+  dpr: number,
+  heat: number,
+) {
+  const speed = Math.hypot(ball.vx, ball.vy)
+  if (speed < 0.04) return
+
+  const bx = ball.x * w
+  const by = ball.y * h
+  const nx = -ball.vx / speed
+  const ny = -ball.vy / speed
+  const px = -ny
+  const py = nx
+  const flameLen = BALL_RADIUS * w * (2.2 + heat * 4.5)
+
+  ctx.save()
+  ctx.globalCompositeOperation = 'lighter'
+
+  const steps = 10
+  for (let i = 0; i < steps; i += 1) {
+    const u = i / steps
+    const fade = (1 - u) * heat
+    if (fade < 0.04) continue
+
+    let sx = bx + nx * flameLen * u
+    let sy = by + ny * flameLen * u
+    if (trail.length > 0 && i < trail.length) {
+      const tp = trail[Math.min(i, trail.length - 1)]!
+      sx = tp.x * w
+      sy = tp.y * h
+    }
+
+    const flick = Math.sin(i * 1.7 + ball.x * 40) * flameLen * 0.06 * heat
+    sx += px * flick
+    sy += py * flick
+
+    const fr = BALL_RADIUS * w * (1.1 + (1 - u) * 1.4) * (0.35 + heat * 0.65)
+    const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, fr)
+    const hot = 1 - u * 0.7
+    g.addColorStop(0, `rgba(255, ${220 - hot * 80}, ${160 - hot * 120}, ${0.35 * fade})`)
+    g.addColorStop(0.4, `rgba(255, ${140 - hot * 60}, 40, ${0.22 * fade})`)
+    g.addColorStop(1, 'rgba(255, 40, 0, 0)')
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.arc(sx, sy, fr, 0, Math.PI * 2)
+    ctx.fill()
+  }
+
+  const coreLen = flameLen * 0.85
+  const ex = bx + nx * coreLen
+  const ey = by + ny * coreLen
+  const coreGrad = ctx.createLinearGradient(bx, by, ex, ey)
+  coreGrad.addColorStop(0, `rgba(255, 245, 210, ${0.55 * heat})`)
+  coreGrad.addColorStop(0.25, `rgba(255, 180, 60, ${0.4 * heat})`)
+  coreGrad.addColorStop(0.6, `rgba(255, 80, 20, ${0.22 * heat})`)
+  coreGrad.addColorStop(1, 'rgba(255, 20, 0, 0)')
+
+  ctx.strokeStyle = coreGrad
+  ctx.lineWidth = BALL_RADIUS * w * (1.2 + heat * 2.2) * dpr
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.moveTo(bx, by)
+  ctx.lineTo(ex, ey)
+  ctx.stroke()
+
+  for (let tongue = 0; tongue < 3; tongue += 1) {
+    const side = (tongue - 1) * 0.35
+    const tx = bx + nx * coreLen * 0.55 + px * side * flameLen * 0.22
+    const ty = by + ny * coreLen * 0.55 + py * side * flameLen * 0.22
+    const tg = ctx.createRadialGradient(tx, ty, 0, tx, ty, BALL_RADIUS * w * (0.7 + heat))
+    tg.addColorStop(0, `rgba(255, 200, 100, ${0.35 * heat})`)
+    tg.addColorStop(1, 'rgba(255, 50, 0, 0)')
+    ctx.fillStyle = tg
+    ctx.beginPath()
+    ctx.moveTo(tx, ty - BALL_RADIUS * w * 0.5)
+    ctx.quadraticCurveTo(tx + px * flameLen * 0.08, ty, tx, ty + BALL_RADIUS * w * 0.35)
+    ctx.quadraticCurveTo(tx - px * flameLen * 0.08, ty, tx, ty - BALL_RADIUS * w * 0.5)
+    ctx.fill()
+  }
+
+  ctx.restore()
 }
 
 function drawPaddle(
@@ -314,12 +511,12 @@ function drawPaddle(
   ctx.save()
 
   ctx.shadowColor = paddleGlow
-  ctx.shadowBlur = 18 * dpr
+  ctx.shadowBlur = 14 * dpr
   ctx.fillStyle = accent === 'cyan' ? 'rgba(0, 232, 255, 0.18)' : 'rgba(255, 45, 154, 0.18)'
   roundRect(ctx, left - 2 * dpr, py - dpr, pw + 4 * dpr, ph + 2 * dpr, radius + dpr)
   ctx.fill()
 
-  ctx.shadowBlur = 14 * dpr
+  ctx.shadowBlur = 10 * dpr
   const bodyGrad = ctx.createLinearGradient(left, py, left, py + ph)
   bodyGrad.addColorStop(0, accent === 'cyan' ? '#1a3a52' : '#3a1a38')
   bodyGrad.addColorStop(0.45, accent === 'cyan' ? '#0a1828' : '#180818')

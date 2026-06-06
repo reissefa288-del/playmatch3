@@ -1,7 +1,6 @@
 import {
   BLOCK_COLS,
   BLOCK_ROWS,
-  cellCount,
   hardDropLane,
   previewPiecePlacement,
   rotationCount,
@@ -26,7 +25,7 @@ export type BlockBotBrain = {
 export function createBlockBot(nowSec: number): BlockBotBrain {
   return {
     targetRot: 0,
-    targetCol: spawnColFor('prism', 0),
+    targetCol: spawnColFor('aquaLine', 0),
     hardDrop: false,
     thinkAt: nowSec + 0.1,
     pending: {},
@@ -42,26 +41,21 @@ function stackHeight(lane: BlockLaneState): number {
   return 0
 }
 
-function scorePlacement(kind: PieceKind, score: PlacementScore): number {
-  const cells = cellCount(kind)
-  const heightPenalty = cells >= 5 ? 10 : 7
-
+function scorePlacement(_kind: PieceKind, score: PlacementScore): number {
   return (
-    score.fusionCells * 1400 +
-    score.surgeCount * 3200 +
-    score.cleared * 350 -
-    score.aggregateHeight * heightPenalty -
+    score.fusionCells * 1600 +
+    score.cleared * 400 -
+    score.aggregateHeight * 7 -
     score.holes * 480 -
     score.bumpiness * 16 +
-    (score.fusionCells >= 4 ? 900 : 0) +
-    (score.surgeCount >= 1 ? 700 : 0) +
-    (score.fusionCells + score.surgeCount >= 6 ? 1200 : 0)
+    (score.fusionCells >= 5 ? 1000 : 0) +
+    (score.fusionCells >= 8 ? 1400 : 0)
   )
 }
 
 function findBestPlacement(lane: BlockLaneState): { rot: number; col: number; hardDrop: boolean } {
   if (!lane.active) {
-    return { rot: 0, col: spawnColFor('prism', 0), hardDrop: false }
+    return { rot: 0, col: spawnColFor('aquaLine', 0), hardDrop: false }
   }
 
   let bestScore = -Infinity
@@ -75,7 +69,7 @@ function findBestPlacement(lane: BlockLaneState): { rot: number; col: number; ha
     for (let col = minCol; col < maxCol; col += 1) {
       const preview = previewPiecePlacement(lane.grid, kind, rot, col)
       if (!preview) continue
-      const total = preview.fusionCells + preview.surgeCount
+      const total = preview.fusionCells
       const placementScore = scorePlacement(kind, preview)
       if (placementScore > bestScore) {
         bestScore = placementScore
@@ -110,7 +104,7 @@ export function updateBlockBotLane(
   dt: number,
   nowSec: number,
   bot: BlockBotBrain,
-): { lane: BlockLaneState; events: ReturnType<typeof updateBlockLane>['events']; attackSent: number } {
+): { lane: BlockLaneState; events: ReturnType<typeof updateBlockLane>['events'] } {
   const events: ReturnType<typeof updateBlockLane>['events'] = []
 
   if (nowSec >= bot.thinkAt || !lane.active) {
@@ -129,7 +123,7 @@ export function updateBlockBotLane(
   ) {
     const dropped = hardDropLane(lane)
     events.push(...dropped.events)
-    return { lane: dropped.lane, events, attackSent: dropped.attackSent }
+    return { lane: dropped.lane, events }
   }
 
   bot.pending = buildInputTowardTarget(lane, bot)
@@ -138,5 +132,5 @@ export function updateBlockBotLane(
 
   const result = updateBlockLane(lane, dt, input)
   events.push(...result.events)
-  return { lane: result.lane, events, attackSent: result.attackSent }
+  return { lane: result.lane, events }
 }

@@ -1,24 +1,34 @@
 import type { SliceObject } from './sliceDuelEngine'
-import { objectY } from './sliceDuelEngine'
+import { objectPos } from './sliceDuelEngine'
 
-export function botSliceDelayMs(): number {
-  return 30 + Math.random() * 90
+export function botSliceDelayMs(score: number): number {
+  const fast = Math.min(score / 2200, 1) * 55
+  return Math.max(12, 35 + Math.random() * 75 - fast)
 }
 
-export function botBombSliceChance(): number {
-  return 0.06
+export function botBombSliceChance(score: number): number {
+  return Math.max(0.04, 0.1 - Math.min(score / 4000, 1) * 0.05)
 }
 
 export function pickBotTarget(objects: SliceObject[], now: number): SliceObject | null {
-  let best: SliceObject | null = null
-  let bestY = Infinity
+  let bestFruit: SliceObject | null = null
+  let bestFruitY = Infinity
+  let bestBomb: SliceObject | null = null
+  let bestBombY = Infinity
+
   for (const o of objects) {
     if (o.sliced) continue
-    const y = objectY(o, now)
-    if (y >= 38 && y <= 78 && y < bestY) {
-      best = o
-      bestY = y
+    const { y } = objectPos(o, now)
+    if (y < 34 || y > 76) continue
+    if (o.kind === 'fruit' && y < bestFruitY) {
+      bestFruit = o
+      bestFruitY = y
+    }
+    if (o.kind === 'bomb' && y < bestBombY) {
+      bestBomb = o
+      bestBombY = y
     }
   }
-  return best
+
+  return bestFruit ?? bestBomb
 }

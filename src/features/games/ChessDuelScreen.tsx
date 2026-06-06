@@ -7,12 +7,13 @@ import { ChessDuelBoard } from './components/ChessDuelBoard'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useChessDuel } from './useChessDuel'
+import { unlockChessDuelAudio } from './utils/chessDuelSounds'
 
 export function ChessDuelScreen() {
   const navigate = useNavigate()
   const duel = useChessDuel()
 
-  const handleBack = useCallback(() => navigate('/games/chess-duel'), [navigate])
+  const handleBack = useCallback(() => navigate('/games'), [navigate])
   const canPlay = duel.running && !duel.legMessage
   const isYourTurn = duel.game.turn === 'w' && duel.game.phase === 'playing'
 
@@ -40,7 +41,12 @@ export function ChessDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--chess">
       <div className="pm-artboard">
-        <motion.div className="pm-chess-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <motion.div
+          className="pm-chess-screen"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          onPointerDown={() => unlockChessDuelAudio()}
+        >
           <GameDuelBackdrop />
 
           <button type="button" className="pm-chess-back" onClick={handleBack} aria-label="Geri dön">
@@ -81,15 +87,17 @@ export function ChessDuelScreen() {
               </div>
             </section>
 
-            <ChessDuelBoard
-              board={duel.game.board}
-              selected={duel.game.selected}
-              legalTargets={duel.game.legalTargets}
-              lastMove={duel.game.lastMove}
-              inCheck={duel.game.inCheck === 'w'}
-              disabled={!canPlay || !isYourTurn}
-              onSquare={duel.tapSquare}
-            />
+            <section className="pm-chess-arena" aria-label="Satranç tahtası">
+              <ChessDuelBoard
+                board={duel.game.board}
+                selected={duel.game.selected}
+                legalTargets={duel.game.legalTargets}
+                lastMove={duel.game.lastMove}
+                inCheck={duel.game.inCheck === 'w'}
+                disabled={!canPlay || !isYourTurn}
+                onSquare={duel.tapSquare}
+              />
+            </section>
           </div>
 
           {overlayMessage ? (

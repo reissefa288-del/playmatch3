@@ -10,10 +10,24 @@ import {
   type LaneState,
 } from './utils/bubbleShooterEngine'
 import { botFireDelay, getBotDecision, smoothBotAim } from './utils/bubbleShooterBot'
-import { playBubbleSound, playBubbleSoundOnGesture, unlockBubbleAudio } from './utils/bubbleShooterSounds'
+import { ROUND_BREAK_MS, pulseBubbleHaptic, type SpecialKind } from './utils/bubbleShooterMeta'
+import {
+  playBubbleSound,
+  playBubbleSoundOnGesture,
+  shootSoundForKind,
+  unlockBubbleAudio,
+  type BubbleSoundId,
+} from './utils/bubbleShooterSounds'
 
 type MatchResult = 'p1' | 'p2' | 'draw'
 type RoundWinner = 'p1' | 'p2' | 'draw'
+
+const SHOOT_KIND_EVENT: Partial<Record<LaneEvent, SpecialKind>> = {
+  shoot_fire: 'fire',
+  shoot_bomb: 'bomb',
+  shoot_rainbow: 'rainbow',
+  shoot_ice: 'ice',
+}
 
 function updateBotLane(
   lane: LaneState,
@@ -80,6 +94,7 @@ export function useBubbleShooterDuel() {
   const [aimDir, setAimDir] = useState<-1 | 0 | 1>(0)
   const [running, setRunning] = useState(true)
   const [winner, setWinner] = useState<MatchResult | null>(null)
+  const [rivalAimFlash, setRivalAimFlash] = useState(false)
 
   const syncUiTickRef = useRef(0)
   const roundTimeRef = useRef(ROUND_SECONDS)
@@ -98,6 +113,7 @@ export function useBubbleShooterDuel() {
   const fireRef = useRef(false)
   const swapRef = useRef(false)
   const botRef = useRef<BotBrain>(createBotBrain(0))
+  const rivalAimTimerRef = useRef(0)
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
@@ -112,25 +128,54 @@ export function useBubbleShooterDuel() {
     setRoundTimeLeft(Math.ceil(timeDisplay))
   }, [])
 
-  const playEvents = useCallback((events: LaneEvent[], side: 'p1' | 'p2') => {
-    for (const event of events) {
-      if (event === 'swap' && side === 'p2') playBubbleSound()
-      else if (event === 'shoot' && side === 'p2') playBubbleSound()
-      else if (event === 'overflow') {
-        playBubbleSound('overflow')
-      } else if (
-        event === 'pop' ||
-        event === 'drop' ||
-        event === 'combo' ||
-        event === 'special' ||
-        event === 'clear' ||
-        event === 'refill' ||
-        event === 'burst'
-      ) {
-        playBubbleSound()
-      }
-    }
+  const flashRivalAim = useCallback(() => {
+    window.clearTimeout(rivalAimTimerRef.current)
+    setRivalAimFlash(true)
+    rivalAimTimerRef.current = window.setTimeout(() => setRivalAimFlash(false), 480)
   }, [])
+
+  const playEvents = useCallback(
+    (events: LaneEvent[], side: 'p1' | 'p2') => {
+      for (const event of events) {
+        const shootKind = SHOOT_KIND_EVENT[event]
+        if (shootKind) {
+          if (side === 'p2') {
+            playBubbleSound(shootSoundForKind(shootKind))
+            pulseBubbleHaptic(shootKind)
+            flashRivalAim()
+          } else {
+            pulseBubbleHaptic(shootKind)
+          }
+          continue
+        }
+
+        if (event === 'shoot') {
+          if (side === 'p2') {
+            playBubbleSound('shoot')
+            flashRivalAim()
+          }
+          continue
+        }
+
+        if (event === 'swap' && side === 'p2') playBubbleSound('swap')
+        else if (event === 'overflow') {
+          playBubbleSound('overflow')
+          pulseBubbleHaptic('overflow')
+        } else if (
+          event === 'pop' ||
+          event === 'drop' ||
+          event === 'combo' ||
+          event === 'special' ||
+          event === 'clear' ||
+          event === 'refill' ||
+          event === 'burst'
+        ) {
+          playBubbleSound()
+        }
+      }
+    },
+    [flashRivalAim],
+  )
 
   const endMatch = useCallback((result: MatchResult) => {
     if (endedRef.current) return
@@ -138,15 +183,15 @@ export function useBubbleShooterDuel() {
     runningRef.current = false
     setRunning(false)
     setIsRoundBreak(false)
+    setRoundMessage(null)
     setWinner(result)
-    playBubbleSound()
+    playBubbleSound(result === 'p1' ? 'win' : result === 'p2' ? 'lose' : 'round')
   }, [])
 
   const beginNextRound = useCallback(
     (l1: LaneState, l2: LaneState) => {
       if (endedRef.current) return
       roundSeedRef.current += 1
-      roundNumberRef.current += 1
       const seed = roundSeedRef.current
       const next1 = startNewRound(l1, seed * 2 + 1)
       const next2 = startNewRound(l2, seed * 2 + 2)
@@ -158,9 +203,9 @@ export function useBubbleShooterDuel() {
       roundEndingRef.current = false
       isOvertimeRef.current = false
       setIsOvertime(false)
-      setRoundNumber(roundNumberRef.current)
       setRoundMessage(null)
       setIsRoundBreak(false)
+      roundBreakUntilRef.current = 0
       syncLanesToReact(next1, next2, ROUND_SECONDS)
       botRef.current = createBotBrain(performance.now() / 1000)
     },
@@ -180,6 +225,7 @@ export function useBubbleShooterDuel() {
 
       lane1Ref.current = next1
       lane2Ref.current = next2
+      syncLanesToReact(next1, next2, roundTimeRef.current)
 
       if (roundNumberRef.current >= WIN_POINTS) {
         const matchResult =
@@ -192,14 +238,28 @@ export function useBubbleShooterDuel() {
                 : next2.totalScore > next1.totalScore
                   ? 'p2'
                   : 'draw'
-        syncLanesToReact(next1, next2, 0)
         endMatch(matchResult)
         return
       }
 
-      playBubbleSound()
-      syncLanesToReact(next1, next2, ROUND_SECONDS)
-      beginNextRound(next1, next2)
+      const msg =
+        roundWinner === 'p1'
+          ? 'EMİR +1 TUR'
+          : roundWinner === 'p2'
+            ? 'ZEYNEP +1 TUR'
+            : 'TUR BERABERE'
+
+      setRoundMessage(msg)
+      setIsRoundBreak(true)
+      playBubbleSound('round')
+      roundBreakUntilRef.current = performance.now() + ROUND_BREAK_MS
+
+      window.setTimeout(() => {
+        if (endedRef.current) return
+        roundNumberRef.current += 1
+        setRoundNumber(roundNumberRef.current)
+        beginNextRound(next1, next2)
+      }, ROUND_BREAK_MS)
     },
     [beginNextRound, endMatch, syncLanesToReact],
   )
@@ -227,7 +287,7 @@ export function useBubbleShooterDuel() {
         return
       }
 
-      const dt = Math.min((now - last) / 1000, 0.028)
+      const dt = Math.min((now - last) / 1000, 0.032)
       last = now
       const nowSec = now / 1000
 
@@ -256,7 +316,7 @@ export function useBubbleShooterDuel() {
         aimDirRef.current !== 0 ||
         r1.events.length > 0 ||
         r2.events.length > 0
-      if (forceUi || syncUiTickRef.current % 2 === 0) {
+      if (forceUi || syncUiTickRef.current % 6 === 0) {
         syncLanesToReact(r1.lane, r2.lane, roundTimeRef.current)
       }
 
@@ -301,8 +361,10 @@ export function useBubbleShooterDuel() {
   const fire = useCallback(() => {
     if (!runningRef.current || endedRef.current) return
     if (performance.now() < roundBreakUntilRef.current) return
-    if (lane1Ref.current.projectile || !lane1Ref.current.canShoot) return
-    playBubbleSoundOnGesture('shoot')
+    const lane = lane1Ref.current
+    if (lane.projectile || !lane.canShoot) return
+    const sound = shootSoundForKind(lane.currentKind) as BubbleSoundId
+    playBubbleSoundOnGesture(sound)
     fireRef.current = true
   }, [])
 
@@ -339,6 +401,7 @@ export function useBubbleShooterDuel() {
     setRoundMessage(null)
     setIsRoundBreak(false)
     setIsOvertime(false)
+    setRivalAimFlash(false)
     setLane1(l1)
     setLane2(l2)
     setRoundTimeLeft(ROUND_SECONDS)
@@ -358,6 +421,7 @@ export function useBubbleShooterDuel() {
     roundMessage,
     isRoundBreak,
     isOvertime,
+    rivalAimFlash,
     winPoints: WIN_POINTS,
     running,
     winner,

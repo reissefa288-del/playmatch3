@@ -1,147 +1,204 @@
 export const MATCH_ROUNDS = 3
 export const WIN_ROUNDS = 2
-export const POINTS_TO_WIN = 5
+export const POINTS_TO_WIN = 20
 export const ROUND_BREAK_MS = 2200
-export const SHOW_PAD_MS = 480
+export const SHOW_PAD_MS = 520
+export const SHOW_GAP_MS = 140
+export const WRONG_REPLAY_MS = 560
+export const SCORE_PAUSE_MS = 1000
+export const AUTO_START_MS = 420
 export const START_SEQ_LEN = 3
 export const MAX_SEQ_LEN = 9
 
 export type PadId = 0 | 1 | 2 | 3
-export type SimonPhase = 'idle' | 'show' | 'input' | 'break'
+export type SimonLanePhase = 'ready' | 'show' | 'input'
+export type SimonShowBeat = 'lit' | 'gap'
 
 export type SimonLaneState = {
   laneId: 1 | 2
   score: number
   matchPoints: number
+  phase: SimonLanePhase
+  sequence: PadId[]
+  showIndex: number
+  showPad: PadId | null
+  showBeat: SimonShowBeat
+  showUntil: number
   inputIndex: number
-  mistake: boolean
+  highlightPad: PadId | null
+  inputStartedAt: number
+  replayCount: number
+  combo: number
+  lastScoreGain: number
+  wrongFlashUntil: number
+  activeSeqLength: number
 }
 
 export type SimonState = {
-  phase: SimonPhase
-  sequence: PadId[]
   seqLength: number
-  showIndex: number
-  highlightPad: PadId | null
-  showUntil: number
-  breakUntil: number
-  roundLocked: boolean
-  roundWinner: 1 | 2 | null
   lane1: SimonLaneState
   lane2: SimonLaneState
   roundNumber: number
 }
 
+export function comboBonus(combo: number): number {
+  if (combo < 2) return 0
+  return Math.min(8, (combo - 1) * 2)
+}
+
 export function createLane(laneId: 1 | 2): SimonLaneState {
-  return { laneId, score: 0, matchPoints: 0, inputIndex: 0, mistake: false }
+  return {
+    laneId,
+    score: 0,
+    matchPoints: 0,
+    phase: 'ready',
+    sequence: [],
+    showIndex: -1,
+    showPad: null,
+    showBeat: 'lit',
+    showUntil: 0,
+    inputIndex: 0,
+    highlightPad: null,
+    inputStartedAt: 0,
+    replayCount: 0,
+    combo: 0,
+    lastScoreGain: 0,
+    wrongFlashUntil: 0,
+    activeSeqLength: 0,
+  }
 }
 
 export function createSimonState(): SimonState {
   return {
-    phase: 'idle',
-    sequence: [],
     seqLength: START_SEQ_LEN,
-    showIndex: -1,
-    highlightPad: null,
-    showUntil: 0,
-    breakUntil: 0,
-    roundLocked: false,
-    roundWinner: null,
     lane1: createLane(1),
     lane2: createLane(2),
     roundNumber: 1,
   }
 }
 
-export function generateSequence(length: number, rand: () => number): PadId[] {
-  const seq: PadId[] = []
-  for (let i = 0; i < length; i++) {
-    seq.push(Math.floor(rand() * 4) as PadId)
-  }
-  return seq
+export function scoreForCompletion(
+  seqLength: number,
+  inputStartedAt: number,
+  completedAt: number,
+  replayCount: number,
+): number {
+  if (seqLength <= 0) return 0
+  const elapsed = Math.max(1, completedAt - inputStartedAt)
+  const ideal = seqLength * 460
+  const speedFactor = Math.min(2.1, ideal / elapsed)
+  const base = seqLength * 2.2
+  const raw = base * speedFactor
+  const penalty = replayCount * 1.8
+  return Math.max(1, Math.min(14, Math.round(raw - penalty)))
 }
 
-export function beginRound(state: SimonState, now: number, rand: () => number): SimonState {
-  const sequence = generateSequence(state.seqLength, rand)
+export function beginWatch(lane: SimonLaneState, sequence: PadId[], now: number): SimonLaneState {
   const first = sequence[0]!
   return {
-    ...state,
+    ...lane,
     phase: 'show',
     sequence,
+    activeSeqLength: sequence.length,
     showIndex: 0,
-    highlightPad: first,
+    showPad: first,
+    showBeat: 'lit',
     showUntil: now + SHOW_PAD_MS,
-    roundLocked: false,
-    roundWinner: null,
-    lane1: { ...state.lane1, inputIndex: 0, mistake: false },
-    lane2: { ...state.lane2, inputIndex: 0, mistake: false },
+    inputIndex: 0,
+    highlightPad: null,
+    inputStartedAt: 0,
+    replayCount: 0,
+    lastScoreGain: 0,
+    wrongFlashUntil: 0,
   }
 }
 
-export function advanceShow(state: SimonState, now: number): SimonState {
-  if (state.phase !== 'show' || now < state.showUntil) return state
-
-  const nextIdx = state.showIndex + 1
-  if (nextIdx >= state.sequence.length) {
-    return {
-      ...state,
-      phase: 'input',
-      showIndex: 0,
-      highlightPad: null,
-    }
-  }
-
-  const pad = state.sequence[nextIdx]!
+export function replayAfterMistake(lane: SimonLaneState, pad: PadId, now: number): SimonLaneState {
+  const first = lane.sequence[0]!
   return {
-    ...state,
-    showIndex: nextIdx,
+    ...lane,
+    phase: 'show',
+    replayCount: lane.replayCount + 1,
+    combo: 0,
     highlightPad: pad,
+    wrongFlashUntil: now + 400,
+    showIndex: 0,
+    showPad: first,
+    showBeat: 'lit',
+    showUntil: now + WRONG_REPLAY_MS + SHOW_PAD_MS,
+    inputIndex: 0,
+    inputStartedAt: 0,
+  }
+}
+
+export function advanceLaneShow(lane: SimonLaneState, now: number): SimonLaneState {
+  if (lane.phase !== 'show' || now < lane.showUntil) return lane
+
+  if (lane.showBeat === 'lit') {
+    if (lane.showIndex >= lane.sequence.length - 1) {
+      return {
+        ...lane,
+        phase: 'input',
+        showIndex: lane.sequence.length,
+        showPad: null,
+        showBeat: 'lit',
+        highlightPad: null,
+        inputStartedAt: now,
+        wrongFlashUntil: 0,
+      }
+    }
+
+    return {
+      ...lane,
+      showBeat: 'gap',
+      showPad: null,
+      showUntil: now + SHOW_GAP_MS,
+    }
+  }
+
+  const nextIdx = lane.showIndex + 1
+  const pad = lane.sequence[nextIdx]!
+  return {
+    ...lane,
+    showIndex: nextIdx,
+    showPad: pad,
+    showBeat: 'lit',
     showUntil: now + SHOW_PAD_MS,
   }
 }
 
-export function applyTap(
-  state: SimonState,
-  player: 1 | 2,
-  pad: PadId,
-  now: number,
-): SimonState {
-  if (state.phase !== 'input' || state.roundLocked) return state
+export function applyLaneTap(lane: SimonLaneState, pad: PadId, now: number): SimonLaneState {
+  if (lane.phase !== 'input') return lane
 
-  const laneKey = player === 1 ? 'lane1' : 'lane2'
-  const otherKey = player === 1 ? 'lane2' : 'lane1'
-  const lane = state[laneKey]
-  const expected = state.sequence[lane.inputIndex]
-
+  const expected = lane.sequence[lane.inputIndex]
   if (pad !== expected) {
-    const other = { ...state[otherKey], score: state[otherKey].score + 1 }
+    return replayAfterMistake(lane, pad, now)
+  }
+
+  const nextIndex = lane.inputIndex + 1
+  if (nextIndex >= lane.sequence.length) {
+    const nextCombo = lane.combo + 1
+    const baseGain = scoreForCompletion(lane.sequence.length, lane.inputStartedAt, now, lane.replayCount)
+    const gain = baseGain + comboBonus(nextCombo)
     return {
-      ...state,
-      [laneKey]: { ...lane, mistake: true },
-      [otherKey]: other,
-      phase: 'break',
-      breakUntil: now + 1100,
-      roundLocked: true,
-      roundWinner: player === 1 ? 2 : 1,
+      ...lane,
+      phase: 'ready',
+      inputIndex: 0,
       highlightPad: pad,
+      showPad: null,
+      score: lane.score + gain,
+      combo: nextCombo,
+      lastScoreGain: gain,
+      replayCount: 0,
     }
   }
 
-  const nextLane = { ...lane, inputIndex: lane.inputIndex + 1 }
-  if (nextLane.inputIndex >= state.sequence.length) {
-    const scored = { ...nextLane, score: nextLane.score + 1 }
-    return {
-      ...state,
-      [laneKey]: scored,
-      phase: 'break',
-      breakUntil: now + 900,
-      roundLocked: true,
-      roundWinner: player,
-      highlightPad: pad,
-    }
+  return {
+    ...lane,
+    inputIndex: nextIndex,
+    highlightPad: pad,
+    showPad: null,
   }
-
-  return { ...state, [laneKey]: nextLane, highlightPad: pad }
 }
 
 export function resolveLegWinner(l1: SimonLaneState, l2: SimonLaneState): 'p1' | 'p2' | 'draw' {

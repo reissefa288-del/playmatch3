@@ -401,11 +401,14 @@
 .pm-bubble-hud-band {
   position: relative;
   flex: 0 0 auto;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 3px;
   overflow: hidden;
   isolation: isolate;
+  container-type: inline-size;
+  container-name: bubble-hud;
 }
 
 .pm-app-shell--bubble .pm-game-portrait.is-active {
@@ -669,9 +672,24 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 6px;
-  padding: 0 2px;
+  padding:
+    0 2px
+    max(6px, env(safe-area-inset-bottom));
   flex: 0 0 auto;
   min-height: 0;
+  background: transparent;
+}
+
+.pm-bubble-controls__icon {
+  display: block;
+  width: clamp(28px, 8vw, 34px);
+  height: auto;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+.pm-bubble-controls__icon.is-fire {
+  width: clamp(30px, 8.5vw, 36px);
 }
 
 .pm-bubble-controls__btn {
@@ -679,8 +697,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
-  min-height: 52px;
+  gap: 4px;
+  min-height: 54px;
   border-radius: 10px;
   border: 1.5px solid transparent;
   background: linear-gradient(180deg, rgba(20, 28, 52, 0.95), rgba(8, 12, 28, 0.98));
@@ -702,24 +720,36 @@
   border-color: rgba(34, 212, 255, 0.55);
   color: var(--bubble-cyan);
   box-shadow:
-    inset 0 0 12px rgba(34, 212, 255, 0.08),
-    0 0 14px rgba(34, 212, 255, 0.12);
+    inset 0 0 14px rgba(34, 212, 255, 0.1),
+    0 0 16px rgba(34, 212, 255, 0.14);
+}
+
+.pm-bubble-controls__btn.is-cyan .pm-bubble-controls__icon {
+  filter: drop-shadow(0 0 6px rgba(34, 200, 255, 0.45));
 }
 
 .pm-bubble-controls__btn.is-pink {
   border-color: rgba(255, 58, 120, 0.55);
   color: var(--bubble-pink);
   box-shadow:
-    inset 0 0 12px rgba(255, 58, 120, 0.08),
-    0 0 14px rgba(255, 58, 120, 0.12);
+    inset 0 0 14px rgba(255, 58, 120, 0.1),
+    0 0 16px rgba(255, 58, 120, 0.14);
+}
+
+.pm-bubble-controls__btn.is-pink .pm-bubble-controls__icon {
+  filter: drop-shadow(0 0 6px rgba(255, 58, 120, 0.4));
 }
 
 .pm-bubble-controls__btn.is-gold {
   border-color: rgba(255, 184, 74, 0.55);
   color: var(--bubble-gold);
   box-shadow:
-    inset 0 0 12px rgba(255, 184, 74, 0.08),
-    0 0 14px rgba(255, 184, 74, 0.12);
+    inset 0 0 14px rgba(255, 184, 74, 0.12),
+    0 0 18px rgba(255, 184, 74, 0.18);
+}
+
+.pm-bubble-controls__btn.is-gold .pm-bubble-controls__icon {
+  filter: drop-shadow(0 0 8px rgba(255, 200, 80, 0.55));
 }
 
 .pm-bubble-controls__btn:active:not(:disabled) {
@@ -731,16 +761,25 @@
   cursor: default;
 }
 
-/* ── Header (portraits flanking title) ── */
+/* ── Header: profiller logoya bitişik küme ── */
 .pm-bubble-header {
   position: relative;
   z-index: 2;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 6px;
   padding-top: 14px;
   min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Sabit genişlik: profiller kenarda, logo ortada büyüyebilir */
+.pm-bubble-header__cluster {
+  position: relative;
+  width: min(100%, 340px);
+  height: clamp(110px, 28vw, 132px);
+  margin-inline: auto;
 }
 
 .pm-bubble-header__side {
@@ -748,17 +787,26 @@
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  min-width: 0;
+  position: absolute;
+  bottom: 0;
+  z-index: 3;
 }
 
 .pm-bubble-header__side.is-p1 {
-  justify-self: end;
-  padding-right: 2px;
+  left: 0;
 }
 
 .pm-bubble-header__side.is-p2 {
-  justify-self: start;
-  padding-left: 2px;
+  right: 0;
+}
+
+/* Diğer duel oyunlarıyla aynı paylaşılan portre boyutu (game-portrait.css) */
+.pm-bubble-header .pm-game-portrait {
+  width: clamp(62px, 18vw, 84px);
+  height: clamp(62px, 18vw, 84px);
+  min-width: clamp(62px, 18vw, 84px);
+  min-height: clamp(62px, 18vw, 84px);
+  flex-shrink: 0;
 }
 
 .pm-bubble-header__name {
@@ -800,57 +848,37 @@
 }
 
 .pm-bubble-header__title {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  z-index: 1;
   margin: 0;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1px;
-  line-height: 1;
-  padding: 9px 20px;
-  border: 1px solid rgba(125, 226, 255, 0.48);
-  clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
-  background:
-    radial-gradient(ellipse 110% 70% at 50% 0%, rgba(255, 255, 255, 0.14), transparent 48%),
-    linear-gradient(120deg, rgba(34, 200, 255, 0.16), transparent 38%, rgba(255, 58, 120, 0.14)),
-    rgba(5, 9, 26, 0.72);
-  backdrop-filter: blur(13px) saturate(1.35);
-  -webkit-backdrop-filter: blur(13px) saturate(1.35);
-  box-shadow:
-    0 0 24px rgba(34, 200, 255, 0.2),
-    0 0 28px rgba(255, 58, 120, 0.16),
-    0 10px 28px rgba(0, 0, 0, 0.34),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18),
-    inset 0 -8px 18px rgba(0, 0, 0, 0.22);
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  clip-path: none;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
-.pm-bubble-header__title .is-cyan {
-  font-size: clamp(0.78rem, 3.6vw, 1rem);
-  font-weight: 800;
-  letter-spacing: 0.16em;
-  color: var(--bubble-cyan);
-  text-shadow:
-    0 0 12px rgba(34, 200, 255, 0.65),
-    0 0 24px rgba(34, 200, 255, 0.35);
+.pm-bubble-header__logo {
+  display: block;
+  width: clamp(190px, 88cqw, 360px);
+  height: auto;
+  max-height: clamp(90px, 24cqw, 148px);
+  object-fit: contain;
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.45));
 }
 
-.pm-bubble-header__title .is-pink {
-  font-size: clamp(0.84rem, 3.8vw, 1.06rem);
-  font-weight: 800;
-  letter-spacing: 0.18em;
-  color: var(--bubble-pink);
-  text-shadow:
-    0 0 12px rgba(255, 58, 120, 0.65),
-    0 0 24px rgba(255, 58, 120, 0.35);
-}
-
-.pm-bubble-header__title .is-gold {
-  font-size: clamp(0.9rem, 4.1vw, 1.14rem);
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  color: var(--bubble-gold);
-  text-shadow:
-    0 0 12px rgba(255, 213, 74, 0.55),
-    0 0 20px rgba(255, 213, 74, 0.28);
+@supports not (width: 1cqw) {
+  .pm-bubble-header__logo {
+    width: clamp(190px, 58vw, 360px);
+    max-height: clamp(90px, 24vw, 148px);
+  }
 }
 
 /* ── HUD ── */
@@ -1009,7 +1037,9 @@
   gap: 6px;
   align-items: stretch;
   padding: 0 2px;
+  flex: 0 0 auto;
   min-height: 58px;
+  max-height: 58px;
   font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -1112,7 +1142,8 @@
 
 .pm-bubble-next.is-fire .pm-bubble-next__orb,
 .pm-bubble-next.is-bomb .pm-bubble-next__orb,
-.pm-bubble-next.is-rainbow .pm-bubble-next__orb {
+.pm-bubble-next.is-rainbow .pm-bubble-next__orb,
+.pm-bubble-next.is-ice .pm-bubble-next__orb {
   box-shadow:
     0 0 12px var(--orb-special-glow, var(--orb-core)),
     0 0 4px var(--orb-special, #fff),
@@ -1137,8 +1168,7 @@
   gap: 8px;
   flex: 1 1 0;
   min-height: 0;
-  height: auto;
-  max-height: none;
+  height: 0;
   padding: 4px 0;
   overflow: hidden;
   contain: layout style paint;
@@ -1269,75 +1299,120 @@
   touch-action: none;
 }
 
-/* ── Footer ── */
-.pm-bubble-footer {
-  position: relative;
-  z-index: 2;
+/* ── Arena combo (sol mavi / sağ kırmızı) ── */
+.pm-bubble-arena-combo {
+  position: absolute;
+  top: clamp(6px, 2vw, 10px);
+  left: 50%;
+  z-index: 4;
+  transform: translateX(-50%);
+  pointer-events: none;
+  text-align: center;
+}
+
+.pm-bubble-arena-combo__burst {
   display: flex;
   flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-end;
-  gap: 6px;
-  flex: 0 0 auto;
-  min-height: 0;
-  padding:
-    2px var(--bubble-pad) max(6px, env(safe-area-inset-bottom));
-  box-sizing: border-box;
-  isolation: isolate;
-  overflow: visible;
-  background: transparent;
-}
-
-.pm-bubble-footer__scores {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: clamp(18px, 7vw, 32px);
-  width: 100%;
-  max-width: 300px;
-  margin: 0 auto;
-  padding: 2px 8px 0;
-  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  gap: 0;
+  padding: 6px 14px 8px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(8, 12, 24, 0.72), rgba(4, 6, 14, 0.88));
+  backdrop-filter: blur(6px);
 }
 
-.pm-bubble-footer__vs-img {
-  display: block;
-  height: clamp(22px, 6.2vw, 30px);
-  width: auto;
-  max-width: 68px;
-  margin: 0 2px;
-  object-fit: contain;
-  flex-shrink: 0;
-  pointer-events: none;
-  user-select: none;
-  -webkit-user-drag: none;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5));
+.pm-bubble-arena-combo__label {
+  font-family: Orbitron, 'Rajdhani', system-ui, sans-serif;
+  font-size: clamp(0.46rem, 2.6vw, 0.54rem);
+  font-weight: 700;
+  letter-spacing: 0.28em;
+  line-height: 1.1;
 }
 
-.pm-bubble-footer__points {
-  flex-shrink: 0;
-  min-width: 40px;
-  min-height: 40px;
-  display: grid;
-  place-items: center;
-  font-size: 0.98rem;
+.pm-bubble-arena-combo__mult {
+  font-family: Orbitron, 'Rajdhani', system-ui, sans-serif;
+  font-size: clamp(0.92rem, 5.2vw, 1.12rem);
   font-weight: 800;
-  font-variant-numeric: lining-nums;
-  letter-spacing: 0;
-  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
-  background: #000;
+  letter-spacing: 0.04em;
+  line-height: 1;
 }
 
-.pm-bubble-footer__points.is-p1 {
-  border: 1px solid rgba(78, 200, 232, 0.38);
-  color: var(--bubble-cyan);
-  box-shadow: inset 0 0 12px rgba(78, 200, 232, 0.06);
+.pm-bubble-arena-combo.is-p1 .pm-bubble-arena-combo__burst {
+  border: 1px solid rgba(62, 212, 255, 0.55);
+  box-shadow:
+    0 0 18px rgba(34, 180, 255, 0.28),
+    inset 0 1px 0 rgba(180, 240, 255, 0.2);
 }
 
-.pm-bubble-footer__points.is-p2 {
-  border: 1px solid rgba(224, 86, 168, 0.38);
-  color: var(--bubble-pink);
-  box-shadow: inset 0 0 12px rgba(224, 86, 168, 0.06);
+.pm-bubble-arena-combo.is-p1 .pm-bubble-arena-combo__label,
+.pm-bubble-arena-combo.is-p1 .pm-bubble-arena-combo__mult {
+  color: #7ee8ff;
+  text-shadow:
+    0 0 12px rgba(34, 200, 255, 0.75),
+    0 0 28px rgba(34, 160, 255, 0.45);
+}
+
+.pm-bubble-arena-combo.is-p2 .pm-bubble-arena-combo__burst {
+  border: 1px solid rgba(255, 72, 98, 0.58);
+  box-shadow:
+    0 0 18px rgba(255, 48, 72, 0.3),
+    inset 0 1px 0 rgba(255, 180, 200, 0.18);
+}
+
+.pm-bubble-arena-combo.is-p2 .pm-bubble-arena-combo__label,
+.pm-bubble-arena-combo.is-p2 .pm-bubble-arena-combo__mult {
+  color: #ff6a7a;
+  text-shadow:
+    0 0 12px rgba(255, 58, 90, 0.8),
+    0 0 28px rgba(255, 32, 64, 0.45);
+}
+
+.pm-bubble-arena-combo.is-hot .pm-bubble-arena-combo__mult {
+  animation: pm-bubble-combo-hot 0.55s ease-in-out 2;
+}
+
+.pm-bubble-arena-combo.is-mega .pm-bubble-arena-combo__burst {
+  animation: pm-bubble-combo-mega-ring 0.9s ease-out 1;
+}
+
+.pm-bubble-arena-combo.is-mega.is-p1 .pm-bubble-arena-combo__mult {
+  color: #b8f4ff;
+}
+
+.pm-bubble-arena-combo.is-mega.is-p2 .pm-bubble-arena-combo__mult {
+  color: #ff9aaa;
+}
+
+@keyframes pm-bubble-combo-hot {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.2);
+  }
+}
+
+@keyframes pm-bubble-combo-mega-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--combo-ring, rgba(255, 255, 255, 0.35));
+  }
+  70% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+
+.pm-bubble-arena-combo.is-mega.is-p1 {
+  --combo-ring: rgba(62, 212, 255, 0.45);
+}
+
+.pm-bubble-arena-combo.is-mega.is-p2 {
+  --combo-ring: rgba(255, 72, 98, 0.45);
 }
 
 /* ── Kontrol paneli (1.png referans — kodla çizilmiş neon dock) ── */
@@ -1669,6 +1744,30 @@
   100% { transform: scale(1); }
 }
 
+/* ── Tur arası özet ── */
+.pm-bubble-round-break {
+  position: absolute;
+  inset: 0;
+  z-index: 9;
+  display: grid;
+  place-content: center;
+  pointer-events: none;
+  background: rgba(4, 8, 18, 0.42);
+}
+
+.pm-bubble-round-break p {
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: rgba(240, 248, 255, 0.98);
+  background: rgba(12, 18, 36, 0.88);
+  border: 1px solid rgba(120, 180, 255, 0.35);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
 /* ── Overlay ── */
 .pm-bubble-overlay {
   position: absolute;
@@ -1715,6 +1814,14 @@
 }
 
 @media (max-width: 360px) {
+  .pm-bubble-header__side,
+  .pm-bubble-header .pm-game-portrait {
+    width: clamp(56px, 16vw, 72px);
+    min-width: clamp(56px, 16vw, 72px);
+    height: clamp(56px, 16vw, 72px);
+    min-height: clamp(56px, 16vw, 72px);
+  }
+
   .pm-bubble-hud-frame {
     width: 62px;
     height: 62px;
@@ -1724,9 +1831,6 @@
     min-height: 48px;
   }
 
-  .pm-bubble-footer__scores {
-    gap: 14px;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1754,7 +1858,9 @@
   .pm-bubble-arena__aura,
   .pm-bubble-stats__value.is-duel-score em,
   .pm-bubble-control-btn__face,
-  .pm-bubble-control-btn__icon.is-gear {
+  .pm-bubble-control-btn__icon.is-gear,
+  .pm-bubble-arena-combo.is-hot .pm-bubble-arena-combo__mult,
+  .pm-bubble-arena-combo.is-mega .pm-bubble-arena-combo__burst {
     animation: none !important;
   }
 }

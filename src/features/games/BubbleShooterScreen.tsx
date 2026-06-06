@@ -2,16 +2,17 @@ import { motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, type PointerEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
-import vsBadge from '../../reference/vs.png'
+import bubbleDuelLogo from '../../reference/b1.png'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
+import { BlockBackIcon } from './components/BlockGameIcons'
 import {
-  BlockArrowLeftIcon,
-  BlockArrowRightIcon,
-  BlockBackIcon,
-  BlockLightningIcon,
-  BlockRotateIcon,
-} from './components/BlockGameIcons'
+  BubbleAimLeftIcon,
+  BubbleAimRightIcon,
+  BubbleFireIcon,
+  BubbleSwapIcon,
+} from './components/BubbleControlIcons'
+import { BubbleArenaCombo } from './components/BubbleArenaCombo'
 import { BubbleShooterCanvas } from './components/BubbleShooterCanvas'
 import { useBubbleShooterDuel } from './useBubbleShooterDuel'
 import {
@@ -151,27 +152,32 @@ export function BubbleShooterScreen() {
           <div className="pm-bubble-screen__stack">
           <div className="pm-bubble-hud-band">
           <header className="pm-bubble-header" aria-label="Oyuncu bilgileri">
-            <article className="pm-bubble-header__side is-p1">
-              <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={playing} />
-              <p className="pm-bubble-header__round-wins">
-                {game.lane1.matchPoints}/{game.winPoints}
-              </p>
-              <p className="pm-bubble-header__name">EMİR</p>
-            </article>
+            <div className="pm-bubble-header__cluster">
+              <article className="pm-bubble-header__side is-p1">
+                <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={playing} />
+                <p className="pm-bubble-header__round-wins">
+                  {game.lane1.matchPoints}/{game.winPoints}
+                </p>
+                <p className="pm-bubble-header__name">EMİR</p>
+              </article>
 
-            <h1 className="pm-bubble-header__title">
-              <span className="is-cyan">BUBBLE</span>
-              <span className="is-pink">SHOOTER</span>
-              <span className="is-gold">DUEL</span>
-            </h1>
+              <h1 className="pm-bubble-header__title">
+                <img
+                  className="pm-bubble-header__logo"
+                  src={bubbleDuelLogo}
+                  alt="Bubble Shooter Duel"
+                  draggable={false}
+                />
+              </h1>
 
-            <article className="pm-bubble-header__side is-p2">
-              <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={playing} />
-              <p className="pm-bubble-header__round-wins">
-                {game.lane2.matchPoints}/{game.winPoints}
-              </p>
-              <p className="pm-bubble-header__name">ZEYNEP</p>
-            </article>
+              <article className="pm-bubble-header__side is-p2">
+                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={playing} />
+                <p className="pm-bubble-header__round-wins">
+                  {game.lane2.matchPoints}/{game.winPoints}
+                </p>
+                <p className="pm-bubble-header__name">ZEYNEP</p>
+              </article>
+            </div>
           </header>
 
           <section className="pm-bubble-stats" aria-label="Maç durumu">
@@ -226,6 +232,7 @@ export function BubbleShooterScreen() {
                 }}
                 aria-hidden
               />
+              <BubbleArenaCombo combo={game.lane1.combo} variant="p1" />
               <BubbleShooterCanvas
                 laneRef={game.lane1RenderRef}
                 accent="cyan"
@@ -237,84 +244,84 @@ export function BubbleShooterScreen() {
             <div className={`pm-bubble-arena is-p2 ${playing ? 'is-live' : ''}`}>
               <span className="pm-bubble-arena__aura" aria-hidden />
               <div className="pm-bubble-arena__city" aria-hidden />
+              <BubbleArenaCombo combo={game.lane2.combo} variant="p2" />
               <BubbleShooterCanvas
                 laneRef={game.lane2RenderRef}
                 accent="pink"
                 showShooterExtras
                 active={playing}
+                showRivalAim={game.rivalAimFlash}
               />
             </div>
           </div>
 
           <section className="pm-bubble-controls" aria-label="Kontroller">
-            <button
-              type="button"
-              className="pm-bubble-controls__btn is-cyan"
-              aria-label="Sola nişan"
-              disabled={!playing}
-              onPointerDown={pressLeft}
-              onPointerUp={release}
-              onPointerLeave={release}
-              onPointerCancel={release}
-            >
-              <BlockArrowLeftIcon />
-              <span>SOL</span>
-            </button>
-            <button
-              type="button"
-              className="pm-bubble-controls__btn is-pink"
-              aria-label="Balon değiştir"
-              disabled={!playing}
-              onPointerDown={(e) => {
-                e.preventDefault()
-                handleSwap()
-              }}
-            >
-              <BlockRotateIcon />
-              <span>DEĞİŞ</span>
-            </button>
-            <button
-              type="button"
-              className="pm-bubble-controls__btn is-gold"
-              aria-label="Ateş"
-              disabled={!playing}
-              onPointerDown={(e) => {
-                e.preventDefault()
-                handleFire()
-              }}
-            >
-              <BlockLightningIcon />
-              <span>ATEŞ</span>
-            </button>
-            <button
-              type="button"
-              className="pm-bubble-controls__btn is-cyan"
-              aria-label="Sağa nişan"
-              disabled={!playing}
-              onPointerDown={pressRight}
-              onPointerUp={release}
-              onPointerLeave={release}
-              onPointerCancel={release}
-            >
-              <BlockArrowRightIcon />
-              <span>SAĞ</span>
-            </button>
+              <button
+                type="button"
+                className="pm-bubble-controls__btn is-cyan"
+                aria-label="Sola nişan"
+                disabled={!playing}
+                onPointerDown={pressLeft}
+                onPointerUp={release}
+                onPointerLeave={release}
+                onPointerCancel={release}
+              >
+                <BubbleAimLeftIcon className="pm-bubble-controls__icon" />
+                <span>SOL</span>
+              </button>
+              <button
+                type="button"
+                className="pm-bubble-controls__btn is-pink"
+                aria-label="Balon değiştir"
+                disabled={!playing}
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  handleSwap()
+                }}
+              >
+                <BubbleSwapIcon className="pm-bubble-controls__icon" />
+                <span>DEĞİŞ</span>
+              </button>
+              <button
+                type="button"
+                className="pm-bubble-controls__btn is-gold"
+                aria-label="Ateş"
+                disabled={!playing}
+                onPointerDown={(e) => {
+                  e.preventDefault()
+                  handleFire()
+                }}
+              >
+                <BubbleFireIcon className="pm-bubble-controls__icon is-fire" />
+                <span>ATEŞ</span>
+              </button>
+              <button
+                type="button"
+                className="pm-bubble-controls__btn is-cyan"
+                aria-label="Sağa nişan"
+                disabled={!playing}
+                onPointerDown={pressRight}
+                onPointerUp={release}
+                onPointerLeave={release}
+                onPointerCancel={release}
+              >
+                <BubbleAimRightIcon className="pm-bubble-controls__icon" />
+                <span>SAĞ</span>
+              </button>
           </section>
-
-          <footer className="pm-bubble-footer">
-            <div className="pm-bubble-footer__scores" aria-label="Tur skoru">
-              <span className="pm-bubble-footer__points is-p1">{game.lane1.matchPoints}</span>
-              <img
-                className="pm-bubble-footer__vs-img"
-                src={vsBadge}
-                alt=""
-                draggable={false}
-                aria-hidden
-              />
-              <span className="pm-bubble-footer__points is-p2">{game.lane2.matchPoints}</span>
-            </div>
-          </footer>
           </div>
+
+          {playing && game.roundMessage && game.isRoundBreak ? (
+            <motion.div
+              className="pm-bubble-round-break"
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              role="status"
+            >
+              <p>{game.roundMessage}</p>
+            </motion.div>
+          ) : null}
 
           {!game.running && overlayMessage ? (
             <motion.div className="pm-bubble-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>

@@ -17,6 +17,7 @@ import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { StackDuelCinematic } from './components/StackDuelCinematic'
 import { StackDuelTower } from './components/StackDuelTower'
 import { useStackDuel } from './useStackDuel'
+import { laneSpeedTier, LIFE_RECOVERY_PERFECTS, LIVES } from './utils/stackDuelEngine'
 import { unlockStackDuelAudio } from './utils/stackDuelSounds'
 
 function formatTime(sec: number) {
@@ -178,13 +179,23 @@ export function StackDuelScreen() {
               <span>SESSİZ</span>
             </button>
             <div className="pm-stack-footer__combo">
-              <span>KOMBO GÜCÜ</span>
+              <span>
+                KOMBO GÜCÜ
+                {game.running && laneSpeedTier(game.lane1) > 0 ? (
+                  <em className="pm-stack-footer__speed"> · HIZ {laneSpeedTier(game.lane1) + 1}</em>
+                ) : null}
+              </span>
               <div className="pm-stack-footer__combo-bar">
                 <span
                   className={game.lane1.combo >= 4 ? 'is-mega' : game.lane1.combo >= 2 ? 'is-hot' : ''}
                   style={{ width: `${Math.min(100, 12 + game.lane1.combo * 14)}%` }}
                 />
               </div>
+              {game.running && game.lane1.perfectStreak > 0 && game.lane1.lives < LIVES ? (
+                <span className="pm-stack-footer__life-streak">
+                  CAN SERİSİ {game.lane1.perfectStreak}/{LIFE_RECOVERY_PERFECTS}
+                </span>
+              ) : null}
             </div>
             <button type="button" className="pm-stack-footer__btn" aria-label="Menü">
               <FiMenu />
@@ -195,6 +206,17 @@ export function StackDuelScreen() {
           {overlayMessage ? (
             <motion.div className="pm-stack-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
               <p>{overlayMessage}</p>
+              {game.roundScoreSummary && game.isRoundBreak ? (
+                <div className="pm-stack-overlay__scores" aria-label="Tur skorları">
+                  <span className={`is-cyan${game.roundScoreSummary.winner === 'p1' ? ' is-winner' : ''}`}>
+                    EMİR {formatScore(game.roundScoreSummary.p1)}
+                  </span>
+                  <span className="pm-stack-overlay__scores-sep">—</span>
+                  <span className={`is-pink${game.roundScoreSummary.winner === 'p2' ? ' is-winner' : ''}`}>
+                    ZEYNEP {formatScore(game.roundScoreSummary.p2)}
+                  </span>
+                </div>
+              ) : null}
               {!game.running ? (
                 <button type="button" onClick={() => { interact(); game.restartMatch() }}>
                   YENİDEN BAŞLAT

@@ -1,4 +1,4 @@
-type StackSoundId = 'move' | 'drop' | 'perfect' | 'miss' | 'round' | 'win' | 'lose'
+type StackSoundId = 'move' | 'drop' | 'perfect' | 'miss' | 'life' | 'round' | 'win' | 'lose'
 
 let audioCtx: AudioContext | null = null
 let unlocked = false
@@ -45,6 +45,7 @@ const MIN_GAP: Record<StackSoundId, number> = {
   drop: 100,
   perfect: 140,
   miss: 200,
+  life: 320,
   round: 500,
   win: 900,
   lose: 900,
@@ -68,6 +69,10 @@ export function playStackDuelSound(id: StackSoundId) {
       break
     case 'miss':
       tone(180, 0.16, 'sawtooth', 0.04, 120)
+      break
+    case 'life':
+      tone(520, 0.1, 'sine', 0.06, 780)
+      tone(880, 0.14, 'sine', 0.05, undefined, 0.08)
       break
     case 'round':
       tone(440, 0.14, 'sine', 0.06, 660)

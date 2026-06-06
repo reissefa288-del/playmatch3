@@ -7,11 +7,14 @@ import {
 } from './utils/memoryDuelBot'
 import {
   applyFlipBack,
+  canFlipCard,
   createLane,
   decayLaneFx,
   FLIP_BACK_MS,
   flipCard,
+  laneHasActiveFx,
   MATCH_ROUNDS,
+  recoverStaleFlipBack,
   resolveRoundWinner,
   ROUND_BREAK_MS,
   ROUND_SECONDS,
@@ -47,9 +50,11 @@ export function useMemoryDuel() {
   const runningRef = useRef(running)
   const botMemoryRef = useRef<BotMemory>(createBotMemory())
   const botSeedRef = useRef(11)
-  const flipBackTimerRef = useRef<number | null>(null)
+  const flipBackTimerP1Ref = useRef<number | null>(null)
+  const flipBackTimerP2Ref = useRef<number | null>(null)
   const botTimerRef = useRef<number | null>(null)
   const scheduleBotRef = useRef<() => void>(() => {})
+  const timeDisplayRef = useRef(ROUND_SECONDS)
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
@@ -62,10 +67,18 @@ export function useMemoryDuel() {
     setLane2(l2)
   }, [])
 
-  const clearFlipBack = useCallback(() => {
-    if (flipBackTimerRef.current != null) {
-      window.clearTimeout(flipBackTimerRef.current)
-      flipBackTimerRef.current = null
+  const clearFlipBack = useCallback((side?: 'p1' | 'p2') => {
+    if (side === 'p1' || side === undefined) {
+      if (flipBackTimerP1Ref.current != null) {
+        window.clearTimeout(flipBackTimerP1Ref.current)
+        flipBackTimerP1Ref.current = null
+      }
+    }
+    if (side === 'p2' || side === undefined) {
+      if (flipBackTimerP2Ref.current != null) {
+        window.clearTimeout(flipBackTimerP2Ref.current)
+        flipBackTimerP2Ref.current = null
+      }
     }
   }, [])
 
@@ -89,6 +102,7 @@ export function useMemoryDuel() {
     (roundWinner: RoundWinner) => {
       if (roundEndingRef.current) return
       roundEndingRef.current = true
+      clearFlipBack()
       clearBotTimer()
 
       let l1 = lane1Ref.current
@@ -142,7 +156,7 @@ export function useMemoryDuel() {
         scheduleBotRef.current()
       }, ROUND_BREAK_MS)
     },
-    [clearBotTimer, syncLanes],
+    [clearBotTimer, clearFlipBack, syncLanes],
   )
 
   const checkRoundEnd = useCallback(() => {
@@ -161,14 +175,17 @@ export function useMemoryDuel() {
 
   const scheduleFlipBack = useCallback(
     (side: 'p1' | 'p2') => {
-      clearFlipBack()
-      flipBackTimerRef.current = window.setTimeout(() => {
-        flipBackTimerRef.current = null
+      clearFlipBack(side)
+      const timerRef = side === 'p1' ? flipBackTimerP1Ref : flipBackTimerP2Ref
+      timerRef.current = window.setTimeout(() => {
+        timerRef.current = null
         if (side === 'p1') {
           const next = applyFlipBack(lane1Ref.current)
+          if (next === lane1Ref.current) return
           syncLanes(next, lane2Ref.current)
         } else {
           const next = applyFlipBack(lane2Ref.current)
+          if (next === lane2Ref.current) return
           syncLanes(lane1Ref.current, next)
         }
         if (!checkRoundEnd()) scheduleBotRef.current()
@@ -200,7 +217,7 @@ export function useMemoryDuel() {
     const lane = lane2Ref.current
     if (lane.finished || lane.inputLocked || lane.flipBackPending) return
 
-    const delay = botThinkDelayMs(lane.combo)
+    const delay = botThinkDelayMs(lane.combo, lane.openIndices.length === 1)
     botTimerRef.current = window.setTimeout(() => {
       botTimerRef.current = null
       if (!runningRef.current || endedRef.current || roundEndingRef.current) return
@@ -222,7 +239,7 @@ export function useMemoryDuel() {
     (index: number) => {
       if (!runningRef.current || endedRef.current || roundEndingRef.current) return
       const lane = lane1Ref.current
-      if (lane.finished || lane.inputLocked || lane.flipBackPending) return
+      if (!canFlipCard(lane)) return
       const result = flipCard(lane, index)
       if (result.events.length === 0) return
       applyLaneResult('p1', result)
@@ -249,7 +266,7 @@ export function useMemoryDuel() {
     setRunning(true)
     setWinner(null)
     syncLanes(createLane(1, 11), createLane(2, 11))
-    window.setTimeout(() => scheduleBotRef.current(), 400)
+    window.setTimeout(() => scheduleBotRef.current(), 280)
   }, [clearBotTimer, clearFlipBack, syncLanes])
 
   useEffect(() => {
@@ -263,7 +280,7 @@ export function useMemoryDuel() {
   useEffect(() => {
     if (!running || endedRef.current) return
     let raf = 0
-  let last = performance.now()
+    let last = performance.now()
 
     const tick = (now: number) => {
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -272,11 +289,28 @@ export function useMemoryDuel() {
       if (!roundEndingRef.current && now >= roundBreakUntilRef.current) {
         const elapsed = now / 1000 - roundStartedAtRef.current
         roundTimeRef.current = Math.max(0, ROUND_SECONDS - elapsed)
-        setRoundTimeLeft(Math.ceil(roundTimeRef.current))
+        const display = Math.ceil(roundTimeRef.current)
+        if (display !== timeDisplayRef.current) {
+          timeDisplayRef.current = display
+          setRoundTimeLeft(display)
+        }
 
-        let l1 = decayLaneFx(lane1Ref.current, dt)
-        let l2 = decayLaneFx(lane2Ref.current, dt)
-        if (l1 !== lane1Ref.current || l2 !== lane2Ref.current) syncLanes(l1, l2)
+        let l1 = lane1Ref.current
+        let l2 = lane2Ref.current
+        const recovered1 = recoverStaleFlipBack(l1, now)
+        const recovered2 = recoverStaleFlipBack(l2, now)
+        if (recovered1 !== l1 || recovered2 !== l2) {
+          syncLanes(recovered1, recovered2)
+          if (!checkRoundEnd()) scheduleBotRef.current()
+          l1 = recovered1
+          l2 = recovered2
+        }
+
+        if (laneHasActiveFx(l1, now) || laneHasActiveFx(l2, now)) {
+          const next1 = decayLaneFx(l1, dt, now)
+          const next2 = decayLaneFx(l2, dt, now)
+          if (next1 !== l1 || next2 !== l2) syncLanes(next1, next2)
+        }
 
         if (roundTimeRef.current <= 0) checkRoundEnd()
       }

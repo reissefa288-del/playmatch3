@@ -8,11 +8,18 @@ export const PERFECT_RATIO = 0.92
 export const GOOD_RATIO = 0.72
 export const MIN_OVERLAP = 0.03
 export const MIN_PLAY_WIDTH = 0.09
+export const DANGER_WIDTH = 0.12
+export const MEGA_COMBO_AT = 4
+export const MEGA_COMBO_MULT = 2
 export const PLATFORM_WIDTH = 0.92
 export const MAX_VISIBLE_BLOCKS = 18
 export const MOVE_SPEED = 0.84
+export const SPEED_TIER_EVERY = 5
+export const MOVE_SPEED_BONUS = 0.09
+export const MOVE_SPEED_MAX = 1.38
+export const LIFE_RECOVERY_PERFECTS = 3
 export const TICK_MS = 16
-export const FALL_DURATION_MS = 700
+export const FALL_DURATION_MS = 920
 export const SLIDE_TOP_PX = 14
 export const STAGE_BASE_BOTTOM_PX = 28
 
@@ -46,6 +53,7 @@ export type StackLaneState = {
   falling: FallingBlock | null
   score: number
   combo: number
+  perfectStreak: number
   lives: number
   height: number
   perfectPop: string | null
@@ -59,6 +67,7 @@ export type DropResult = {
   event: StackLaneEvent
   points: number
   overlapRatio: number
+  lifeRecovered?: boolean
 }
 
 const P1_COLORS = ['#3d7bff', '#5a9bff', '#6b5cff', '#00e8ff', '#4d8aff', '#8b7cff', '#2ec4ff']
@@ -91,6 +100,29 @@ export function stackTop(lane: StackLaneState): StackBlock {
   return lane.platform
 }
 
+export function comboScoreMultiplier(combo: number): number {
+  return combo >= MEGA_COMBO_AT ? MEGA_COMBO_MULT : 1
+}
+
+export function lanePlayWidth(lane: StackLaneState): number {
+  if (lane.finished || lane.lives <= 0) return stackTop(lane).width
+  return lane.falling?.width ?? lane.active.width
+}
+
+export function isLaneInDanger(lane: StackLaneState): boolean {
+  if (lane.finished || lane.lives <= 0) return false
+  return lanePlayWidth(lane) <= DANGER_WIDTH + 0.008
+}
+
+export function laneSpeedTier(lane: StackLaneState): number {
+  return Math.floor(lane.blocks.length / SPEED_TIER_EVERY)
+}
+
+export function laneMoveSpeed(lane: StackLaneState): number {
+  const tier = laneSpeedTier(lane)
+  return Math.min(MOVE_SPEED_MAX, MOVE_SPEED + tier * MOVE_SPEED_BONUS)
+}
+
 function createActive(width: number, color: string, seed: number, prevDir?: 1 | -1): ActiveBlock {
   const rand = mulberry32(seed)
   const half = width / 2
@@ -119,6 +151,7 @@ export function createLane(laneId: number, seed: number): StackLaneState {
     falling: null,
     score: 0,
     combo: 0,
+    perfectStreak: 0,
     lives: LIVES,
     height: 0,
     perfectPop: null,
@@ -160,7 +193,8 @@ export function commitFall(lane: StackLaneState, seed: number): DropResult {
 export function tickActive(lane: StackLaneState, dt: number): StackLaneState {
   if (lane.finished || lane.lives <= 0 || lane.falling) return lane
   const half = lane.active.width / 2
-  let x = lane.active.x + lane.active.dir * MOVE_SPEED * dt
+  const speed = laneMoveSpeed(lane)
+  let x = lane.active.x + lane.active.dir * speed * dt
   let dir = lane.active.dir
   if (x - half <= 0) {
     x = half
@@ -220,6 +254,7 @@ export function dropBlock(lane: StackLaneState, seed: number): DropResult {
       ...lane,
       lives,
       combo: 0,
+      perfectStreak: 0,
       shake: 8,
       finished,
       lastEvent: 'miss',
@@ -232,9 +267,18 @@ export function dropBlock(lane: StackLaneState, seed: number): DropResult {
   const isPerfect = ratio >= PERFECT_RATIO
   const isGood = ratio >= GOOD_RATIO
   const combo = isPerfect ? lane.combo + 1 : isGood ? Math.max(1, lane.combo) : 0
+  let perfectStreak = isPerfect ? lane.perfectStreak + 1 : 0
+  let lives = lane.lives
+  let lifeRecovered = false
+  if (isPerfect && perfectStreak >= LIFE_RECOVERY_PERFECTS && lives < LIVES) {
+    lives += 1
+    perfectStreak = 0
+    lifeRecovered = true
+  }
   const basePts = Math.round(overlapW * 220)
   const bonus = isPerfect ? 260 + combo * 28 : isGood ? 140 + combo * 12 : Math.round((1 - ratio) * 40)
-  const points = basePts + bonus
+  const mult = comboScoreMultiplier(combo)
+  const points = Math.round((basePts + bonus) * mult)
 
   const placed: StackBlock = {
     x: center,
@@ -246,9 +290,14 @@ export function dropBlock(lane: StackLaneState, seed: number): DropResult {
   const score = lane.score + points
 
   let perfectPop: string | null = null
-  if (isPerfect) perfectPop = `PERFECT! +${points}`
-  else if (isGood) perfectPop = `İYİ! +${points}`
-  else perfectPop = `KÜÇÜLDÜ! ${Math.round(overlapW * 100)}%`
+  if (isPerfect) {
+    perfectPop = mult > 1 ? `MEGA x${mult}! +${points}` : `PERFECT! +${points}`
+  } else if (isGood) {
+    perfectPop = mult > 1 ? `MEGA x${mult}! +${points}` : `İYİ! +${points}`
+  } else {
+    perfectPop = `KÜÇÜLDÜ! ${Math.round(overlapW * 100)}%`
+  }
+  if (lifeRecovered) perfectPop = `+1 CAN! ${perfectPop}`
 
   const tooThin = overlapW < MIN_PLAY_WIDTH
   const next: StackLaneState = {
@@ -258,6 +307,8 @@ export function dropBlock(lane: StackLaneState, seed: number): DropResult {
     nextColor: pickLaneColor(lane.laneId, blocks.length + 2, seed + 11),
     score,
     combo: isPerfect ? combo : isGood ? combo : 0,
+    perfectStreak,
+    lives,
     height: blocks.length,
     perfectPop,
     shake: isPerfect ? 0 : 4,
@@ -270,6 +321,7 @@ export function dropBlock(lane: StackLaneState, seed: number): DropResult {
     event: tooThin ? 'over' : isPerfect ? 'perfect' : isGood ? 'good' : 'place',
     points,
     overlapRatio: ratio,
+    lifeRecovered,
   }
 }
 
@@ -285,17 +337,18 @@ export function laneOutOfMoves(lane: StackLaneState): boolean {
   return lane.lives <= 0 || lane.finished
 }
 
-/** Hamle kalmayınca süreyi beklemeden round bitsin (skorla kazanan). */
+export function isLaneEliminated(lane: StackLaneState): boolean {
+  return laneOutOfMoves(lane)
+}
+
+/** Can bitti veya kule inceldiğinde tur hemen biter; kazanan skora göre belirlenir. */
 export function shouldEndRoundEarly(l1: StackLaneState, l2: StackLaneState): boolean {
-  if (l1.lives <= 0 || l2.lives <= 0) return true
-  return laneOutOfMoves(l1) && laneOutOfMoves(l2)
+  return laneOutOfMoves(l1) || laneOutOfMoves(l2)
 }
 
 export function resolveRoundWinner(l1: StackLaneState, l2: StackLaneState): 'p1' | 'p2' | 'draw' {
   if (l1.score > l2.score) return 'p1'
   if (l2.score > l1.score) return 'p2'
-  if (l1.height > l2.height) return 'p1'
-  if (l2.height > l1.height) return 'p2'
   return 'draw'
 }
 

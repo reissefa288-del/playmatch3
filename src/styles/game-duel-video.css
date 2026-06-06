@@ -11,6 +11,10 @@
 .pm-snake-screen,
 .pm-pong-lobby,
 .pm-pong-screen,
+.pm-simon-screen,
+.pm-slice-screen,
+.pm-chess-lobby,
+.pm-chess-screen,
 .pm-memory-screen,
 .pm-bubble-screen,
 .pm-stack-screen {
@@ -112,6 +116,10 @@
 .pm-snake-screen .pm-duel-ambient,
 .pm-pong-lobby .pm-duel-ambient,
 .pm-pong-screen .pm-duel-ambient,
+.pm-simon-screen .pm-duel-ambient,
+.pm-slice-screen .pm-duel-ambient,
+.pm-chess-lobby .pm-duel-ambient,
+.pm-chess-screen .pm-duel-ambient,
 .pm-memory-screen .pm-duel-ambient,
 .pm-bubble-screen .pm-duel-ambient,
 .pm-stack-screen .pm-duel-ambient {
