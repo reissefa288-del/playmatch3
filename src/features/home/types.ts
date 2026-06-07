@@ -20,11 +20,6 @@ export type FilterItem = {
   active?: boolean
 }
 
-export type FavoriteGame = {
-  id: string
-  label: string
-}
-
 export type HeroSocialPresence = {
   lastGame: string
   today: string
@@ -50,7 +45,7 @@ export type HeroDiscoveryPlayer = {
   compatibility: number
   portraitPosition: string
   social: HeroSocialPresence
-  favoriteGames: FavoriteGame[]
+  interests: string[]
   tags: HeroDiscoveryTag[]
 }
 
@@ -60,8 +55,8 @@ export type NearbyPlayer = {
   id: string
   name: string
   age: number
-  rank: string
-  gameTags: string[]
+  level: number
+  interests: string[]
   distance: string
   gender?: PlayerGender
   isOnline?: boolean

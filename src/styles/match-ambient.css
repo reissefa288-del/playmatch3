@@ -21,11 +21,14 @@
 
 .pm-app-shell--match {
   background: transparent;
+  min-height: auto;
+  height: auto;
 }
 
 .pm-app-shell--match .pm-artboard {
   position: relative;
   z-index: 1;
+  flex: 0 0 auto;
   background: transparent;
 }
 

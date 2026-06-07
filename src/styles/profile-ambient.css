@@ -2,6 +2,8 @@
 
 .pm-tab-panel#pm-tab-profile {
   background: #060818;
+  overflow-anchor: none;
+  scroll-padding-bottom: 16px;
 }
 
 .pm-tab-panel#pm-tab-profile::before {
@@ -22,6 +24,8 @@
 
 .pm-app-shell--profile {
   background: transparent;
+  min-height: auto;
+  height: auto;
 }
 
 .pm-app-shell--profile .pm-artboard {
@@ -29,6 +33,7 @@
   z-index: 1;
   isolation: isolate;
   background: transparent;
+  flex: 0 0 auto;
 }
 
 .pm-app-shell--profile .pm-artboard::before {

@@ -7,6 +7,7 @@ import {
   FiLock,
   FiMapPin,
   FiSend,
+  FiStar,
   FiX,
 } from 'react-icons/fi'
 import { motion } from 'framer-motion'
@@ -15,16 +16,25 @@ import { LuGamepad2 } from 'react-icons/lu'
 import { MdEmojiEvents } from 'react-icons/md'
 import { fakePortraitForGender } from '../../../shared/fakePortraits'
 import { PhotoLightbox, type LightboxPhoto } from '../../../shared/PhotoLightbox'
+import { useGemBalance } from '../../currency/GemBalanceProvider'
+import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
 import type { HeroDiscoveryPlayer, HeroDiscoveryTag } from '../types'
 
 export type HeroPlayerCardProps = {
   player: HeroDiscoveryPlayer
   showSentOverlay?: boolean
   matchBusy?: boolean
+  canLike?: boolean
+  isPremium?: boolean
   isPeek?: boolean
   onMatchRequest?: () => void
   onPass?: () => void
+  onGameInvite?: () => void
+  onSuperLike?: () => void
+  sentOverlayVariant?: 'match' | 'super'
 }
+
+export const SUPER_LIKE_GEM_COST = 5
 
 function TagIcon({ tag }: { tag: HeroDiscoveryTag }) {
   if (tag.icon === 'trophy') return <MdEmojiEvents aria-hidden />
@@ -38,24 +48,53 @@ const heroLightboxPhotos: LightboxPhoto[] = heroPhotoPositions.map((objectPositi
   objectPosition,
 }))
 
+const VISIBLE_INTERESTS = 3
+
 export function HeroPlayerCard({
   player,
   showSentOverlay = false,
   matchBusy = false,
+  canLike = true,
+  isPremium = false,
   isPeek = false,
   onMatchRequest,
   onPass,
+  onGameInvite,
+  onSuperLike,
+  sentOverlayVariant = 'match',
 }: HeroPlayerCardProps) {
-  const [inviteHint, setInviteHint] = useState(false)
+  const { spend, balance, formatBalance } = useGemBalance()
+  const [inviteHint, setInviteHint] = useState<'locked' | 'sent' | null>(null)
+  const [superHint, setSuperHint] = useState<'gems' | 'sent' | null>(null)
   const [photosOpen, setPhotosOpen] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [photoIndex, setPhotoIndex] = useState(0)
   const portraitSrc = fakePortraitForGender(player.gender)
   const actionsLocked = showSentOverlay || matchBusy || isPeek
+  const visibleInterests = player.interests.slice(0, VISIBLE_INTERESTS)
+  const extraInterests = player.interests.length - visibleInterests.length
 
-  const onLockedInvite = () => {
-    setInviteHint(true)
-    window.setTimeout(() => setInviteHint(false), 3800)
+  const onInviteClick = () => {
+    if (!isPremium) {
+      setInviteHint('locked')
+      window.setTimeout(() => setInviteHint(null), 3800)
+      return
+    }
+    onGameInvite?.()
+    setInviteHint('sent')
+    window.setTimeout(() => setInviteHint(null), 3200)
+  }
+
+  const onSuperLikeClick = () => {
+    if (actionsLocked) return
+    if (!spend(SUPER_LIKE_GEM_COST)) {
+      setSuperHint('gems')
+      window.setTimeout(() => setSuperHint(null), 3800)
+      return
+    }
+    onSuperLike?.()
+    setSuperHint('sent')
+    window.setTimeout(() => setSuperHint(null), 3200)
   }
 
   const openPhotos = () => {
@@ -97,7 +136,9 @@ export function HeroPlayerCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.08 }}
           >
-            Eşleşme isteği gönderildi
+            {sentOverlayVariant === 'super'
+              ? 'Süper beğeni gönderildi'
+              : 'Eşleşme isteği gönderildi'}
           </motion.strong>
           <motion.p
             className="pm-hero-card__sent-sub"
@@ -105,7 +146,9 @@ export function HeroPlayerCard({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.14 }}
           >
-            Karşı tarafa bildirim gitti
+            {sentOverlayVariant === 'super'
+              ? `${player.name} profiline öne çıktın`
+              : 'Karşı tarafa bildirim gitti'}
           </motion.p>
           <motion.span
             className="pm-hero-card__sent-chip"
@@ -113,7 +156,9 @@ export function HeroPlayerCard({
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2 }}
           >
-            Premium bildirim · anında iletildi
+            {sentOverlayVariant === 'super'
+              ? `${SUPER_LIKE_GEM_COST} elmas · öncelikli bildirim`
+              : 'Premium bildirim · anında iletildi'}
           </motion.span>
         </motion.div>
       ) : null}
@@ -226,14 +271,16 @@ export function HeroPlayerCard({
                 ))}
               </div>
 
-              <h3>Favori Oyunlar</h3>
-              <div className="pm-favorites">
-                {player.favoriteGames.map((game) => (
-                  <div key={game.id} className="pm-mini-game">
-                    {game.label}
-                  </div>
+              <h3>İlgi Alanları</h3>
+              <div className="pm-hero-interests">
+                {visibleInterests.map((interest) => (
+                  <span key={interest} className="pm-hero-interest">
+                    {INTEREST_EMOJI[interest] ?? '•'} {interest}
+                  </span>
                 ))}
-                <div className="pm-mini-game muted">+3</div>
+                {extraInterests > 0 ? (
+                  <span className="pm-hero-interest pm-hero-interest--more">+{extraInterests}</span>
+                ) : null}
               </div>
             </div>
           </div>
@@ -241,12 +288,37 @@ export function HeroPlayerCard({
       </div>
 
       <div className="pm-hero-card__actions pm-hero-card__actions--spread">
-        {inviteHint ? (
+        {inviteHint === 'locked' ? (
           <p className="pm-hero-card__invite-hint" role="status">
             <FiLock aria-hidden />
             <span>
-              Davet, eşleşme olunca açılır. <strong>Premium</strong> alarak istek
-              yollayabilirsiniz.
+              Oyuna davet etmek için <strong>Premium</strong> gerekir. Premium sekmesinden
+              aktifleştirebilirsin.
+            </span>
+          </p>
+        ) : null}
+        {inviteHint === 'sent' ? (
+          <p className="pm-hero-card__invite-hint pm-hero-card__invite-hint--sent" role="status">
+            <LuGamepad2 aria-hidden />
+            <span>
+              <strong>Oyun daveti gönderildi.</strong> {player.name} lobine davet edildi.
+            </span>
+          </p>
+        ) : null}
+        {superHint === 'gems' ? (
+          <p className="pm-hero-card__invite-hint pm-hero-card__invite-hint--gems" role="status">
+            <FiStar aria-hidden />
+            <span>
+              Süper beğeni için <strong>{SUPER_LIKE_GEM_COST} elmas</strong> gerekir. Bakiye:{' '}
+              <strong>{formatBalance(balance)}</strong>
+            </span>
+          </p>
+        ) : null}
+        {superHint === 'sent' && !showSentOverlay ? (
+          <p className="pm-hero-card__invite-hint pm-hero-card__invite-hint--super" role="status">
+            <FiStar aria-hidden />
+            <span>
+              <strong>Süper beğeni gönderildi.</strong> {player.name} seni öncelikli görecek.
             </span>
           </p>
         ) : null}
@@ -265,8 +337,8 @@ export function HeroPlayerCard({
 
         <button
           type="button"
-          className={`pm-hero-btn pm-hero-btn--match${showSentOverlay ? ' is-sent' : ''}${matchBusy ? ' is-busy' : ''}`}
-          disabled={actionsLocked || showSentOverlay}
+          className={`pm-hero-btn pm-hero-btn--match${showSentOverlay ? ' is-sent' : ''}${matchBusy ? ' is-busy' : ''}${!canLike ? ' is-exhausted' : ''}`}
+          disabled={actionsLocked || showSentOverlay || !canLike}
           onClick={onMatchRequest}
         >
           <span className="pm-hero-btn__icon" aria-hidden>
@@ -279,21 +351,41 @@ export function HeroPlayerCard({
             )}
           </span>
           <span className="pm-hero-btn__label">
-            {matchBusy ? 'Gönderiliyor…' : showSentOverlay ? 'Gönderildi' : 'Eşleşme isteği'}
+            {matchBusy
+              ? 'Gönderiliyor…'
+              : showSentOverlay
+                ? 'Gönderildi'
+                : !canLike
+                  ? 'Beğeni hakkın bitti'
+                  : 'Eşleşme isteği'}
           </span>
         </button>
 
         <button
           type="button"
-          className="pm-hero-btn pm-hero-btn--invite is-locked"
+          className={`pm-hero-btn pm-hero-btn--invite${isPremium ? '' : ' is-locked'}`}
           disabled={actionsLocked}
-          onClick={onLockedInvite}
+          onClick={onInviteClick}
         >
           <span className="pm-hero-btn__icon" aria-hidden>
             <LuGamepad2 />
-            <FiLock className="pm-hero-btn__lock" />
+            {!isPremium ? <FiLock className="pm-hero-btn__lock" /> : null}
           </span>
           <span className="pm-hero-btn__label">Oyuna Davet Et</span>
+        </button>
+
+        <button
+          type="button"
+          className="pm-hero-btn pm-hero-btn--super"
+          disabled={actionsLocked}
+          onClick={onSuperLikeClick}
+          aria-label={`Süper beğeni gönder · ${SUPER_LIKE_GEM_COST} elmas`}
+        >
+          <span className="pm-hero-btn__icon" aria-hidden>
+            <FiStar />
+          </span>
+          <span className="pm-hero-btn__label">Süper Beğeni</span>
+          <span className="pm-hero-btn__gem-cost">{SUPER_LIKE_GEM_COST} elmas</span>
         </button>
       </div>
 

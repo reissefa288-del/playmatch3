@@ -7,16 +7,17 @@ import {
   FiChevronLeft,
   FiClock,
   FiMenu,
-  FiSettings,
   FiVolume2,
 } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { StackDuelCinematic } from './components/StackDuelCinematic'
 import { StackDuelTower } from './components/StackDuelTower'
 import { useStackDuel } from './useStackDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { laneSpeedTier, LIFE_RECOVERY_PERFECTS, LIVES } from './utils/stackDuelEngine'
 import { unlockStackDuelAudio } from './utils/stackDuelSounds'
 
@@ -41,6 +42,7 @@ function RoundDots({ wins, max, variant }: { wins: number; max: number; variant:
 }
 
 export function StackDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useStackDuel()
 
@@ -65,10 +67,6 @@ export function StackDuelScreen() {
           <button type="button" className="pm-stack-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-stack-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <header className="pm-stack-header">
             <h1 className="pm-stack-header__title">
               <span className="is-cyan">STACK</span>
@@ -98,7 +96,7 @@ export function StackDuelScreen() {
             </div>
 
             <article className={`pm-stack-hud__side is-p2 ${game.running ? 'is-active' : ''}`}>
-              <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={game.running} />
+              <GamePlayerPortrait src={opponent.portrait} variant="pink" active={game.running} {...likeProps}/>
               <p className="pm-stack-hud__label">OYUNCU 2</p>
               <RoundDots wins={game.matchPoints.p2} max={game.winRounds} variant="pink" />
             </article>
@@ -218,9 +216,14 @@ export function StackDuelScreen() {
                 </div>
               ) : null}
               {!game.running ? (
-                <button type="button" onClick={() => { interact(); game.restartMatch() }}>
-                  YENİDEN BAŞLAT
-                </button>
+                <GameDuelRematchActions
+                  onRestart={() => {
+                    interact()
+                    game.restartMatch()
+                  }}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}

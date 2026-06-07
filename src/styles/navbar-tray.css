@@ -66,8 +66,26 @@
 /* —— Elmas —— */
 .pm-currency-nav__item.is-gems {
   height: var(--pm-nav-chip-h);
-  padding: 0 8px 0 6px;
+  padding: 0 6px 0 4px;
   border-radius: var(--pm-nav-chip-radius);
+  gap: 6px;
+  margin: 0;
+  flex: 0 0 auto;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  text-align: left;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.2s ease;
+}
+
+.pm-currency-nav__item.is-gems:active {
+  transform: scale(0.98);
 }
 
 .pm-currency-nav__item.is-gems:hover {
@@ -76,6 +94,15 @@
     0 4px 20px rgba(0, 0, 0, 0.4),
     0 0 18px rgba(100, 140, 255, 0.1),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.pm-currency-nav__item.is-gems:focus {
+  outline: none;
+}
+
+.pm-currency-nav__item.is-gems:focus-visible {
+  outline: 2px solid rgba(120, 200, 255, 0.55);
+  outline-offset: 2px;
 }
 
 .pm-currency-nav__gem {
@@ -174,22 +201,23 @@
   letter-spacing: 0.02em;
 }
 
-.pm-currency-nav__plus {
-  width: 28px;
-  height: 28px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(0, 0, 0, 0.22);
-  transition:
-    transform 0.2s ease,
-    border-color 0.25s ease;
+.pm-currency-nav__item.is-gems .pm-currency-nav__plus {
+  width: 26px;
+  height: 26px;
+  margin-right: 2px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e8ecff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  pointer-events: none;
+  transition: background 0.2s ease;
 }
 
-.pm-currency-nav__plus:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-}
-
-.pm-currency-nav__plus:active {
-  transform: scale(0.94);
+.pm-currency-nav__item.is-gems:hover .pm-currency-nav__plus {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* —— Bildirim (elmas pill ile aynı koyu chip) —— */
@@ -205,10 +233,21 @@
   box-shadow: var(--pm-nav-chip-shadow);
   color: #e8ecff;
   font-size: 18px;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  position: relative;
   transition:
     border-color 0.25s ease,
     box-shadow 0.25s ease,
     color 0.2s ease;
+}
+
+.pm-navbar__right .pm-icon-button.pm-icon-button--bell > svg {
+  position: relative;
+  z-index: 1;
+  display: block;
+  flex-shrink: 0;
 }
 
 .pm-navbar__right .pm-icon-button.pm-icon-button--bell:hover {
@@ -236,6 +275,7 @@
   height: 17px;
   font-size: 9px;
   border: 1.5px solid rgba(8, 10, 28, 0.95);
+  z-index: 2;
   animation: pm-bell-badge-pulse 2.5s ease-in-out infinite;
 }
 

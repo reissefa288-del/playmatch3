@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from 'framer-motion'
 import { useProfileLevel } from '../../profile/ProfileLevelProvider'
 import { XP_GAME_POPULAR } from '../../profile/profileLevel'
 import type { HubGame } from '../data'
+import { GameCoverArt } from './GameCoverArt'
 
 type PopularGamesGridProps = {
   games: HubGame[]
@@ -53,10 +54,10 @@ export function PopularGamesGrid({ games }: PopularGamesGridProps) {
             }}
           >
             <span className="pm-game-card__glow" aria-hidden />
-            <div className="pm-game-card__art">
+            <GameCoverArt gameId={game.id} className="pm-game-card__art">
               <span className="pm-game-card__art-gloss" aria-hidden />
               <game.icon />
-            </div>
+            </GameCoverArt>
             <motion.div className="pm-game-card__content">
               <h4>{game.title}</h4>
               <p className="pm-game-card__activity">{game.activity}</p>

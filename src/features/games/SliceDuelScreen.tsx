@@ -1,14 +1,16 @@
 import '../../styles/slice-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
-import { FiArrowLeft, FiClock, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { SliceDuelArena } from './components/SliceDuelArena'
 import { SliceDuelHealth } from './components/SliceDuelHealth'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useSliceDuel } from './useSliceDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { unlockSliceDuelAudio } from './utils/sliceDuelSounds'
 
 function formatScore(n: number) {
@@ -16,6 +18,7 @@ function formatScore(n: number) {
 }
 
 export function SliceDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const duel = useSliceDuel()
 
@@ -44,10 +47,6 @@ export function SliceDuelScreen() {
           <button type="button" className="pm-slice-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-slice-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-slice-screen__stack">
             <header className="pm-slice-header">
               <h1 className="pm-slice-header__title">
@@ -73,7 +72,7 @@ export function SliceDuelScreen() {
                 <span>Bomba −1 can • Combo ×8 = FRENZY (+45% skor)</span>
               </div>
               <div className="pm-slice-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={canPlay} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={canPlay} {...likeProps}/>
                 <p>ZEYNEP</p>
                 <strong>{formatScore(duel.game.p2.score)}</strong>
                 <SliceDuelHealth lives={duel.game.p2.lives} variant="p2" />
@@ -94,9 +93,11 @@ export function SliceDuelScreen() {
             <motion.div className="pm-slice-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
-                <button type="button" onClick={duel.restartMatch}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={duel.restartMatch}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}

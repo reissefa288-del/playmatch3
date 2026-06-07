@@ -1,9 +1,9 @@
 import '../../styles/snake-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
-import { FiArrowLeft, FiClock, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { SnakeDuelCinematicOverlay } from './components/SnakeDuelCinematicOverlay'
 import { SnakeDuelControls } from './components/SnakeDuelControls'
 import { SnakeDuelGrid } from './components/SnakeDuelGrid'
@@ -11,6 +11,7 @@ import { SnakeDuelTutorial } from './components/SnakeDuelTutorial'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useSnakeDuel } from './useSnakeDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { ROUND_SECONDS } from './utils/snakeDuelEngine'
 import { SNAKE_DUEL_ART } from './snakeDuelAssets'
 
@@ -21,6 +22,7 @@ function formatTime(sec: number) {
 }
 
 export function SnakeDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useSnakeDuel()
 
@@ -59,10 +61,6 @@ export function SnakeDuelScreen() {
           <button type="button" className="pm-snake-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-snake-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-snake-screen__stack">
             <motion.header
               className="pm-snake-header"
@@ -138,7 +136,7 @@ export function SnakeDuelScreen() {
               </div>
 
               <div className="pm-snake-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={canPlay} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={canPlay} {...likeProps}/>
                 <p className="pm-snake-hud__name">ZEYNEP</p>
                 <motion.strong
                   key={game.lane2.score}
@@ -220,6 +218,7 @@ export function SnakeDuelScreen() {
             setP1={game.lane1.matchPoints}
             setP2={game.lane2.matchPoints}
             onRestart={game.restartMatch}
+            onExit={handleBack}
           />
         </motion.div>
       </div>

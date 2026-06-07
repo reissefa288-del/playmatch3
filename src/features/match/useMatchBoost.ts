@@ -3,7 +3,8 @@ import { useCallback, useEffect, useState } from 'react'
 const STORAGE_KEY = 'pm-match-boost-until'
 
 export const BOOST_GEM_COST = 35
-export const BOOST_DURATION_MS = 45 * 60 * 1000
+export const BOOST_DURATION_MS = 60 * 60 * 1000
+export const BOOST_DURATION_MINUTES = BOOST_DURATION_MS / 60_000
 
 function readBoostUntil(): number | null {
   try {
@@ -69,6 +70,6 @@ export function useMatchBoost() {
     progress,
     activate,
     cost: BOOST_GEM_COST,
-    durationMinutes: 45,
+    durationMinutes: BOOST_DURATION_MINUTES,
   }
 }

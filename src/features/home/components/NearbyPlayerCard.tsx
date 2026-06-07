@@ -3,6 +3,8 @@ import { IoShieldCheckmark } from 'react-icons/io5'
 import { MdEmojiEvents } from 'react-icons/md'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { fakePortraitForProfile } from '../../../shared/fakePortraits'
+import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
+import { formatPlayerLevel } from '../../profile/profileLevel'
 import type { NearbyPlayer } from '../types'
 import { NearbyLikeBurst } from './NearbyLikeBurst'
 import { NearbyLikeButton, type NearbyLikePhase } from './NearbyLikeButton'
@@ -62,15 +64,16 @@ export function NearbyPlayerCard({ player, onDismissed }: NearbyPlayerCardProps)
           <span>{player.age}</span>
         </h4>
         <p>
-          <MdEmojiEvents aria-hidden /> {player.rank}
+          <MdEmojiEvents aria-hidden /> {formatPlayerLevel(player.level)}
         </p>
-        {player.recentActivity ? <p className="pm-nearby-card__live">{player.recentActivity}</p> : null}
       </div>
 
       <div className="pm-nearby-card__footer">
         <div className="pm-nearby-card__tags">
-          {player.gameTags.map((tag) => (
-            <span key={tag}>{tag}</span>
+          {player.interests.map((interest) => (
+            <span key={interest}>
+              {INTEREST_EMOJI[interest] ?? '•'} {interest}
+            </span>
           ))}
         </div>
         <NearbyLikeButton

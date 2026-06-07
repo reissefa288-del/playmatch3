@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { FiArrowLeft, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { MissileCommandDuelArena } from './components/MissileCommandDuelArena'
 import { RiftWardComboBadge } from './components/RiftWardComboBadge'
 import { RiftWardMatchPips } from './components/RiftWardMatchPips'
@@ -10,9 +10,11 @@ import { RiftWardNexusBar } from './components/RiftWardNexusBar'
 import { RiftWardScoreFloat } from './components/RiftWardScoreFloat'
 import { RiftWardTimerRing } from './components/RiftWardTimerRing'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { playRiftWardSound, startRiftWardAmbient, stopRiftWardAmbient, unlockRiftWardAudio } from './utils/riftWardSounds'
 import { useMissileCommandDuel } from './useMissileCommandDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 
 function formatScore(n: number) {
   return n.toLocaleString('tr-TR')
@@ -29,6 +31,7 @@ function overlayVariant(duel: ReturnType<typeof useMissileCommandDuel>) {
 }
 
 export function MissileCommandDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const duel = useMissileCommandDuel()
 
@@ -88,10 +91,6 @@ export function MissileCommandDuelScreen() {
           <button type="button" className="pm-missile-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-missile-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-missile-play__stack">
             <header className="pm-missile-header">
               <h1 className="pm-missile-header__title">
@@ -124,7 +123,7 @@ export function MissileCommandDuelScreen() {
               </div>
 
               <div className="pm-missile-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={canPlay} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={canPlay} {...likeProps}/>
                 <p>ZEYNEP</p>
                 <strong
                   key={duel.scorePulseP2}
@@ -161,9 +160,12 @@ export function MissileCommandDuelScreen() {
               <p className="pm-missile-overlay__title">{overlayMessage}</p>
               {overlaySub ? <p className="pm-missile-overlay__sub">{overlaySub}</p> : null}
               {!duel.running ? (
-                <button type="button" className="pm-missile-overlay__cta" onClick={handleRestart}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={handleRestart}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                  primaryClassName="pm-missile-overlay__cta"
+                />
               ) : null}
             </motion.div>
           ) : null}

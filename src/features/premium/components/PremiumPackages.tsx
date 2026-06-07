@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react'
 import { FiCheck, FiLock, FiStar } from 'react-icons/fi'
-import { LuCrown } from 'react-icons/lu'
 import { motion, useReducedMotion } from 'framer-motion'
 import type { PremiumPackage } from '../data'
 import { premiumTrust } from '../data'
@@ -43,11 +42,6 @@ export function PremiumPackages({
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.45 }}
       >
-        <span className="pm-premium-section__head-icon" aria-hidden>
-          <span className="pm-premium-section__head-icon-ring" />
-          <span className="pm-premium-section__head-icon-glow" />
-          <LuCrown />
-        </span>
         <h2>Premium Paketleri</h2>
       </motion.header>
 
@@ -163,7 +157,6 @@ export function PremiumPackages({
       >
         <span className="pm-premium-packages__upgrade-aura" aria-hidden />
         <span className="pm-premium-packages__upgrade-shine" aria-hidden />
-        <LuCrown aria-hidden />
         Hemen Yükselt
       </motion.button>
 

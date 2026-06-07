@@ -48,7 +48,16 @@
   height: auto !important;
 }
 
-.pm-tab-panel > .pm-app-shell:not(.pm-app-shell--home) {
+.pm-tab-panel > .pm-app-shell--home,
+.pm-tab-panel > .pm-app-shell--match,
+.pm-tab-panel > .pm-app-shell--games,
+.pm-tab-panel > .pm-app-shell--premium,
+.pm-tab-panel > .pm-app-shell--profile {
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.pm-tab-panel > .pm-app-shell:not(.pm-app-shell--home):not(.pm-app-shell--match):not(.pm-app-shell--games):not(.pm-app-shell--premium):not(.pm-app-shell--profile) {
   min-height: 100% !important;
 }
 
@@ -57,8 +66,14 @@
   scroll-padding-bottom: 16px;
 }
 
+.pm-tab-panel#pm-tab-match {
+  overflow-anchor: none;
+  scroll-padding-bottom: 12px;
+}
+
 .pm-tab-panel#pm-tab-premium {
-  scroll-padding-bottom: 20px;
+  overflow-anchor: none;
+  scroll-padding-bottom: 16px;
 }
 
 .pm-tab-panel:not(.is-active) {

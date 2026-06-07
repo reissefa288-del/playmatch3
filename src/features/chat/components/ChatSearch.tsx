@@ -1,7 +1,12 @@
 import { FiSearch } from 'react-icons/fi'
 import { motion } from 'framer-motion'
 
-export function ChatSearch() {
+type ChatSearchProps = {
+  value: string
+  onChange: (value: string) => void
+}
+
+export function ChatSearch({ value, onChange }: ChatSearchProps) {
   return (
     <motion.div
       className="pm-chat-search"
@@ -11,7 +16,13 @@ export function ChatSearch() {
     >
       <label className="pm-chat-search__field">
         <FiSearch aria-hidden />
-        <input type="search" placeholder="Kişi veya mesaj ara..." />
+        <input
+          type="search"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Kişi veya mesaj ara..."
+          aria-label="Kişi veya mesaj ara"
+        />
       </label>
     </motion.div>
   )

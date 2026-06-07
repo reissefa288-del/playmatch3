@@ -5,7 +5,7 @@ export const LEG_DURATION_MS = 44_000
 export const ROUND_BREAK_MS = 2600
 export const START_LIVES = 3
 export const SHIP_Y = 88
-export const FIRE_COOLDOWN_MS = 190
+export const FIRE_COOLDOWN_MS = 175
 export const BULLET_SPEED = 0.16
 export const ENEMY_BULLET_SPEED = 0.095
 export const INVULN_MS = 1400
@@ -208,10 +208,21 @@ function enemyShoot(side: Game1942SideState, now: number, rand: () => number): G
   }
 }
 
-export function tickSide(side: Game1942SideState, dt: number, now: number, rand: () => number): Game1942SideState {
-  if (dt <= 0) return side
+export function resolveDuelWinner(g: Game1942State): 'p1' | 'p2' | 'draw' | null {
+  const p1Dead = g.p1.lives <= 0
+  const p2Dead = g.p2.lives <= 0
+  if (!p1Dead && !p2Dead) return null
+  if (p1Dead && p2Dead) return 'draw'
+  if (p1Dead) return 'p2'
+  return 'p1'
+}
+
+export function tickSide(side: Game1942SideState, dt: number, now: number, rand: () => number): Game1942TickResult {
+  const events: Y42FxEvent[] = []
+  if (dt <= 0 || side.lives <= 0) return { side, events }
 
   let s = { ...side }
+  const livesBefore = s.lives
   s.formationPhase += dt * 0.0025
   s.scrollY += SCROLL_SPEED * dt
   const sway = Math.sin(s.formationPhase) * 14
@@ -247,6 +258,7 @@ export function tickSide(side: Game1942SideState, dt: number, now: number, rand:
         if (hp <= 0) {
           hitEnemies.add(e.id)
           scoreGain += SCORE[e.kind]
+          events.push({ type: 'enemyKill', x: e.x, y: e.y })
         } else {
           s.enemies = s.enemies.map((en) => (en.id === e.id ? { ...en, hp } : en))
         }
@@ -292,7 +304,20 @@ export function tickSide(side: Game1942SideState, dt: number, now: number, rand:
   if (now >= s.nextDiveAt) s = startDive(s, now, rand)
   if (now >= s.nextEnemyShotAt) s = enemyShoot(s, now, rand)
 
-  return s
+  if (s.lives < livesBefore) {
+    events.push({ type: 'shipHit', x: s.shipX, y: SHIP_Y })
+  }
+
+  return { side: s, events }
+}
+
+export type Y42FxEvent =
+  | { type: 'enemyKill'; x: number; y: number }
+  | { type: 'shipHit'; x: number; y: number }
+
+export type Game1942TickResult = {
+  side: Game1942SideState
+  events: Y42FxEvent[]
 }
 
 export function legShouldEnd(g: Game1942State, now: number) {

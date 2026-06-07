@@ -2,12 +2,14 @@ import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiAward, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { MathDuelAmbient } from './components/MathDuelAmbient'
 import { MathDuelSide } from './components/MathDuelSide'
 import { useMathDuel } from './useMathDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { LIVES_START } from './utils/mathDuelEngine'
 import { unlockMathDuelAudio } from './utils/mathDuelSounds'
 
@@ -58,6 +60,7 @@ function RoundDots({ wins, max, variant }: { wins: number; max: number; variant:
 }
 
 export function MathDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useMathDuel()
 
@@ -152,7 +155,7 @@ export function MathDuelScreen() {
             <article className={`pm-math-hud__side is-p2 ${game.running ? 'is-active' : ''}`}>
               <div className="pm-math-portrait-wrap is-pink">
                 <span className="pm-math-portrait-wrap__aura" aria-hidden />
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={game.running} crown />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={game.running} crown {...likeProps}/>
               </div>
               <div className="pm-math-hud__panel is-pink">
                 <p className="pm-math-hud__label">OYUNCU 2</p>
@@ -215,9 +218,14 @@ export function MathDuelScreen() {
                 {overlayMessage}
               </motion.p>
               {!game.running ? (
-                <button type="button" onClick={() => { interact(); game.restartMatch() }}>
-                  YENİ MAÇ
-                </button>
+                <GameDuelRematchActions
+                  onRestart={() => {
+                    interact()
+                    game.restartMatch()
+                  }}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}

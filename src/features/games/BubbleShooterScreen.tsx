@@ -1,9 +1,10 @@
 import { motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, type PointerEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import bubbleDuelLogo from '../../reference/b1.png'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { BlockBackIcon } from './components/BlockGameIcons'
 import {
@@ -15,6 +16,7 @@ import {
 import { BubbleArenaCombo } from './components/BubbleArenaCombo'
 import { BubbleShooterCanvas } from './components/BubbleShooterCanvas'
 import { useBubbleShooterDuel } from './useBubbleShooterDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import {
   aimFromNormalizedPointer,
   COLOR_HEX,
@@ -65,6 +67,7 @@ function NextBubble({
 }
 
 export function BubbleShooterScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useBubbleShooterDuel()
   const aimDragRef = useRef(false)
@@ -171,7 +174,7 @@ export function BubbleShooterScreen() {
               </h1>
 
               <article className="pm-bubble-header__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={playing} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={playing} {...likeProps}/>
                 <p className="pm-bubble-header__round-wins">
                   {game.lane2.matchPoints}/{game.winPoints}
                 </p>
@@ -329,16 +332,15 @@ export function BubbleShooterScreen() {
               <p className="pm-bubble-overlay__sub">
                 {game.lane1.matchPoints} — {game.lane2.matchPoints}
               </p>
-              <button
-                type="button"
-                className="pm-bubble-overlay__btn"
-                onClick={() => {
+              <GameDuelRematchActions
+                onRestart={() => {
                   interact()
                   game.restart()
                 }}
-              >
-                TEKRAR OYNA
-              </button>
+                onExit={handleBack}
+                opponentName={opponent.name}
+                primaryClassName="pm-bubble-overlay__btn"
+              />
             </motion.div>
           ) : null}
         </div>

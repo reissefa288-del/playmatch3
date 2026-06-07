@@ -7,12 +7,14 @@ import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { XoxGameBoard } from './components/XoxGameBoard'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useXoxRealtime } from './useXoxRealtime'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { playXoxSound, unlockXoxAudio } from './utils/xoxSounds'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 
 type SessionScores = { x: number; o: number }
 
 export function XoxGameScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const { addXp } = useProfileLevel()
   const [scores, setScores] = useState<SessionScores>({ x: 0, o: 0 })
@@ -166,10 +168,9 @@ export function XoxGameScreen() {
 
               <article className={`pm-xox-hud__side is-p2 ${activeTurnSide === 'o' && interactive ? 'is-active' : ''}`}>
                 <GamePlayerPortrait
-                  src={FAKE_PORTRAIT_FEMALE}
+                  src={opponent.portrait}
                   variant="pink"
-                  active={activeTurnSide === 'o' && interactive}
-                />
+                  active={activeTurnSide === 'o' && interactive} {...likeProps}/>
                 <p className="pm-xox-hud__label">OYUNCU 2</p>
                 <div className="pm-xox-score-pill is-blue">
                   <strong>{scores.o}</strong>

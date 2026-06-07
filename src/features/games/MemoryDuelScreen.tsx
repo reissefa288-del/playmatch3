@@ -1,14 +1,16 @@
 import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
-import { FiArrowLeft, FiClock, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
 import vsBadge from '../../reference/vs.png'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { MemoryDuelAmbient } from './components/MemoryDuelAmbient'
 import { MemoryDuelGrid } from './components/MemoryDuelGrid'
 import { useMemoryDuel } from './useMemoryDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { unlockMemoryDuelAudio } from './utils/memoryDuelSounds'
 
 function formatTime(sec: number) {
@@ -18,6 +20,7 @@ function formatTime(sec: number) {
 }
 
 export function MemoryDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useMemoryDuel()
 
@@ -68,10 +71,6 @@ export function MemoryDuelScreen() {
           <button type="button" className="pm-memory-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-memory-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-memory-screen__stack">
             <header className="pm-memory-header">
               <h1 className="pm-memory-header__title">
@@ -110,7 +109,7 @@ export function MemoryDuelScreen() {
               </div>
 
               <div className="pm-memory-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={game.running} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={game.running} {...likeProps}/>
                 <p className="pm-memory-hud__name">ZEYNEP</p>
                 <div className="pm-memory-score-card is-pink">
                   <span>PUAN</span>
@@ -160,9 +159,11 @@ export function MemoryDuelScreen() {
                 {overlayMessage}
               </motion.p>
               {!game.running ? (
-                <button type="button" onClick={handleRestart}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={handleRestart}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}

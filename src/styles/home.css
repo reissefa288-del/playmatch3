@@ -746,8 +746,33 @@
   letter-spacing: 0.02em;
 }
 
-.pm-hero-card__details .pm-favorites {
+.pm-hero-card__details .pm-hero-interests {
   margin: 0;
+}
+
+.pm-hero-interests {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pm-hero-interest {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 110, 200, 0.22);
+  background: rgba(255, 110, 200, 0.12);
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 220, 240, 0.92);
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.pm-hero-interest--more {
+  border-color: rgba(92, 228, 255, 0.25);
+  background: rgba(92, 228, 255, 0.12);
+  color: #b8f4ff;
 }
 
 .pm-favorites {

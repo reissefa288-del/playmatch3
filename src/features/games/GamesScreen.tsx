@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
-import { FiArrowLeft, FiChevronRight, FiSearch, FiSliders, FiUserPlus, FiUsers, FiZap } from 'react-icons/fi'
+import { FiArrowLeft, FiSearch, FiSliders, FiUserPlus, FiUsers, FiZap } from 'react-icons/fi'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
 import { useProfileLevel } from '../profile/ProfileLevelProvider'
-import { XP_GAME_FEATURED, XP_GAME_POPULAR } from '../profile/profileLevel'
-import { allGamesCards, featuredGames, gamesHeroStats, popularGamesCards, type FeaturedGame, type GamesMiniCard } from './data'
+import { XP_GAME_FEATURED } from '../profile/profileLevel'
+import { featuredGames, gamesHeroStats, popularGamesCards, type FeaturedGame, type GamesMiniCard } from './data'
 import { FeaturedGamesRow } from './components/FeaturedGamesRow'
+import { AllGamesRow } from './components/AllGamesRow'
+import { GameInviteSheet } from './components/GameInviteSheet'
+import { GameCoverArt } from './components/GameCoverArt'
 import { preloadSnakeDuel } from './snakeDuelPreload'
+import { quickMatchPath } from './quickMatch'
 import oyunReference from '../../reference/oyun.png'
 
 export function GamesScreen() {
@@ -17,6 +22,7 @@ export function GamesScreen() {
   const location = useLocation()
   const [onlineCount, setOnlineCount] = useState(3842)
   const [activeMatches, setActiveMatches] = useState(42)
+  const [inviteSheetOpen, setInviteSheetOpen] = useState(false)
   const gamesVars = {
     '--pm-games-reference': `url(${oyunReference})`,
   } as CSSProperties
@@ -28,196 +34,50 @@ export function GamesScreen() {
       })),
     [activeMatches, onlineCount],
   )
-  const catalogMode = location.pathname === '/games/popular' ? 'popular' : location.pathname === '/games/library' ? 'library' : null
+  const isPopularCatalog = location.pathname === '/games/popular'
 
-  const openXox = useCallback(() => {
-    navigate('/games/xox')
+  const openInviteSheet = useCallback(() => {
+    setInviteSheetOpen(true)
+  }, [])
+
+  const closeInviteSheet = useCallback(() => {
+    setInviteSheetOpen(false)
+  }, [])
+
+  const inviteSheetPortal =
+    typeof document !== 'undefined'
+      ? createPortal(
+          <GameInviteSheet open={inviteSheetOpen} onClose={closeInviteSheet} />,
+          document.body,
+        )
+      : null
+
+  const openQuickMatch = useCallback(() => {
+    navigate('/games/quick-match')
   }, [navigate])
 
-  const openBubbleShooter = useCallback(() => {
-    navigate('/games/bubble-shooter')
-  }, [navigate])
-
-  const openBrickBreak = useCallback(() => {
-    navigate('/games/brick-break')
-  }, [navigate])
-
-  const openBlockDuel = useCallback(() => {
-    navigate('/games/block-duel')
-  }, [navigate])
-
-  const openMemoryDuel = useCallback(() => {
-    navigate('/games/memory-duel')
-  }, [navigate])
-
-  const openStackDuel = useCallback(() => {
-    navigate('/games/stack-duel')
-  }, [navigate])
-
-  const openMathDuel = useCallback(() => {
-    navigate('/games/math-duel')
-  }, [navigate])
-
-  const openColorMatch = useCallback(() => {
-    navigate('/games/color-match/play')
-  }, [navigate])
-
-  const openNeonCrush = useCallback(() => {
-    navigate('/games/neon-crush/play')
-  }, [navigate])
-
-  const openSnakeDuel = useCallback(() => {
-    navigate('/games/snake-duel/play')
-  }, [navigate])
-
-  const openPongDuel = useCallback(() => {
-    navigate('/games/pong-duel/play')
-  }, [navigate])
-
-  const openSimonDuel = useCallback(() => {
-    navigate('/games/simon-duel/play')
-  }, [navigate])
-
-  const openSliceDuel = useCallback(() => {
-    navigate('/games/slice-duel/play')
-  }, [navigate])
-
-  const openChessDuel = useCallback(() => {
-    navigate('/games/chess-duel/play')
-  }, [navigate])
-
-  const openSpaceDuel = useCallback(() => {
-    navigate('/games/space-duel/play')
-  }, [navigate])
-
-  const openMissileCommandDuel = useCallback(() => {
-    navigate('/games/missile-command-duel/play')
-  }, [navigate])
-
-  const openDefenderDuel = useCallback(() => {
-    navigate('/games/defender-duel')
-  }, [navigate])
-
-  const openGame1942Duel = useCallback(() => {
-    navigate('/games/1942-duel')
-  }, [navigate])
+  const openQuickMatchForGame = useCallback(
+    (gameId: string) => {
+      navigate(quickMatchPath(gameId))
+    },
+    [navigate],
+  )
 
   const handleFeaturedPlay = useCallback(
     (game: FeaturedGame) => {
-      if (game.id === 'bubble-shooter-duel') {
-        openBubbleShooter()
-        return
-      }
-      if (game.id === 'block-duel') {
-        openBlockDuel()
-        return
-      }
-      if (game.id === 'xox-featured') {
-        openXox()
-        return
-      }
       addXp(XP_GAME_FEATURED)
+      openQuickMatchForGame(game.id)
     },
-    [addXp, openBlockDuel, openBrickBreak, openBubbleShooter, openXox],
+    [addXp, openQuickMatchForGame],
   )
 
   const handleMiniCardClick = useCallback(
     (game: GamesMiniCard, xp: number) => {
-      if (isBubbleShooterGame(game)) {
-        openBubbleShooter()
-        return
-      }
-      if (isBrickBreakGame(game)) {
-        openBrickBreak()
-        return
-      }
-      if (isBlockDuelGame(game)) {
-        openBlockDuel()
-        return
-      }
-      if (isXoxGame(game)) {
-        openXox()
-        return
-      }
-      if (isMemoryDuelGame(game)) {
-        openMemoryDuel()
-        return
-      }
-      if (isStackDuelGame(game)) {
-        openStackDuel()
-        return
-      }
-      if (isMathDuelGame(game)) {
-        openMathDuel()
-        return
-      }
-      if (isColorMatchGame(game)) {
-        openColorMatch()
-        return
-      }
-      if (isNeonCrushGame(game)) {
-        openNeonCrush()
-        return
-      }
-      if (isSnakeDuelGame(game)) {
-        openSnakeDuel()
-        return
-      }
-      if (isPongDuelGame(game)) {
-        openPongDuel()
-        return
-      }
-      if (isSimonDuelGame(game)) {
-        openSimonDuel()
-        return
-      }
-      if (isSliceDuelGame(game)) {
-        openSliceDuel()
-        return
-      }
-      if (isChessDuelGame(game)) {
-        openChessDuel()
-        return
-      }
-      if (isSpaceDuelGame(game)) {
-        openSpaceDuel()
-        return
-      }
-      if (isMissileCommandDuelGame(game)) {
-        openMissileCommandDuel()
-        return
-      }
-      if (isDefenderDuelGame(game)) {
-        openDefenderDuel()
-        return
-      }
-      if (isGame1942DuelGame(game)) {
-        openGame1942Duel()
-        return
-      }
+      if (game.isMore) return
       addXp(xp)
+      openQuickMatchForGame(game.id)
     },
-    [
-      addXp,
-      openBlockDuel,
-      openBrickBreak,
-      openBubbleShooter,
-      openColorMatch,
-      openMathDuel,
-      openMemoryDuel,
-      openNeonCrush,
-      openSnakeDuel,
-      openPongDuel,
-      openSimonDuel,
-      openSliceDuel,
-      openChessDuel,
-      openSpaceDuel,
-      openMissileCommandDuel,
-      openDefenderDuel,
-      openGame1942Duel,
-      openStackDuel,
-      openXox,
-    ],
+    [addXp, openQuickMatchForGame],
   )
 
   useEffect(() => {
@@ -228,10 +88,8 @@ export function GamesScreen() {
     return () => window.clearInterval(timer)
   }, [])
 
-  if (catalogMode) {
-    const cards = catalogMode === 'popular' ? popularGamesCards : allGamesCards
-    const title = catalogMode === 'popular' ? 'Popüler Oyunlar' : 'Tüm Oyunlar'
-    const xp = catalogMode === 'popular' ? XP_GAME_FEATURED : XP_GAME_POPULAR
+  if (isPopularCatalog) {
+    const xp = XP_GAME_FEATURED
 
     return (
       <>
@@ -246,12 +104,12 @@ export function GamesScreen() {
                 </button>
                 <div>
                   <p>Oyun Kataloğu</p>
-                  <h2>{title}</h2>
+                  <h2>Tüm Oyunlar</h2>
                 </div>
               </header>
               <section className="pm-games-all__panel">
                 <div className="pm-games-all__grid" role="list">
-                  {cards.map((game) => (
+                  {popularGamesCards.map((game) => (
                     <article
                       key={game.id}
                       className={`pm-games-mini-card ${game.color} ${game.isMore ? 'is-more' : ''}`}
@@ -267,13 +125,27 @@ export function GamesScreen() {
                       }}
                     >
                     {game.badge ? <span className="pm-games-mini-card__badge">{game.badge}</span> : null}
-                    <div className={`pm-games-mini-card__art is-${game.artKind}`} aria-hidden>
+                    <GameCoverArt
+                      gameId={game.id}
+                      artKind={game.artKind}
+                      className={`pm-games-mini-card__art is-${game.artKind}`}
+                    >
                       <game.icon className="pm-games-mini-card__icon" />
-                    </div>
+                    </GameCoverArt>
                     <strong>{game.title}</strong>
                     <small>
                       <FiUsers /> {game.players}
                     </small>
+                    <button
+                      type="button"
+                      className="pm-games-mini-card__play"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        handleMiniCardClick(game, xp)
+                      }}
+                    >
+                      Oyna
+                    </button>
                   </article>
                   ))}
                 </div>
@@ -318,154 +190,86 @@ export function GamesScreen() {
 
           <FeaturedGamesRow games={featuredGames} onPlay={handleFeaturedPlay} />
 
-          <section className="pm-games-shelf pm-games-shelf--popular">
-            <header className="pm-games-shelf__head">
-              <h3>Popüler Oyunlar</h3>
-              <button type="button" onClick={() => navigate('/games/popular')}>
-                Tümünü Gör <FiChevronRight />
-              </button>
-            </header>
-            <div className="pm-games-shelf__row" role="list">
-              {popularGamesCards.map((game) => (
-                <article
-                  key={game.id}
-                  className={`pm-games-mini-card ${game.color}`}
-                  role="button"
-                  tabIndex={0}
-                  {...snakeDuelPreloadHandlers(game)}
-                  onClick={() => handleMiniCardClick(game, XP_GAME_FEATURED)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      handleMiniCardClick(game, XP_GAME_FEATURED)
-                    }
-                  }}
-                >
-                  <span className="pm-games-mini-card__badge">{game.badge}</span>
-                  <div className={`pm-games-mini-card__art is-${game.artKind}`} aria-hidden>
-                    <game.icon className="pm-games-mini-card__icon" />
-                  </div>
-                  <strong>{game.title}</strong>
-                  <small>
-                    <FiUsers /> {game.players}
-                  </small>
-                </article>
-              ))}
-            </div>
-          </section>
-
-          <section className="pm-games-shelf pm-games-shelf--all">
-            <header className="pm-games-shelf__head">
-              <h3>Tüm Oyunlar</h3>
-              <button type="button" onClick={() => navigate('/games/library')}>
-                Tümünü Gör <FiChevronRight />
-              </button>
-            </header>
-            <div className="pm-games-shelf__row" role="list">
-              {allGamesCards.map((game) => (
-                <article
-                  key={game.id}
-                  className={`pm-games-mini-card ${game.color} ${game.isMore ? 'is-more' : ''}`}
-                  role="button"
-                  tabIndex={0}
-                  {...snakeDuelPreloadHandlers(game)}
-                  onClick={() => handleMiniCardClick(game, XP_GAME_POPULAR)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                      event.preventDefault()
-                      handleMiniCardClick(game, XP_GAME_POPULAR)
-                    }
-                  }}
-                >
-                  <div className={`pm-games-mini-card__art is-${game.artKind}`} aria-hidden>
-                    <game.icon className="pm-games-mini-card__icon" />
-                  </div>
-                  <strong>{game.title}</strong>
-                  <small>
-                    <FiUsers /> {game.players}
-                  </small>
-                </article>
-              ))}
-            </div>
-          </section>
+          <AllGamesRow
+            games={popularGamesCards}
+            onPlay={(game) => handleMiniCardClick(game, XP_GAME_FEATURED)}
+            onShowAll={() => navigate('/games/popular')}
+            getCardHandlers={snakeDuelPreloadHandlers}
+          />
 
           <section className="pm-games-cta-grid">
             <article className="pm-games-cta-card is-random">
-              <div className="pm-games-cta-card__visual is-random" aria-hidden>
-                <FiZap />
+              <span className="pm-games-cta-card__edge" aria-hidden />
+              <span className="pm-games-cta-card__glow" aria-hidden />
+
+              <div className="pm-games-cta-card__top">
+                <div className="pm-games-cta-card__visual is-random" aria-hidden>
+                  <FiZap />
+                </div>
+                <p className="pm-games-cta-card__eyebrow">
+                  <FiZap /> Hızlı Eşleşme
+                </p>
               </div>
-              <p className="pm-games-cta-card__eyebrow">
-                <FiZap /> HIZLI EŞLEŞME
+
+              <div className="pm-games-cta-card__title">
+                <span>Rastgele</span>
+                <strong>Oyna</strong>
+              </div>
+
+              <p className="pm-games-cta-card__desc">
+                Karşı cinsiyetten rakiple hızlı eşleş, rastgele oyuna dal!
               </p>
-              <h4>RASTGELE OYNA</h4>
-              <p>Hızlı eşleş, rastgele rakiplerle mücadele et!</p>
-              <small>
-                <span className="pm-games-online-dot" /> 2.148 oyuncu oynuyor
-              </small>
-              <button type="button" onClick={openXox}>
-                <FiZap /> HEMEN OYNA
+
+              <div className="pm-games-cta-card__stat">
+                <span className="pm-games-online-dot" />
+                <span>2.148 oyuncu oynuyor</span>
+              </div>
+
+              <button type="button" onClick={openQuickMatch}>
+                <span className="pm-games-cta-card__btn-shine" aria-hidden />
+                <FiZap /> Hemen Oyna
               </button>
             </article>
 
             <article className="pm-games-cta-card is-friends">
-              <div className="pm-games-cta-card__visual is-friends" aria-hidden>
-                <FiUsers />
-                <FiUserPlus />
+              <span className="pm-games-cta-card__edge" aria-hidden />
+              <span className="pm-games-cta-card__glow" aria-hidden />
+
+              <div className="pm-games-cta-card__top">
+                <div className="pm-games-cta-card__visual is-friends" aria-hidden>
+                  <FiUserPlus />
+                </div>
+                <p className="pm-games-cta-card__eyebrow">
+                  <FiUsers /> Arkadaşlarınla
+                </p>
               </div>
-              <p className="pm-games-cta-card__eyebrow">
-                <FiUsers /> ARKADAŞLARINLA
+
+              <div className="pm-games-cta-card__title">
+                <span>Özel</span>
+                <strong>Oda</strong>
+              </div>
+
+              <p className="pm-games-cta-card__desc">
+                Eşleştiğin oyuncuları davet et, birlikte özel odada oyna!
               </p>
-              <h4>OYNA</h4>
-              <p>Arkadaşını davet et ve özel odada oynayın!</p>
-              <small>
-                <span className="pm-games-online-dot" /> 512 oda aktif
-              </small>
-              <button type="button" onClick={openXox}>
-                <FiUserPlus /> DAVET ET
+
+              <div className="pm-games-cta-card__stat">
+                <span className="pm-games-online-dot" />
+                <span>512 oda aktif</span>
+              </div>
+
+              <button type="button" onClick={openInviteSheet}>
+                <span className="pm-games-cta-card__btn-shine" aria-hidden />
+                <FiUserPlus /> Davet Et
               </button>
             </article>
           </section>
         </main>
       </motion.div>
     </div>
+    {inviteSheetPortal}
     </>
   )
-}
-
-function isBubbleShooterGame(game: GamesMiniCard) {
-  return game.id === 'bubble-shooter-duel' || game.artKind === 'bubble-shooter'
-}
-
-function isXoxGame(game: GamesMiniCard) {
-  return game.id === 'xox' || game.artKind === 'xox'
-}
-
-function isBrickBreakGame(game: GamesMiniCard) {
-  return game.id === 'brick-break-duel' || game.artKind === 'brick-break'
-}
-
-function isBlockDuelGame(game: GamesMiniCard) {
-  return game.id === 'block-duel' || game.artKind === 'block-duel'
-}
-
-function isMemoryDuelGame(game: GamesMiniCard) {
-  return game.id === 'memory-duel' || game.artKind === 'memory'
-}
-
-function isStackDuelGame(game: GamesMiniCard) {
-  return game.id === 'stack-duel' || game.artKind === 'stack'
-}
-
-function isMathDuelGame(game: GamesMiniCard) {
-  return game.id === 'math-duel' || game.artKind === 'math-duel' || game.artKind === 'math'
-}
-
-function isColorMatchGame(game: GamesMiniCard) {
-  return game.id === 'color-match-duel' || game.id === 'color-match' || game.artKind === 'color-match'
-}
-
-function isNeonCrushGame(game: GamesMiniCard) {
-  return game.id === 'neon-crush-duel' || game.id === 'neon-crush' || game.artKind === 'neon-crush'
 }
 
 function isSnakeDuelGame(game: GamesMiniCard) {
@@ -475,38 +279,6 @@ function isSnakeDuelGame(game: GamesMiniCard) {
 function snakeDuelPreloadHandlers(game: GamesMiniCard) {
   if (!isSnakeDuelGame(game)) return {}
   return { onPointerEnter: () => void preloadSnakeDuel() }
-}
-
-function isPongDuelGame(game: GamesMiniCard) {
-  return game.id === 'pong-duel' || game.artKind === 'pong-duel' || game.artKind === 'pong'
-}
-
-function isSimonDuelGame(game: GamesMiniCard) {
-  return game.id === 'simon-duel' || game.artKind === 'simon-duel'
-}
-
-function isSliceDuelGame(game: GamesMiniCard) {
-  return game.id === 'slice-duel' || game.artKind === 'slice-duel'
-}
-
-function isChessDuelGame(game: GamesMiniCard) {
-  return game.id === 'chess-duel' || game.artKind === 'chess-duel'
-}
-
-function isSpaceDuelGame(game: GamesMiniCard) {
-  return game.id === 'space-duel' || game.artKind === 'space-duel'
-}
-
-function isMissileCommandDuelGame(game: GamesMiniCard) {
-  return game.id === 'missile-command-duel' || game.artKind === 'missile-command-duel'
-}
-
-function isDefenderDuelGame(game: GamesMiniCard) {
-  return game.id === 'defender-duel' || game.artKind === 'defender-duel'
-}
-
-function isGame1942DuelGame(game: GamesMiniCard) {
-  return game.id === '1942-duel' || game.artKind === '1942-duel'
 }
 
 function randomInt(min: number, max: number) {

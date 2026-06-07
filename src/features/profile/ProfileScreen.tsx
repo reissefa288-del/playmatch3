@@ -7,14 +7,19 @@ import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
 import { ProfileInsightIcon } from './components/ProfileInsightIcon'
 import { ProfileLevelCard } from './components/ProfileLevelCard'
-import { ProfileTraitIcon, type ProfileTraitIconKind } from './components/ProfileTraitIcon'
 import { ProfilePreviewSheet } from './components/ProfilePreviewSheet'
 import {
   ProfileStatStripIcon,
   type ProfileStatIconKind,
 } from './components/ProfileStatStripIcon'
+import { useUserProfile } from '../onboarding/useUserProfile'
+import { INTEREST_EMOJI } from '../onboarding/onboardingSteps'
+import { REQUIRED_INTEREST_COUNT } from '../onboarding/onboardingProfile'
 import profileReference from '../../reference/profile-final.png'
 import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+
+const aboutFallback =
+  'Oyun sadece bir hobi değil, bir yaşam tarzı. Gerçek bağlantılar, güzel anlar yaratır. 🎮✨'
 
 const quickStats: {
   id: ProfileStatIconKind
@@ -27,28 +32,40 @@ const quickStats: {
   { id: 'matches', value: '98', label: 'Ortak Match' },
 ]
 
-const traits: { id: ProfileTraitIconKind; label: string; value: string }[] = [
-  { id: 'role', label: 'Favori Rol', value: 'Rusher' },
-  { id: 'style', label: 'Oyun Tarzı', value: 'Rekabetçi' },
-  { id: 'time', label: 'Aktif Zaman', value: 'Gece Kuşu' },
-  { id: 'duo', label: 'Duo Arıyor', value: 'Evet' },
-]
-
-const aboutTags = ['Gamer', 'Müzik', 'Seyahat', 'Film', 'Spor']
 const PHOTO_SLOT_COUNT = 3
 const MAX_PHOTO_SIDE = 2600
 const MAX_PHOTO_PIXELS = 4_000_000
 
 export function ProfileScreen() {
-  const [photos, setPhotos] = useState<(string | null)[]>([FAKE_PORTRAIT_MALE, null, null])
+  const { profile } = useUserProfile()
+  const profileInterests = profile.interests.slice(0, REQUIRED_INTEREST_COUNT)
+  const interestSlots = Array.from({ length: REQUIRED_INTEREST_COUNT }, (_, index) => profileInterests[index] ?? null)
+  const aboutText = profile.bio.trim() || aboutFallback
+  const displayName = profile.name.trim() || 'Oyuncu'
+  const onboardingPhoto = profile.photoUrl.trim() || null
+
+  const [photos, setPhotos] = useState<(string | null)[]>(() => [
+    onboardingPhoto ?? FAKE_PORTRAIT_MALE,
+    null,
+    null,
+  ])
   const [uploadedUrls, setUploadedUrls] = useState<(string | null)[]>([null, null, null])
   const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [isPreviewOpen, setIsPreviewOpen] = useState(false)
   const [photoError, setPhotoError] = useState<string | null>(null)
   const fileInputRefs = useRef<(HTMLInputElement | null)[]>([])
 
-  const portraitSrc = photos[0] ?? FAKE_PORTRAIT_MALE
+  const portraitSrc = photos[0] ?? onboardingPhoto ?? FAKE_PORTRAIT_MALE
   const previewPhotos = photos.filter((photo): photo is string => photo != null)
+
+  useEffect(() => {
+    if (!onboardingPhoto) return
+    setPhotos((prev) => {
+      if (prev[0] === onboardingPhoto) return prev
+      if (prev[0]?.startsWith('blob:')) return prev
+      return [onboardingPhoto, prev[1], prev[2]]
+    })
+  }, [onboardingPhoto])
 
   useEffect(() => {
     return () => {
@@ -162,7 +179,7 @@ export function ProfileScreen() {
               <div className="pm-profile-hero-card__content">
                 <div className="pm-profile-hero-card__meta">
                   <h1>
-                    Emirhan <MdVerified aria-label="Doğrulanmış" />
+                    {displayName} <MdVerified aria-label="Doğrulanmış" />
                   </h1>
                   <p className="pm-profile-premium-chip">
                     <PiCrownSimpleFill aria-hidden />
@@ -226,12 +243,16 @@ export function ProfileScreen() {
 
           <ProfileLevelCard />
 
-          <section className="pm-profile-traits" aria-label="Profil ozellikleri">
-            {traits.map((trait) => (
-              <article key={trait.id} className="pm-profile-traits__item" data-trait={trait.id}>
-                <ProfileTraitIcon kind={trait.id} />
-                <p>{trait.label}</p>
-                <strong>{trait.value}</strong>
+          <section className="pm-profile-traits pm-profile-traits--interests" aria-label="İlgi alanları">
+            {interestSlots.map((tag, index) => (
+              <article
+                key={tag ?? `empty-${index}`}
+                className={`pm-profile-traits__item${tag ? '' : ' is-empty'}`}
+              >
+                <span className="pm-profile-interest-icon" aria-hidden>
+                  {tag ? INTEREST_EMOJI[tag] ?? '•' : '—'}
+                </span>
+                <strong>{tag ?? 'Seçilmedi'}</strong>
               </article>
             ))}
           </section>
@@ -239,34 +260,26 @@ export function ProfileScreen() {
           <section className="pm-profile-about" aria-label="Hakkımda">
             <h2>Hakkımda</h2>
             <p>
-              <span aria-hidden>“</span> Oyun sadece bir hobi değil, bir yaşam tarzı. Gerçek bağlantılar, güzel anlar
-              yaratır. <span aria-hidden>🎮✨</span>
+              <span aria-hidden>“</span> {aboutText} <span aria-hidden>”</span>
             </p>
-            <div className="pm-profile-about__tags">
-              {aboutTags.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
           </section>
 
           <section className="pm-profile-insights" aria-label="Beğeni ve ziyaret">
             <article className="pm-profile-insight-card is-likes">
-              <p className="pm-profile-insight-card__title">
-                <ProfileInsightIcon kind="likes" variant="title" />
-                Beğenilerim
-              </p>
-              <strong>1.2K</strong>
-              <span>Toplam beğeni</span>
-              <ProfileInsightIcon kind="likes" variant="decor" />
+              <div className="pm-profile-insight-card__content">
+                <p className="pm-profile-insight-card__title">Beğenilerim</p>
+                <strong>1.2K</strong>
+                <span className="pm-profile-insight-card__meta">Toplam beğeni</span>
+              </div>
+              <ProfileInsightIcon kind="likes" />
             </article>
             <article className="pm-profile-insight-card is-visits">
-              <p className="pm-profile-insight-card__title">
-                <ProfileInsightIcon kind="visits" variant="title" />
-                Ziyaretçilerim
-              </p>
-              <strong>312</strong>
-              <span>Profil ziyareti</span>
-              <ProfileInsightIcon kind="visits" variant="decor" />
+              <div className="pm-profile-insight-card__content">
+                <p className="pm-profile-insight-card__title">Ziyaretçilerim</p>
+                <strong>312</strong>
+                <span className="pm-profile-insight-card__meta">Profil ziyareti</span>
+              </div>
+              <ProfileInsightIcon kind="visits" />
             </article>
           </section>
         </main>
@@ -276,7 +289,7 @@ export function ProfileScreen() {
         open={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         photos={previewPhotos}
-        name="Emirhan"
+        name={displayName}
         location="İstanbul, Türkiye"
         isPremium
         verified

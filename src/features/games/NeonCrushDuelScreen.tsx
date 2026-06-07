@@ -1,15 +1,16 @@
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useRef } from 'react'
 import { unlockNeonCrushAudio } from './utils/neonCrushSounds'
-import { FiArrowLeft, FiClock, FiSettings, FiZap } from 'react-icons/fi'
+import { FiArrowLeft, FiClock, FiZap } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { NeonCrushAmbient } from './components/NeonCrushAmbient'
 import { NeonCrushFinale } from './components/NeonCrushFinale'
 import { NeonCrushGrid } from './components/NeonCrushGrid'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useNeonCrushDuel } from './useNeonCrushDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 
 function formatTime(sec: number) {
   const m = Math.floor(sec / 60)
@@ -22,6 +23,7 @@ function formatScore(n: number) {
 }
 
 export function NeonCrushDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useNeonCrushDuel()
   const audioUnlockedRef = useRef(false)
@@ -74,10 +76,6 @@ export function NeonCrushDuelScreen() {
           <button type="button" className="pm-ncrush-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-ncrush-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-ncrush-screen__stack">
             <header className="pm-ncrush-header">
               <h1 className="pm-ncrush-header__title">
@@ -124,11 +122,10 @@ export function NeonCrushDuelScreen() {
 
               <div className={`pm-ncrush-hud__side is-p2${game.leader === 'p2' ? ' is-leading' : ''}`}>
                 <GamePlayerPortrait
-                  src={FAKE_PORTRAIT_FEMALE}
+                  src={opponent.portrait}
                   variant="pink"
                   active={game.running}
-                  crown={game.leader === 'p2'}
-                />
+                  crown={game.leader === 'p2'} {...likeProps}/>
                 <p className="pm-ncrush-hud__name">ZEYNEP</p>
                 <motion.strong
                   key={game.lane2.roundScore}
@@ -194,10 +191,12 @@ export function NeonCrushDuelScreen() {
                   winner={game.winner!}
                   p1Score={game.lane1.roundScore}
                   p2Score={game.lane2.roundScore}
+                  opponentName={opponent.name}
                   onRestart={() => {
                     ensureAudio()
                     game.restartMatch()
                   }}
+                  onExit={handleBack}
                 />
               ) : null}
             </section>

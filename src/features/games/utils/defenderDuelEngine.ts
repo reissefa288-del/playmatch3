@@ -1,21 +1,22 @@
-export const MATCH_ROUNDS = 3
-export const WIN_ROUNDS = 2
-export const POINTS_TO_WIN = 3600
-export const LEG_DURATION_MS = 48_000
-export const ROUND_BREAK_MS = 2600
+export const MATCH_ROUNDS = 1
+export const WIN_ROUNDS = 1
+export const POINTS_TO_WIN = 999_999
+export const LEG_DURATION_MS = 600_000
+export const ROUND_BREAK_MS = 2200
 export const START_LIVES = 3
-export const MOVE_COOLDOWN_MS = 90
-export const FIRE_COOLDOWN_MS = 240
-export const INVULN_MS = 1400
+export const MOVE_COOLDOWN_MS = 70
+export const FIRE_COOLDOWN_MS = 175
+export const AUTO_FIRE_COOLDOWN_MS = 175
+export const INVULN_MS = 1200
 export const SHIP_X = 10
 export const HUMAN_Y = 86
 export const SHIP_MIN_Y = 14
 export const SHIP_MAX_Y = 78
-export const BULLET_SPEED = 0.38
-export const ENEMY_BULLET_SPEED = 0.16
-export const MAX_PLAYER_BULLETS = 5
-export const MAX_ENEMIES = 7
-export const SPAWN_MS = 1900
+export const BULLET_SPEED = 0.44
+export const ENEMY_BULLET_SPEED = 0.19
+export const MAX_PLAYER_BULLETS = 6
+export const MAX_ENEMIES = 9
+export const SPAWN_MS = 1050
 export const HUMAN_X = [18, 32, 46, 60, 74] as const
 
 export type VerticalDir = 'up' | 'down'
@@ -184,19 +185,30 @@ function nearestHumanX(side: DefenderSideState, x: number) {
   return alive.sort((a, b) => Math.abs(a.x - x) - Math.abs(b.x - x))[0]!
 }
 
-export function tickSide(side: DefenderSideState, dt: number, now: number, rand: () => number): DefenderSideState {
-  if (dt <= 0 || side.lives <= 0) return side
+export type DefFxEvent =
+  | { type: 'enemyKill'; x: number; y: number }
+  | { type: 'shipHit'; x: number; y: number }
+  | { type: 'humanLost'; x: number; y: number }
+
+export type DefenderTickResult = {
+  side: DefenderSideState
+  events: DefFxEvent[]
+}
+
+export function tickSide(side: DefenderSideState, dt: number, now: number, rand: () => number): DefenderTickResult {
+  const events: DefFxEvent[] = []
+  if (dt <= 0 || side.lives <= 0) return { side, events }
 
   let s = spawnEnemy(side, now, rand)
 
   let enemies = s.enemies.map((e) => {
     let { x, y, vy, diving } = e
-    const speed = e.kind === 'mutant' ? 0.055 : e.kind === 'bomber' ? 0.04 : 0.035
+    const speed = e.kind === 'mutant' ? 0.064 : e.kind === 'bomber' ? 0.048 : 0.042
     x -= speed * dt
 
     if (e.kind === 'lander' && x < 72 && !diving) {
       const target = nearestHumanX(s, x)
-      if (target && rand() > 0.02) {
+      if (target && rand() > 0.012) {
         diving = true
         vy = 0.045
       }
@@ -205,7 +217,7 @@ export function tickSide(side: DefenderSideState, dt: number, now: number, rand:
       y += vy * dt
     }
 
-    if (e.kind === 'bomber' && rand() > 0.992) {
+    if (e.kind === 'bomber' && rand() > 0.984) {
       s = {
         ...s,
         bullets: [
@@ -234,6 +246,7 @@ export function tickSide(side: DefenderSideState, dt: number, now: number, rand:
         humans: s.humans.map((hum) => (hum.id === h.id ? { ...hum, alive: false } : hum)),
         score: Math.max(0, s.score - 80),
       }
+      events.push({ type: 'humanLost', x: h.x, y: HUMAN_Y })
       enemies = enemies.filter((en) => en.id !== e.id)
       break
     }
@@ -254,6 +267,7 @@ export function tickSide(side: DefenderSideState, dt: number, now: number, rand:
       if (Math.abs(b.x - e.x) < 5 && Math.abs(b.y - e.y) < 6) {
         hitEnemyIds.add(e.id)
         hitBulletIds.add(b.id)
+        events.push({ type: 'enemyKill', x: e.x, y: e.y })
         let score = s.score + SCORE[e.kind]
         let saved = s.saved
         if (e.kind === 'lander' && e.diving) {
@@ -273,6 +287,7 @@ export function tickSide(side: DefenderSideState, dt: number, now: number, rand:
   if (!invuln) {
     for (const e of enemies) {
       if (Math.abs(e.x - SHIP_X) < 8 && Math.abs(e.y - s.shipY) < 8) {
+        events.push({ type: 'shipHit', x: SHIP_X, y: s.shipY })
         s = respawn(s, now)
         break
       }
@@ -281,6 +296,7 @@ export function tickSide(side: DefenderSideState, dt: number, now: number, rand:
       for (const b of bullets) {
         if (b.fromPlayer) continue
         if (Math.abs(b.x - SHIP_X) < 6 && Math.abs(b.y - s.shipY) < 6) {
+          events.push({ type: 'shipHit', x: SHIP_X, y: s.shipY })
           s = respawn(s, now)
           break
         }
@@ -294,13 +310,20 @@ export function tickSide(side: DefenderSideState, dt: number, now: number, rand:
     bullets: bullets.slice(-12),
   }
 
-  return s
+  return { side: s, events }
 }
 
-export function legShouldEnd(g: DefenderState, now: number) {
-  if (now >= g.legEndsAt) return true
-  if (g.p1.score >= POINTS_TO_WIN || g.p2.score >= POINTS_TO_WIN) return true
+export function legShouldEnd(_g: DefenderState, _now: number) {
   return false
+}
+
+export function resolveDuelWinner(g: DefenderState): 'p1' | 'p2' | 'draw' | null {
+  const p1Dead = g.p1.lives <= 0
+  const p2Dead = g.p2.lives <= 0
+  if (!p1Dead && !p2Dead) return null
+  if (p1Dead && p2Dead) return 'draw'
+  if (p1Dead) return 'p2'
+  return 'p1'
 }
 
 export function resolveLegWinner(p1: DefenderSideState, p2: DefenderSideState): 'p1' | 'p2' | 'draw' {

@@ -8,6 +8,7 @@ import { MessageScreen } from '../features/chat/MessageScreen'
 import { BlockDuelScreen } from '../features/games/BlockDuelScreen'
 import { BubbleShooterScreen } from '../features/games/BubbleShooterScreen'
 import { BrickBreakScreen } from '../features/games/BrickBreakScreen'
+import { QuickMatchScreen } from '../features/games/QuickMatchScreen'
 import { XoxGameScreen } from '../features/games/XoxGameScreen'
 import { MemoryDuelScreen } from '../features/games/MemoryDuelScreen'
 import { StackDuelScreen } from '../features/games/StackDuelScreen'
@@ -26,9 +27,7 @@ import { ChessDuelScreen } from '../features/games/ChessDuelScreen'
 import { SpaceDuelLobbyScreen } from '../features/games/SpaceDuelLobbyScreen'
 import { SpaceDuelScreen } from '../features/games/SpaceDuelScreen'
 import { MissileCommandDuelScreen } from '../features/games/MissileCommandDuelScreen'
-import { DefenderDuelLobbyScreen } from '../features/games/DefenderDuelLobbyScreen'
 import { DefenderDuelScreen } from '../features/games/DefenderDuelScreen'
-import { Game1942DuelLobbyScreen } from '../features/games/Game1942DuelLobbyScreen'
 import { Game1942DuelScreen } from '../features/games/Game1942DuelScreen'
 import { NearbyPlayersScreen } from '../features/home/NearbyPlayersScreen'
 import { MainTabLayout } from './MainTabLayout'
@@ -38,6 +37,7 @@ import { useNavDockHeight } from './useNavDockHeight'
 
 const MESSAGE_PATH = /^\/chat\/[^/]+$/
 const NEARBY_PATH = /^\/nearby$/
+const QUICK_MATCH_PATH = /^\/games\/quick-match$/
 const XOX_PATH = /^\/games\/xox$/
 const BRICK_PATH = /^\/games\/brick-break$/
 const BUBBLE_PATH = /^\/games\/bubble-shooter$/
@@ -57,15 +57,14 @@ const SLICE_PLAY_PATH = /^\/games\/slice-duel(\/play)?$/
 const CHESS_PLAY_PATH = /^\/games\/chess-duel(\/play)?$/
 const SPACE_PLAY_PATH = /^\/games\/space-duel(\/play)?$/
 const MISSILE_PLAY_PATH = /^\/games\/missile-command-duel(\/play)?$/
-const DEFENDER_LOBBY_PATH = /^\/games\/defender-duel$/
-const DEFENDER_PLAY_PATH = /^\/games\/defender-duel\/play$/
-const GAME1942_LOBBY_PATH = /^\/games\/1942-duel$/
-const GAME1942_PLAY_PATH = /^\/games\/1942-duel\/play$/
+const DEFENDER_PLAY_PATH = /^\/games\/defender-duel(\/play)?$/
+const GAME1942_PLAY_PATH = /^\/games\/1942-duel(\/play)?$/
 export function AppRoutes() {
   const location = useLocation()
   const path = location.pathname.replace(/\/$/, '') || '/'
   const isMessage = MESSAGE_PATH.test(path)
   const isNearby = NEARBY_PATH.test(path)
+  const isQuickMatch = QUICK_MATCH_PATH.test(path)
   const isXox = XOX_PATH.test(path)
   const isBrick = BRICK_PATH.test(path)
   const isBubble = BUBBLE_PATH.test(path)
@@ -85,13 +84,12 @@ export function AppRoutes() {
   const isChessPlay = CHESS_PLAY_PATH.test(path)
   const isSpacePlay = SPACE_PLAY_PATH.test(path)
   const isMissilePlay = MISSILE_PLAY_PATH.test(path)
-  const isDefenderLobby = DEFENDER_LOBBY_PATH.test(path)
   const isDefenderPlay = DEFENDER_PLAY_PATH.test(path)
-  const isGame1942Lobby = GAME1942_LOBBY_PATH.test(path)
   const isGame1942Play = GAME1942_PLAY_PATH.test(path)
   const stackOpen =
     isMessage ||
     isNearby ||
+    isQuickMatch ||
     isXox ||
     isBrick ||
     isBubble ||
@@ -111,9 +109,7 @@ export function AppRoutes() {
     isChessPlay ||
     isSpacePlay ||
     isMissilePlay ||
-    isDefenderLobby ||
     isDefenderPlay ||
-    isGame1942Lobby ||
     isGame1942Play
   const activeTabId = resolveTabId(location.pathname)
 
@@ -140,6 +136,7 @@ export function AppRoutes() {
             <Routes location={location}>
               <Route path="/chat/:chatId" element={<MessageScreen />} />
               <Route path="/nearby" element={<NearbyPlayersScreen />} />
+              <Route path="/games/quick-match" element={<QuickMatchScreen />} />
               <Route path="/games/xox" element={<XoxGameScreen />} />
               <Route path="/games/brick-break" element={<BrickBreakScreen />} />
               <Route path="/games/bubble-shooter" element={<BubbleShooterScreen />} />
@@ -174,9 +171,9 @@ export function AppRoutes() {
               <Route path="/games/space-duel/play" element={<SpaceDuelScreen />} />
               <Route path="/games/missile-command-duel" element={<Navigate to="/games/missile-command-duel/play" replace />} />
               <Route path="/games/missile-command-duel/play" element={<MissileCommandDuelScreen />} />
-              <Route path="/games/defender-duel" element={<DefenderDuelLobbyScreen />} />
+              <Route path="/games/defender-duel" element={<DefenderDuelScreen />} />
               <Route path="/games/defender-duel/play" element={<DefenderDuelScreen />} />
-              <Route path="/games/1942-duel" element={<Game1942DuelLobbyScreen />} />
+              <Route path="/games/1942-duel" element={<Game1942DuelScreen />} />
               <Route path="/games/1942-duel/play" element={<Game1942DuelScreen />} />
             </Routes>
           </motion.div>

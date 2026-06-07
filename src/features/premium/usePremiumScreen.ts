@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { premiumPackages } from './data'
+import { usePremiumSubscription } from './usePremiumSubscription'
 
 export type PremiumSheetKind = 'upgrade' | 'gift' | null
 
@@ -14,6 +15,7 @@ const defaultPackageId =
   premiumPackages.find((p) => p.popular)?.id ?? premiumPackages[0]?.id ?? '3m'
 
 export function usePremiumScreen() {
+  const { activatePremium } = usePremiumSubscription()
   const [selectedPackageId, setSelectedPackageId] = useState(defaultPackageId)
   const [sheet, setSheet] = useState<PremiumSheetKind>(null)
   const [toast, setToast] = useState<PremiumToastPayload | null>(null)
@@ -41,12 +43,13 @@ export function usePremiumScreen() {
 
   const confirmUpgrade = useCallback(() => {
     if (!selectedPackage) return
+    activatePremium(selectedPackage.id)
     setSheet(null)
     showToast(
       'Premium aktif!',
-      `${selectedPackage.duration} paketin tanımlandı. Keyfini çıkar.`,
+      `${selectedPackage.duration} paketin tanımlandı. Oyuna davet artık açık.`,
     )
-  }, [selectedPackage, showToast])
+  }, [activatePremium, selectedPackage, showToast])
 
   const confirmGift = useCallback(
     (friendName: string) => {

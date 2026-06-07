@@ -17,9 +17,7 @@ export function PremiumTitleBar({ onGift }: PremiumTitleBarProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
-        <h1>
-          Premium <span aria-hidden>👑</span>
-        </h1>
+        <h1>Premium</h1>
         <p>Daha fazlasını keşfet, ayrıcalıkları yaşa! ✨</p>
       </motion.div>
       <motion.button

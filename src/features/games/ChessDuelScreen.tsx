@@ -1,15 +1,18 @@
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
-import { FiArrowLeft, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { ChessDuelBoard } from './components/ChessDuelBoard'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useChessDuel } from './useChessDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { unlockChessDuelAudio } from './utils/chessDuelSounds'
 
 export function ChessDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const duel = useChessDuel()
 
@@ -52,10 +55,6 @@ export function ChessDuelScreen() {
           <button type="button" className="pm-chess-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-chess-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-chess-play__stack">
             <header className="pm-chess-header">
               <h1 className="pm-chess-header__title">
@@ -77,10 +76,9 @@ export function ChessDuelScreen() {
               <p className="pm-chess-hud__status">{statusLine}</p>
               <div className={`pm-chess-hud__side is-p2 ${!isYourTurn && duel.game.phase === 'playing' ? 'is-active' : ''}`}>
                 <GamePlayerPortrait
-                  src={FAKE_PORTRAIT_FEMALE}
+                  src={opponent.portrait}
                   variant="pink"
-                  active={!isYourTurn && duel.game.phase === 'playing'}
-                />
+                  active={!isYourTurn && duel.game.phase === 'playing'} {...likeProps}/>
                 <p>ZEYNEP</p>
                 <span>SİYAH</span>
                 <strong>{duel.game.lane2.matchPoints}</strong>
@@ -104,9 +102,11 @@ export function ChessDuelScreen() {
             <motion.div className="pm-chess-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
-                <button type="button" onClick={duel.restartMatch}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={duel.restartMatch}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}

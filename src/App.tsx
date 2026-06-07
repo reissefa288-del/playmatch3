@@ -1,8 +1,15 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { AuthScreen } from './features/auth/AuthScreen'
+import { PrivacyPolicyScreen, TermsOfServiceScreen } from './features/legal/LegalPages'
 import { GemBalanceProvider } from './features/currency/GemBalanceProvider'
+import { GameMatchedInvitesProvider } from './features/games/GameMatchedInvitesProvider'
 import { NearbyLikesProvider } from './features/home/NearbyLikesProvider'
+import { DailyLikesProvider } from './features/likes/DailyLikesProvider'
 import { ProfileLevelProvider } from './features/profile/ProfileLevelProvider'
+import { OnboardingFlow } from './features/onboarding/OnboardingFlow'
 import { AppRoutes } from './navigation/AppRoutes'
+import { AuthGuard } from './navigation/AuthGuard'
+import { OnboardingGuard } from './navigation/OnboardingGuard'
 import './styles/currency-ui.css'
 import './styles/home-filters.css'
 import './styles/home-hero-stack.css'
@@ -13,12 +20,16 @@ import './styles/home-nearby-sheet.css'
 import './styles/home-nearby-likes.css'
 import './styles/home-nearby-card-aaa.css'
 import './styles/home-nearby-screen.css'
+import './styles/home-nearby-ambient.css'
 import './styles/notifications.css'
 import './styles/home-ambient.css'
 import './styles/brand-aaa.css'
 import './styles/navbar-tray.css'
 import './styles/home.css'
 import './styles/games.css'
+import './styles/games-quick-match.css'
+import './styles/games-invite-sheet.css'
+import './styles/game-duel-rematch.css'
 import './styles/game-portrait.css'
 import './styles/game-duel-ambient.css'
 import './styles/game-duel-video.css'
@@ -55,17 +66,50 @@ import './styles/photo-lightbox.css'
 import './styles/premium.css'
 import './styles/premium-feature-icons.css'
 import './styles/navigation.css'
+import './styles/auth.css'
+import './styles/auth-aaa.css'
+import './styles/google-auth.css'
+import './styles/legal.css'
+import './styles/onboarding.css'
+
+function WelcomeRoute() {
+  return <AuthScreen />
+}
 
 function App() {
   return (
     <GemBalanceProvider>
       <ProfileLevelProvider>
         <NearbyLikesProvider>
+          <DailyLikesProvider>
+          <GameMatchedInvitesProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="*" element={<AppRoutes />} />
+              <Route path="/welcome" element={<WelcomeRoute />} />
+              <Route path="/legal/kullanim-kosullari" element={<TermsOfServiceScreen />} />
+              <Route path="/legal/gizlilik-politikasi" element={<PrivacyPolicyScreen />} />
+              <Route
+                path="/onboarding"
+                element={
+                  <AuthGuard>
+                    <OnboardingFlow />
+                  </AuthGuard>
+                }
+              />
+              <Route
+                path="*"
+                element={
+                  <AuthGuard>
+                    <OnboardingGuard>
+                      <AppRoutes />
+                    </OnboardingGuard>
+                  </AuthGuard>
+                }
+              />
             </Routes>
           </BrowserRouter>
+          </GameMatchedInvitesProvider>
+          </DailyLikesProvider>
         </NearbyLikesProvider>
       </ProfileLevelProvider>
     </GemBalanceProvider>

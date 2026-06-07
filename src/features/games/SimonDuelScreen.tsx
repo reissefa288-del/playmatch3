@@ -1,18 +1,21 @@
 import '../../styles/simon-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback, useMemo } from 'react'
-import { FiArrowLeft, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { SimonDuelComboBadge } from './components/SimonDuelComboBadge'
 import { SimonDuelPad } from './components/SimonDuelPad'
 import { SimonDuelScorePop } from './components/SimonDuelScorePop'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useSimonDuel } from './useSimonDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { unlockSimonDuelAudio } from './utils/simonDuelSounds'
 
 export function SimonDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const duel = useSimonDuel()
 
@@ -56,10 +59,6 @@ export function SimonDuelScreen() {
           <button type="button" className="pm-simon-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-simon-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-simon-screen__stack">
             <header className="pm-simon-header">
               <h1 className="pm-simon-header__title">
@@ -80,7 +79,7 @@ export function SimonDuelScreen() {
               </div>
               <p className="pm-simon-status">{statusText}</p>
               <div className="pm-simon-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={canPlay} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={canPlay} {...likeProps}/>
                 <p>ZEYNEP</p>
                 <strong>{l2.score}</strong>
                 <span>MAÇ {l2.matchPoints}</span>
@@ -146,9 +145,11 @@ export function SimonDuelScreen() {
             <motion.div className="pm-simon-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
-                <button type="button" onClick={duel.restartMatch}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={duel.restartMatch}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}

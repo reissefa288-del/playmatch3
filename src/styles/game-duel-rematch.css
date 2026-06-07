@@ -1,0 +1,110 @@
+.pm-duel-rematch {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.pm-duel-rematch__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+}
+
+.pm-duel-rematch__btn {
+  min-width: min(140px, 42vw);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: clamp(0.34rem, 1.8vw, 0.42rem);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
+}
+
+.pm-duel-rematch__btn:active {
+  transform: scale(0.97);
+}
+
+.pm-duel-rematch__btn.is-primary {
+  border-color: rgba(94, 203, 255, 0.45);
+  background: linear-gradient(180deg, rgba(94, 203, 255, 0.22), rgba(40, 120, 200, 0.18));
+  color: #e8f8ff;
+  box-shadow: 0 0 18px rgba(94, 203, 255, 0.2);
+}
+
+.pm-duel-rematch__btn.is-ghost {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(220, 230, 255, 0.88);
+}
+
+.pm-duel-rematch__status {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  padding: 10px 8px 4px;
+  text-align: center;
+}
+
+.pm-duel-rematch__spinner {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid rgba(94, 203, 255, 0.35);
+  background: rgba(8, 14, 32, 0.85);
+  color: #7ee0ff;
+  box-shadow: 0 0 16px rgba(94, 203, 255, 0.25);
+  animation: pm-duel-rematch-spin 1s linear infinite;
+}
+
+.pm-duel-rematch__spinner svg {
+  width: 18px;
+  height: 18px;
+}
+
+.pm-duel-rematch__title {
+  margin: 0;
+  font-size: clamp(0.36rem, 1.9vw, 0.44rem);
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #eef6ff;
+}
+
+.pm-duel-rematch__sub {
+  margin: 0;
+  max-width: 28ch;
+  font-size: clamp(0.28rem, 1.5vw, 0.34rem);
+  line-height: 1.45;
+  color: rgba(200, 215, 240, 0.86);
+}
+
+.pm-duel-rematch__sub strong {
+  color: #ffd0e8;
+}
+
+.pm-duel-rematch.is-declined .pm-duel-rematch__title {
+  color: #ffb8a8;
+}
+
+.pm-duel-rematch.is-declined .pm-duel-rematch__spinner {
+  display: none;
+}
+
+@keyframes pm-duel-rematch-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-duel-rematch__spinner {
+    animation: none;
+  }
+}

@@ -22,33 +22,22 @@ export function CurrencyNavPills({ variant = 'default' }: CurrencyNavPillsProps)
   return (
     <>
       <div className={navClass}>
-        <div
+        <button
+          type="button"
           className="pm-currency-nav__item is-gems"
-          role="group"
-          aria-label={`Elmas bakiyesi: ${formatBalance(balance)}`}
+          onClick={openGemsShop}
+          aria-label={`Elmas bakiyesi: ${formatBalance(balance)}. Satın almak için dokunun.`}
         >
-          <button
-            type="button"
-            className="pm-currency-nav__tap"
-            onClick={openGemsShop}
-            aria-label="Elmas satın alma ekranını aç"
-          >
-            <span className="pm-currency-nav__icon pm-currency-nav__gem" aria-hidden>
-              <span className="pm-currency-nav__gem-aura" aria-hidden />
-              <span className="pm-currency-nav__gem-flare" aria-hidden />
-              <img src={elmasIcon} alt="" className="pm-currency-nav__gem-img" />
-            </span>
-            <span className="pm-currency-nav__amount">{formatBalance(balance)}</span>
-          </button>
-          <button
-            type="button"
-            className="pm-currency-nav__plus"
-            aria-label="Elmas satın al"
-            onClick={openGemsShop}
-          >
+          <span className="pm-currency-nav__icon pm-currency-nav__gem" aria-hidden>
+            <span className="pm-currency-nav__gem-aura" aria-hidden />
+            <span className="pm-currency-nav__gem-flare" aria-hidden />
+            <img src={elmasIcon} alt="" className="pm-currency-nav__gem-img" />
+          </span>
+          <span className="pm-currency-nav__amount">{formatBalance(balance)}</span>
+          <span className="pm-currency-nav__plus" aria-hidden>
             <FiPlus />
-          </button>
-        </div>
+          </span>
+        </button>
       </div>
       {typeof document !== 'undefined'
         ? createPortal(

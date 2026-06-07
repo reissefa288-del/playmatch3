@@ -1,121 +1,159 @@
-import { useState, type CSSProperties, type UIEvent } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { FiUsers } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
 import { useProfileLevel } from '../../profile/ProfileLevelProvider'
 import { XP_GAME_FEATURED } from '../../profile/profileLevel'
 import type { FeaturedGame } from '../data'
+import { GameCoverArt } from './GameCoverArt'
 
-const FEATURED_CARD_STEP = 262
+const CARDS_PER_PAGE = 2
+const AUTO_ADVANCE_MS = 4800
 
 type FeaturedGamesRowProps = {
   games: FeaturedGame[]
   onPlay?: (game: FeaturedGame) => void
 }
 
-export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
-  const reduceMotion = useReducedMotion()
-  const { addXp } = useProfileLevel()
-  const [activeIndex, setActiveIndex] = useState(0)
+function chunkGames<T>(items: T[], size: number): T[][] {
+  const pages: T[][] = []
+  for (let index = 0; index < items.length; index += size) {
+    pages.push(items.slice(index, index + size))
+  }
+  return pages
+}
 
-  function onTrackScroll(e: UIEvent<HTMLDivElement>) {
-    const idx = Math.round(e.currentTarget.scrollLeft / FEATURED_CARD_STEP)
-    const clamped = Math.max(0, Math.min(games.length - 1, idx))
-    if (clamped !== activeIndex) setActiveIndex(clamped)
+type FeaturedGameCardProps = {
+  game: FeaturedGame
+  onPlay?: (game: FeaturedGame) => void
+  addXp: (amount: number) => void
+}
+
+function FeaturedGameCard({ game, onPlay, addXp }: FeaturedGameCardProps) {
+  function playGame() {
+    addXp(XP_GAME_FEATURED)
+    onPlay?.(game)
   }
 
   return (
-    <section className="pm-games-featured-list" aria-label="Öne çıkan oyunlar">
+    <article
+      className={`pm-featured-card ${game.accent === 'pink' ? 'is-pink' : 'is-blue'} is-${game.id}`}
+      style={{ '--pm-card-art-pos': game.artPosition } as CSSProperties}
+      role="button"
+      tabIndex={0}
+      onClick={playGame}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          playGame()
+        }
+      }}
+    >
+      <span className="pm-featured-card__edge" aria-hidden />
+      <span className="pm-featured-card__glow" aria-hidden />
+      <span className="pm-featured-card__badge">{game.badge}</span>
+
+      <GameCoverArt gameId={game.id} className="pm-featured-card__art">
+        <span className="pm-featured-card__art-gloss" aria-hidden />
+        <game.icon />
+      </GameCoverArt>
+
+      <h4>{game.title}</h4>
+      <p className="pm-featured-card__mode">{game.mode}</p>
+
+      <div className="pm-featured-card__social">
+        <div className="pm-featured-card__avatars">
+          {game.friends.map((friend) => (
+            <span key={`${game.id}-${friend}`}>{friend}</span>
+          ))}
+        </div>
+        <small>
+          <FiUsers /> {game.players}
+        </small>
+        <span className="pm-featured-card__friends">{game.friendsPlaying ?? '\u00A0'}</span>
+      </div>
+
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation()
+          playGame()
+        }}
+      >
+        <span className="pm-featured-card__btn-shine" aria-hidden />
+        {game.cta}
+      </button>
+    </article>
+  )
+}
+
+export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
+  const reduceMotion = useReducedMotion()
+  const { addXp } = useProfileLevel()
+  const pages = chunkGames(games, CARDS_PER_PAGE)
+  const [pageIndex, setPageIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
+
+  useEffect(() => {
+    if (reduceMotion || pages.length <= 1 || paused) return
+
+    const timer = window.setInterval(() => {
+      setPageIndex((current) => (current + 1) % pages.length)
+    }, AUTO_ADVANCE_MS)
+
+    return () => window.clearInterval(timer)
+  }, [pages.length, paused, reduceMotion])
+
+  return (
+    <section className="pm-games-featured-list" aria-label="Haftanın en çok oynanan oyunları">
       <header className="pm-games-section-head">
-        <h3>Öne Çıkan Oyunlar</h3>
-        <span className="pm-games-section-head__live">
-          <span className="pm-games-online-dot" />
-          Canlı lobiler
-        </span>
+        <h3>Haftanın En Çok Oynananları</h3>
       </header>
 
-      <motion.div
-        className="pm-games-featured-scroll"
-        onScroll={onTrackScroll}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.4 }}
+      <div
+        className="pm-games-featured-viewport"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+        onFocusCapture={() => setPaused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setPaused(false)
+          }
+        }}
       >
-        {games.map((game, index) => (
-          <motion.article
-            key={game.id}
-            className={`pm-featured-card ${game.accent === 'pink' ? 'is-pink' : 'is-blue'} is-${game.id}`}
-            style={{ '--pm-card-art-pos': game.artPosition } as CSSProperties}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05 + index * 0.06, duration: 0.4 }}
-            whileHover={reduceMotion ? undefined : { y: -8, scale: 1.01 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.98 }}
-            role="button"
-            tabIndex={0}
-            onClick={() => {
-              addXp(XP_GAME_FEATURED)
-              onPlay?.(game)
-            }}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                addXp(XP_GAME_FEATURED)
-                onPlay?.(game)
-              }
-            }}
-          >
-            <span className="pm-featured-card__edge" aria-hidden />
-            <span className="pm-featured-card__glow" aria-hidden />
-            <span className="pm-featured-card__badge">{game.badge}</span>
-
-            <div className="pm-featured-card__art">
-              <span className="pm-featured-card__art-gloss" aria-hidden />
-              <span className="pm-featured-card__art-live" aria-hidden>
-                <span className="pm-games-online-dot" />
-                CANLI
-              </span>
-              <game.icon />
+        <motion.div
+          className="pm-games-featured-track"
+          animate={{ x: `-${pageIndex * 100}%` }}
+          transition={
+            reduceMotion
+              ? { duration: 0 }
+              : { duration: 0.52, ease: [0.22, 1, 0.36, 1] }
+          }
+        >
+          {pages.map((page) => (
+            <div key={page.map((game) => game.id).join('-')} className="pm-games-featured-page">
+              {page.map((game) => (
+                <FeaturedGameCard key={game.id} game={game} onPlay={onPlay} addXp={addXp} />
+              ))}
             </div>
-
-            <h4>{game.title}</h4>
-            <p className="pm-featured-card__mode">{game.mode}</p>
-
-            <motion.div className="pm-featured-card__social">
-              <div className="pm-featured-card__avatars">
-                {game.friends.map((friend) => (
-                  <span key={`${game.id}-${friend}`}>{friend}</span>
-                ))}
-              </div>
-              <small>
-                <FiUsers /> {game.players}
-              </small>
-              {game.friendsPlaying ? (
-                <span className="pm-featured-card__friends">{game.friendsPlaying}</span>
-              ) : null}
-            </motion.div>
-
-            <motion.button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation()
-                addXp(XP_GAME_FEATURED)
-                onPlay?.(game)
-              }}
-              whileHover={reduceMotion ? undefined : { scale: 1.03, y: -1 }}
-              whileTap={reduceMotion ? undefined : { scale: 0.96 }}
-            >
-              <span className="pm-featured-card__btn-shine" aria-hidden />
-              {game.cta}
-            </motion.button>
-          </motion.article>
-        ))}
-      </motion.div>
-
-      <div className="pm-games-carousel-dots" aria-hidden>
-        {games.map((game, index) => (
-          <span key={`${game.id}-dot`} className={index === activeIndex ? 'is-active' : ''} />
-        ))}
+          ))}
+        </motion.div>
       </div>
+
+      {pages.length > 1 ? (
+        <div className="pm-games-carousel-dots" role="tablist" aria-label="Öne çıkan oyun sayfaları">
+          {pages.map((page, index) => (
+            <button
+              key={page.map((game) => game.id).join('-')}
+              type="button"
+              role="tab"
+              aria-selected={index === pageIndex}
+              aria-label={`Sayfa ${index + 1}`}
+              className={index === pageIndex ? 'is-active' : ''}
+              onClick={() => setPageIndex(index)}
+            />
+          ))}
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -1,16 +1,19 @@
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
-import { FiArrowLeft, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { PongDuelArena } from './components/PongDuelArena'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { usePongDuel } from './usePongDuel'
 
 export function PongDuelScreen() {
   const navigate = useNavigate()
   const duel = usePongDuel()
+  const { opponent, likeProps } = useOpponentLikeProps()
 
   const handleBack = useCallback(() => navigate('/games'), [navigate])
   const canPlay = duel.running && !duel.roundMessage
@@ -33,10 +36,6 @@ export function PongDuelScreen() {
           <button type="button" className="pm-pong-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-pong-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-pong-screen__stack">
             <header className="pm-pong-header">
               <h1 className="pm-pong-header__title">
@@ -58,7 +57,7 @@ export function PongDuelScreen() {
                 <span>LEG {duel.game.lane1.matchPoints}</span>
               </div>
               <div className="pm-pong-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={canPlay} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={canPlay} {...likeProps} />
                 <p>ZEYNEP</p>
                 <strong>{duel.game.lane2.score}</strong>
                 <span>LEG {duel.game.lane2.matchPoints}</span>
@@ -74,9 +73,11 @@ export function PongDuelScreen() {
             <motion.div className="pm-pong-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
-                <button type="button" onClick={duel.restartMatch}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={duel.restartMatch}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}

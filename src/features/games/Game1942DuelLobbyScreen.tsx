@@ -5,8 +5,8 @@ import { useNavigate } from 'react-router-dom'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 
 const RULES = [
-  { title: 'İKİ GÖKYÜZÜ', text: 'Solda senin 1942 sahan, sağda Zeynep — aynı dalga, ayrı skor.' },
-  { title: 'UÇ & VUR', text: 'Parmağınla uçağı kaydır; ATEŞ ile düşman formasyonunu dağıt. Dalış yapanlara dikkat!' },
+  { title: 'İKİ GÖKYÜZÜ', text: 'Solda senin Sky Ace sahan, sağda rakip — aynı dalga, ayrı skor.' },
+  { title: 'UÇ & OTOMATİK ATEŞ', text: 'Parmağınla uçağı kaydır; ateş otomatik. Dalış yapan düşmanlara dikkat!' },
   { title: 'LEG', text: '44 sn veya 4000 puana ilk ulaşan leg alır. 3 leg, 2 galibiyet.' },
 ]
 
@@ -30,10 +30,10 @@ export function Game1942DuelLobbyScreen() {
             <header className="pm-y42-lobby__hero">
               <p className="pm-y42-lobby__eyebrow">1v1 DUEL</p>
               <h1 className="pm-y42-lobby__title">
-                <span className="is-sky">1942</span>
+                <span className="is-sky">SKY ACE</span>
                 <span className="is-gold">DUEL</span>
               </h1>
-              <p className="pm-y42-lobby__sub">DALGA • FORM • ATEŞ</p>
+              <p className="pm-y42-lobby__sub">DALGA • FORM • OTOMATİK ATEŞ</p>
             </header>
 
             <ul className="pm-y42-lobby__rules">

@@ -136,19 +136,38 @@
   font-weight: 600;
 }
 
-.pm-nearby-list-card__tags {
+.pm-nearby-list-card__interests {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
   margin-top: 6px;
 }
 
-.pm-nearby-list-card__tags span {
+.pm-nearby-list-card__interest {
   font-size: 9px;
   padding: 2px 6px;
-  border-radius: 8px;
-  background: rgba(60, 90, 180, 0.35);
-  color: #d0dcff;
+  border-radius: 999px;
+  border: 1px solid rgba(110, 180, 255, 0.28);
+  background: rgba(60, 100, 200, 0.22);
+  color: #d8e8ff;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.pm-nearby-list-card__interest--more {
+  border-color: rgba(92, 228, 255, 0.25);
+  background: rgba(92, 228, 255, 0.12);
+  color: #b8f4ff;
+}
+
+.pm-nearby-list-card__actions {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  flex-shrink: 0;
 }
 
 /* Eski dairesel kalp — NearbyLikeButton (.pm-nearby-card__like-btn) kullanılıyor */

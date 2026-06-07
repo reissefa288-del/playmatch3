@@ -1,10 +1,13 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import { GameDuelRematchActions } from './GameDuelRematchActions'
 
 type Props = {
   winner: 'p1' | 'p2' | 'draw'
   p1Score: number
   p2Score: number
   onRestart: () => void
+  onExit: () => void
+  opponentName?: string
 }
 
 function formatScore(n: number) {
@@ -12,7 +15,7 @@ function formatScore(n: number) {
 }
 
 /** Kompakt maç sonucu — tahtalar görünür kalır, sıralama yok */
-export function NeonCrushFinale({ winner, p1Score, p2Score, onRestart }: Props) {
+export function NeonCrushFinale({ winner, p1Score, p2Score, onRestart, onExit, opponentName }: Props) {
   const headline =
     winner === 'draw' ? 'BERABERE' : winner === 'p1' ? 'KAZANDIN!' : 'KAYBETTİN'
 
@@ -35,9 +38,12 @@ export function NeonCrushFinale({ winner, p1Score, p2Score, onRestart }: Props) 
             ZEYNEP <strong>{formatScore(p2Score)}</strong>
           </span>
         </div>
-        <button type="button" className="pm-ncrush-result__cta" onClick={onRestart}>
-          TEKRAR OYNA
-        </button>
+        <GameDuelRematchActions
+          onRestart={onRestart}
+          onExit={onExit}
+          opponentName={opponentName}
+          primaryClassName="pm-ncrush-result__cta"
+        />
       </motion.div>
     </AnimatePresence>
   )

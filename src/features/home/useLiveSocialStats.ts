@@ -26,8 +26,8 @@ function nextWaitingCount(prev: number) {
 
 const TICKER_MESSAGES = [
   'Ece Block Duel oynuyor',
-  'Mert XOX lobisinde',
-  'Azra puzzle odası kurdu',
+  'Mert Puzzle oynuyor',
+  'Azra Block Duel oynuyor',
   'Yeni eşleşme isteği geldi',
   '247 oyuncu lobide',
   'Damla seni bekliyor',

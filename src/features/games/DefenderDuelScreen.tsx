@@ -1,31 +1,124 @@
-import { motion } from 'framer-motion'
-import { useCallback } from 'react'
-import { FiArrowLeft, FiClock, FiSettings } from 'react-icons/fi'
+import { AnimatePresence, motion } from 'framer-motion'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { DefenderDuelArena } from './components/DefenderDuelArena'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
-import { GamePlayerPortrait } from './components/GamePlayerPortrait'
+import { GameOpponentLikeButton } from './components/GameOpponentLikeButton'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { useDefenderDuel } from './useDefenderDuel'
+import { useGameOpponent } from './useGameOpponent'
 
-function formatScore(n: number) {
-  return n.toLocaleString('tr-TR')
+function LivesHeart({
+  filled,
+  accent,
+  critical,
+}: {
+  filled: boolean
+  accent: 'cyan' | 'pink'
+  critical?: boolean
+}) {
+  return (
+    <span
+      className={[
+        'pm-def-life-heart',
+        `is-${accent}`,
+        filled ? 'is-full' : 'is-empty',
+        critical && filled ? 'is-critical' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      aria-hidden
+    >
+      <span className="pm-def-life-heart__ring" />
+      <span className="pm-def-life-heart__core" />
+    </span>
+  )
+}
+
+function LivesRow({
+  lives,
+  max,
+  accent,
+  sideLost,
+}: {
+  lives: number
+  max: number
+  accent: 'cyan' | 'pink'
+  sideLost?: boolean
+}) {
+  return (
+    <div
+      className={['pm-def-lives-row', `is-${accent}`, sideLost ? 'is-side-lost' : ''].filter(Boolean).join(' ')}
+      aria-label={`${lives} can`}
+    >
+      {Array.from({ length: max }, (_, index) => (
+        <LivesHeart
+          key={index}
+          filled={index < lives}
+          accent={accent}
+          critical={lives === 1 && index === 0}
+        />
+      ))}
+    </div>
+  )
+}
+
+const OVERLAY_SUB: Record<'win' | 'lose' | 'draw', string> = {
+  win: 'Savunma hattını korudun — rakip saf dışı!',
+  lose: 'Tüm canların bitti. Bir tur daha dene.',
+  draw: 'İki taraf da aynı anda düştü.',
 }
 
 export function DefenderDuelScreen() {
   const navigate = useNavigate()
   const duel = useDefenderDuel()
+  const opponent = useGameOpponent()
+  const canPlay = duel.running && !duel.winner
+  const maxLives = 3
 
-  const handleBack = useCallback(() => navigate('/games/defender-duel'), [navigate])
-  const canPlay = duel.running && !duel.legMessage
+  const prevP1Lives = useRef(duel.game.p1.lives)
+  const prevP2Lives = useRef(duel.game.p2.lives)
+  const [p1HitFlash, setP1HitFlash] = useState(false)
+  const [p2HitFlash, setP2HitFlash] = useState(false)
 
-  const overlayMessage = !duel.running
+  useEffect(() => {
+    if (duel.game.p1.lives < prevP1Lives.current) {
+      setP1HitFlash(true)
+      const timer = window.setTimeout(() => setP1HitFlash(false), 420)
+      prevP1Lives.current = duel.game.p1.lives
+      return () => window.clearTimeout(timer)
+    }
+    prevP1Lives.current = duel.game.p1.lives
+  }, [duel.game.p1.lives])
+
+  useEffect(() => {
+    if (duel.game.p2.lives < prevP2Lives.current) {
+      setP2HitFlash(true)
+      const timer = window.setTimeout(() => setP2HitFlash(false), 420)
+      prevP2Lives.current = duel.game.p2.lives
+      return () => window.clearTimeout(timer)
+    }
+    prevP2Lives.current = duel.game.p2.lives
+  }, [duel.game.p2.lives])
+
+  const handleBack = useCallback(() => navigate('/games'), [navigate])
+
+  const resultVariant = duel.winner
     ? duel.winner === 'draw'
-      ? 'MAÇ BERABERE'
+      ? 'draw'
       : duel.winner === 'p1'
-        ? 'EMİR KAZANDI'
-        : 'ZEYNEP KAZANDI'
-    : duel.legMessage
+        ? 'win'
+        : 'lose'
+    : null
+
+  const overlayMessage = resultVariant
+    ? resultVariant === 'draw'
+      ? 'BERABERE'
+      : resultVariant === 'win'
+        ? 'KAZANDIN!'
+        : 'KAYBETTİN'
+    : null
 
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--defender">
@@ -36,37 +129,61 @@ export function DefenderDuelScreen() {
           <button type="button" className="pm-def-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-def-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
 
           <div className="pm-def-play__stack">
-            <header className="pm-def-header">
+            <header className="pm-def-header pm-def-header--compact">
+              <p className="pm-def-header__eyebrow">1v1 ARCADE DUEL</p>
               <h1 className="pm-def-header__title">
                 <span className="is-lime">DEFENDER</span>
                 <span className="is-cyan">DUEL</span>
               </h1>
-              <p className="pm-def-header__sub">
-                LEG {duel.game.roundNumber}/{duel.matchRounds} • {formatScore(duel.pointsToWin)} PUAN
-              </p>
+              <span className="pm-def-header__line" aria-hidden />
             </header>
 
-            <section className="pm-def-hud">
-              <div className="pm-def-hud__side">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={canPlay} />
-                <p>EMİR</p>
-                <strong>{formatScore(duel.game.p1.score)}</strong>
-                <span>MAÇ {duel.game.p1.matchPoints} · ☠{duel.game.p1.kills}</span>
+            <section className="pm-def-lives-hud" aria-label="Can durumu">
+              <div
+                className={[
+                  'pm-def-lives-hud__panel',
+                  'is-p1',
+                  duel.game.p1.lives === 1 ? 'is-critical' : '',
+                  p1HitFlash ? 'is-hit' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <span className="pm-def-lives-hud__panel-glow" aria-hidden />
+                <span className="pm-def-lives-hud__tag">SEN</span>
+                <LivesRow lives={duel.game.p1.lives} max={maxLives} accent="cyan" />
               </div>
-              <div className="pm-def-hud__center">
-                <FiClock aria-hidden />
-                <strong>{duel.legTimeLeft}s</strong>
+
+              <div className="pm-def-lives-hud__core" aria-hidden>
+                <span className="pm-def-lives-hud__core-ring" />
+                <span className="pm-def-lives-hud__vs">VS</span>
               </div>
-              <div className="pm-def-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={canPlay} />
-                <p>ZEYNEP</p>
-                <strong>{formatScore(duel.game.p2.score)}</strong>
-                <span>MAÇ {duel.game.p2.matchPoints}</span>
+
+              <div
+                className={[
+                  'pm-def-lives-hud__panel',
+                  'is-p2',
+                  duel.game.p2.lives === 1 ? 'is-critical' : '',
+                  p2HitFlash ? 'is-hit' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+              >
+                <span className="pm-def-lives-hud__panel-glow" aria-hidden />
+                <span className="pm-def-lives-hud__tag">RAKİP</span>
+                <LivesRow
+                  lives={duel.game.p2.lives}
+                  max={maxLives}
+                  accent="pink"
+                  sideLost={duel.game.p2.lives === 0}
+                />
+                <GameOpponentLikeButton
+                  className="is-panel"
+                  playerId={opponent.id}
+                  playerName={opponent.name}
+                />
               </div>
             </section>
 
@@ -74,23 +191,61 @@ export function DefenderDuelScreen() {
               p1={duel.game.p1}
               p2={duel.game.p2}
               now={duel.now}
+              fxP1={duel.fxP1}
+              fxP2={duel.fxP2}
+              shakeP1Until={duel.shakeP1Until}
+              muzzleP1Until={duel.muzzleP1Until}
               disabled={!canPlay}
-              onMove={duel.moveP1}
-              onFire={duel.fireP1}
               onPointerShip={duel.pointerShipP1}
             />
           </div>
 
-          {overlayMessage ? (
-            <motion.div className="pm-def-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
-              <p>{overlayMessage}</p>
-              {!duel.running ? (
-                <button type="button" onClick={duel.restartMatch}>
-                  Tekrar Oyna
-                </button>
-              ) : null}
-            </motion.div>
-          ) : null}
+          <AnimatePresence>
+            {overlayMessage && resultVariant ? (
+              <motion.div
+                className={['pm-def-overlay', `is-${resultVariant}`].join(' ')}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                role="status"
+              >
+                {resultVariant === 'win' ? (
+                  <div className="pm-def-overlay__confetti" aria-hidden>
+                    {Array.from({ length: 18 }, (_, i) => (
+                      <span key={i} style={{ '--i': i } as React.CSSProperties} />
+                    ))}
+                  </div>
+                ) : null}
+
+                <motion.div
+                  className="pm-def-result-card"
+                  initial={{ opacity: 0, scale: 0.88, y: 18 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  transition={{ type: 'spring', stiffness: 340, damping: 26 }}
+                >
+                  <span className="pm-def-result-card__badge" aria-hidden />
+                  <p className="pm-def-result-card__eyebrow">MAÇ SONUCU</p>
+                  <p className="pm-def-result-card__title">{overlayMessage}</p>
+                  <p className="pm-def-result-card__sub">{OVERLAY_SUB[resultVariant]}</p>
+
+                  <div className="pm-def-lives-row is-summary" aria-label="Final can durumu">
+                    <LivesRow lives={duel.game.p1.lives} max={maxLives} accent="cyan" />
+                    <span className="pm-def-result-card__divider">·</span>
+                    <LivesRow lives={duel.game.p2.lives} max={maxLives} accent="pink" />
+                  </div>
+
+                  <GameDuelRematchActions
+                    onRestart={duel.restartMatch}
+                    onExit={handleBack}
+                    opponentName={opponent.name}
+                    className="pm-def-result-card__actions"
+                    primaryClassName="is-primary"
+                    ghostClassName="is-ghost"
+                  />
+                </motion.div>
+              </motion.div>
+            ) : null}
+          </AnimatePresence>
         </motion.div>
       </div>
     </div>

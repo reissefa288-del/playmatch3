@@ -26,6 +26,10 @@ export type LevelSnapshot = {
   nextLevel: number
 }
 
+export function formatPlayerLevel(level: number): string {
+  return `Seviye ${Math.max(1, Math.round(level))}`
+}
+
 export function getLevelTitle(level: number): string {
   if (level >= 40) return 'Efsane'
   if (level >= 30) return 'Usta'

@@ -2,6 +2,9 @@ import {
   fakePortraitForGender,
   type FakePortraitGender,
 } from '../../shared/fakePortraits'
+import { DAILY_LIKES_LIMIT } from '../../shared/dailyLikes'
+
+export { DAILY_LIKES_LIMIT }
 
 export type MatchTabId = 'discover' | 'likers' | 'matches'
 
@@ -32,6 +35,7 @@ export type MatchProfile = {
   verified?: boolean
   online: boolean
   compatibility: number
+  province: string
   distance: string
   location: string
   tags: MatchStyleTag[]
@@ -39,8 +43,6 @@ export type MatchProfile = {
   bio: string
   photos: MatchPhoto[]
 }
-
-export const DAILY_LIKES_LIMIT = 15
 
 export const matchTabs: { id: MatchTabId; label: string; badge?: number }[] = [
   { id: 'discover', label: 'Keşfet' },
@@ -75,12 +77,13 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     verified: true,
     online: true,
     compatibility: 92,
-    distance: '1.2 km uzaklıkta',
-    location: 'İstanbul, Türkiye',
+    province: 'İstanbul',
+    distance: '1.2 km · aynı il',
+    location: 'Kadıköy, İstanbul',
     tags: [
       { id: 'fps', label: 'FPS', icon: 'gamepad' },
       { id: 'ranked', label: 'Rekabetçi', icon: 'target' },
-      { id: 'rank', label: 'Platinum I', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'bd', label: 'Block Duel', emoji: '🧱' },
@@ -97,18 +100,19 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     gender: 'male',
     online: true,
     compatibility: 87,
-    distance: '3.2 km uzaklıkta',
-    location: 'İstanbul, Türkiye',
+    province: 'Ankara',
+    distance: 'Ankara · 352 km',
+    location: 'Çankaya, Ankara',
     tags: [
       { id: 'strat', label: 'Strateji', icon: 'gamepad' },
-      { id: 'rank', label: 'Diamond IV', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'xox', label: 'XOX', emoji: '❌' },
       { id: 'puz', label: 'Puzzle', emoji: '🧩' },
       { id: '8top', label: '8 Top', emoji: '🎱' },
     ],
-    bio: 'Strateji oyunlarında sabırlıyım; iyi bir duo arıyorum. Akşamları ranked açığım.',
+    bio: 'Strateji oyunlarında sabırlıyım; akşamları online olurum.',
   }),
   profile({
     id: 'damla',
@@ -118,11 +122,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     verified: true,
     online: true,
     compatibility: 84,
-    distance: '4.1 km uzaklıkta',
-    location: 'Kadıköy, İstanbul',
+    province: 'İzmir',
+    distance: 'İzmir · 478 km',
+    location: 'Bornova, İzmir',
     tags: [
       { id: 'casual', label: 'Casual', icon: 'gamepad' },
-      { id: 'rank', label: 'Gold II', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'block', label: 'Block', emoji: '🧱' },
@@ -138,11 +143,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     gender: 'male',
     online: true,
     compatibility: 79,
-    distance: '2.4 km uzaklıkta',
+    province: 'İstanbul',
+    distance: '4.8 km · aynı il',
     location: 'Beşiktaş, İstanbul',
     tags: [
       { id: 'multi', label: 'Multiplayer', icon: 'gamepad' },
-      { id: 'rank', label: 'Diamond II', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: '8top', label: '8 Top', emoji: '🎱' },
@@ -157,11 +163,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     gender: 'male',
     online: true,
     compatibility: 76,
-    distance: '5.0 km uzaklıkta',
-    location: 'Üsküdar, İstanbul',
+    province: 'Bursa',
+    distance: 'Bursa · 155 km',
+    location: 'Nilüfer, Bursa',
     tags: [
       { id: 'ranked', label: 'Ranked', icon: 'target' },
-      { id: 'rank', label: 'Platinum I', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'puz', label: 'Puzzle', emoji: '🧩' },
@@ -177,18 +184,19 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     verified: true,
     online: true,
     compatibility: 88,
-    distance: '1.8 km uzaklıkta',
-    location: 'Şişli, İstanbul',
+    province: 'Antalya',
+    distance: 'Antalya · 482 km',
+    location: 'Muratpaşa, Antalya',
     tags: [
       { id: 'fps', label: 'FPS', icon: 'gamepad' },
-      { id: 'rank', label: 'Platinum III', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'val', label: 'Valorant', emoji: '🎯' },
       { id: 'lol', label: 'LOL', emoji: '⚔️' },
       { id: 'ps', label: 'PlayStation', emoji: '🎮' },
     ],
-    bio: 'Ranked arıyorum; iletişim güçlü, tilt az. Duo için uygun saatlerde online.',
+    bio: 'İletişim güçlü, sakin oyun tarzı; akşamları online.',
   }),
   profile({
     id: 'azra',
@@ -197,11 +205,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     gender: 'female',
     online: true,
     compatibility: 81,
-    distance: '2.9 km uzaklıkta',
+    province: 'İstanbul',
+    distance: '2.9 km · aynı il',
     location: 'Bakırköy, İstanbul',
     tags: [
       { id: 'casual', label: 'Casual', icon: 'gamepad' },
-      { id: 'rank', label: 'Gold I', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'block', label: 'Block', emoji: '🧱' },
@@ -216,18 +225,19 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     gender: 'male',
     online: true,
     compatibility: 83,
-    distance: '3.6 km uzaklıkta',
-    location: 'Ataşehir, İstanbul',
+    province: 'Adana',
+    distance: 'Adana · 868 km',
+    location: 'Seyhan, Adana',
     tags: [
-      { id: 'duo', label: 'Duo', icon: 'target' },
-      { id: 'rank', label: 'Diamond I', icon: 'trophy' },
+      { id: 'comp', label: 'Rekabetçi', icon: 'target' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'bd', label: 'Block Duel', emoji: '🧱' },
       { id: '8top', label: '8 Top', emoji: '🎱' },
       { id: 'plus', label: '+1', emoji: '+1', more: true },
     ],
-    bio: 'Duo partneri arıyorum; maç sonrası kısa sohbet, uzun vadede sabit takım.',
+    bio: 'Block Duel ve 8 Top severim; maç sonrası kısa sohbet.',
   }),
   profile({
     id: 'selin',
@@ -237,11 +247,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     verified: true,
     online: false,
     compatibility: 77,
-    distance: '4.4 km uzaklıkta',
-    location: 'Maltepe, İstanbul',
+    province: 'Kocaeli',
+    distance: 'Kocaeli · 98 km',
+    location: 'İzmit, Kocaeli',
     tags: [
       { id: 'puz', label: 'Puzzle', icon: 'gamepad' },
-      { id: 'rank', label: 'Platinum II', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'puz', label: 'Puzzle', emoji: '🧩' },
@@ -256,11 +267,12 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     gender: 'male',
     online: true,
     compatibility: 90,
-    distance: '5.2 km uzaklıkta',
-    location: 'Kartal, İstanbul',
+    province: 'Ankara',
+    distance: 'Ankara · 352 km',
+    location: 'Yenimahalle, Ankara',
     tags: [
       { id: 'comp', label: 'Rekabetçi', icon: 'target' },
-      { id: 'rank', label: 'Master', icon: 'trophy' },
+      { id: 'rank', label: 'Seviye', icon: 'trophy' },
     ],
     favoriteGames: [
       { id: 'lol', label: 'LOL', emoji: '⚔️' },
@@ -269,6 +281,13 @@ export const matchDiscoverProfiles: MatchProfile[] = [
     bio: 'Yüksek elo maçları; analitik oyun tarzı. Ciddi ama saygılı takım arkadaşı.',
   }),
 ]
+
+/** Eşleşme sonrası oyun daveti gönderilebilecek profiller */
+const MATCHED_PROFILE_IDS = ['zeynep', 'mert', 'ali', 'damla', 'ece', 'azra', 'berk'] as const
+
+export const matchedProfiles: MatchProfile[] = MATCHED_PROFILE_IDS.map((id) =>
+  matchDiscoverProfiles.find((profile) => profile.id === id),
+).filter((profile): profile is MatchProfile => Boolean(profile))
 
 /** @deprecated use matchDiscoverProfiles */
 export const matchProfile = matchDiscoverProfiles[0]!

@@ -2,6 +2,15 @@
 /* PlayMeet Premium — AAA cinematic membership (premium-final reference)      */
 /* -------------------------------------------------------------------------- */
 
+.pm-app-shell--premium {
+  min-height: auto;
+  height: auto;
+}
+
+.pm-app-shell--premium .pm-artboard {
+  flex: 0 0 auto;
+}
+
 .pm-app-shell--premium .pm-artboard::before {
   opacity: 1;
   background:
@@ -12,8 +21,8 @@
 
 .pm-premium {
   width: 100%;
-  flex: 1 0 auto;
-  padding: 16px 16px calc(var(--pm-nav-dock-h) + 20px);
+  flex: 0 0 auto;
+  padding: 16px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 22px;
@@ -1325,7 +1334,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 0;
   height: 54px;
   border: none;
   border-radius: 16px;
@@ -1783,8 +1792,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin: 16px 0 0;
-  padding-top: 14px;
+  margin: 12px 0 0;
+  padding-top: 12px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
   font-size: 0.625rem;
   font-weight: 500;

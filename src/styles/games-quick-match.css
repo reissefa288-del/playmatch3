@@ -1,0 +1,229 @@
+.pm-app-shell--quick-match {
+  min-height: 100svh;
+  background: #060818;
+}
+
+.pm-quick-match {
+  width: 100%;
+  min-height: 100svh;
+  padding: 16px 16px 28px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.pm-quick-match__head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pm-quick-match__back {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(130, 160, 255, 0.38);
+  background: rgba(8, 12, 34, 0.88);
+  color: #eef3ff;
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.pm-quick-match__head p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b48cff;
+}
+
+.pm-quick-match__head h1 {
+  margin: 2px 0 0;
+  font-size: 1.45rem;
+  letter-spacing: -0.03em;
+}
+
+.pm-quick-match__stage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 8px 0 24px;
+}
+
+.pm-quick-match__radar {
+  position: relative;
+  width: min(100%, 280px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+}
+
+.pm-quick-match__radar-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(155, 90, 255, 0.28);
+  animation: pm-quick-match-pulse 2.4s ease-out infinite;
+}
+
+.pm-quick-match__radar-ring--b {
+  inset: 12%;
+  animation-delay: 0.45s;
+}
+
+.pm-quick-match__radar-ring--c {
+  inset: 24%;
+  animation-delay: 0.9s;
+}
+
+.pm-quick-match__radar.is-found .pm-quick-match__radar-ring {
+  animation: none;
+  border-color: rgba(0, 241, 164, 0.42);
+  box-shadow: 0 0 24px rgba(0, 241, 164, 0.16);
+}
+
+.pm-quick-match__radar-core {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.6rem;
+  color: #f3e8ff;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(180, 100, 255, 0.45), transparent 58%),
+    rgba(20, 10, 48, 0.96);
+  border: 1px solid rgba(180, 100, 255, 0.55);
+  box-shadow:
+    0 0 28px rgba(155, 80, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  z-index: 1;
+}
+
+.pm-quick-match__radar.is-found .pm-quick-match__radar-core {
+  opacity: 0.15;
+  transform: scale(0.8);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.pm-quick-match__opponent {
+  position: absolute;
+  inset: 18%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 20px;
+  background: rgba(6, 10, 30, 0.72);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(120, 160, 255, 0.32);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
+}
+
+.pm-quick-match__opponent-portrait {
+  width: 88px;
+  height: 108px;
+  border-radius: 16px;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border: 2px solid rgba(180, 100, 255, 0.45);
+  box-shadow: 0 0 20px rgba(155, 80, 255, 0.28);
+}
+
+.pm-quick-match__opponent strong {
+  font-size: 1.05rem;
+  letter-spacing: -0.02em;
+}
+
+.pm-quick-match__opponent span {
+  font-size: 11px;
+  color: #b8c8ef;
+}
+
+.pm-quick-match__status {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f2f6ff;
+}
+
+.pm-quick-match__hint {
+  margin: 0;
+  max-width: 280px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #9eb0e0;
+}
+
+.pm-quick-match__game-pill {
+  width: min(100%, 320px);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(130, 160, 255, 0.34);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 48%),
+    rgba(8, 12, 36, 0.88);
+  text-align: left;
+}
+
+.pm-quick-match__game-pill > span:first-child {
+  font-size: 1.6rem;
+}
+
+.pm-quick-match__game-pill small {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9eb8ff;
+}
+
+.pm-quick-match__game-pill strong {
+  display: block;
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.pm-quick-match__game-pill__go {
+  font-size: 11px;
+  font-weight: 700;
+  color: #7fe8c8;
+  white-space: nowrap;
+}
+
+@keyframes pm-quick-match-pulse {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-quick-match__radar-ring {
+    animation: none;
+    opacity: 0.35;
+  }
+}

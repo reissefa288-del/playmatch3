@@ -1,21 +1,21 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { AmbientParticles } from '../home/components/AmbientParticles'
-import { HomeFiltersSheet } from '../home/components/HomeFiltersSheet'
 import { Navbar } from '../home/components/Navbar'
-import { useHomeFilters } from '../home/useHomeFilters'
 import type { MatchTabId } from './data'
 import { DAILY_LIKES_LIMIT } from './data'
 import { MatchDiscoverDeck } from './components/MatchDiscoverDeck'
 import { MatchFilterButton } from './components/MatchFilterButton'
+import { MatchFiltersSheet } from './components/MatchFiltersSheet'
 import { MatchTabs } from './components/MatchTabs'
 import { MatchTitleBar } from './components/MatchTitleBar'
 import { useMatchDiscover } from './useMatchDiscover'
+import { useMatchFilters } from './useMatchFilters'
 
 export function MatchScreen() {
   const [tab, setTab] = useState<MatchTabId>('discover')
-  const filters = useHomeFilters()
-  const discover = useMatchDiscover()
+  const filters = useMatchFilters()
+  const discover = useMatchDiscover(filters.applied.gender)
 
   return (
     <motion.div
@@ -51,7 +51,7 @@ export function MatchScreen() {
         </main>
       </motion.div>
 
-      <HomeFiltersSheet
+      <MatchFiltersSheet
         open={filters.open}
         draft={filters.draft}
         onChange={filters.patchDraft}

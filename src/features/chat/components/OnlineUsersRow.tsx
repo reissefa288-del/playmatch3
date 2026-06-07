@@ -5,9 +5,11 @@ import type { OnlineUser } from '../data'
 
 type OnlineUsersRowProps = {
   users: OnlineUser[]
+  onNewChat: () => void
+  onUserClick: (userId: string) => void
 }
 
-export function OnlineUsersRow({ users }: OnlineUsersRowProps) {
+export function OnlineUsersRow({ users, onNewChat, onUserClick }: OnlineUsersRowProps) {
   return (
     <motion.section
       className="pm-chat-online"
@@ -19,6 +21,7 @@ export function OnlineUsersRow({ users }: OnlineUsersRowProps) {
       <motion.button
         type="button"
         className="pm-chat-online__new"
+        onClick={onNewChat}
         whileHover={{ scale: 1.04, y: -2 }}
         whileTap={{ scale: 0.97 }}
       >
@@ -29,13 +32,15 @@ export function OnlineUsersRow({ users }: OnlineUsersRowProps) {
       </motion.button>
 
       {users.map((user, index) => (
-        <motion.article
+        <motion.button
           key={user.id}
+          type="button"
           className={`pm-chat-online__user is-${user.ring}`}
           initial={{ opacity: 0, scale: 0.92 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 + index * 0.05, duration: 0.35 }}
           whileHover={{ y: -3 }}
+          onClick={() => onUserClick(user.id)}
         >
           <span
             className="pm-chat-online__avatar"
@@ -46,7 +51,7 @@ export function OnlineUsersRow({ users }: OnlineUsersRowProps) {
           />
           <span className="pm-chat-online__dot" aria-hidden />
           <span className="pm-chat-online__name">{user.name}</span>
-        </motion.article>
+        </motion.button>
       ))}
     </motion.section>
   )

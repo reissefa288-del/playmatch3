@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useDailyLikes } from '../likes/useDailyLikes'
 import { DAILY_LIKES_LIMIT, matchDiscoverProfiles } from './data'
+import { filterMatchProfiles } from './filterMatchProfiles'
+import type { MatchGenderFilter } from './types'
 
 export type DiscoverAction = 'like' | 'pass' | 'super' | 'invite'
 
@@ -16,18 +19,28 @@ export type MatchToastPayload = {
   variant: 'premium' | 'invite' | 'warn' | 'success'
 }
 
-export function useMatchDiscover() {
+export function useMatchDiscover(gender: MatchGenderFilter) {
+  const pool = useMemo(() => filterMatchProfiles(matchDiscoverProfiles, gender), [gender])
+  const { remaining, isUnlimited, tryConsumeLike } = useDailyLikes()
+
   const [index, setIndex] = useState(0)
-  const [likesRemaining, setLikesRemaining] = useState(DAILY_LIKES_LIMIT)
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [toast, setToast] = useState<MatchToastPayload | null>(null)
   const toastId = useRef(0)
+  const prevGender = useRef(gender)
 
-  const current = matchDiscoverProfiles[index] ?? null
-  const peekLeft = index > 0 ? matchDiscoverProfiles[index - 1]! : null
-  const peekRight =
-    index < matchDiscoverProfiles.length - 1 ? matchDiscoverProfiles[index + 1]! : null
-  const queueDone = index >= matchDiscoverProfiles.length
+  useEffect(() => {
+    if (prevGender.current === gender) return
+    prevGender.current = gender
+    setIndex(0)
+    setHistory([])
+    setToast(null)
+  }, [gender])
+
+  const current = pool[index] ?? null
+  const peekLeft = index > 0 ? pool[index - 1]! : null
+  const peekRight = index < pool.length - 1 ? pool[index + 1]! : null
+  const queueDone = pool.length === 0 || index >= pool.length
 
   const dismissToast = useCallback(() => setToast(null), [])
 
@@ -45,13 +58,10 @@ export function useMatchDiscover() {
     return () => window.clearTimeout(t)
   }, [toast])
 
-  const advance = useCallback(
-    (entry: HistoryEntry) => {
-      setHistory((h) => [...h, entry])
-      setIndex((i) => i + 1)
-    },
-    [],
-  )
+  const advance = useCallback((entry: HistoryEntry) => {
+    setHistory((h) => [...h, entry])
+    setIndex((i) => i + 1)
+  }, [])
 
   const pass = useCallback(() => {
     if (!current) return
@@ -60,13 +70,17 @@ export function useMatchDiscover() {
 
   const like = useCallback(() => {
     if (!current) return
-    if (likesRemaining <= 0) {
-      showToast('Beğeni hakkın bitti', 'warn', 'Yarın 15 yeni hak tanımlanacak')
+    if (!isUnlimited && remaining <= 0) {
+      showToast(
+        'Beğeni hakkın bitti',
+        'warn',
+        `Yarın ${DAILY_LIKES_LIMIT} yeni hak tanımlanacak · Premium ile sınırsız`,
+      )
       return
     }
-    setLikesRemaining((n) => n - 1)
+    if (!tryConsumeLike()) return
     advance({ profileId: current.id, action: 'like', consumedLike: true })
-  }, [advance, current, likesRemaining, showToast])
+  }, [advance, current, isUnlimited, remaining, showToast, tryConsumeLike])
 
   const superLike = useCallback(() => {
     if (!current) return
@@ -83,14 +97,13 @@ export function useMatchDiscover() {
   const undo = useCallback(() => {
     const last = history[history.length - 1]
     if (!last) return
-    if (last.consumedLike) setLikesRemaining((n) => Math.min(DAILY_LIKES_LIMIT, n + 1))
     setHistory((h) => h.slice(0, -1))
     setIndex((i) => Math.max(0, i - 1))
     setToast(null)
   }, [history])
 
   const canUndo = history.length > 0
-  const canLike = Boolean(current) && likesRemaining > 0
+  const canLike = Boolean(current) && (isUnlimited || remaining > 0)
   const canAct = Boolean(current) && !queueDone
 
   return {
@@ -98,8 +111,10 @@ export function useMatchDiscover() {
     peekLeft,
     peekRight,
     queueDone,
-    likesRemaining,
+    poolSize: pool.length,
+    likesRemaining: remaining,
     dailyLimit: DAILY_LIKES_LIMIT,
+    isUnlimited,
     toast,
     dismissToast,
     pass,

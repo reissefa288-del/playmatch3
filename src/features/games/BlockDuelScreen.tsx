@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { BlockBoardCanvas } from './components/BlockBoardCanvas'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import {
@@ -14,6 +15,7 @@ import {
   BlockTrophyIcon,
 } from './components/BlockGameIcons'
 import { useBlockDuel } from './useBlockDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { unlockBlockAudio } from './utils/blockSounds'
 
 const PROFILE_SCORES = { p1: 1250, p2: 980 }
@@ -21,6 +23,7 @@ const PROFILE_SCORES = { p1: 1250, p2: 980 }
 export function BlockDuelScreen() {
   const navigate = useNavigate()
   const game = useBlockDuel()
+  const { opponent, likeProps } = useOpponentLikeProps()
 
   const handleBack = useCallback(() => navigate(-1), [navigate])
 
@@ -146,7 +149,7 @@ export function BlockDuelScreen() {
               </div>
 
               <article className="pm-block-player is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" {...likeProps} />
                 <p className="pm-block-player__name">PLAYER 2</p>
                 <p className="pm-block-player__trophy">
                   <BlockTrophyIcon size={11} />
@@ -275,9 +278,12 @@ export function BlockDuelScreen() {
               <p className="pm-block-overlay__sub">
                 {game.matchPoints.p1} — {game.matchPoints.p2}
               </p>
-              <button type="button" className="pm-block-overlay__btn" onClick={game.restart}>
-                TEKRAR OYNA
-              </button>
+              <GameDuelRematchActions
+                onRestart={game.restart}
+                onExit={handleBack}
+                opponentName={opponent.name}
+                primaryClassName="pm-block-overlay__btn"
+              />
             </motion.div>
           ) : null}
         </motion.div>

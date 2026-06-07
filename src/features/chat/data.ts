@@ -110,23 +110,6 @@ export const chatThreads: ChatThread[] = [
     portraitPosition: '8% 58%',
   },
   {
-    id: 'xox-group',
-    name: 'XOX Takımı',
-    lastMessage: 'Emir: Hemen başlayalım!',
-    time: '11:48',
-    unread: 3,
-    isGroup: true,
-    groupEmoji: '⭕',
-  },
-  {
-    id: 'block-duel-group',
-    name: 'Block Duel Grubu',
-    lastMessage: 'Damla yeni rekor kırdı 🔥',
-    time: 'Dün',
-    isGroup: true,
-    groupEmoji: '🧱',
-  },
-  {
     id: 'damla',
     name: 'Damla',
     lastMessage: 'Sesli sohbete geçelim mi?',

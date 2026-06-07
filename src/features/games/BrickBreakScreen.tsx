@@ -2,12 +2,14 @@ import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { FiArrowLeft, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { BrickBreakCanvas } from './components/BrickBreakCanvas'
 import { BrickPickupBanner } from './components/BrickPickupBanner'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useBrickBreakDuel } from './useBrickBreakDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 import { unlockBrickBreakAudio } from './utils/brickBreakSounds'
 
 function LivesRow({ lives, max, variant }: { lives: number; max: number; variant: 'cyan' | 'pink' }) {
@@ -21,6 +23,7 @@ function LivesRow({ lives, max, variant }: { lives: number; max: number; variant
 }
 
 export function BrickBreakScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useBrickBreakDuel()
 
@@ -117,7 +120,7 @@ export function BrickBreakScreen() {
             </div>
 
             <article className="pm-brick-hud__side is-p2">
-              <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" />
+              <GamePlayerPortrait src={opponent.portrait} variant="pink" {...likeProps}/>
               <p className="pm-brick-hud__label">OYUNCU 2</p>
               <LivesRow lives={game.lane2.lives} max={game.maxLives} variant="pink" />
               <div className="pm-brick-score-pill is-pink">
@@ -171,9 +174,12 @@ export function BrickBreakScreen() {
           {!game.running && overlayMessage ? (
             <div className="pm-brick-overlay">
               <p>{overlayMessage}</p>
-              <button type="button" className="pm-brick-overlay__btn" onClick={game.restart}>
-                TEKRAR OYNA
-              </button>
+              <GameDuelRematchActions
+                onRestart={game.restart}
+                onExit={handleBack}
+                opponentName={opponent.name}
+                primaryClassName="pm-brick-overlay__btn"
+              />
             </div>
           ) : null}
         </motion.div>

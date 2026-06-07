@@ -1,8 +1,8 @@
 .pm-profile {
   --pm-layout-pad: 16px;
   width: 100%;
-  flex: 1 0 auto;
-  padding: var(--pm-layout-pad) var(--pm-layout-pad) 132px;
+  flex: 0 0 auto;
+  padding: var(--pm-layout-pad) var(--pm-layout-pad) 16px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -1057,9 +1057,66 @@
 }
 
 .pm-profile-traits__item strong {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: #f4f7ff;
+  line-height: 1.15;
+  word-break: break-word;
+}
+
+.pm-profile-traits--interests .pm-profile-traits__item.is-empty {
+  opacity: 0.45;
+}
+
+.pm-profile-interest-icon {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    rgba(6, 8, 26, 0.9);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.pm-profile-traits--interests .pm-profile-traits__item:nth-child(1) .pm-profile-interest-icon {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 16px rgba(90, 160, 255, 0.28),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pm-profile-traits--interests .pm-profile-traits__item:nth-child(2) .pm-profile-interest-icon {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 16px rgba(255, 120, 80, 0.28),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pm-profile-traits--interests .pm-profile-traits__item:nth-child(3) .pm-profile-interest-icon {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 16px rgba(160, 120, 255, 0.28),
+    0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.pm-profile-traits--interests .pm-profile-traits__item:nth-child(4) .pm-profile-interest-icon {
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 0 16px rgba(255, 100, 200, 0.28),
+    0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 /* AAA trait icons */
@@ -1194,8 +1251,11 @@
 }
 
 .pm-profile-insight-card {
-  padding: 12px;
-  position: relative;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
   overflow: hidden;
 }
 
@@ -1213,11 +1273,13 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
+.pm-profile-insight-card__content {
+  flex: 1;
+  min-width: 0;
+}
+
 .pm-profile-insight-card__title {
   margin: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   color: #e8eeff;
   font-size: 0.88rem;
   font-weight: 700;
@@ -1226,145 +1288,130 @@
 .pm-profile-insight-card strong {
   display: block;
   margin-top: 6px;
-  font-size: 3rem;
+  font-size: 2.2rem;
   line-height: 1;
-  position: relative;
-  z-index: 2;
 }
 
-.pm-profile-insight-card span {
-  position: relative;
-  z-index: 2;
+.pm-profile-insight-card__meta {
+  display: block;
+  margin-top: 2px;
   color: #a8b8e0;
   font-size: 0.8rem;
 }
 
-/* Başlık ikonları */
-.pm-profile-insight-title-icon {
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.pm-profile-insight-title-icon svg {
-  width: 15px;
-  height: 15px;
-}
-
-.pm-profile-insight-title-icon--likes {
-  color: #ffb8e8;
-  background: rgba(180, 50, 140, 0.35);
-  border: 1px solid rgba(255, 120, 200, 0.4);
-  box-shadow: 0 0 12px rgba(255, 80, 180, 0.25);
-}
-
-.pm-profile-insight-title-icon--visits {
-  color: #b8e8ff;
-  background: rgba(40, 100, 200, 0.35);
-  border: 1px solid rgba(100, 200, 255, 0.4);
-  box-shadow: 0 0 12px rgba(70, 160, 255, 0.25);
-}
-
-/* Dekor — animasyonlu kalp / göz */
-.pm-profile-insight-decor {
-  position: absolute;
-  right: 6px;
-  bottom: 4px;
-  width: 78px;
-  height: 78px;
+/* Beğenilerim / Ziyaretçilerim — Premium ikon (sağ) */
+.pm-profile-insight-icon {
+  position: relative;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
   display: grid;
   place-items: center;
   pointer-events: none;
 }
 
-.pm-profile-insight-decor__glow {
+.pm-profile-insight-icon__orb {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  opacity: 0.75;
+  pointer-events: none;
 }
 
-.pm-profile-insight-decor--likes .pm-profile-insight-decor__glow {
-  background: radial-gradient(circle, rgba(255, 90, 200, 0.45), transparent 68%);
+.pm-profile-insight-icon__ring {
+  position: absolute;
+  inset: 4px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.pm-profile-insight-icon__box {
+  position: relative;
+  z-index: 2;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.14) 0%, transparent 42%),
+    rgba(8, 10, 32, 0.75);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.pm-profile-insight-icon__box .pm-feat-icon {
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+}
+
+.pm-profile-insight-icon__box .pm-feat-icon__heart-main {
+  font-size: 1.2rem;
+}
+
+.pm-profile-insight-icon__spark {
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  z-index: 3;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #fff;
+  pointer-events: none;
+  animation: pm-premium-feature-spark 2.2s ease-in-out infinite;
+}
+
+.pm-profile-insight-icon--likes .pm-profile-insight-icon__orb {
+  background: radial-gradient(circle at 35% 30%, rgba(255, 120, 200, 0.5), transparent 68%);
   animation: pm-insight-likes-glow 2.4s ease-in-out infinite;
 }
 
-.pm-profile-insight-decor--visits .pm-profile-insight-decor__glow {
-  background: radial-gradient(circle, rgba(80, 180, 255, 0.42), transparent 68%);
+.pm-profile-insight-icon--likes .pm-profile-insight-icon__box {
+  color: #ff9ce8;
+  border-color: rgba(255, 100, 200, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(255, 100, 200, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 0 24px rgba(255, 60, 180, 0.42),
+    0 8px 20px rgba(0, 0, 0, 0.32);
+}
+
+.pm-profile-insight-icon--likes .pm-profile-insight-icon__spark {
+  background: #ffb8e8;
+  box-shadow: 0 0 8px rgba(255, 120, 200, 0.8);
+}
+
+.pm-profile-insight-icon--visits .pm-profile-insight-icon__orb {
+  background: radial-gradient(circle at 65% 35%, rgba(160, 100, 255, 0.48), transparent 68%);
   animation: pm-insight-visits-glow 3s ease-in-out infinite;
 }
 
-.pm-profile-insight-decor__face {
-  position: relative;
-  z-index: 1;
-  width: 56px;
-  height: 56px;
-  display: grid;
-  place-items: center;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(6, 10, 28, 0.35);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+.pm-profile-insight-icon--visits .pm-profile-insight-icon__box {
+  color: #d4b0ff;
+  border-color: rgba(160, 120, 255, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(160, 120, 255, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 24px rgba(140, 80, 255, 0.4),
+    0 8px 20px rgba(0, 0, 0, 0.32);
 }
 
-.pm-profile-insight-decor__face svg {
-  width: 34px;
-  height: 34px;
-  display: block;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.35));
+.pm-profile-insight-icon--visits .pm-profile-insight-icon__spark {
+  background: #e0c8ff;
+  box-shadow: 0 0 8px rgba(180, 140, 255, 0.8);
 }
 
-.pm-profile-insight-decor--likes .pm-profile-insight-decor__face {
-  animation: pm-insight-heart-beat 1.15s ease-in-out infinite;
-  border-color: rgba(255, 120, 200, 0.35);
-  box-shadow: 0 0 24px rgba(255, 80, 180, 0.35);
-}
-
-.pm-profile-insight-decor--visits .pm-profile-insight-decor__face {
-  border-color: rgba(100, 200, 255, 0.35);
-  box-shadow: 0 0 22px rgba(70, 160, 255, 0.32);
-  animation: pm-insight-eye-blink 4.5s ease-in-out infinite;
-}
-
-.pm-profile-insight-decor--visits .pm-profile-insight-eye__pupil {
-  transform-origin: center;
-  animation: pm-insight-eye-look 4s ease-in-out infinite;
-}
-
-@keyframes pm-insight-eye-blink {
-  0%,
-  88%,
-  100% {
-    transform: scaleY(1);
-  }
-  92% {
-    transform: scaleY(0.12);
-  }
-  96% {
-    transform: scaleY(1);
-  }
-}
-
-@keyframes pm-insight-heart-beat {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  14% {
-    transform: scale(1.1);
-  }
-  28% {
-    transform: scale(1);
-  }
-  42% {
-    transform: scale(1.08);
-  }
-  56% {
-    transform: scale(1);
+@media (prefers-reduced-motion: reduce) {
+  .pm-profile-insight-icon--likes .pm-profile-insight-icon__orb,
+  .pm-profile-insight-icon--visits .pm-profile-insight-icon__orb,
+  .pm-profile-insight-icon__spark {
+    animation: none;
   }
 }
 
@@ -1389,31 +1436,5 @@
   50% {
     opacity: 0.9;
     transform: scale(1.06);
-  }
-}
-
-@keyframes pm-insight-eye-look {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  25% {
-    transform: translateX(0.6px);
-  }
-  50% {
-    transform: translateX(-0.5px);
-  }
-  75% {
-    transform: translateX(0.4px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pm-profile-insight-decor--likes .pm-profile-insight-decor__face,
-  .pm-profile-insight-decor--likes .pm-profile-insight-decor__glow,
-  .pm-profile-insight-decor--visits .pm-profile-insight-decor__glow,
-  .pm-profile-insight-decor--visits .pm-profile-insight-decor__face,
-  .pm-profile-insight-decor--visits .pm-profile-insight-eye__pupil {
-    animation: none;
   }
 }

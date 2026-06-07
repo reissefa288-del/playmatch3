@@ -16,6 +16,7 @@ type MatchActionRowProps = {
   canAct: boolean
   likesRemaining: number
   dailyLimit?: number
+  isUnlimited?: boolean
 }
 
 export function MatchActionRow({
@@ -29,6 +30,7 @@ export function MatchActionRow({
   canAct,
   likesRemaining,
   dailyLimit = DAILY_LIKES_LIMIT,
+  isUnlimited = false,
 }: MatchActionRowProps) {
   return (
     <motion.div
@@ -37,7 +39,7 @@ export function MatchActionRow({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1, duration: 0.45 }}
     >
-      <MatchLikesQuota remaining={likesRemaining} limit={dailyLimit} />
+      <MatchLikesQuota remaining={likesRemaining} limit={dailyLimit} isUnlimited={isUnlimited} />
       <motion.div className="pm-match-actions">
       <ActionCircle
         label="Geri Al"

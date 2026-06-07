@@ -1,5 +1,4 @@
 import { FiCheck } from 'react-icons/fi'
-import { LuCrown } from 'react-icons/lu'
 import { motion, useReducedMotion } from 'framer-motion'
 import kasaIcon from '../../../reference/kasa.png'
 import { premiumHero } from '../data'
@@ -41,7 +40,6 @@ export function PremiumHero({ onUpgrade }: PremiumHeroProps) {
           onClick={onUpgrade}
         >
           <span className="pm-premium-hero__cta-shine" aria-hidden />
-          <LuCrown aria-hidden />
           {premiumHero.cta}
         </motion.button>
       </motion.div>

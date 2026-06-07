@@ -6,7 +6,7 @@ import {
 } from 'react-icons/fi'
 import { PiCrownSimpleFill } from 'react-icons/pi'
 import { LuGamepad2 } from 'react-icons/lu'
-import type { BottomNavItem, FavoriteGame, HeroDiscoveryPlayer, NearbyPlayer } from './types'
+import type { BottomNavItem, HeroDiscoveryPlayer, NearbyPlayer } from './types'
 
 const heroSocial = (
   lastGame: string,
@@ -29,15 +29,11 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     compatibility: 92,
     portraitPosition: '14% 38%',
     social: heroSocial('Son: Black Desert'),
-    favoriteGames: [
-      { id: 'lol', label: 'LOL' },
-      { id: 'valorant', label: 'Valorant' },
-      { id: 'bd', label: 'Block' },
-    ],
+    interests: ['FPS', 'MOBA', 'Gamer', 'E-Spor'],
     tags: [
       { label: 'FPS', icon: 'gamepad' },
       { label: 'Rekabetçi', icon: 'gamepad' },
-      { label: 'Platinum I', icon: 'trophy' },
+      { label: 'Seviye', icon: 'trophy' },
     ],
   },
   {
@@ -51,13 +47,10 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     compatibility: 87,
     portraitPosition: '32% 56%',
     social: heroSocial('Son: XOX'),
-    favoriteGames: [
-      { id: 'xox', label: 'XOX' },
-      { id: 'puzzle', label: 'Puzzle' },
-    ],
+    interests: ['Strateji', 'Indie', 'Gamer', 'Sohbet'],
     tags: [
       { label: 'Strateji', icon: 'gamepad' },
-      { label: 'Diamond IV', icon: 'trophy' },
+      { label: 'Seviye', icon: 'trophy' },
     ],
   },
   {
@@ -72,13 +65,10 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     compatibility: 84,
     portraitPosition: '54% 54%',
     social: heroSocial('Son: Block Duel'),
-    favoriteGames: [
-      { id: 'block', label: 'Block' },
-      { id: 'xox', label: 'XOX' },
-    ],
+    interests: ['Sohbet', 'Indie', 'Gamer'],
     tags: [
       { label: 'Casual', icon: 'gamepad' },
-      { label: 'Gold II', icon: 'trophy' },
+      { label: 'Seviye', icon: 'trophy' },
     ],
   },
   {
@@ -92,13 +82,10 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     compatibility: 79,
     portraitPosition: '8% 58%',
     social: heroSocial('Son: 8 Top'),
-    favoriteGames: [
-      { id: '8top', label: '8 Top' },
-      { id: 'block', label: 'Block' },
-    ],
+    interests: ['Spor', 'FPS', 'Battle Royale'],
     tags: [
       { label: 'Multiplayer', icon: 'gamepad' },
-      { label: 'Diamond II', icon: 'trophy' },
+      { label: 'Seviye', icon: 'trophy' },
     ],
   },
   {
@@ -112,13 +99,10 @@ export const heroDiscoveryQueue: HeroDiscoveryPlayer[] = [
     compatibility: 76,
     portraitPosition: '80% 55%',
     social: heroSocial('Son: Puzzle Rush'),
-    favoriteGames: [
-      { id: 'puzzle', label: 'Puzzle' },
-      { id: 'duel', label: 'Duel' },
-    ],
+    interests: ['E-Spor', 'MOBA', 'Strateji', 'Anime'],
     tags: [
       { label: 'Ranked', icon: 'gamepad' },
-      { label: 'Platinum I', icon: 'trophy' },
+      { label: 'Seviye', icon: 'trophy' },
     ],
   },
 ]
@@ -132,19 +116,13 @@ export const heroPlayerMeta = {
 
 export const heroPortraitPosition = '50% 12%'
 
-export const heroGames: FavoriteGame[] = [
-  { id: 'lol', label: 'LOL' },
-  { id: 'valorant', label: 'Valorant' },
-  { id: 'bd', label: 'Block' },
-]
-
 export const nearbyPlayers: NearbyPlayer[] = [
   {
     id: 'ali',
     name: 'Ali',
     age: 23,
-    rank: 'Diamond II',
-    gameTags: ['Block Duel', 'XOX'],
+    level: 18,
+    interests: ['FPS', 'Gamer', 'MOBA'],
     distance: '2.4 km',
     isOnline: true,
     gender: 'male',
@@ -155,33 +133,33 @@ export const nearbyPlayers: NearbyPlayer[] = [
     id: 'mert',
     name: 'Mert',
     age: 24,
-    rank: 'Diamond IV',
-    gameTags: ['Puzzle', '8 Top'],
+    level: 24,
+    interests: ['Strateji', 'Indie', 'Gamer'],
     distance: '3.2 km',
     isOnline: true,
     gender: 'male',
     portraitPosition: '32% 56%',
-    recentActivity: 'XOX lobisinde',
+    recentActivity: 'Az önce çevrimiçi oldu',
   },
   {
     id: 'damla',
     name: 'Damla',
     age: 20,
-    rank: 'Gold II',
-    gameTags: ['XOX', 'Puzzle'],
+    level: 31,
+    interests: ['Sohbet', 'Indie', 'Gamer'],
     distance: '4.1 km',
     verified: true,
     isOnline: true,
     gender: 'female',
     portraitPosition: '54% 54%',
-    recentActivity: 'Puzzle odası kurdu',
+    recentActivity: 'Puzzle oynuyor',
   },
   {
     id: 'emir',
     name: 'Emir',
     age: 25,
-    rank: 'Platinum I',
-    gameTags: ['8 Top', 'Block Duel'],
+    level: 14,
+    interests: ['Spor', 'FPS', 'Battle Royale'],
     distance: '5.0 km',
     isOnline: true,
     gender: 'male',
@@ -192,21 +170,21 @@ export const nearbyPlayers: NearbyPlayer[] = [
     id: 'ece',
     name: 'Ece',
     age: 22,
-    rank: 'Platinum III',
-    gameTags: ['Valorant', 'LOL'],
+    level: 37,
+    interests: ['E-Spor', 'MOBA', 'Anime'],
     distance: '1.8 km',
     verified: true,
     isOnline: true,
     gender: 'female',
     portraitPosition: '20% 42%',
-    recentActivity: 'Ranked arıyor',
+    recentActivity: 'Az önce çevrimiçi oldu',
   },
   {
     id: 'azra',
     name: 'Azra',
     age: 19,
-    rank: 'Gold I',
-    gameTags: ['Block', 'XOX'],
+    level: 9,
+    interests: ['Sohbet', 'Gamer'],
     distance: '2.9 km',
     isOnline: true,
     gender: 'female',
@@ -217,20 +195,20 @@ export const nearbyPlayers: NearbyPlayer[] = [
     id: 'can',
     name: 'Can',
     age: 26,
-    rank: 'Diamond I',
-    gameTags: ['Block Duel', '8 Top'],
+    level: 28,
+    interests: ['FPS', 'Strateji', 'Gamer'],
     distance: '3.6 km',
     isOnline: true,
     gender: 'male',
     portraitPosition: '68% 52%',
-    recentActivity: 'Duo arıyor',
+    recentActivity: 'Block Duel oynuyor',
   },
   {
     id: 'selin',
     name: 'Selin',
     age: 21,
-    rank: 'Platinum II',
-    gameTags: ['Puzzle', 'Block'],
+    level: 16,
+    interests: ['Indie', 'Sohbet'],
     distance: '4.4 km',
     verified: true,
     isOnline: false,
@@ -242,8 +220,8 @@ export const nearbyPlayers: NearbyPlayer[] = [
     id: 'berk',
     name: 'Berk',
     age: 24,
-    rank: 'Master',
-    gameTags: ['LOL', 'Valorant'],
+    level: 42,
+    interests: ['MOBA', 'E-Spor', 'FPS'],
     distance: '5.2 km',
     isOnline: true,
     gender: 'male',
@@ -254,8 +232,8 @@ export const nearbyPlayers: NearbyPlayer[] = [
     id: 'ilayda',
     name: 'İlayda',
     age: 20,
-    rank: 'Gold III',
-    gameTags: ['XOX', 'Puzzle'],
+    level: 11,
+    interests: ['Sohbet', 'Indie', 'Gamer'],
     distance: '6.1 km',
     isOnline: true,
     gender: 'female',
@@ -267,7 +245,7 @@ export const nearbyPlayers: NearbyPlayer[] = [
 export const nearbyListLiveCaption = {
   activePlayersLabel: '247 oyuncu aktif',
   waitLabel: '3 kişi seni bekliyor',
-  ticker: ['Ece Block Duel oynuyor', 'Mert XOX lobisinde', 'Azra puzzle odasi kurdu'],
+  ticker: ['Ece Block Duel oynuyor', 'Mert Puzzle oynuyor', 'Azra Block Duel oynuyor'],
   sectionEyebrow: 'Lobi şu an canlı · 18 davet aktif',
 }
 

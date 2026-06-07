@@ -1,4 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import { GameDuelRematchActions } from './GameDuelRematchActions'
+import { useGameOpponent } from '../useGameOpponent'
 import { ROUND_BREAK_MS } from '../utils/snakeDuelEngine'
 
 type Props = {
@@ -12,6 +14,7 @@ type Props = {
   setP1: number
   setP2: number
   onRestart?: () => void
+  onExit?: () => void
 }
 
 export function SnakeDuelCinematicOverlay({
@@ -25,7 +28,9 @@ export function SnakeDuelCinematicOverlay({
   setP1,
   setP2,
   onRestart,
+  onExit,
 }: Props) {
+  const opponent = useGameOpponent()
   const winnerTone =
     message.includes('KAZANDIN') || message === 'EMİR KAZANDI'
       ? 'win'
@@ -105,11 +110,15 @@ export function SnakeDuelCinematicOverlay({
                   transition={{ duration: ROUND_BREAK_MS / 1000, ease: 'linear' }}
                 />
               </div>
-            ) : (
-              <button type="button" className="pm-snake-cinematic__btn" onClick={onRestart}>
-                Tekrar Oyna
-              </button>
-            )}
+            ) : onRestart && onExit ? (
+              <GameDuelRematchActions
+                onRestart={onRestart}
+                onExit={onExit}
+                opponentName={opponent.name}
+                className="pm-snake-cinematic__rematch"
+                primaryClassName="pm-snake-cinematic__btn"
+              />
+            ) : null}
           </motion.div>
         </motion.div>
       ) : null}

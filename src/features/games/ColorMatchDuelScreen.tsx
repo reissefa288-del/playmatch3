@@ -1,11 +1,13 @@
 import { useCallback } from 'react'
-import { FiArrowLeft, FiClock, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { ColorMatchGrid } from './components/ColorMatchGrid'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useColorMatchDuel } from './useColorMatchDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 
 function formatTime(sec: number) {
   const m = Math.floor(sec / 60)
@@ -28,6 +30,7 @@ function RoundDots({ wins, max, variant }: { wins: number; max: number; variant:
 }
 
 export function ColorMatchDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const game = useColorMatchDuel()
 
@@ -51,10 +54,6 @@ export function ColorMatchDuelScreen() {
           <button type="button" className="pm-cmatch-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-cmatch-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-cmatch-screen__stack">
             <header className="pm-cmatch-header">
               <h1 className="pm-cmatch-header__title">
@@ -87,7 +86,7 @@ export function ColorMatchDuelScreen() {
               </div>
 
               <div className="pm-cmatch-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={game.running} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={game.running} {...likeProps}/>
                 <p className="pm-cmatch-hud__name">ZEYNEP</p>
                 <strong className="pm-cmatch-hud__score">{formatScore(game.lane2.score)}</strong>
                 <span className="pm-cmatch-hud__combo">x{game.lane2.comboMult.toFixed(1)}</span>
@@ -128,9 +127,11 @@ export function ColorMatchDuelScreen() {
             <div className="pm-cmatch-overlay" role="status">
               <p>{overlayMessage}</p>
               {!game.running ? (
-                <button type="button" onClick={game.restartMatch}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={game.restartMatch}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </div>
           ) : null}

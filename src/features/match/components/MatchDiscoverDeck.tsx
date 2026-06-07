@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { DAILY_LIKES_LIMIT } from '../data'
 import type { useMatchDiscover } from '../useMatchDiscover'
 import { MatchActionRow } from './MatchActionRow'
 import { MatchBoostPanel } from './MatchBoostPanel'
@@ -12,6 +13,31 @@ type MatchDiscoverDeckProps = {
 }
 
 export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
+  if (discover.poolSize === 0) {
+    return (
+      <motion.div
+        className="pm-match-discover"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.35 }}
+      >
+        <motion.div
+          className="pm-match-discover-empty"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <p className="pm-match-discover-empty__title">Profil bulunamadı</p>
+          <p className="pm-match-discover-empty__text">
+            Seçtiğin cinsiyet filtresine uygun profil yok. Filtreyi değiştirmeyi dene.
+          </p>
+        </motion.div>
+        <MatchBoostPanel onNotify={discover.notify} />
+        <MatchToast toast={discover.toast} onDismiss={discover.dismissToast} />
+      </motion.div>
+    )
+  }
+
   if (discover.queueDone) {
     return (
       <motion.div
@@ -28,7 +54,8 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
         >
           <p className="pm-match-discover-empty__title">Keşif tamamlandı</p>
           <p className="pm-match-discover-empty__text">
-            Bugünkü 10 profili gördün. Yarın yeni oyuncular ve 15 beğeni hakkı seni bekliyor.
+            Bugünkü {discover.poolSize} profili gördün. Yarın yeni oyuncular ve {DAILY_LIKES_LIMIT}{' '}
+            beğeni hakkı seni bekliyor.
           </p>
         </motion.div>
         <MatchBoostPanel onNotify={discover.notify} />
@@ -63,6 +90,7 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
         canAct={discover.canAct}
         likesRemaining={discover.likesRemaining}
         dailyLimit={discover.dailyLimit}
+        isUnlimited={discover.isUnlimited}
       />
       <MatchBoostPanel onNotify={discover.notify} />
       <MatchToast toast={discover.toast} onDismiss={discover.dismissToast} />

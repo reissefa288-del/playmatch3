@@ -1,18 +1,21 @@
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
-import { FiArrowLeft, FiClock, FiSettings } from 'react-icons/fi'
+import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { SpaceDuelArena } from './components/SpaceDuelArena'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
+import { GameDuelRematchActions } from './components/GameDuelRematchActions'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
 import { useSpaceDuel } from './useSpaceDuel'
+import { useOpponentLikeProps } from './useGameOpponent'
 
 function formatScore(n: number) {
   return n.toLocaleString('tr-TR')
 }
 
 export function SpaceDuelScreen() {
+  const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
   const duel = useSpaceDuel()
 
@@ -36,10 +39,6 @@ export function SpaceDuelScreen() {
           <button type="button" className="pm-space-back" onClick={handleBack} aria-label="Geri dön">
             <FiArrowLeft />
           </button>
-          <button type="button" className="pm-space-settings" aria-label="Ayarlar">
-            <FiSettings />
-          </button>
-
           <div className="pm-space-play__stack">
             <header className="pm-space-header">
               <h1 className="pm-space-header__title">
@@ -63,7 +62,7 @@ export function SpaceDuelScreen() {
                 <strong>{duel.legTimeLeft}s</strong>
               </div>
               <div className="pm-space-hud__side is-p2">
-                <GamePlayerPortrait src={FAKE_PORTRAIT_FEMALE} variant="pink" active={canPlay} />
+                <GamePlayerPortrait src={opponent.portrait} variant="pink" active={canPlay} {...likeProps}/>
                 <p>ZEYNEP</p>
                 <strong>{formatScore(duel.game.p2.score)}</strong>
                 <span>D{duel.game.p2.wave} • MAÇ {duel.game.p2.matchPoints}</span>
@@ -83,9 +82,11 @@ export function SpaceDuelScreen() {
             <motion.div className="pm-space-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
-                <button type="button" onClick={duel.restartMatch}>
-                  Tekrar Oyna
-                </button>
+                <GameDuelRematchActions
+                  onRestart={duel.restartMatch}
+                  onExit={handleBack}
+                  opponentName={opponent.name}
+                />
               ) : null}
             </motion.div>
           ) : null}
