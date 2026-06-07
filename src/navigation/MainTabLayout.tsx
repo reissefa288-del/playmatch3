@@ -1,61 +1,69 @@
-import { useEffect, useRef, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
+import { prefetchTabRoutes } from './prefetchRoutes'
+import { TabActivityProvider } from './TabActivityContext'
 import { TabPanel } from './TabPanel'
-import { getTabDirection, MAIN_TABS, PREMIUM_TAB, resolveTabId, type TabId } from './tabConfig'
+import { MAIN_TABS, PREMIUM_TAB, resolveTabId, type TabId } from './tabConfig'
+
+const MAX_MOUNTED_TABS = 3
+
+function trimMountedTabs(order: TabId[], activeTabId: TabId) {
+  if (order.length <= MAX_MOUNTED_TABS) return order
+  const next = [...order]
+  while (next.length > MAX_MOUNTED_TABS) {
+    const evictIndex = next.findIndex((id) => id !== activeTabId)
+    if (evictIndex < 0) break
+    next.splice(evictIndex, 1)
+  }
+  return next
+}
 
 export function MainTabLayout() {
   const location = useLocation()
   const activeTabId = resolveTabId(location.pathname)
-  const [mountedTabs, setMountedTabs] = useState<Set<TabId>>(() =>
-    activeTabId ? new Set([activeTabId]) : new Set(['home']),
+  const [mountedTabOrder, setMountedTabOrder] = useState<TabId[]>(() =>
+    activeTabId ? [activeTabId] : ['home'],
   )
-
-  const previousTabRef = useRef<TabId>(activeTabId ?? 'home')
-  const direction =
-    activeTabId && previousTabRef.current
-      ? getTabDirection(previousTabRef.current, activeTabId)
-      : 0
 
   useEffect(() => {
     if (!activeTabId) return
-    setMountedTabs((current) => {
-      if (current.has(activeTabId)) return current
-      const next = new Set(current)
-      next.add(activeTabId)
-      return next
+    setMountedTabOrder((current) => {
+      const withoutActive = current.filter((id) => id !== activeTabId)
+      const next = [...withoutActive, activeTabId]
+      return trimMountedTabs(next, activeTabId)
     })
   }, [activeTabId])
 
   useEffect(() => {
-    if (activeTabId) {
-      previousTabRef.current = activeTabId
-    }
+    if (!activeTabId) return
+    prefetchTabRoutes(activeTabId)
   }, [activeTabId])
 
   if (!activeTabId) {
     return <Navigate to="/" replace />
   }
 
-  return (
-    <div className="pm-main-layout">
-      <div className="pm-tab-viewport" role="presentation">
-        {[...MAIN_TABS, PREMIUM_TAB].map((tab) => {
-          if (!mountedTabs.has(tab.id)) return null
-          const isActive = tab.id === activeTabId
-          const { Component } = tab
+  const mountedTabs = new Set(mountedTabOrder)
 
-          return (
-            <TabPanel
-              key={tab.id}
-              tabId={tab.id}
-              isActive={isActive}
-              direction={isActive ? direction : 0}
-            >
-              <Component />
-            </TabPanel>
-          )
-        })}
+  return (
+    <TabActivityProvider activeTabId={activeTabId}>
+      <div className="pm-main-layout">
+        <div className="pm-tab-viewport" role="presentation">
+          {[...MAIN_TABS, PREMIUM_TAB].map((tab) => {
+            if (!mountedTabs.has(tab.id)) return null
+            const isActive = tab.id === activeTabId
+            const { Component } = tab
+
+            return (
+              <TabPanel key={tab.id} tabId={tab.id} isActive={isActive}>
+                <Suspense fallback={null}>
+                  <Component />
+                </Suspense>
+              </TabPanel>
+            )
+          })}
+        </div>
       </div>
-    </div>
+    </TabActivityProvider>
   )
 }

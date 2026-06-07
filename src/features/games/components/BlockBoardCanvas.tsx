@@ -1,4 +1,5 @@
 import { useEffect, useRef, type RefObject } from 'react'
+import { useDocumentVisible } from '../../../shared/useDocumentVisible'
 import {
   BLOCK_COLS,
   BLOCK_ROWS,
@@ -37,30 +38,43 @@ type BlockBoardCanvasProps = {
 
 export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const documentVisible = useDocumentVisible()
 
   useEffect(() => {
+    if (!documentVisible) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
     let raf = 0
+    let width = 0
+    let height = 0
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const rect = canvas.getBoundingClientRect()
+      width = Math.max(1, Math.floor(rect.width * dpr))
+      height = Math.max(1, Math.floor(rect.height * dpr))
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width
+        canvas.height = height
+      }
+    }
+
+    const ro = new ResizeObserver(resize)
+    ro.observe(canvas)
+    resize()
 
     const draw = () => {
       const lane = laneRef.current
-      if (!lane) {
-        raf = requestAnimationFrame(draw)
-        return
-      }
+      if (!lane) return
+
+      const w = width
+      const h = height
+      if (w < 1 || h < 1) return
 
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
-      const rect = canvas.getBoundingClientRect()
-      const w = Math.max(1, Math.floor(rect.width * dpr))
-      const h = Math.max(1, Math.floor(rect.height * dpr))
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w
-        canvas.height = h
-      }
 
       const padX = w * 0.06
       const padY = h * 0.04
@@ -218,8 +232,11 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
     }
 
     raf = requestAnimationFrame(draw)
-    return () => cancelAnimationFrame(raf)
-  }, [accent, laneRef])
+    return () => {
+      cancelAnimationFrame(raf)
+      ro.disconnect()
+    }
+  }, [accent, documentVisible, laneRef])
 
   return <canvas ref={canvasRef} className="pm-block-arena__canvas" />
 }

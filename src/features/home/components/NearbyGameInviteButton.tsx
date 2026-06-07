@@ -2,8 +2,8 @@ import { useState, type MouseEvent } from 'react'
 import { FiLock } from 'react-icons/fi'
 import { IoGameController } from 'react-icons/io5'
 import { motion, useReducedMotion } from 'framer-motion'
-import { usePremiumSubscription } from '../../premium/usePremiumSubscription'
-import { useNearbyLikes } from '../useNearbyLikes'
+import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
+import { useNearbyLikesActions, useHasInvited } from '../NearbyLikesProvider'
 
 export type NearbyInvitePhase = 'idle' | 'burst'
 
@@ -23,9 +23,9 @@ export function NearbyGameInviteButton({
   className = '',
 }: NearbyGameInviteButtonProps) {
   const reduceMotion = useReducedMotion()
-  const { isPremiumActive } = usePremiumSubscription()
-  const { hasInvited, sendInvite } = useNearbyLikes()
-  const invited = hasInvited(playerId)
+  const { active: isPremiumActive } = usePremiumSubscriptionState()
+  const { sendInvite } = useNearbyLikesActions()
+  const invited = useHasInvited(playerId)
   const [phase, setPhase] = useState<NearbyInvitePhase>('idle')
   const [lockedHint, setLockedHint] = useState(false)
 

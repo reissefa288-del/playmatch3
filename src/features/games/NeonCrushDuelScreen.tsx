@@ -1,3 +1,4 @@
+import '../../styles/neon-crush.css'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useRef } from 'react'
 import { unlockNeonCrushAudio } from './utils/neonCrushSounds'

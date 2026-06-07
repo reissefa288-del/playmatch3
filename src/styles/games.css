@@ -936,8 +936,8 @@
 .pm-app-shell--games .pm-ambient-wrap {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100dvh;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
@@ -1324,6 +1324,14 @@
   gap: 10px;
 }
 
+.pm-games-all__grid--virtual {
+  display: block;
+}
+
+.pm-games-all__grid-row .pm-games-mini-card {
+  min-height: 160px;
+}
+
 .pm-games-all__grid .pm-games-mini-card {
   flex: none;
   width: 100%;
@@ -1592,14 +1600,14 @@
   inset: 0;
   border: 0;
   border-radius: inherit;
-  background: url('../reference/brick.png') center / cover no-repeat;
+  background: url('../reference/opt/thumb/brick.webp') center / cover no-repeat;
 }
 
 .pm-games-mini-card__art.is-bubble-shooter::before {
   inset: 0;
   border: 0;
   border-radius: inherit;
-  background: url('../reference/bubble.png') center / cover no-repeat;
+  background: url('../reference/opt/thumb/bubble.webp') center / cover no-repeat;
 }
 
 .pm-games-mini-card.is-bubble-shooter-duel .pm-games-mini-card__icon,
@@ -1911,7 +1919,7 @@
 .pm-games-mini-card__art.is-math-duel::before {
   inset: 10% 14%;
   border: 0;
-  background: url('../reference/math.png') center / cover no-repeat;
+  background: url('../reference/opt/thumb/math.webp') center / cover no-repeat;
   filter: saturate(1.05);
 }
 

@@ -1,7 +1,6 @@
-import { motion } from 'framer-motion'
 import { NavLink, useLocation } from 'react-router-dom'
-import type { BottomNavItem } from '../types'
 import type { TabId } from '../../../navigation/tabConfig'
+import type { BottomNavItem } from '../types'
 
 type BottomNavigationProps = {
   items: BottomNavItem[]
@@ -33,14 +32,7 @@ export function BottomNavigation({ items, activeTabId }: BottomNavigationProps) 
 
         const inner = (
           <>
-            {active ? (
-              <motion.span
-                layoutId="pm-nav-active-indicator"
-                className="pm-bottom-nav__indicator"
-                transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                aria-hidden
-              />
-            ) : null}
+            {active ? <span className="pm-bottom-nav__indicator" aria-hidden /> : null}
             <span className="pm-bottom-nav__icon">
               <item.icon />
               {item.badge ? <em>{item.badge}</em> : null}

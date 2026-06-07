@@ -35,8 +35,8 @@
 .pm-app-shell--match .pm-ambient-wrap {
   position: fixed;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100dvh;
   z-index: 0;
   pointer-events: none;
 }
@@ -53,5 +53,70 @@
 @media (prefers-reduced-motion: reduce) {
   .pm-tab-panel#pm-tab-match::before {
     animation: none;
+  }
+
+  .pm-app-shell--match.pm-shell-enter,
+  .pm-app-shell--match .pm-artboard.pm-artboard-enter,
+  .pm-app-shell--match .pm-match-top.pm-match-top-enter,
+  .pm-app-shell--match .pm-match-empty.pm-match-empty-enter {
+    animation: none;
+  }
+}
+
+.pm-app-shell--match.pm-shell-enter {
+  animation: pm-match-shell-enter 0.35s ease-out both;
+}
+
+.pm-app-shell--match .pm-artboard.pm-artboard-enter {
+  animation: pm-match-artboard-enter 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pm-app-shell--match .pm-match-top.pm-match-top-enter {
+  animation: pm-match-top-enter 0.4s ease-out 0.05s both;
+}
+
+.pm-app-shell--match .pm-match-empty.pm-match-empty-enter {
+  animation: pm-match-empty-enter 0.35s ease-out both;
+}
+
+@keyframes pm-match-shell-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pm-match-artboard-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pm-match-top-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pm-match-empty-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

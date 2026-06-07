@@ -1,3 +1,4 @@
+import '../../styles/home-bundle.css'
 import { useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import { FiChevronDown, FiMapPin, FiSliders } from 'react-icons/fi'

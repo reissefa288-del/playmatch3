@@ -1,3 +1,5 @@
+import '../../styles/chat-ambient.css'
+import '../../styles/chat.css'
 import { useCallback, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'

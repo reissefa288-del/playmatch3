@@ -2,7 +2,9 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react'
@@ -13,16 +15,21 @@ import {
   type LevelSnapshot,
 } from './profileLevel'
 
-type ProfileLevelContextValue = LevelSnapshot & {
-  addXp: (amount: number) => void
+type ProfileLevelState = LevelSnapshot & {
   lastGain: number | null
 }
 
-const ProfileLevelContext = createContext<ProfileLevelContextValue | null>(null)
+type ProfileLevelActions = {
+  addXp: (amount: number) => void
+}
+
+const ProfileLevelStateContext = createContext<ProfileLevelState | null>(null)
+const ProfileLevelActionsContext = createContext<ProfileLevelActions | null>(null)
 
 export function ProfileLevelProvider({ children }: { children: ReactNode }) {
   const [totalXp, setTotalXp] = useState(loadStoredTotalXp)
   const [lastGain, setLastGain] = useState<number | null>(null)
+  const gainTimerRef = useRef<number | null>(null)
 
   const snapshot = useMemo(() => getLevelSnapshot(totalXp), [totalXp])
 
@@ -34,25 +41,59 @@ export function ProfileLevelProvider({ children }: { children: ReactNode }) {
       return next
     })
     setLastGain(amount)
-    window.setTimeout(() => setLastGain(null), 2200)
+    if (gainTimerRef.current != null) {
+      window.clearTimeout(gainTimerRef.current)
+    }
+    gainTimerRef.current = window.setTimeout(() => {
+      gainTimerRef.current = null
+      setLastGain(null)
+    }, 2200)
   }, [])
 
-  const value = useMemo(
-    () => ({
-      ...snapshot,
-      addXp,
-      lastGain,
-    }),
-    [snapshot, addXp, lastGain],
+  useEffect(
+    () => () => {
+      if (gainTimerRef.current != null) {
+        window.clearTimeout(gainTimerRef.current)
+      }
+    },
+    [],
   )
 
-  return <ProfileLevelContext.Provider value={value}>{children}</ProfileLevelContext.Provider>
+  const stateValue = useMemo(
+    () => ({
+      ...snapshot,
+      lastGain,
+    }),
+    [snapshot, lastGain],
+  )
+
+  const actionsValue = useMemo(() => ({ addXp }), [addXp])
+
+  return (
+    <ProfileLevelActionsContext.Provider value={actionsValue}>
+      <ProfileLevelStateContext.Provider value={stateValue}>{children}</ProfileLevelStateContext.Provider>
+    </ProfileLevelActionsContext.Provider>
+  )
+}
+
+export function useProfileLevelState() {
+  const ctx = useContext(ProfileLevelStateContext)
+  if (!ctx) {
+    throw new Error('useProfileLevelState must be used within ProfileLevelProvider')
+  }
+  return ctx
+}
+
+export function useProfileLevelActions() {
+  const ctx = useContext(ProfileLevelActionsContext)
+  if (!ctx) {
+    throw new Error('useProfileLevelActions must be used within ProfileLevelProvider')
+  }
+  return ctx
 }
 
 export function useProfileLevel() {
-  const ctx = useContext(ProfileLevelContext)
-  if (!ctx) {
-    throw new Error('useProfileLevel must be used within ProfileLevelProvider')
-  }
-  return ctx
+  const state = useProfileLevelState()
+  const { addXp } = useProfileLevelActions()
+  return { ...state, addXp }
 }

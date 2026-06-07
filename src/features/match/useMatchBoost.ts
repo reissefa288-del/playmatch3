@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useRuntimeActive } from '../../shared/useRuntimeActive'
 
 const STORAGE_KEY = 'pm-match-boost-until'
 
@@ -31,12 +32,13 @@ function formatRemaining(ms: number): string {
 export function useMatchBoost() {
   const [boostUntil, setBoostUntil] = useState<number | null>(readBoostUntil)
   const [now, setNow] = useState(() => Date.now())
+  const visible = useRuntimeActive('match')
 
   useEffect(() => {
-    if (!boostUntil) return
+    if (!boostUntil || !visible) return
     const tick = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(tick)
-  }, [boostUntil])
+  }, [boostUntil, visible])
 
   useEffect(() => {
     if (boostUntil && boostUntil <= now) {

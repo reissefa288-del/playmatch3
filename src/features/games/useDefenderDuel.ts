@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
 import { tickDefenderBot } from './utils/defenderDuelBot'
 import {
   applyDefFxEvents,
@@ -52,14 +53,34 @@ export function useDefenderDuel() {
   fxP2Ref.current = fxP2
   shakeP1Ref.current = shakeP1Until
 
+  const documentVisible = useDocumentVisible()
+
   useEffect(() => {
+    if (!documentVisible) return
     if (!running && endedRef.current) return
 
     const tick = () => {
       const t = performance.now()
       const dt = Math.min(48, t - lastTickRef.current)
       lastTickRef.current = t
-      setNow(t)
+      if (!endedRef.current) {
+        setNow(t)
+      }
+
+      if (endedRef.current) {
+        const p1Fx = pruneDefParticles(fxP1Ref.current, t)
+        const p2Fx = pruneDefParticles(fxP2Ref.current, t)
+        const shakeP1 = shakeP1Ref.current
+        const hasFx = p1Fx.length > 0 || p2Fx.length > 0 || shakeP1 > t
+        if (hasFx) {
+          fxP1Ref.current = p1Fx
+          fxP2Ref.current = p2Fx
+          setFxP1(p1Fx)
+          setFxP2(p2Fx)
+          loopRef.current = window.requestAnimationFrame(tick)
+        }
+        return
+      }
 
       let p1Fx = pruneDefParticles(fxP1Ref.current, t)
       let p2Fx = pruneDefParticles(fxP2Ref.current, t)
@@ -125,7 +146,7 @@ export function useDefenderDuel() {
     return () => {
       if (loopRef.current != null) window.cancelAnimationFrame(loopRef.current)
     }
-  }, [running])
+  }, [documentVisible, running])
 
   const pointerShipP1 = useCallback(
     (clientY: number, rect: DOMRect) => {

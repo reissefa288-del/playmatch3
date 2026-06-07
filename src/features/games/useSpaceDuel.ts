@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { tickSpaceBot } from './utils/spaceDuelBot'
 import {
   createSpaceState,
@@ -42,6 +43,7 @@ export function useSpaceDuel() {
   gameRef.current = game
 
   const endLegRef = useRef<() => void>(() => {})
+  const breakTimer = useManagedTimeout()
 
   const endLeg = useCallback(() => {
     if (legEndingRef.current) return
@@ -62,7 +64,7 @@ export function useSpaceDuel() {
     const matchOver =
       p1.matchPoints >= WIN_ROUNDS || p2.matchPoints >= WIN_ROUNDS || g.roundNumber >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           p1.matchPoints > p2.matchPoints ? 'p1' : p2.matchPoints > p1.matchPoints ? 'p2' : 'draw'
@@ -84,7 +86,7 @@ export function useSpaceDuel() {
       setLegMessage(null)
       lastTickRef.current = t
     }, ROUND_BREAK_MS)
-  }, [])
+  }, [breakTimer])
 
   endLegRef.current = endLeg
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -15,8 +15,9 @@ import { IoShieldCheckmark } from 'react-icons/io5'
 import { LuGamepad2 } from 'react-icons/lu'
 import { MdEmojiEvents } from 'react-icons/md'
 import { fakePortraitForGender } from '../../../shared/fakePortraits'
+import { LazyImage } from '../../../shared/LazyImage'
 import { PhotoLightbox, type LightboxPhoto } from '../../../shared/PhotoLightbox'
-import { useGemBalance } from '../../currency/GemBalanceProvider'
+import { formatBalance, useGemBalanceActions, useGemBalanceState } from '../../currency/GemBalanceProvider'
 import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
 import type { HeroDiscoveryPlayer, HeroDiscoveryTag } from '../types'
 
@@ -50,7 +51,7 @@ const heroLightboxPhotos: LightboxPhoto[] = heroPhotoPositions.map((objectPositi
 
 const VISIBLE_INTERESTS = 3
 
-export function HeroPlayerCard({
+export const HeroPlayerCard = memo(function HeroPlayerCard({
   player,
   showSentOverlay = false,
   matchBusy = false,
@@ -63,13 +64,15 @@ export function HeroPlayerCard({
   onSuperLike,
   sentOverlayVariant = 'match',
 }: HeroPlayerCardProps) {
-  const { spend, balance, formatBalance } = useGemBalance()
+  const { spend } = useGemBalanceActions()
+  const { balance } = useGemBalanceState()
   const [inviteHint, setInviteHint] = useState<'locked' | 'sent' | null>(null)
   const [superHint, setSuperHint] = useState<'gems' | 'sent' | null>(null)
   const [photosOpen, setPhotosOpen] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [photoIndex, setPhotoIndex] = useState(0)
-  const portraitSrc = fakePortraitForGender(player.gender)
+  const portraitSrc = fakePortraitForGender(player.gender, 'display')
+  const portraitFull = fakePortraitForGender(player.gender, 'full')
   const actionsLocked = showSentOverlay || matchBusy || isPeek
   const visibleInterests = player.interests.slice(0, VISIBLE_INTERESTS)
   const extraInterests = player.interests.length - visibleInterests.length
@@ -170,12 +173,14 @@ export function HeroPlayerCard({
             role="img"
             aria-label={player.name}
           >
-            <img
+            <LazyImage
               src={portraitSrc}
               alt=""
               className="pm-hero-card__portrait-img"
               style={{ objectPosition: heroPhotoPositions[photoIndex] }}
               draggable={false}
+              width={390}
+              height={440}
             />
             {photosOpen ? (
               <button
@@ -392,11 +397,11 @@ export function HeroPlayerCard({
       <PhotoLightbox
         open={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
-        imageSrc={portraitSrc}
+        imageSrc={portraitFull}
         photos={heroLightboxPhotos}
         index={photoIndex}
         onIndexChange={setPhotoIndex}
       />
     </article>
   )
-}
+})

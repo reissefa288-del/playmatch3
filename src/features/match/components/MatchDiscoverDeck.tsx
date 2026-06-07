@@ -1,19 +1,22 @@
+import { memo } from 'react'
 import { motion } from 'framer-motion'
 import { DAILY_LIKES_LIMIT } from '../data'
-import type { useMatchDiscover } from '../useMatchDiscover'
+import type { MatchDiscoverActions, MatchDiscoverState } from '../matchDiscoverTypes'
 import { MatchActionRow } from './MatchActionRow'
 import { MatchBoostPanel } from './MatchBoostPanel'
 import { MatchProfileCard } from './MatchProfileCard'
 import { MatchToast } from './MatchToast'
 
-type DiscoverState = ReturnType<typeof useMatchDiscover>
-
 type MatchDiscoverDeckProps = {
-  discover: DiscoverState
+  state: MatchDiscoverState
+  actions: MatchDiscoverActions
 }
 
-export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
-  if (discover.poolSize === 0) {
+export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
+  state,
+  actions,
+}: MatchDiscoverDeckProps) {
+  if (state.poolSize === 0) {
     return (
       <motion.div
         className="pm-match-discover"
@@ -32,13 +35,13 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
             Seçtiğin cinsiyet filtresine uygun profil yok. Filtreyi değiştirmeyi dene.
           </p>
         </motion.div>
-        <MatchBoostPanel onNotify={discover.notify} />
-        <MatchToast toast={discover.toast} onDismiss={discover.dismissToast} />
+        <MatchBoostPanel onNotify={actions.notify} />
+        <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
       </motion.div>
     )
   }
 
-  if (discover.queueDone) {
+  if (state.queueDone) {
     return (
       <motion.div
         className="pm-match-discover"
@@ -54,17 +57,17 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
         >
           <p className="pm-match-discover-empty__title">Keşif tamamlandı</p>
           <p className="pm-match-discover-empty__text">
-            Bugünkü {discover.poolSize} profili gördün. Yarın yeni oyuncular ve {DAILY_LIKES_LIMIT}{' '}
+            Bugünkü {state.poolSize} profili gördün. Yarın yeni oyuncular ve {DAILY_LIKES_LIMIT}{' '}
             beğeni hakkı seni bekliyor.
           </p>
         </motion.div>
-        <MatchBoostPanel onNotify={discover.notify} />
-        <MatchToast toast={discover.toast} onDismiss={discover.dismissToast} />
+        <MatchBoostPanel onNotify={actions.notify} />
+        <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
       </motion.div>
     )
   }
 
-  if (!discover.current) return null
+  if (!state.current) return null
 
   return (
     <motion.div
@@ -74,26 +77,26 @@ export function MatchDiscoverDeck({ discover }: MatchDiscoverDeckProps) {
       transition={{ duration: 0.35 }}
     >
       <MatchProfileCard
-        key={discover.current.id}
-        profile={discover.current}
-        peekLeftName={discover.peekLeft?.name}
-        peekRightName={discover.peekRight?.name}
+        key={state.current.id}
+        profile={state.current}
+        peekLeftName={state.peekLeft?.name}
+        peekRightName={state.peekRight?.name}
       />
       <MatchActionRow
-        onUndo={discover.undo}
-        onPass={discover.pass}
-        onLike={discover.like}
-        onInvite={discover.gameInvite}
-        onSuperLike={discover.superLike}
-        canUndo={discover.canUndo}
-        canLike={discover.canLike}
-        canAct={discover.canAct}
-        likesRemaining={discover.likesRemaining}
-        dailyLimit={discover.dailyLimit}
-        isUnlimited={discover.isUnlimited}
+        onUndo={actions.undo}
+        onPass={actions.pass}
+        onLike={actions.like}
+        onInvite={actions.gameInvite}
+        onSuperLike={actions.superLike}
+        canUndo={state.canUndo}
+        canLike={state.canLike}
+        canAct={state.canAct}
+        likesRemaining={state.likesRemaining}
+        dailyLimit={state.dailyLimit}
+        isUnlimited={state.isUnlimited}
       />
-      <MatchBoostPanel onNotify={discover.notify} />
-      <MatchToast toast={discover.toast} onDismiss={discover.dismissToast} />
+      <MatchBoostPanel onNotify={actions.notify} />
+      <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
     </motion.div>
   )
-}
+})

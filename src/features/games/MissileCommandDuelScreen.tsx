@@ -1,3 +1,4 @@
+import '../../styles/missile-command-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'

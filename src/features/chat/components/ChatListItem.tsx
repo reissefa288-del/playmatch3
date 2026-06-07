@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { MdVerified } from 'react-icons/md'
 import { motion } from 'framer-motion'
@@ -9,12 +10,12 @@ type ChatListItemProps = {
   index: number
 }
 
-export function ChatListItem({ thread, index }: ChatListItemProps) {
+export const ChatListItem = memo(function ChatListItem({ thread, index }: ChatListItemProps) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={false}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.12 + index * 0.04, duration: 0.35 }}
+      transition={{ delay: index * 0.02, duration: 0.28 }}
     >
       <Link
         to={`/chat/${thread.id}`}
@@ -59,10 +60,8 @@ export function ChatListItem({ thread, index }: ChatListItemProps) {
           <span className="pm-chat-item__preview">{thread.lastMessage}</span>
         </span>
 
-        {thread.unread != null && thread.unread > 0 ? (
-          <span className="pm-chat-item__badge">{thread.unread}</span>
-        ) : null}
+        {thread.unread ? <span className="pm-chat-item__badge">{thread.unread}</span> : null}
       </Link>
     </motion.div>
   )
-}
+})

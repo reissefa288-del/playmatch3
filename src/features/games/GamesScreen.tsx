@@ -1,23 +1,27 @@
+import '../../styles/games.css'
 import { useCallback, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import { FiArrowLeft, FiSearch, FiSliders, FiUserPlus, FiUsers, FiZap } from 'react-icons/fi'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useRuntimeActive } from '../../shared/useRuntimeActive'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
-import { useProfileLevel } from '../profile/ProfileLevelProvider'
+import { useProfileLevelActions } from '../profile/ProfileLevelProvider'
 import { XP_GAME_FEATURED } from '../profile/profileLevel'
 import { featuredGames, gamesHeroStats, popularGamesCards, type FeaturedGame, type GamesMiniCard } from './data'
 import { FeaturedGamesRow } from './components/FeaturedGamesRow'
 import { AllGamesRow } from './components/AllGamesRow'
+import { GamesCatalogGrid } from './components/GamesCatalogGrid'
 import { GameInviteSheet } from './components/GameInviteSheet'
-import { GameCoverArt } from './components/GameCoverArt'
 import { preloadSnakeDuel } from './snakeDuelPreload'
+import { prefetchPopularGameRoutes } from '../../navigation/prefetchRoutes'
 import { quickMatchPath } from './quickMatch'
-import oyunReference from '../../reference/oyun.png'
+import oyunReference from '../../reference/opt/thumb/oyun.webp'
 
 export function GamesScreen() {
-  const { addXp } = useProfileLevel()
+  const { addXp } = useProfileLevelActions()
+  const visible = useRuntimeActive('games')
   const navigate = useNavigate()
   const location = useLocation()
   const [onlineCount, setOnlineCount] = useState(3842)
@@ -81,12 +85,14 @@ export function GamesScreen() {
   )
 
   useEffect(() => {
+    if (!visible) return
+    prefetchPopularGameRoutes()
     const timer = window.setInterval(() => {
       setOnlineCount((current) => clamp(current + randomInt(-38, 56), 3600, 4300))
       setActiveMatches((current) => clamp(current + randomInt(-2, 3), 34, 62))
     }, 2300)
     return () => window.clearInterval(timer)
-  }, [])
+  }, [visible])
 
   if (isPopularCatalog) {
     const xp = XP_GAME_FEATURED
@@ -108,47 +114,11 @@ export function GamesScreen() {
                 </div>
               </header>
               <section className="pm-games-all__panel">
-                <div className="pm-games-all__grid" role="list">
-                  {popularGamesCards.map((game) => (
-                    <article
-                      key={game.id}
-                      className={`pm-games-mini-card ${game.color} ${game.isMore ? 'is-more' : ''}`}
-                      role="button"
-                      tabIndex={0}
-                      {...snakeDuelPreloadHandlers(game)}
-                      onClick={() => handleMiniCardClick(game, xp)}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          handleMiniCardClick(game, xp)
-                        }
-                      }}
-                    >
-                    {game.badge ? <span className="pm-games-mini-card__badge">{game.badge}</span> : null}
-                    <GameCoverArt
-                      gameId={game.id}
-                      artKind={game.artKind}
-                      className={`pm-games-mini-card__art is-${game.artKind}`}
-                    >
-                      <game.icon className="pm-games-mini-card__icon" />
-                    </GameCoverArt>
-                    <strong>{game.title}</strong>
-                    <small>
-                      <FiUsers /> {game.players}
-                    </small>
-                    <button
-                      type="button"
-                      className="pm-games-mini-card__play"
-                      onClick={(event) => {
-                        event.stopPropagation()
-                        handleMiniCardClick(game, xp)
-                      }}
-                    >
-                      Oyna
-                    </button>
-                  </article>
-                  ))}
-                </div>
+                <GamesCatalogGrid
+                  games={popularGamesCards}
+                  onPlay={(game) => handleMiniCardClick(game, xp)}
+                  getCardHandlers={snakeDuelPreloadHandlers}
+                />
               </section>
             </main>
           </motion.div>

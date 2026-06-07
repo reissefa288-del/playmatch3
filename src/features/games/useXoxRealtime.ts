@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { io, type Socket } from 'socket.io-client'
+import { createGameSocket, type Socket } from './gameSocketClient'
 import {
   fetchWithTimeout,
   gameServerApiUrl,
@@ -102,8 +102,9 @@ export function useXoxRealtime({ onMatchXp }: UseXoxRealtimeOptions) {
     return () => {
       cleanupSocket()
       clearBotTimer()
+      clearLocalMatchTimer()
     }
-  }, [cleanupSocket, clearBotTimer])
+  }, [cleanupSocket, clearBotTimer, clearLocalMatchTimer])
 
   const finishLocalMatch = useCallback(
     (board: XoxBoard) => {
@@ -206,14 +207,14 @@ export function useXoxRealtime({ onMatchXp }: UseXoxRealtimeOptions) {
       const client = getGameServerClientConfig()
       const token = await ensureAuthToken(client.apiBase)
       const socket = client.usePageOrigin
-        ? io({
+        ? await createGameSocket({
             path: client.socketPath,
             transports: ['polling', 'websocket'],
             auth: { token },
             timeout: 5000,
             reconnection: false,
           })
-        : io(client.apiBase, {
+        : await createGameSocket(client.apiBase, {
             path: client.socketPath,
             transports: ['polling', 'websocket'],
             auth: { token },

@@ -3,18 +3,20 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react'
 
 const STORAGE_KEY = 'pm-matched-game-invites'
 
-type GameMatchedInvitesContextValue = {
-  hasInvited: (id: string) => boolean
+type GameMatchedInvitesActions = {
   sendInvite: (id: string) => void
 }
 
-const GameMatchedInvitesContext = createContext<GameMatchedInvitesContextValue | null>(null)
+const GameMatchedInvitesActionsContext = createContext<GameMatchedInvitesActions | null>(null)
+
+let invitedIds = readIdSet()
+const listeners = new Set<() => void>()
 
 function readIdSet(): Set<string> {
   try {
@@ -34,31 +36,57 @@ function persistIdSet(next: Set<string>) {
   }
 }
 
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+function emit() {
+  listeners.forEach((listener) => listener())
+}
+
+function getSnapshot() {
+  return [...invitedIds].sort().join('|')
+}
+
 export function GameMatchedInvitesProvider({ children }: { children: ReactNode }) {
-  const [invited, setInvited] = useState<Set<string>>(() => readIdSet())
-
-  const hasInvited = useCallback((id: string) => invited.has(id), [invited])
-
   const sendInvite = useCallback((id: string) => {
-    setInvited((prev) => {
-      const next = new Set(prev)
-      next.add(id)
-      persistIdSet(next)
-      return next
-    })
+    if (invitedIds.has(id)) return
+    invitedIds = new Set(invitedIds)
+    invitedIds.add(id)
+    persistIdSet(invitedIds)
+    emit()
   }, [])
 
-  const value = useMemo(() => ({ hasInvited, sendInvite }), [hasInvited, sendInvite])
+  const actions = useMemo(() => ({ sendInvite }), [sendInvite])
 
   return (
-    <GameMatchedInvitesContext.Provider value={value}>{children}</GameMatchedInvitesContext.Provider>
+    <GameMatchedInvitesActionsContext.Provider value={actions}>
+      {children}
+    </GameMatchedInvitesActionsContext.Provider>
   )
 }
 
-export function useGameMatchedInvites() {
-  const ctx = useContext(GameMatchedInvitesContext)
+export function useGameMatchedInvitesActions() {
+  const ctx = useContext(GameMatchedInvitesActionsContext)
   if (!ctx) {
-    throw new Error('useGameMatchedInvites must be used within GameMatchedInvitesProvider')
+    throw new Error('useGameMatchedInvitesActions must be used within GameMatchedInvitesProvider')
   }
   return ctx
+}
+
+export function useHasGameMatchedInvite(id: string) {
+  const snapshot = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  void snapshot
+  return invitedIds.has(id)
+}
+
+/** @deprecated Prefer useHasGameMatchedInvite / useGameMatchedInvitesActions for fewer rerenders. */
+export function useGameMatchedInvites() {
+  useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
+  const { sendInvite } = useGameMatchedInvitesActions()
+  return {
+    hasInvited: (playerId: string) => invitedIds.has(playerId),
+    sendInvite,
+  }
 }

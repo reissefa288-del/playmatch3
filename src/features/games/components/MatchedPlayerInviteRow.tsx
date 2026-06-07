@@ -3,7 +3,7 @@ import { FiCheckCircle } from 'react-icons/fi'
 import { IoGameController } from 'react-icons/io5'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import type { MatchProfile } from '../../match/data'
-import { useGameMatchedInvites } from '../GameMatchedInvitesProvider'
+import { useHasGameMatchedInvite, useGameMatchedInvitesActions } from '../GameMatchedInvitesProvider'
 import { NearbyInviteBurst } from '../../home/components/NearbyInviteBurst'
 
 const BURST_MS = 900
@@ -14,8 +14,8 @@ type MatchedPlayerInviteRowProps = {
 
 export function MatchedPlayerInviteRow({ profile }: MatchedPlayerInviteRowProps) {
   const reduceMotion = useReducedMotion()
-  const { hasInvited, sendInvite } = useGameMatchedInvites()
-  const invited = hasInvited(profile.id)
+  const { sendInvite } = useGameMatchedInvitesActions()
+  const invited = useHasGameMatchedInvite(profile.id)
   const [burst, setBurst] = useState(false)
   const topGame = profile.favoriteGames[0]
 

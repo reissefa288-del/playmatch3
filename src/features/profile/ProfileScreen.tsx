@@ -1,3 +1,6 @@
+import '../../styles/photo-lightbox.css'
+import '../../styles/profile-ambient.css'
+import '../../styles/profile.css'
 import { useEffect, useRef, useState, type CSSProperties, type ChangeEvent } from 'react'
 import { motion } from 'framer-motion'
 import { FiEye, FiMapPin, FiSettings } from 'react-icons/fi'
@@ -15,7 +18,8 @@ import {
 import { useUserProfile } from '../onboarding/useUserProfile'
 import { INTEREST_EMOJI } from '../onboarding/onboardingSteps'
 import { REQUIRED_INTEREST_COUNT } from '../onboarding/onboardingProfile'
-import profileReference from '../../reference/profile-final.png'
+import { LazyImage } from '../../shared/LazyImage'
+import profileReference from '../../reference/opt/full/profile-final.webp'
 import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 
 const aboutFallback =
@@ -169,11 +173,14 @@ export function ProfileScreen() {
 
           <section className="pm-profile-hero-card" aria-label="Profil kartı">
             <div className="pm-profile-hero-card__stage">
-              <img
+              <LazyImage
                 src={portraitSrc}
                 alt=""
                 className="pm-profile-hero-card__portrait"
                 draggable={false}
+                width={390}
+                height={520}
+                eager
               />
               <div className="pm-profile-hero-card__shade" aria-hidden />
               <div className="pm-profile-hero-card__content">
@@ -222,7 +229,11 @@ export function ProfileScreen() {
                     onClick={() => triggerSlotPicker(slot)}
                     aria-label={`${slot + 1}. fotoğrafı yükle`}
                   >
-                    {photo ? <img src={photo} alt="" draggable={false} /> : <span>+ Fotoğraf Ekle</span>}
+                    {photo ? (
+                      <LazyImage src={photo} alt="" draggable={false} width={120} height={120} />
+                    ) : (
+                      <span>+ Fotoğraf Ekle</span>
+                    )}
                     <i>{slot === 0 ? 'Ana Fotoğraf' : `${slot + 1}. Fotoğraf`}</i>
                   </button>
                 ))}

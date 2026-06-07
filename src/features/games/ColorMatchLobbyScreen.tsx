@@ -1,3 +1,4 @@
+import '../../styles/color-match.css'
 import { Navigate } from 'react-router-dom'
 
 /** Eski lobby rotası — doğrudan oyuna yönlendir. */

@@ -1,3 +1,4 @@
+import '../../styles/space-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiZap } from 'react-icons/fi'

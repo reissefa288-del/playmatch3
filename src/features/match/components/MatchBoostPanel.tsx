@@ -1,7 +1,7 @@
 import { useCallback } from 'react'
 import { FiZap } from 'react-icons/fi'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useGemBalance } from '../../currency/GemBalanceProvider'
+import { useGemBalanceActions, useGemBalanceState, formatBalance } from '../../currency/GemBalanceProvider'
 import type { MatchToastPayload } from '../useMatchDiscover'
 import { useMatchBoost } from '../useMatchBoost'
 
@@ -17,7 +17,8 @@ type MatchBoostPanelProps = {
 
 export function MatchBoostPanel({ onNotify }: MatchBoostPanelProps) {
   const reduceMotion = useReducedMotion()
-  const { spend, formatBalance, balance } = useGemBalance()
+  const { spend } = useGemBalanceActions()
+  const { balance } = useGemBalanceState()
   const { isActive, remainingLabel, progress, activate, cost, durationMinutes } =
     useMatchBoost()
 
@@ -49,7 +50,6 @@ export function MatchBoostPanel({ onNotify }: MatchBoostPanelProps) {
     balance,
     cost,
     durationMinutes,
-    formatBalance,
     isActive,
     onNotify,
     spend,

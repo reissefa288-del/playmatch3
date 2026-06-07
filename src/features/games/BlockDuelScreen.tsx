@@ -1,3 +1,4 @@
+import '../../styles/block-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'

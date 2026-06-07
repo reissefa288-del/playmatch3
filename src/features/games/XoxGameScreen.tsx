@@ -1,8 +1,9 @@
+import '../../styles/xox-game.css'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { useProfileLevel } from '../profile/ProfileLevelProvider'
+import { useProfileLevelActions } from '../profile/ProfileLevelProvider'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { XoxGameBoard } from './components/XoxGameBoard'
 import { GamePlayerPortrait } from './components/GamePlayerPortrait'
@@ -16,7 +17,7 @@ type SessionScores = { x: number; o: number }
 export function XoxGameScreen() {
   const { opponent, likeProps } = useOpponentLikeProps()
   const navigate = useNavigate()
-  const { addXp } = useProfileLevel()
+  const { addXp } = useProfileLevelActions()
   const [scores, setScores] = useState<SessionScores>({ x: 0, o: 0 })
   const scoredRoomRef = useRef<string | null>(null)
   const prevWinnerRef = useRef<null | 'X' | 'O' | 'draw'>(null)

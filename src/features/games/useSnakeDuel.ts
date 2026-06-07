@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { pickBotDirection } from './utils/snakeDuelBot'
 import {
   canRespawnLane,
@@ -76,6 +78,8 @@ export function useSnakeDuel() {
   const seedRef = useRef(301)
   const loopActiveRef = useRef(false)
   const shakeTimerRef = useRef(0)
+  const breakTimer = useManagedTimeout()
+  const documentVisible = useDocumentVisible()
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
@@ -106,7 +110,7 @@ export function useSnakeDuel() {
     const matchOver =
       l1.matchPoints >= WIN_ROUNDS || l2.matchPoints >= WIN_ROUNDS || roundNumberRef.current >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           l1.matchPoints > l2.matchPoints ? 'p1' : l2.matchPoints > l1.matchPoints ? 'p2' : 'draw'
@@ -133,10 +137,10 @@ export function useSnakeDuel() {
       roundEndingRef.current = false
       setRoundMessage(null)
     }, ROUND_BREAK_MS)
-  }, [pulseShake])
+  }, [breakTimer, pulseShake])
 
   useEffect(() => {
-    if (!running || endedRef.current || roundMessage) {
+    if (!running || endedRef.current || roundMessage || !documentVisible) {
       loopActiveRef.current = false
       return
     }
@@ -222,10 +226,10 @@ export function useSnakeDuel() {
       loopActiveRef.current = false
       window.clearTimeout(timeoutId)
     }
-  }, [pulseShake, running, roundMessage, tutorialOpen])
+  }, [documentVisible, pulseShake, running, roundMessage, tutorialOpen])
 
   useEffect(() => {
-    if (!running || endedRef.current || roundMessage) return
+    if (!running || endedRef.current || roundMessage || !documentVisible) return
     const timer = window.setInterval(() => {
       if (roundEndingRef.current) return
       roundTimeRef.current = Math.max(0, roundTimeRef.current - 1)
@@ -233,14 +237,15 @@ export function useSnakeDuel() {
       if (roundTimeRef.current === 0) endRound()
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [endRound, running, roundMessage])
+  }, [documentVisible, endRound, running, roundMessage])
 
   useEffect(() => {
     return () => {
+      breakTimer.clear()
       window.clearTimeout(shakeTimerRef.current)
       window.clearTimeout(deathMsgTimerRef.current)
     }
-  }, [])
+  }, [breakTimer])
 
   const setDirection = useCallback(
     (dir: Direction) => {
@@ -296,6 +301,7 @@ export function useSnakeDuel() {
 
   const restartMatch = useCallback(() => {
     unlockSnakeDuelAudio()
+    breakTimer.clear()
     endedRef.current = false
     roundEndingRef.current = false
     roundNumberRef.current = 1
@@ -314,7 +320,7 @@ export function useSnakeDuel() {
     setPlayerDeathMsg(null)
     respawnAtMsRef.current = { p1: 0, p2: 0 }
     setRunning(true)
-  }, [])
+  }, [breakTimer])
 
   const ensureAudio = useCallback(() => {
     unlockSnakeDuelAudio()

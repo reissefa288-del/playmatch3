@@ -1,3 +1,4 @@
+import '../../../styles/games-invite-sheet.css'
 import { useEffect } from 'react'
 import { FiUserPlus, FiX } from 'react-icons/fi'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'

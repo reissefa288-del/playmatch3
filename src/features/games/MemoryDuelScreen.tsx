@@ -1,8 +1,10 @@
+import '../../styles/memory-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import vsBadge from '../../reference/vs.png'
+import vsBadge from '../../reference/opt/thumb/vs.webp'
+import { LazyImage } from '../../shared/LazyImage'
 import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GameDuelRematchActions } from './components/GameDuelRematchActions'
@@ -127,7 +129,7 @@ export function MemoryDuelScreen() {
               />
               <span className="pm-memory-arena__vs-wrap" aria-hidden>
                 <span className="pm-memory-arena__vs-glow" />
-                <img className="pm-memory-arena__vs" src={vsBadge} alt="" />
+                <LazyImage className="pm-memory-arena__vs" src={vsBadge} alt="" width={48} height={48} />
               </span>
               <MemoryDuelGrid lane={game.lane2} accent="pink" />
             </section>

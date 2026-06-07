@@ -1,3 +1,4 @@
+import '../../styles/home-nearby-screen.css'
 import { useMemo } from 'react'
 import { FiArrowLeft, FiMapPin } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'

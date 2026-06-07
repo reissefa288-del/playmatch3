@@ -1,3 +1,4 @@
+import '../../styles/brick-break.css'
 import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { FiArrowLeft, FiChevronLeft, FiChevronRight } from 'react-icons/fi'

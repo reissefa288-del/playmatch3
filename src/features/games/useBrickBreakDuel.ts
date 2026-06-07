@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
 import {
   botPaddleTarget,
   bricksRemaining,
@@ -31,6 +32,7 @@ export function useBrickBreakDuel() {
   const runningRef = useRef(true)
   const waveSeedRef = useRef(3)
   const waveLockRef = useRef(false)
+  const waveTimerRef = useRef<number | null>(null)
   const syncUiTickRef = useRef(0)
   const p1DirRef = useRef(p1Dir)
 
@@ -51,6 +53,8 @@ export function useBrickBreakDuel() {
   timeLeftRef.current = timeLeft
   roundRef.current = round
   runningRef.current = running
+
+  const documentVisible = useDocumentVisible()
 
   const persistBest = useCallback((lane: 'p1' | 'p2', score: number) => {
     if (lane === 'p1') {
@@ -107,10 +111,16 @@ export function useBrickBreakDuel() {
     }
   }, [])
 
+  const clearWaveTimer = useCallback(() => {
+    if (waveTimerRef.current != null) window.clearTimeout(waveTimerRef.current)
+    waveTimerRef.current = null
+  }, [])
+
   const endMatch = useCallback(() => {
     if (endedRef.current) return
     endedRef.current = true
     runningRef.current = false
+    clearWaveTimer()
     const l1 = lane1Ref.current
     const l2 = lane2Ref.current
     const result = resolveMatchResult(l1, l2)
@@ -121,7 +131,7 @@ export function useBrickBreakDuel() {
     persistBest('p1', l1.score)
     persistBest('p2', l2.score)
     playBrickBreakSound(result === 'draw' ? 'life' : 'win')
-  }, [persistBest])
+  }, [clearWaveTimer, persistBest])
 
   const syncHud = useCallback((l1: LaneState, l2: LaneState, timeDisplay: number) => {
     setLane1(l1)
@@ -130,7 +140,7 @@ export function useBrickBreakDuel() {
   }, [])
 
   useEffect(() => {
-    if (!running) return
+    if (!running || !documentVisible) return
     let last = performance.now()
     let raf = 0
 
@@ -192,7 +202,9 @@ export function useBrickBreakDuel() {
         const refillP2 = bricksRemaining(lane2Ref.current.bricks) === 0
         if (refillP1 || refillP2) {
           waveLockRef.current = true
-          window.setTimeout(() => {
+          clearWaveTimer()
+          waveTimerRef.current = window.setTimeout(() => {
+            waveTimerRef.current = null
             nextWave(refillP1, refillP2)
             waveLockRef.current = false
           }, 350)
@@ -203,11 +215,14 @@ export function useBrickBreakDuel() {
     }
 
     raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [endMatch, getSpeedMult, nextWave, playEvents, running, syncHud])
+    return () => {
+      cancelAnimationFrame(raf)
+      clearWaveTimer()
+    }
+  }, [clearWaveTimer, documentVisible, endMatch, getSpeedMult, nextWave, playEvents, running, syncHud])
 
   useEffect(() => {
-    if (!running) return
+    if (!running || !documentVisible) return
     const timer = window.setInterval(() => {
       timeLeftRef.current = Math.max(0, timeLeftRef.current - 1)
       if (timeLeftRef.current <= 0) {
@@ -217,7 +232,7 @@ export function useBrickBreakDuel() {
       setTimeLeft(timeLeftRef.current)
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [endMatch, running])
+  }, [documentVisible, endMatch, running])
 
   const setPlayerDirection = useCallback((dir: -1 | 0 | 1) => {
     unlockBrickBreakAudio()
@@ -227,6 +242,7 @@ export function useBrickBreakDuel() {
   }, [])
 
   const restart = useCallback(() => {
+    clearWaveTimer()
     endedRef.current = false
     runningRef.current = true
     waveSeedRef.current = 3
@@ -250,7 +266,7 @@ export function useBrickBreakDuel() {
     setP1Dir(0)
     setWinner(null)
     setRunning(true)
-  }, [])
+  }, [clearWaveTimer])
 
   const formatTime = `${String(Math.floor(timeLeft / 60)).padStart(2, '0')}:${String(timeLeft % 60).padStart(2, '0')}`
   const speedMult = computeSpeedMultiplier({

@@ -1,8 +1,8 @@
 import { useEffect, useState, type HTMLAttributes } from 'react'
-import { FiChevronRight, FiUsers } from 'react-icons/fi'
+import { FiChevronRight } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
 import type { GamesMiniCard } from '../data'
-import { GameCoverArt } from './GameCoverArt'
+import { GamesMiniCardTile } from './GamesMiniCardTile'
 
 const CARDS_PER_PAGE = 2
 const AUTO_ADVANCE_MS = 4800
@@ -20,57 +20,6 @@ function chunkGames<T>(items: T[], size: number): T[][] {
     pages.push(items.slice(index, index + size))
   }
   return pages
-}
-
-type AllGameCardProps = {
-  game: GamesMiniCard
-  onPlay?: (game: GamesMiniCard) => void
-  cardHandlers?: HTMLAttributes<HTMLElement>
-}
-
-function AllGameCard({ game, onPlay, cardHandlers }: AllGameCardProps) {
-  function playGame() {
-    onPlay?.(game)
-  }
-
-  return (
-    <article
-      className={`pm-games-mini-card ${game.color}`}
-      role="button"
-      tabIndex={0}
-      {...cardHandlers}
-      onClick={playGame}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault()
-          playGame()
-        }
-      }}
-    >
-      {game.badge ? <span className="pm-games-mini-card__badge">{game.badge}</span> : null}
-      <GameCoverArt
-        gameId={game.id}
-        artKind={game.artKind}
-        className={`pm-games-mini-card__art is-${game.artKind}`}
-      >
-        <game.icon className="pm-games-mini-card__icon" />
-      </GameCoverArt>
-      <strong>{game.title}</strong>
-      <small>
-        <FiUsers /> {game.players}
-      </small>
-      <button
-        type="button"
-        className="pm-games-mini-card__play"
-        onClick={(event) => {
-          event.stopPropagation()
-          playGame()
-        }}
-      >
-        Oyna
-      </button>
-    </article>
-  )
 }
 
 export function AllGamesRow({ games, onPlay, onShowAll, getCardHandlers }: AllGamesRowProps) {
@@ -123,7 +72,7 @@ export function AllGamesRow({ games, onPlay, onShowAll, getCardHandlers }: AllGa
           {pages.map((page) => (
             <div key={page.map((game) => game.id).join('-')} className="pm-games-featured-page">
               {page.map((game) => (
-                <AllGameCard
+                <GamesMiniCardTile
                   key={game.id}
                   game={game}
                   onPlay={onPlay}

@@ -1,7 +1,10 @@
+import '../../styles/google-auth.css'
+import '../../styles/auth-aaa.css'
+import '../../styles/auth.css'
 import { useCallback, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import authReference from '../../reference/giriş.jpeg'
+import authReference from '../../reference/opt/full/giriş.webp'
 import { privacyPolicy } from '../legal/content/privacyPolicy'
 import { termsOfService } from '../legal/content/termsOfService'
 import { LegalConsentSheet } from '../legal/LegalConsentSheet'
@@ -109,6 +112,10 @@ export function AuthScreen() {
             alt=""
             className="pm-auth-ref-frame__img"
             draggable={false}
+            loading="eager"
+            decoding="async"
+            width={390}
+            height={844}
             initial={{ scale: 1.06 }}
             animate={{ scale: 1 }}
             transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}

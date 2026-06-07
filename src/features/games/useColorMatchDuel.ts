@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { botThinkDelayMs, pickBotTapIndex } from './utils/colorMatchBot'
 import {
   applyHit,
@@ -38,10 +40,21 @@ export function useColorMatchDuel() {
   const botTimerRef = useRef<number | null>(null)
   const targetTimer1Ref = useRef<number | null>(null)
   const targetTimer2Ref = useRef<number | null>(null)
+  const boardClearTimerRef = useRef<number | null>(null)
   const scheduleBotRef = useRef<() => void>(() => {})
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
+
+  const breakTimer = useManagedTimeout()
+  const documentVisible = useDocumentVisible()
+
+  const clearBoardClearTimer = useCallback(() => {
+    if (boardClearTimerRef.current != null) {
+      window.clearTimeout(boardClearTimerRef.current)
+      boardClearTimerRef.current = null
+    }
+  }, [])
 
   const setLane = useCallback((lane: LaneId, next: ColorLaneState) => {
     if (lane === 1) {
@@ -96,14 +109,16 @@ export function useColorMatchDuel() {
 
   const onBoardCleared = useCallback(
     (lane: LaneId) => {
-      window.setTimeout(() => {
+      clearBoardClearTimer()
+      boardClearTimerRef.current = window.setTimeout(() => {
+        boardClearTimerRef.current = null
         if (endedRef.current || roundEndingRef.current) return
         respawnLaneBoard(lane, 2)
         scheduleTargetTimeout(lane)
         if (lane === 2) scheduleBotRef.current()
       }, BOARD_CLEAR_MS)
     },
-    [respawnLaneBoard, scheduleTargetTimeout],
+    [clearBoardClearTimer, respawnLaneBoard, scheduleTargetTimeout],
   )
 
   const scheduleBot = useCallback(() => {
@@ -146,7 +161,7 @@ export function useColorMatchDuel() {
     const matchOver =
       l1.matchPoints >= WIN_ROUNDS || l2.matchPoints >= WIN_ROUNDS || roundNumberRef.current >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           l1.matchPoints > l2.matchPoints ? 'p1' : l2.matchPoints > l1.matchPoints ? 'p2' : 'draw'
@@ -174,7 +189,7 @@ export function useColorMatchDuel() {
       scheduleTargetTimeout(2)
       scheduleBotRef.current()
     }, ROUND_BREAK_MS)
-  }, [clearAllTargetTimers, clearBot, scheduleTargetTimeout])
+  }, [breakTimer, clearAllTargetTimers, clearBot, scheduleTargetTimeout])
 
   useEffect(() => {
     scheduleTargetTimeout(1)
@@ -183,11 +198,13 @@ export function useColorMatchDuel() {
     return () => {
       clearBot()
       clearAllTargetTimers()
+      clearBoardClearTimer()
+      breakTimer.clear()
     }
-  }, [clearAllTargetTimers, clearBot, scheduleTargetTimeout])
+  }, [breakTimer, clearAllTargetTimers, clearBoardClearTimer, clearBot, scheduleTargetTimeout])
 
   useEffect(() => {
-    if (!running || endedRef.current) return
+    if (!running || endedRef.current || !documentVisible) return
     const timer = window.setInterval(() => {
       if (roundEndingRef.current) return
       if (performance.now() < roundBreakUntilRef.current) return
@@ -196,7 +213,7 @@ export function useColorMatchDuel() {
       if (roundTimeRef.current === 0) endRound()
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [endRound, running])
+  }, [documentVisible, endRound, running])
 
   const tapP1 = useCallback(
     (index: number) => {
@@ -215,6 +232,8 @@ export function useColorMatchDuel() {
   const restartMatch = useCallback(() => {
     clearBot()
     clearAllTargetTimers()
+    clearBoardClearTimer()
+    breakTimer.clear()
     endedRef.current = false
     roundEndingRef.current = false
     roundNumberRef.current = 1
@@ -234,7 +253,7 @@ export function useColorMatchDuel() {
     scheduleTargetTimeout(1)
     scheduleTargetTimeout(2)
     scheduleBotRef.current()
-  }, [clearAllTargetTimers, clearBot, scheduleTargetTimeout])
+  }, [breakTimer, clearAllTargetTimers, clearBoardClearTimer, clearBot, scheduleTargetTimeout])
 
   return {
     lane1,

@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { updateBotPaddle } from './utils/pongDuelBot'
 import {
   ballHeatLevel,
@@ -29,6 +31,8 @@ export function usePongDuel() {
   const endedRef = useRef(false)
   const seedRef = useRef(901)
   const pauseUntilRef = useRef(0)
+  const breakTimer = useManagedTimeout()
+  const documentVisible = useDocumentVisible()
 
   gameRef.current = game
 
@@ -52,7 +56,7 @@ export function usePongDuel() {
     const matchOver =
       lane1.matchPoints >= WIN_ROUNDS || lane2.matchPoints >= WIN_ROUNDS || roundNumberRef.current >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           lane1.matchPoints > lane2.matchPoints ? 'p1' : lane2.matchPoints > lane1.matchPoints ? 'p2' : 'draw'
@@ -73,7 +77,7 @@ export function usePongDuel() {
       roundEndingRef.current = false
       setRoundMessage(null)
     }, ROUND_BREAK_MS)
-  }, [])
+  }, [breakTimer])
 
   const checkRoundEnd = useCallback((g: PongState) => {
     if (g.lane1.score >= POINTS_TO_WIN || g.lane2.score >= POINTS_TO_WIN) {
@@ -82,7 +86,7 @@ export function usePongDuel() {
   }, [endRound])
 
   useEffect(() => {
-    if (!running || roundMessage || endedRef.current) return
+    if (!running || roundMessage || endedRef.current || !documentVisible) return
 
     let frame = 0
     const loop = () => {
@@ -113,7 +117,11 @@ export function usePongDuel() {
 
     frame = window.requestAnimationFrame(loop)
     return () => window.cancelAnimationFrame(frame)
-  }, [checkRoundEnd, running, roundMessage])
+  }, [checkRoundEnd, documentVisible, running, roundMessage])
+
+  useEffect(() => {
+    return () => breakTimer.clear()
+  }, [breakTimer])
 
   const movePaddle = useCallback(
     (yNorm: number) => {
@@ -126,6 +134,7 @@ export function usePongDuel() {
   )
 
   const restartMatch = useCallback(() => {
+    breakTimer.clear()
     endedRef.current = false
     roundEndingRef.current = false
     roundNumberRef.current = 1
@@ -138,7 +147,7 @@ export function usePongDuel() {
     setWinner(null)
     setRunning(true)
     pauseUntilRef.current = 0
-  }, [])
+  }, [breakTimer])
 
   return {
     game,

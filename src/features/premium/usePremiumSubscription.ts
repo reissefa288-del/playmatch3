@@ -1,9 +1,10 @@
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useMemo, useSyncExternalStore } from 'react'
 import {
   activatePremium as persistPremium,
   readPremiumSubscription,
   readPremiumSubscriptionRaw,
 } from './premiumSubscription'
+import { notifyDailyLikesSyncChanged } from '../likes/dailyLikesSync'
 
 let listeners = new Set<() => void>()
 
@@ -20,15 +21,24 @@ function getSnapshot(): string | null {
   return readPremiumSubscriptionRaw()
 }
 
-export function usePremiumSubscription() {
+export function usePremiumSubscriptionState() {
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
-  const subscription = readPremiumSubscription()
+  return readPremiumSubscription()
+}
 
+export function usePremiumSubscriptionActions() {
   const activatePremium = useCallback((packageId: string) => {
     persistPremium(packageId)
     emit()
+    notifyDailyLikesSyncChanged()
   }, [])
 
+  return useMemo(() => ({ activatePremium }), [activatePremium])
+}
+
+export function usePremiumSubscription() {
+  const subscription = usePremiumSubscriptionState()
+  const { activatePremium } = usePremiumSubscriptionActions()
   return {
     subscription,
     isPremiumActive: subscription.active,

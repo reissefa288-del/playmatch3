@@ -1,3 +1,4 @@
+import '../../styles/stack-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import {

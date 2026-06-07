@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { MdEmojiEvents } from 'react-icons/md'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { fakePortraitForProfile } from '../../../shared/fakePortraits'
+import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
 import { formatPlayerLevel } from '../../profile/profileLevel'
 import type { NearbyPlayer } from '../types'
@@ -11,38 +11,37 @@ import { NearbyLikeButton, type NearbyLikePhase } from './NearbyLikeButton'
 
 type NearbyPlayerCardProps = {
   player: NearbyPlayer
-  onDismissed?: () => void
+  onDismissed?: (playerId: string) => void
 }
 
-export function NearbyPlayerCard({ player, onDismissed }: NearbyPlayerCardProps) {
-  const reduceMotion = useReducedMotion()
+export const NearbyPlayerCard = memo(function NearbyPlayerCard({
+  player,
+  onDismissed,
+}: NearbyPlayerCardProps) {
+  const reduceMotion = usePrefersReducedMotion()
   const [likePhase, setLikePhase] = useState<NearbyLikePhase>('idle')
 
   useEffect(() => {
     if (likePhase !== 'exit') return
     const ms = reduceMotion ? 0 : 420
-    const id = window.setTimeout(() => onDismissed?.(), ms)
+    const id = window.setTimeout(() => onDismissed?.(player.id), ms)
     return () => window.clearTimeout(id)
-  }, [likePhase, reduceMotion, onDismissed])
+  }, [likePhase, onDismissed, player.id, reduceMotion])
 
   return (
-    <motion.article
-      className="pm-nearby-card pm-nearby-card--aaa"
-      layout
-      initial={false}
-      animate={
-        likePhase === 'exit' && !reduceMotion
-          ? { opacity: 0, x: 140, scale: 0.88, rotate: 6 }
-          : { opacity: 1, x: 0, scale: 1, rotate: 0 }
-      }
-      transition={{ type: 'spring', stiffness: 340, damping: 28 }}
+    <article
+      className={[
+        'pm-nearby-card',
+        'pm-nearby-card--aaa',
+        likePhase === 'exit' && !reduceMotion ? 'is-exiting' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
     >
       <span className="pm-nearby-card__glow" aria-hidden />
       <span className="pm-nearby-card__shine" aria-hidden />
 
-      <AnimatePresence>
-        {likePhase === 'burst' ? <NearbyLikeBurst /> : null}
-      </AnimatePresence>
+      {likePhase === 'burst' ? <NearbyLikeBurst /> : null}
 
       <div
         className="pm-nearby-card__image"
@@ -83,6 +82,6 @@ export function NearbyPlayerCard({ player, onDismissed }: NearbyPlayerCardProps)
           onPhaseChange={setLikePhase}
         />
       </div>
-    </motion.article>
+    </article>
   )
-}
+})

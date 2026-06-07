@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import '../../../styles/game-duel-rematch.css'
 import { FiLoader } from 'react-icons/fi'
 import { useGameOpponent } from '../useGameOpponent'
 import { useDuelRematch } from '../useDuelRematch'
@@ -56,16 +56,12 @@ export function GameDuelRematchActions({
   if (rematch.isDeclined) {
     return (
       <div className={['pm-duel-rematch', 'is-declined', className].filter(Boolean).join(' ')} role="status">
-        <motion.div
-          className="pm-duel-rematch__status"
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
+        <div className="pm-duel-rematch__status pm-fade-up-enter">
           <p className="pm-duel-rematch__title">Rakip kabul etmedi</p>
           <p className="pm-duel-rematch__sub">
             <strong>{name}</strong> rematch isteğini reddetti. Yeni maç başlatılmadı.
           </p>
-        </motion.div>
+        </div>
         <div className="pm-duel-rematch__actions">
           <button type="button" className={ghostClass} onClick={handleExit}>
             Çıkış

@@ -1,10 +1,10 @@
 import type { GemId } from '../utils/neonCrushEngine'
 import { GEM_IDS } from '../utils/neonCrushEngine'
-import gemA1 from '../../../reference/a1.png'
-import gemA2 from '../../../reference/a2.png'
-import gemA3 from '../../../reference/a3.png'
-import gemA4 from '../../../reference/a4.png'
-import gemA5 from '../../../reference/a5.png'
+import gemA1 from '../../../reference/opt/thumb/a1.webp'
+import gemA2 from '../../../reference/opt/thumb/a2.webp'
+import gemA3 from '../../../reference/opt/thumb/a3.webp'
+import gemA4 from '../../../reference/opt/thumb/a4.webp'
+import gemA5 from '../../../reference/opt/thumb/a5.webp'
 
 export const GEM_ART: Record<GemId, string> = {
   a1: gemA1,

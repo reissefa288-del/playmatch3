@@ -1,1 +1,9 @@
-export { useNearbyLikes } from './NearbyLikesProvider'
+export {
+  NearbyLikesProvider,
+  useNearbyLikes,
+  useNearbyLikesActions,
+  useHasLiked,
+  useHasInvited,
+  useNearbyLikesRevision,
+  isNearbyPlayerLiked,
+} from './NearbyLikesProvider'

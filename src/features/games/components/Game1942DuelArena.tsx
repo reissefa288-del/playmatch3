@@ -1,5 +1,6 @@
 import { useCallback, useRef } from 'react'
-import { enemyGlyph, SHIP_Y, type Game1942SideState } from '../utils/game1942DuelEngine'
+import type { EnemyKind, Game1942SideState } from '../utils/game1942DuelEngine'
+import { SHIP_Y } from '../utils/game1942DuelConstants'
 import type { Y42Particle } from '../utils/game1942DuelFx'
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
   muzzleP1Until?: number
   disabled?: boolean
   onShipX: (x: number) => void
+  enemyGlyph: (kind: EnemyKind) => string
 }
 
 const STAR_SEEDS = [
@@ -92,6 +94,7 @@ function Game1942Screen({
   interactive,
   disabled,
   onShipX,
+  enemyGlyph,
 }: {
   side: Game1942SideState
   label: string
@@ -103,6 +106,7 @@ function Game1942Screen({
   interactive: boolean
   disabled?: boolean
   onShipX?: (x: number) => void
+  enemyGlyph: (kind: EnemyKind) => string
 }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const invuln = now < side.invulnUntil
@@ -217,6 +221,7 @@ export function Game1942DuelArena({
   muzzleP1Until = 0,
   disabled = false,
   onShipX,
+  enemyGlyph,
 }: Props) {
   const shaking = now < shakeP1Until
   const muzzleFlash = now < muzzleP1Until
@@ -236,8 +241,17 @@ export function Game1942DuelArena({
         interactive
         disabled={disabled}
         onShipX={onShipX}
+        enemyGlyph={enemyGlyph}
       />
-      <Game1942Screen side={p2} label="RAKİP" accent="pink" now={now} particles={fxP2} interactive={false} />
+      <Game1942Screen
+        side={p2}
+        label="RAKİP"
+        accent="pink"
+        now={now}
+        particles={fxP2}
+        interactive={false}
+        enemyGlyph={enemyGlyph}
+      />
     </div>
   )
 }

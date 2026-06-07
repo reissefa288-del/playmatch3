@@ -2,8 +2,8 @@ import { useState, type MouseEvent } from 'react'
 import { IoHeart } from 'react-icons/io5'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { useDailyLikes } from '../../likes/useDailyLikes'
-import { useNearbyLikes } from '../../home/useNearbyLikes'
+import { useDailyLikesState, useDailyLikesActions } from '../../likes/useDailyLikes'
+import { useHasLiked, useNearbyLikesActions } from '../../home/useNearbyLikes'
 
 type GameOpponentLikeButtonProps = {
   playerId: string
@@ -57,9 +57,10 @@ function GameLikeBurst({
 export function GameOpponentLikeButton({ playerId, playerName, className = '' }: GameOpponentLikeButtonProps) {
   const navigate = useNavigate()
   const reduceMotion = useReducedMotion()
-  const { hasLiked, sendLike } = useNearbyLikes()
-  const { remaining, isUnlimited, canSendLike, tryConsumeLike, limit } = useDailyLikes()
-  const alreadyLiked = hasLiked(playerId)
+  const { sendLike } = useNearbyLikesActions()
+  const alreadyLiked = useHasLiked(playerId)
+  const { remaining, isUnlimited, canSendLike, limit } = useDailyLikesState()
+  const { tryConsumeLike } = useDailyLikesActions()
   const [burst, setBurst] = useState(false)
   const [toast, setToast] = useState<ToastKind>(null)
 

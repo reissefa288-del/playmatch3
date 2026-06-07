@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { botThinkDelayMs, pickBotChoice } from './utils/mathDuelBot'
 import {
   applyAnswer,
@@ -59,6 +61,9 @@ export function useMathDuel() {
   problem1Ref.current = problem1
   problem2Ref.current = problem2
   runningRef.current = running
+
+  const breakTimer = useManagedTimeout()
+  const documentVisible = useDocumentVisible()
 
   const clearBot = useCallback(() => {
     if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
@@ -216,7 +221,7 @@ export function useMathDuel() {
     const matchOver =
       l1.matchPoints >= WIN_ROUNDS || l2.matchPoints >= WIN_ROUNDS || roundNumberRef.current >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           l1.matchPoints > l2.matchPoints ? 'p1' : l2.matchPoints > l1.matchPoints ? 'p2' : 'draw'
@@ -241,7 +246,7 @@ export function useMathDuel() {
       setRoundMessage(null)
       spawnBothRef.current()
     }, ROUND_BREAK_MS)
-  }, [clearBot, clearLaneTimers])
+  }, [breakTimer, clearBot, clearLaneTimers])
 
   endRoundRef.current = endRound
 
@@ -265,11 +270,12 @@ export function useMathDuel() {
       clearBot()
       clearFx()
       clearLaneTimers()
+      breakTimer.clear()
     }
-  }, [clearBot, clearFx, clearLaneTimers])
+  }, [breakTimer, clearBot, clearFx, clearLaneTimers])
 
   useEffect(() => {
-    if (!running || endedRef.current) return
+    if (!running || endedRef.current || !documentVisible) return
     const tick = window.setInterval(() => {
       if (roundEndingRef.current) return
       if (performance.now() < roundBreakUntilRef.current) return
@@ -278,12 +284,13 @@ export function useMathDuel() {
       if (roundTimeRef.current === 0) endRoundRef.current()
     }, 1000)
     return () => window.clearInterval(tick)
-  }, [running])
+  }, [documentVisible, running])
 
   const restartMatch = useCallback(() => {
     clearBot()
     clearFx()
     clearLaneTimers()
+    breakTimer.clear()
     endedRef.current = false
     roundEndingRef.current = false
     roundNumberRef.current = 1
@@ -299,7 +306,7 @@ export function useMathDuel() {
     setIsRoundBreak(false)
     setRunning(true)
     spawnBothRef.current()
-  }, [clearBot, clearFx, clearLaneTimers])
+  }, [breakTimer, clearBot, clearFx, clearLaneTimers])
 
   return {
     lane1,

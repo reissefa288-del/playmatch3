@@ -1,10 +1,11 @@
+import { SHIP_Y, START_LIVES } from './game1942DuelConstants'
+
 export const MATCH_ROUNDS = 3
 export const WIN_ROUNDS = 2
 export const POINTS_TO_WIN = 4000
 export const LEG_DURATION_MS = 44_000
 export const ROUND_BREAK_MS = 2600
-export const START_LIVES = 3
-export const SHIP_Y = 88
+export { SHIP_Y, START_LIVES }
 export const FIRE_COOLDOWN_MS = 175
 export const BULLET_SPEED = 0.16
 export const ENEMY_BULLET_SPEED = 0.095

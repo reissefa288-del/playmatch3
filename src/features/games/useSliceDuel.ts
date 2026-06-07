@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { botBombSliceChance, botSliceDelayMs, pickBotTarget } from './utils/sliceDuelBot'
 import {
   applySwipe,
@@ -65,6 +67,8 @@ export function useSliceDuel() {
   gameRef.current = game
 
   const endLegRef = useRef<() => void>(() => {})
+  const breakTimer = useManagedTimeout()
+  const documentVisible = useDocumentVisible()
 
   const endLeg = useCallback(() => {
     if (legEndingRef.current) return
@@ -89,7 +93,7 @@ export function useSliceDuel() {
     const matchOver =
       p1.matchPoints >= WIN_ROUNDS || p2.matchPoints >= WIN_ROUNDS || g.roundNumber >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           p1.matchPoints > p2.matchPoints ? 'p1' : p2.matchPoints > p1.matchPoints ? 'p2' : 'draw'
@@ -113,7 +117,7 @@ export function useSliceDuel() {
       setLegMessage(null)
       botSlicedRef.current.clear()
     }, ROUND_BREAK_MS)
-  }, [])
+  }, [breakTimer])
 
   endLegRef.current = endLeg
 
@@ -140,7 +144,7 @@ export function useSliceDuel() {
   }, [running])
 
   useEffect(() => {
-    if (!running || legMessage || endedRef.current) return
+    if (!running || legMessage || endedRef.current || !documentVisible) return
 
     const tick = () => {
       const t = performance.now()
@@ -194,7 +198,11 @@ export function useSliceDuel() {
     return () => {
       if (loopRef.current != null) window.cancelAnimationFrame(loopRef.current)
     }
-  }, [legMessage, running, tickBot])
+  }, [documentVisible, legMessage, running, tickBot])
+
+  useEffect(() => {
+    return () => breakTimer.clear()
+  }, [breakTimer])
 
   const swipeP1 = useCallback(
     (path: SlicePoint[]) => {
@@ -214,6 +222,7 @@ export function useSliceDuel() {
   )
 
   const restartMatch = useCallback(() => {
+    breakTimer.clear()
     endedRef.current = false
     legEndingRef.current = false
     startedRef.current = false
@@ -226,7 +235,7 @@ export function useSliceDuel() {
     setLegPause(false)
     setWinner(null)
     setRunning(true)
-  }, [])
+  }, [breakTimer])
 
   const legTimeLeft = Math.max(0, Math.ceil((game.legEndsAt - now) / 1000))
 

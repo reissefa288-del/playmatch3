@@ -1,0 +1,12 @@
+/* Home route — single CSS entry (replaces 11 per-screen imports) */
+@import './home-nearby-ambient.css';
+@import './home-nearby-card-aaa.css';
+@import './home-nearby-likes.css';
+@import './home-nearby-sheet.css';
+@import './home-premium-unlock.css';
+@import './home-hero-actions.css';
+@import './home-hero-aaa.css';
+@import './home-hero-stack.css';
+@import './home-filters.css';
+@import './home-ambient.css';
+@import './home.css';

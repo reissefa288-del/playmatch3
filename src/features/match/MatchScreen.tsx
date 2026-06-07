@@ -1,5 +1,5 @@
+import '../../styles/match-bundle.css'
 import { useState } from 'react'
-import { motion } from 'framer-motion'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
 import type { MatchTabId } from './data'
@@ -15,41 +15,28 @@ import { useMatchFilters } from './useMatchFilters'
 export function MatchScreen() {
   const [tab, setTab] = useState<MatchTabId>('discover')
   const filters = useMatchFilters()
-  const discover = useMatchDiscover(filters.applied.gender)
+  const { state: discoverState, actions: discoverActions } = useMatchDiscover(
+    filters.applied.gender,
+  )
 
   return (
-    <motion.div
-      className="pm-app-shell pm-app-shell--match"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
-    >
-      <motion.div
-        className="pm-artboard"
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      >
+    <div className="pm-app-shell pm-app-shell--match pm-shell-enter">
+      <div className="pm-artboard pm-artboard-enter">
         <AmbientParticles />
         <main className="pm-match">
           <Navbar currencyVariant="match" />
-          <motion.div
-            className="pm-match-top"
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.05, duration: 0.4 }}
-          >
+          <div className="pm-match-top pm-match-top-enter">
             <MatchFilterButton onClick={filters.openSheet} />
             <MatchTitleBar />
-          </motion.div>
+          </div>
           <MatchTabs active={tab} onChange={setTab} />
           {tab === 'discover' ? (
-            <MatchDiscoverDeck discover={discover} />
+            <MatchDiscoverDeck state={discoverState} actions={discoverActions} />
           ) : (
             <TabEmptyState tab={tab} />
           )}
         </main>
-      </motion.div>
+      </div>
 
       <MatchFiltersSheet
         open={filters.open}
@@ -59,24 +46,19 @@ export function MatchScreen() {
         onReset={filters.resetDraft}
         onClose={filters.closeSheet}
       />
-    </motion.div>
+    </div>
   )
 }
 
 function TabEmptyState({ tab }: { tab: Exclude<MatchTabId, 'discover'> }) {
   const title = tab === 'likers' ? 'Beğenenler' : 'Eşleşmelerim'
   return (
-    <motion.div
-      className="pm-match-empty"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35 }}
-    >
+    <div className="pm-match-empty pm-match-empty-enter">
       <p className="pm-match-empty__title">{title}</p>
       <p className="pm-match-empty__text">
         Bu sekme için liste yakında eklenecek. Keşfet ile eşleşmeye devam et — günlük{' '}
         {DAILY_LIKES_LIMIT} beğeni hakkın var.
       </p>
-    </motion.div>
+    </div>
   )
 }

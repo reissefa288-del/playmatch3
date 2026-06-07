@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react'
 import { FiChevronRight } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useProfileLevel } from '../../profile/ProfileLevelProvider'
+import { useProfileLevelActions } from '../../profile/ProfileLevelProvider'
 import { XP_GAME_POPULAR } from '../../profile/profileLevel'
 import type { HubGame } from '../data'
 import { GameCoverArt } from './GameCoverArt'
@@ -12,7 +12,7 @@ type PopularGamesGridProps = {
 
 export function PopularGamesGrid({ games }: PopularGamesGridProps) {
   const reduceMotion = useReducedMotion()
-  const { addXp } = useProfileLevel()
+  const { addXp } = useProfileLevelActions()
 
   return (
     <section className="pm-games-popular" aria-label="Popüler oyunlar">

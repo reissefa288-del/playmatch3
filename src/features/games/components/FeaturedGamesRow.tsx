@@ -1,7 +1,7 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { FiUsers } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useProfileLevel } from '../../profile/ProfileLevelProvider'
+import { useProfileLevelActions } from '../../profile/ProfileLevelProvider'
 import { XP_GAME_FEATURED } from '../../profile/profileLevel'
 import type { FeaturedGame } from '../data'
 import { GameCoverArt } from './GameCoverArt'
@@ -52,7 +52,7 @@ function FeaturedGameCard({ game, onPlay, addXp }: FeaturedGameCardProps) {
       <span className="pm-featured-card__glow" aria-hidden />
       <span className="pm-featured-card__badge">{game.badge}</span>
 
-      <GameCoverArt gameId={game.id} className="pm-featured-card__art">
+      <GameCoverArt gameId={game.id} artSize="full" className="pm-featured-card__art">
         <span className="pm-featured-card__art-gloss" aria-hidden />
         <game.icon />
       </GameCoverArt>
@@ -88,7 +88,7 @@ function FeaturedGameCard({ game, onPlay, addXp }: FeaturedGameCardProps) {
 
 export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
   const reduceMotion = useReducedMotion()
-  const { addXp } = useProfileLevel()
+  const { addXp } = useProfileLevelActions()
   const pages = chunkGames(games, CARDS_PER_PAGE)
   const [pageIndex, setPageIndex] = useState(0)
   const [paused, setPaused] = useState(false)

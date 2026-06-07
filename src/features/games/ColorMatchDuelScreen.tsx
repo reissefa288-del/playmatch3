@@ -1,3 +1,4 @@
+import '../../styles/color-match.css'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import {
   botThinkDelayMs,
   createBotMemory,
@@ -59,6 +60,8 @@ export function useMemoryDuel() {
   lane1Ref.current = lane1
   lane2Ref.current = lane2
   runningRef.current = running
+
+  const breakTimer = useManagedTimeout()
 
   const syncLanes = useCallback((l1: LaneState, l2: LaneState) => {
     lane1Ref.current = l1
@@ -138,7 +141,7 @@ export function useMemoryDuel() {
       }
 
       roundBreakUntilRef.current = performance.now() + ROUND_BREAK_MS
-      window.setTimeout(() => {
+      breakTimer.schedule(() => {
         if (endedRef.current) return
         roundSeedRef.current += 17
         roundNumberRef.current += 1
@@ -156,7 +159,7 @@ export function useMemoryDuel() {
         scheduleBotRef.current()
       }, ROUND_BREAK_MS)
     },
-    [clearBotTimer, clearFlipBack, syncLanes],
+    [breakTimer, clearBotTimer, clearFlipBack, syncLanes],
   )
 
   const checkRoundEnd = useCallback(() => {
@@ -251,6 +254,7 @@ export function useMemoryDuel() {
     unlockMemoryDuelAudio()
     clearFlipBack()
     clearBotTimer()
+    breakTimer.clear()
     endedRef.current = false
     roundEndingRef.current = false
     roundSeedRef.current = 11
@@ -266,8 +270,8 @@ export function useMemoryDuel() {
     setRunning(true)
     setWinner(null)
     syncLanes(createLane(1, 11), createLane(2, 11))
-    window.setTimeout(() => scheduleBotRef.current(), 280)
-  }, [clearBotTimer, clearFlipBack, syncLanes])
+    breakTimer.schedule(() => scheduleBotRef.current(), 280)
+  }, [breakTimer, clearBotTimer, clearFlipBack, syncLanes])
 
   useEffect(() => {
     scheduleBotRef.current()

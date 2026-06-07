@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { tickMissileCommandBot } from './utils/missileCommandDuelBot'
 import {
   createMissileCommandState,
@@ -113,6 +114,7 @@ export function useMissileCommandDuel() {
   scoreFloatsRef.current = scoreFloats
 
   const endLegRef = useRef<() => void>(() => {})
+  const breakTimer = useManagedTimeout()
 
   const endLeg = useCallback(() => {
     if (legEndingRef.current) return
@@ -137,7 +139,7 @@ export function useMissileCommandDuel() {
     const matchOver =
       p1.matchPoints >= WIN_ROUNDS || p2.matchPoints >= WIN_ROUNDS || g.roundNumber >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           p1.matchPoints > p2.matchPoints ? 'p1' : p2.matchPoints > p1.matchPoints ? 'p2' : 'draw'
@@ -162,7 +164,7 @@ export function useMissileCommandDuel() {
       setLegMessage(null)
       lastTickRef.current = t
     }, ROUND_BREAK_MS)
-  }, [])
+  }, [breakTimer])
 
   endLegRef.current = endLeg
 
@@ -260,6 +262,7 @@ export function useMissileCommandDuel() {
   )
 
   const restartMatch = useCallback(() => {
+    breakTimer.clear()
     endedRef.current = false
     legEndingRef.current = false
     seedRef.current = 11007 + Math.floor(Math.random() * 500)
@@ -281,7 +284,7 @@ export function useMissileCommandDuel() {
     setScoreFloats([])
     setScorePulseP1(0)
     setScorePulseP2(0)
-  }, [])
+  }, [breakTimer])
 
   const legTimeLeft = Math.max(0, Math.ceil((game.legEndsAt - now) / 1000))
   const legProgress = Math.max(0, Math.min(1, (game.legEndsAt - now) / LEG_DURATION_MS))

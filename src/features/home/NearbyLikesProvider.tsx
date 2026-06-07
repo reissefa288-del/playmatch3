@@ -3,21 +3,23 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react'
 
 const LIKES_STORAGE_KEY = 'pm-nearby-likes'
 const INVITES_STORAGE_KEY = 'pm-nearby-game-invites'
 
-type NearbyLikesContextValue = {
-  hasLiked: (id: string) => boolean
+type NearbyLikesActions = {
   sendLike: (id: string) => void
-  hasInvited: (id: string) => boolean
   sendInvite: (id: string) => void
 }
 
-const NearbyLikesContext = createContext<NearbyLikesContextValue | null>(null)
+const NearbyLikesActionsContext = createContext<NearbyLikesActions | null>(null)
+
+let likedIds = readIdSet(LIKES_STORAGE_KEY)
+let invitedIds = readIdSet(INVITES_STORAGE_KEY)
+const listeners = new Set<() => void>()
 
 function readIdSet(key: string): Set<string> {
   try {
@@ -37,43 +39,83 @@ function persistIdSet(key: string, next: Set<string>) {
   }
 }
 
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  return () => listeners.delete(listener)
+}
+
+function emit() {
+  listeners.forEach((listener) => listener())
+}
+
+function getLikedSnapshot() {
+  return [...likedIds].sort().join('|')
+}
+
+function getInvitedSnapshot() {
+  return [...invitedIds].sort().join('|')
+}
+
+function getCombinedSnapshot() {
+  return `${getLikedSnapshot()}::${getInvitedSnapshot()}`
+}
+
 export function NearbyLikesProvider({ children }: { children: ReactNode }) {
-  const [liked, setLiked] = useState<Set<string>>(() => readIdSet(LIKES_STORAGE_KEY))
-  const [invited, setInvited] = useState<Set<string>>(() => readIdSet(INVITES_STORAGE_KEY))
-
-  const hasLiked = useCallback((id: string) => liked.has(id), [liked])
-  const hasInvited = useCallback((id: string) => invited.has(id), [invited])
-
   const sendLike = useCallback((id: string) => {
-    setLiked((prev) => {
-      const next = new Set(prev)
-      next.add(id)
-      persistIdSet(LIKES_STORAGE_KEY, next)
-      return next
-    })
+    if (likedIds.has(id)) return
+    likedIds = new Set(likedIds)
+    likedIds.add(id)
+    persistIdSet(LIKES_STORAGE_KEY, likedIds)
+    emit()
   }, [])
 
   const sendInvite = useCallback((id: string) => {
-    setInvited((prev) => {
-      const next = new Set(prev)
-      next.add(id)
-      persistIdSet(INVITES_STORAGE_KEY, next)
-      return next
-    })
+    if (invitedIds.has(id)) return
+    invitedIds = new Set(invitedIds)
+    invitedIds.add(id)
+    persistIdSet(INVITES_STORAGE_KEY, invitedIds)
+    emit()
   }, [])
 
-  const value = useMemo(
-    () => ({ hasLiked, sendLike, hasInvited, sendInvite }),
-    [hasLiked, sendLike, hasInvited, sendInvite],
-  )
+  const actions = useMemo(() => ({ sendLike, sendInvite }), [sendLike, sendInvite])
 
-  return <NearbyLikesContext.Provider value={value}>{children}</NearbyLikesContext.Provider>
+  return <NearbyLikesActionsContext.Provider value={actions}>{children}</NearbyLikesActionsContext.Provider>
 }
 
-export function useNearbyLikes() {
-  const ctx = useContext(NearbyLikesContext)
-  if (!ctx) {
-    throw new Error('useNearbyLikes must be used within NearbyLikesProvider')
-  }
+export function useNearbyLikesActions() {
+  const ctx = useContext(NearbyLikesActionsContext)
+  if (!ctx) throw new Error('useNearbyLikesActions must be used within NearbyLikesProvider')
   return ctx
+}
+
+export function useHasLiked(id: string) {
+  const snapshot = useSyncExternalStore(subscribe, getLikedSnapshot, getLikedSnapshot)
+  void snapshot
+  return likedIds.has(id)
+}
+
+export function useHasInvited(id: string) {
+  const snapshot = useSyncExternalStore(subscribe, getInvitedSnapshot, getInvitedSnapshot)
+  void snapshot
+  return invitedIds.has(id)
+}
+
+export function useNearbyLikesRevision() {
+  return useSyncExternalStore(subscribe, getLikedSnapshot, getLikedSnapshot)
+}
+
+export function isNearbyPlayerLiked(id: string) {
+  return likedIds.has(id)
+}
+
+/** @deprecated Prefer useHasLiked / useNearbyLikesActions for fewer rerenders. */
+export function useNearbyLikes() {
+  useSyncExternalStore(subscribe, getCombinedSnapshot, getCombinedSnapshot)
+  const { sendLike, sendInvite } = useNearbyLikesActions()
+  return {
+    hasLiked: (playerId: string) => likedIds.has(playerId),
+    hasInvited: (playerId: string) => invitedIds.has(playerId),
+    sendLike,
+    sendInvite,
+  }
 }

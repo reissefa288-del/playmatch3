@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import {
   createLane,
   resolveRoundByScore,
@@ -121,6 +122,8 @@ export function useBubbleShooterDuel() {
   lane2RenderRef.current = lane2
   aimDirRef.current = aimDir
   runningRef.current = running
+
+  const breakTimer = useManagedTimeout()
 
   const syncLanesToReact = useCallback((l1: LaneState, l2: LaneState, timeDisplay: number) => {
     setLane1(l1)
@@ -254,14 +257,14 @@ export function useBubbleShooterDuel() {
       playBubbleSound('round')
       roundBreakUntilRef.current = performance.now() + ROUND_BREAK_MS
 
-      window.setTimeout(() => {
+      breakTimer.schedule(() => {
         if (endedRef.current) return
         roundNumberRef.current += 1
         setRoundNumber(roundNumberRef.current)
         beginNextRound(next1, next2)
       }, ROUND_BREAK_MS)
     },
-    [beginNextRound, endMatch, syncLanesToReact],
+    [beginNextRound, breakTimer, endMatch, syncLanesToReact],
   )
 
   const handleTimeUp = useCallback(
@@ -341,6 +344,13 @@ export function useBubbleShooterDuel() {
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
   }, [running, playEvents, handleTimeUp, finishRound, syncLanesToReact])
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(rivalAimTimerRef.current)
+      breakTimer.clear()
+    }
+  }, [breakTimer])
 
   const setAimDirection = useCallback((dir: -1 | 0 | 1) => {
     if (dir !== 0) unlockBubbleAudio()

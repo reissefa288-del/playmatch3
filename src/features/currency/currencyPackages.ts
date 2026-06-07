@@ -1,6 +1,6 @@
-import altinIcon from '../../reference/altın.png'
-import elmasIcon from '../../reference/elmas.png'
-import morGemIcon from '../../reference/mor.png'
+import altinIcon from '../../reference/opt/thumb/altın.webp'
+import elmasIcon from '../../reference/opt/thumb/elmas.webp'
+import morGemIcon from '../../reference/opt/thumb/mor.webp'
 import type { CurrencyKind, CurrencyPackage } from './types'
 
 /** Elmas paket — Satın Al butonunda mor elmas gösterilen paketler */

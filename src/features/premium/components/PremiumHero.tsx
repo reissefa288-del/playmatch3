@@ -1,6 +1,7 @@
 import { FiCheck } from 'react-icons/fi'
 import { motion, useReducedMotion } from 'framer-motion'
-import kasaIcon from '../../../reference/kasa.png'
+import kasaIcon from '../../../reference/opt/thumb/kasa.webp'
+import { LazyImage } from '../../../shared/LazyImage'
 import { premiumHero } from '../data'
 
 type PremiumHeroProps = {
@@ -63,7 +64,7 @@ export function PremiumHero({ onUpgrade }: PremiumHeroProps) {
           transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
         >
           <span className="pm-premium-hero__kasa-glow" aria-hidden />
-          <img src={kasaIcon} alt="" className="pm-premium-hero__kasa" />
+          <LazyImage src={kasaIcon} alt="" className="pm-premium-hero__kasa" width={96} height={96} />
         </motion.div>
       </motion.div>
     </motion.section>

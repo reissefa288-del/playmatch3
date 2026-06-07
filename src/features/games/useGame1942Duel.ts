@@ -1,20 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { tickGame1942Bot } from './utils/game1942DuelBot'
-import {
-  applyY42FxEvents,
-  applyY42MuzzleFx,
-  pruneY42Particles,
-  type Y42Particle,
-} from './utils/game1942DuelFx'
-import {
-  createGame1942State,
-  moveShip,
-  resolveDuelWinner,
-  SHIP_Y,
-  tickSide,
-  tryShoot,
-  type Game1942State,
-} from './utils/game1942DuelEngine'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { loadGame1942DuelRuntime, type Game1942DuelRuntime } from './game1942DuelRuntime'
+import type { Game1942State } from './utils/game1942DuelEngine'
+import type { Y42Particle } from './utils/game1942DuelFx'
 
 type MatchWinner = 'p1' | 'p2' | 'draw'
 
@@ -29,7 +17,9 @@ function mulberry32(seed: number) {
 }
 
 export function useGame1942Duel() {
-  const [game, setGame] = useState<Game1942State>(() => createGame1942State(performance.now()))
+  const runtimeRef = useRef<Game1942DuelRuntime | null>(null)
+  const [engineReady, setEngineReady] = useState(false)
+  const [game, setGame] = useState<Game1942State | null>(null)
   const [running, setRunning] = useState(true)
   const [winner, setWinner] = useState<MatchWinner | null>(null)
   const [now, setNow] = useState(() => performance.now())
@@ -38,7 +28,7 @@ export function useGame1942Duel() {
   const [shakeP1Until, setShakeP1Until] = useState(0)
   const [muzzleP1Until, setMuzzleP1Until] = useState(0)
 
-  const gameRef = useRef(game)
+  const gameRef = useRef<Game1942State | null>(null)
   const endedRef = useRef(false)
   const seedRef = useRef(194201)
   const lastTickRef = useRef(performance.now())
@@ -47,25 +37,68 @@ export function useGame1942Duel() {
   const fxP2Ref = useRef(fxP2)
   const shakeP1Ref = useRef(shakeP1Until)
 
-  gameRef.current = game
   fxP1Ref.current = fxP1
   fxP2Ref.current = fxP2
   shakeP1Ref.current = shakeP1Until
 
+  const documentVisible = useDocumentVisible()
+
   useEffect(() => {
+    let cancelled = false
+    loadGame1942DuelRuntime().then((runtime) => {
+      if (cancelled) return
+      runtimeRef.current = runtime
+      const initial = runtime.engine.createGame1942State(performance.now())
+      gameRef.current = initial
+      setGame(initial)
+      setEngineReady(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!engineReady || !gameRef.current || !documentVisible) return
     if (!running && endedRef.current) return
+
+    const runtime = runtimeRef.current
+    if (!runtime) return
+
+    const {
+      engine: { tickSide, tryShoot, resolveDuelWinner, SHIP_Y },
+      bot: { tickGame1942Bot },
+      fx: { pruneY42Particles, applyY42FxEvents, applyY42MuzzleFx },
+    } = runtime
 
     const tick = () => {
       const t = performance.now()
       const dt = Math.min(48, t - lastTickRef.current)
       lastTickRef.current = t
-      setNow(t)
+      if (!endedRef.current) {
+        setNow(t)
+      }
+
+      if (endedRef.current) {
+        const p1Fx = pruneY42Particles(fxP1Ref.current, t)
+        const p2Fx = pruneY42Particles(fxP2Ref.current, t)
+        const shakeP1 = shakeP1Ref.current
+        const hasFx = p1Fx.length > 0 || p2Fx.length > 0 || shakeP1 > t
+        if (hasFx) {
+          fxP1Ref.current = p1Fx
+          fxP2Ref.current = p2Fx
+          setFxP1(p1Fx)
+          setFxP2(p2Fx)
+          loopRef.current = window.requestAnimationFrame(tick)
+        }
+        return
+      }
 
       let p1Fx = pruneY42Particles(fxP1Ref.current, t)
       let p2Fx = pruneY42Particles(fxP2Ref.current, t)
       let shakeP1 = shakeP1Ref.current
 
-      if (!endedRef.current && running) {
+      if (!endedRef.current && running && gameRef.current) {
         const prev = gameRef.current
         const rand1 = mulberry32(seedRef.current++)
         const rand2 = mulberry32(seedRef.current + 19)
@@ -100,11 +133,11 @@ export function useGame1942Duel() {
           p2Fx = muzzle.particles
         }
 
-        const g = { ...prev, p1, p2 }
-        gameRef.current = g
-        setGame(g)
+        const next = { ...prev, p1, p2 }
+        gameRef.current = next
+        setGame(next)
 
-        const duelWinner = resolveDuelWinner(g)
+        const duelWinner = resolveDuelWinner(next)
         if (duelWinner) {
           setWinner(duelWinner)
           setRunning(false)
@@ -126,12 +159,13 @@ export function useGame1942Duel() {
     return () => {
       if (loopRef.current != null) window.cancelAnimationFrame(loopRef.current)
     }
-  }, [running])
+  }, [documentVisible, engineReady, running])
 
   const setShipX = useCallback(
     (x: number) => {
-      if (!running || endedRef.current) return
-      const p1 = moveShip(gameRef.current.p1, x)
+      const runtime = runtimeRef.current
+      if (!runtime || !running || endedRef.current || !gameRef.current) return
+      const p1 = runtime.engine.moveShip(gameRef.current.p1, x)
       const next = { ...gameRef.current, p1 }
       gameRef.current = next
       setGame(next)
@@ -140,11 +174,13 @@ export function useGame1942Duel() {
   )
 
   const restartMatch = useCallback(() => {
+    const runtime = runtimeRef.current
+    if (!runtime) return
     endedRef.current = false
     seedRef.current = 194201 + Math.floor(Math.random() * 500)
     const t = performance.now()
     lastTickRef.current = t
-    const fresh = createGame1942State(t)
+    const fresh = runtime.engine.createGame1942State(t)
     gameRef.current = fresh
     setGame(fresh)
     setWinner(null)
@@ -159,6 +195,7 @@ export function useGame1942Duel() {
   }, [])
 
   return {
+    engineReady,
     game,
     now,
     running,
@@ -169,5 +206,6 @@ export function useGame1942Duel() {
     muzzleP1Until,
     setShipX,
     restartMatch,
+    enemyGlyph: engineReady ? (runtimeRef.current?.engine.enemyGlyph ?? null) : null,
   }
 }

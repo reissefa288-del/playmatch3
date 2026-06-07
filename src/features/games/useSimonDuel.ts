@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { botMistakeChance, botTapDelayMs, pickBotWrongPad } from './utils/simonDuelBot'
 import {
   advanceLaneShow,
@@ -91,6 +93,9 @@ export function useSimonDuel() {
     clearAutoStart()
   }, [clearAutoStart, clearBotTap])
 
+  const breakTimer = useManagedTimeout()
+  const documentVisible = useDocumentVisible()
+
   const checkLegEnd = useCallback((g: SimonState) => {
     if (g.lane1.score >= POINTS_TO_WIN || g.lane2.score >= POINTS_TO_WIN) {
       endLegRef.current()
@@ -123,7 +128,7 @@ export function useSimonDuel() {
     const matchOver =
       l1.matchPoints >= WIN_ROUNDS || l2.matchPoints >= WIN_ROUNDS || g.roundNumber >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           l1.matchPoints > l2.matchPoints ? 'p1' : l2.matchPoints > l1.matchPoints ? 'p2' : 'draw'
@@ -145,7 +150,7 @@ export function useSimonDuel() {
       setLegPause(false)
       setLegMessage(null)
     }, ROUND_BREAK_MS)
-  }, [clearAllTimers])
+  }, [breakTimer, clearAllTimers])
 
   endLegRef.current = endLeg
 
@@ -246,7 +251,7 @@ export function useSimonDuel() {
   }, [checkLegEnd, clearBotTap, scheduleAutoStart])
 
   useEffect(() => {
-    if (!running || endedRef.current || legMessage) return
+    if (!running || endedRef.current || legMessage || !documentVisible) return
 
     const tick = () => {
       const now = performance.now()
@@ -289,7 +294,15 @@ export function useSimonDuel() {
     return () => {
       if (loopRef.current != null) window.cancelAnimationFrame(loopRef.current)
     }
-  }, [legMessage, running])
+  }, [documentVisible, legMessage, running])
+
+  useEffect(() => {
+    return () => {
+      clearAllTimers()
+      breakTimer.clear()
+      if (loopRef.current != null) window.cancelAnimationFrame(loopRef.current)
+    }
+  }, [breakTimer, clearAllTimers])
 
   useEffect(() => {
     const l1 = game.lane1
@@ -364,6 +377,7 @@ export function useSimonDuel() {
 
   const restartMatch = useCallback(() => {
     clearAllTimers()
+    breakTimer.clear()
     endedRef.current = false
     legEndingRef.current = false
     startedRef.current = false
@@ -379,7 +393,7 @@ export function useSimonDuel() {
     setP1ScorePulse(0)
     setP2ScorePulse(0)
     setRunning(true)
-  }, [clearAllTimers])
+  }, [breakTimer, clearAllTimers])
 
   return {
     game,

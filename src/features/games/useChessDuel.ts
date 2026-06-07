@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { botThinkMs, pickBotMove } from './utils/chessDuelBot'
 import {
   applyPlayerMove,
@@ -48,6 +49,8 @@ export function useChessDuel() {
 
   gameRef.current = game
 
+  const breakTimer = useManagedTimeout()
+
   const clearBot = useCallback(() => {
     if (botTimerRef.current != null) window.clearTimeout(botTimerRef.current)
     botTimerRef.current = null
@@ -80,7 +83,7 @@ export function useChessDuel() {
     const matchOver =
       l1.matchPoints >= WIN_ROUNDS || l2.matchPoints >= WIN_ROUNDS || g.roundNumber >= MATCH_ROUNDS
 
-    window.setTimeout(() => {
+    breakTimer.schedule(() => {
       if (matchOver) {
         const final =
           l1.matchPoints > l2.matchPoints ? 'p1' : l2.matchPoints > l1.matchPoints ? 'p2' : 'draw'
@@ -103,7 +106,7 @@ export function useChessDuel() {
       setLegMessage(null)
       playChessDuelSound('start')
     }, LEG_BREAK_MS)
-  }, [clearBot])
+  }, [breakTimer, clearBot])
 
   const runBot = useCallback(() => {
     clearBot()
@@ -139,6 +142,13 @@ export function useChessDuel() {
   }, [game.turn, game.phase, runBot, clearBot])
 
   useEffect(() => {
+    return () => {
+      clearBot()
+      breakTimer.clear()
+    }
+  }, [breakTimer, clearBot])
+
+  useEffect(() => {
     if (startedRef.current) return
     startedRef.current = true
     playChessDuelSound('start')
@@ -172,6 +182,7 @@ export function useChessDuel() {
 
   const restartMatch = useCallback(() => {
     clearBot()
+    breakTimer.clear()
     endedRef.current = false
     legEndingRef.current = false
     const fresh = createChessState()
@@ -182,7 +193,7 @@ export function useChessDuel() {
     setRunning(true)
     unlockChessDuelAudio()
     playChessDuelSound('start')
-  }, [clearBot])
+  }, [breakTimer, clearBot])
 
   return {
     game,

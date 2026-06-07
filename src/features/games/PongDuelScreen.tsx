@@ -1,3 +1,4 @@
+import '../../styles/pong-duel.css'
 import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'

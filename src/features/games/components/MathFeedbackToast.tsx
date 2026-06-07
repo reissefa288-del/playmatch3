@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { FiCheck, FiShield, FiX } from 'react-icons/fi'
 import type { MathFeedbackToast as Toast } from '../utils/mathDuelEngine'
 
@@ -23,14 +22,10 @@ export function MathFeedbackToast({ toast, accent }: MathFeedbackToastProps) {
       : `−${formatPoints(toast.points)} puan`
 
   return (
-    <motion.div
-      className={`pm-math-toast is-${toast.variant} is-${accent}`}
+    <div
+      className={`pm-math-toast pm-math-toast-enter is-${toast.variant} is-${accent}`}
       role="status"
       aria-live="polite"
-      initial={{ opacity: 0, y: 10, scale: 0.92 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -6, scale: 0.96 }}
-      transition={{ type: 'spring', stiffness: 420, damping: 26 }}
     >
       <span className="pm-math-toast__icon" aria-hidden>
         {isCorrect ? <FiCheck /> : isShield ? <FiShield /> : <FiX />}
@@ -39,6 +34,6 @@ export function MathFeedbackToast({ toast, accent }: MathFeedbackToastProps) {
         <strong className="pm-math-toast__title">{title}</strong>
         <span className="pm-math-toast__detail">{detail}</span>
       </span>
-    </motion.div>
+    </div>
   )
 }

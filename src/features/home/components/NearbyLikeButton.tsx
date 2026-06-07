@@ -1,7 +1,7 @@
 import { useState, type MouseEvent } from 'react'
 import { IoHeart } from 'react-icons/io5'
 import { motion, useReducedMotion } from 'framer-motion'
-import { useNearbyLikes } from '../useNearbyLikes'
+import { useNearbyLikesActions, useHasLiked } from '../NearbyLikesProvider'
 
 export type NearbyLikePhase = 'idle' | 'burst' | 'exit'
 
@@ -26,8 +26,8 @@ export function NearbyLikeButton({
   className = '',
 }: NearbyLikeButtonProps) {
   const reduceMotion = useReducedMotion()
-  const { hasLiked, sendLike } = useNearbyLikes()
-  const alreadyLiked = hasLiked(playerId)
+  const { sendLike } = useNearbyLikesActions()
+  const alreadyLiked = useHasLiked(playerId)
   const [phase, setPhase] = useState<NearbyLikePhase>('idle')
 
   const setLikePhase = (next: NearbyLikePhase) => {

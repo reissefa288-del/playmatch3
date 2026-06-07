@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useRuntimeActive } from '../../shared/useRuntimeActive'
 
 const ACTIVE_MIN = 210
 const ACTIVE_MAX = 398
@@ -34,6 +35,7 @@ const TICKER_MESSAGES = [
 ]
 
 export function useLiveSocialStats() {
+  const visible = useRuntimeActive('home')
   const [activeCount, setActiveCount] = useState(234)
   const [waitingCount, setWaitingCount] = useState(3)
   const [tickerIndex, setTickerIndex] = useState(0)
@@ -57,6 +59,7 @@ export function useLiveSocialStats() {
   }, [])
 
   useEffect(() => {
+    if (!visible) return
     const id = setInterval(() => {
       setActiveCount((prev) => {
         const next = nextActiveCount(prev)
@@ -70,13 +73,20 @@ export function useLiveSocialStats() {
       })
     }, TICK_MS)
     return () => clearInterval(id)
-  }, [flash])
+  }, [flash, visible])
 
   useEffect(() => {
+    if (!visible) return
     const id = setInterval(() => {
       setTickerIndex((i) => (i + 1) % TICKER_MESSAGES.length)
     }, 5500)
     return () => clearInterval(id)
+  }, [visible])
+
+  useEffect(() => {
+    return () => {
+      if (flashTimer.current) window.clearTimeout(flashTimer.current)
+    }
   }, [])
 
   return {

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useManagedTimeout } from '../../shared/useManagedTimeout'
 import { botThinkDelayMs, shouldBotDrop } from './utils/stackDuelBot'
 import {
   beginFall,
@@ -47,12 +48,15 @@ export function useStackDuel() {
   const endedRef = useRef(false)
   const runningRef = useRef(running)
   const botTimerRef = useRef<number | null>(null)
+  const botCommitTimerRef = useRef<number | null>(null)
   const popTimerRef = useRef<number | null>(null)
   const lastTickRef = useRef(performance.now())
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
   runningRef.current = running
+
+  const breakTimer = useManagedTimeout()
 
   const playLaneEvent = useCallback((event: StackLaneEvent, combo: number) => {
     if (event === 'perfect') playStackDuelSound('perfect')
@@ -69,11 +73,17 @@ export function useStackDuel() {
     }, 900)
   }, [])
 
+  const clearBotCommitTimer = useCallback(() => {
+    if (botCommitTimerRef.current != null) window.clearTimeout(botCommitTimerRef.current)
+    botCommitTimerRef.current = null
+  }, [])
+
   const endRoundRef = useRef<() => void>(() => {})
   const tryEndRoundEarlyRef = useRef<() => void>(() => {})
 
   const scheduleBot = useCallback(() => {
     if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
+    clearBotCommitTimer()
     if (!runningRef.current || endedRef.current || roundEndingRef.current) return
 
     const delay = botThinkDelayMs(lane2Ref.current.combo)
@@ -86,7 +96,9 @@ export function useStackDuel() {
         if (started) {
           lane2Ref.current = started
           setLane2(started)
-          window.setTimeout(() => {
+          clearBotCommitTimer()
+          botCommitTimerRef.current = window.setTimeout(() => {
+            botCommitTimerRef.current = null
             setLane2((l) => {
               const result = commitFall(l, seed + 7)
               lane2Ref.current = result.lane
@@ -101,7 +113,7 @@ export function useStackDuel() {
       }
       scheduleBot()
     }, delay)
-  }, [playLaneEvent])
+  }, [clearBotCommitTimer, playLaneEvent])
 
   const endRound = useCallback(() => {
     if (roundEndingRef.current) return
@@ -123,7 +135,7 @@ export function useStackDuel() {
         p2: mp.p2 + (rw === 'p2' ? 1 : 0),
       }
 
-      window.setTimeout(() => {
+      breakTimer.schedule(() => {
         if (next.p1 >= WIN_ROUNDS || next.p2 >= WIN_ROUNDS) {
           endedRef.current = true
           setRunning(false)
@@ -172,7 +184,7 @@ export function useStackDuel() {
 
       return next
     })
-  }, [scheduleBot])
+  }, [breakTimer, scheduleBot])
 
   endRoundRef.current = endRound
 
@@ -252,9 +264,10 @@ export function useStackDuel() {
     scheduleBot()
     return () => {
       if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
+      clearBotCommitTimer()
       if (popTimerRef.current) window.clearTimeout(popTimerRef.current)
     }
-  }, [scheduleBot, playLaneEvent])
+  }, [clearBotCommitTimer, scheduleBot])
 
   const movePlayer = useCallback((dir: -1 | 1) => {
     if (!runningRef.current || roundEndingRef.current) return
@@ -292,6 +305,10 @@ export function useStackDuel() {
   }, [dropPlayer, movePlayer])
 
   const restartMatch = useCallback(() => {
+    breakTimer.clear()
+    clearBotCommitTimer()
+    if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
+    botTimerRef.current = null
     endedRef.current = false
     roundEndingRef.current = false
     roundBreakUntilRef.current = 0
@@ -313,7 +330,7 @@ export function useStackDuel() {
     setLane1(l1)
     setLane2(l2)
     scheduleBot()
-  }, [scheduleBot])
+  }, [breakTimer, clearBotCommitTimer, scheduleBot])
 
   return {
     lane1,

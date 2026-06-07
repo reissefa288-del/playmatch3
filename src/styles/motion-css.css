@@ -1,0 +1,278 @@
+/* PlayMeet — CSS motion utilities (Framer Motion replacements) */
+
+:root {
+  --pm-ease-flagship: cubic-bezier(0.22, 1, 0.36, 1);
+  --pm-dur-tab: 0.38s;
+  --pm-dur-stack: 0.4s;
+}
+
+@keyframes pm-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pm-modal-enter {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes pm-modal-enter-notif {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -52%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes pm-sheet-panel-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.94) translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pm-sheet-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pm-stack-enter {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pm-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pm-toast-icon-pop {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes pm-toast-body-enter {
+  from {
+    opacity: 0;
+    transform: translateX(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pm-math-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pm-score-pop-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.55) translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes pm-rw-score-float-p1 {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-4px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-32px) scale(0.85);
+  }
+}
+
+@keyframes pm-rw-score-float-p2 {
+  0% {
+    opacity: 0;
+    transform: translateX(50%) translateY(8px) scale(0.7);
+  }
+  15% {
+    opacity: 1;
+    transform: translateX(50%) translateY(-4px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(50%) translateY(-32px) scale(0.85);
+  }
+}
+
+@keyframes pm-fade-up-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pm-nearby-card-exit {
+  to {
+    opacity: 0;
+    transform: translateX(140px) scale(0.88) rotate(6deg);
+  }
+}
+
+@keyframes pm-nav-indicator-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 0.92;
+    transform: scale(1);
+  }
+}
+
+.pm-sheet-backdrop-enter {
+  animation: pm-fade-in 0.28s ease-out both;
+}
+
+.pm-sheet-viewport-enter {
+  animation: pm-fade-in 0.25s ease-out both;
+}
+
+.pm-sheet-modal-enter {
+  animation: pm-modal-enter 0.38s var(--pm-ease-flagship) both;
+}
+
+.pm-sheet-modal-enter--notif {
+  animation: pm-modal-enter-notif 0.38s var(--pm-ease-flagship) both;
+}
+
+.pm-sheet-panel-enter {
+  animation: pm-sheet-panel-enter 0.4s var(--pm-ease-flagship) both;
+}
+
+.pm-sheet-slide-up-enter {
+  animation: pm-sheet-slide-up 0.42s var(--pm-ease-flagship) both;
+}
+
+.pm-stack-overlay-enter {
+  animation: pm-stack-enter var(--pm-dur-stack) var(--pm-ease-flagship) both;
+}
+
+.pm-toast-enter {
+  animation: pm-toast-enter 0.38s var(--pm-ease-flagship) both;
+}
+
+.pm-toast-enter .pm-match-toast__icon {
+  animation: pm-toast-icon-pop 0.55s ease-out both;
+}
+
+.pm-toast-enter .pm-match-toast__body {
+  animation: pm-toast-body-enter 0.28s ease-out 0.06s both;
+}
+
+.pm-math-toast-enter {
+  animation: pm-math-toast-enter 0.35s var(--pm-ease-flagship) both;
+}
+
+.pm-score-pop-enter {
+  animation: pm-score-pop-enter 0.35s var(--pm-ease-flagship) both;
+}
+
+.pm-rw-score-float.is-p1.is-active {
+  animation: pm-rw-score-float-p1 0.9s ease-out forwards;
+}
+
+.pm-rw-score-float.is-p2.is-active {
+  animation: pm-rw-score-float-p2 0.9s ease-out forwards;
+}
+
+.pm-fade-up-enter {
+  animation: pm-fade-up-enter 0.3s var(--pm-ease-flagship) both;
+}
+
+.pm-enter-fade-up {
+  animation: pm-fade-up-enter 0.45s ease-out both;
+}
+
+.pm-nearby-card.is-exiting {
+  animation: pm-nearby-card-exit 0.42s var(--pm-ease-flagship) forwards;
+  pointer-events: none;
+}
+
+.pm-bottom-nav__indicator {
+  animation: pm-nav-indicator-enter 0.32s var(--pm-ease-flagship) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-sheet-backdrop-enter,
+  .pm-sheet-viewport-enter,
+  .pm-sheet-modal-enter,
+  .pm-sheet-modal-enter--notif,
+  .pm-sheet-panel-enter,
+  .pm-sheet-slide-up-enter,
+  .pm-stack-overlay-enter,
+  .pm-toast-enter,
+  .pm-math-toast-enter,
+  .pm-score-pop-enter,
+  .pm-rw-score-float.is-p1.is-active,
+  .pm-rw-score-float.is-p2.is-active,
+  .pm-fade-up-enter,
+  .pm-enter-fade-up,
+  .pm-nearby-card.is-exiting,
+  .pm-bottom-nav__indicator,
+  .pm-toast-enter .pm-match-toast__icon,
+  .pm-toast-enter .pm-match-toast__body {
+    animation: none !important;
+  }
+}

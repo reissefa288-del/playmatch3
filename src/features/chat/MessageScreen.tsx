@@ -1,3 +1,6 @@
+import '../../styles/message-final.css'
+import '../../styles/message-screen.css'
+import '../../styles/message-ambient.css'
 import { Navigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { AmbientParticles } from '../home/components/AmbientParticles'

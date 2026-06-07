@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
 *,
 *::before,
 *::after {
@@ -21,7 +19,7 @@ body {
     -apple-system,
     'Segoe UI',
     sans-serif;
-  background: #01030b;
+  background: #060818;
   color: #fff;
   -webkit-font-smoothing: antialiased;
 }

@@ -1,3 +1,4 @@
+import '../../styles/games-quick-match.css'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { FiArrowLeft, FiZap } from 'react-icons/fi'
 import { motion } from 'framer-motion'

@@ -221,7 +221,7 @@ export function BubbleShooterCanvas({
       cancelAnimationFrame(raf)
       ro?.disconnect()
     }
-  }, [active, laneRef, showAimGuide, showRivalAim])
+  }, [active, laneRef])
 
   return <canvas ref={canvasRef} className="pm-bubble-arena__canvas" />
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
 import { botThinkDelayMs, pickBotSwap } from './utils/neonCrushBot'
 import { recordNeonCrushScore } from './utils/neonCrushLeaderboard'
 import {
@@ -76,6 +77,9 @@ export function useNeonCrushDuel() {
   const botTimerRef = useRef<number | null>(null)
   const p1AnimTimerRef = useRef<number | null>(null)
   const p2AnimTimerRef = useRef<number | null>(null)
+  const p1SettleTimerRef = useRef<number | null>(null)
+  const p2SettleTimerRef = useRef<number | null>(null)
+  const botChainTimerRef = useRef<number | null>(null)
   const scheduleBotRef = useRef<() => void>(() => {})
   const lastPressureAtRef = useRef(0)
   const pressureTimerRef = useRef<number | null>(null)
@@ -83,16 +87,24 @@ export function useNeonCrushDuel() {
   lane1Ref.current = lane1
   lane2Ref.current = lane2
 
+  const documentVisible = useDocumentVisible()
+
   const clearBot = useCallback(() => {
     if (botTimerRef.current != null) window.clearTimeout(botTimerRef.current)
     botTimerRef.current = null
+    if (botChainTimerRef.current != null) window.clearTimeout(botChainTimerRef.current)
+    botChainTimerRef.current = null
   }, [])
 
   const clearAnimTimers = useCallback(() => {
     if (p1AnimTimerRef.current != null) window.clearTimeout(p1AnimTimerRef.current)
     if (p2AnimTimerRef.current != null) window.clearTimeout(p2AnimTimerRef.current)
+    if (p1SettleTimerRef.current != null) window.clearTimeout(p1SettleTimerRef.current)
+    if (p2SettleTimerRef.current != null) window.clearTimeout(p2SettleTimerRef.current)
     p1AnimTimerRef.current = null
     p2AnimTimerRef.current = null
+    p1SettleTimerRef.current = null
+    p2SettleTimerRef.current = null
   }, [])
 
   const clearPressureTimer = useCallback(() => {
@@ -202,7 +214,10 @@ export function useNeonCrushDuel() {
         timerRef.current = null
 
         if (spawnIndices.length > 0) {
-          window.setTimeout(() => {
+          const settleRef = lane === 1 ? p1SettleTimerRef : p2SettleTimerRef
+          if (settleRef.current != null) window.clearTimeout(settleRef.current)
+          settleRef.current = window.setTimeout(() => {
+            settleRef.current = null
             const clearSettle = (l: NeonLaneState) => ({ ...l, settle: null })
             if (lane === 1) {
               lane1Ref.current = clearSettle(lane1Ref.current)
@@ -291,7 +306,11 @@ export function useNeonCrushDuel() {
         result.scoreGain,
         result.combo,
       )
-      window.setTimeout(() => scheduleBotRef.current(), MATCH_ANIM_MS + 40)
+      if (botChainTimerRef.current != null) window.clearTimeout(botChainTimerRef.current)
+      botChainTimerRef.current = window.setTimeout(() => {
+        botChainTimerRef.current = null
+        scheduleBotRef.current()
+      }, MATCH_ANIM_MS + 40)
     }, delay)
   }, [bumpBoards, clearBot, commitLaneSwap])
 
@@ -307,7 +326,7 @@ export function useNeonCrushDuel() {
   }, [clearAnimTimers, clearBot, clearPressureTimer])
 
   useEffect(() => {
-    if (!running || endedRef.current) return
+    if (!running || endedRef.current || !documentVisible) return
     const timer = window.setInterval(() => {
       if (matchEndingRef.current) return
       timeRef.current = Math.max(0, timeRef.current - 1)
@@ -316,7 +335,7 @@ export function useNeonCrushDuel() {
       if (timeRef.current === 0) endMatchRef.current()
     }, 1000)
     return () => window.clearInterval(timer)
-  }, [running])
+  }, [documentVisible, running])
 
   const tapCell = useCallback(
     (index: number) => {

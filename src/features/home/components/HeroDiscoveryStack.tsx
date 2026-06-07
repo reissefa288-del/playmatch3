@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react'
 import { FiRefreshCw, FiUsers } from 'react-icons/fi'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { DAILY_LIKES_LIMIT } from '../../../shared/dailyLikes'
+import { useManagedTimers } from '../../../shared/useManagedTimers'
+import { useDailyLikesActions, useDailyLikesState } from '../../likes/useDailyLikes'
 import { MatchLikesQuota } from '../../match/components/MatchLikesQuota'
-import { useDailyLikes } from '../../likes/useDailyLikes'
-import { usePremiumSubscription } from '../../premium/usePremiumSubscription'
+import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
 import { heroDiscoveryQueue } from '../data'
 import { HeroPlayerCard } from './HeroPlayerCard'
 
@@ -16,9 +16,10 @@ const EXIT_MS = 480
 const PASS_EXIT_MS = 360
 
 export function HeroDiscoveryStack() {
-  const reduceMotion = useReducedMotion()
-  const { isPremiumActive } = usePremiumSubscription()
-  const { remaining, isUnlimited, tryConsumeLike } = useDailyLikes()
+  const { active: isPremiumActive } = usePremiumSubscriptionState()
+  const { remaining, isUnlimited } = useDailyLikesState()
+  const { tryConsumeLike } = useDailyLikesActions()
+  const timers = useManagedTimers()
   const [index, setIndex] = useState(0)
   const [phase, setPhase] = useState<StackPhase>('idle')
   const [exitMode, setExitMode] = useState<ExitMode>('match')
@@ -41,37 +42,38 @@ export function HeroDiscoveryStack() {
     setSentVariant('match')
     setExitMode('match')
     setPhase('busy')
-    window.setTimeout(() => {
+    timers.schedule(() => {
       setPhase('sent')
-      window.setTimeout(() => {
+      timers.schedule(() => {
         setPhase('exiting')
-        window.setTimeout(advanceCard, EXIT_MS)
+        timers.schedule(advanceCard, EXIT_MS)
       }, SENT_HOLD_MS)
     }, 380)
-  }, [advanceCard, canLike, current, phase, tryConsumeLike])
+  }, [advanceCard, canLike, current, phase, timers, tryConsumeLike])
 
   const handleSuperLike = useCallback(() => {
     if (!current || phase !== 'idle') return
     setSentVariant('super')
     setExitMode('match')
     setPhase('busy')
-    window.setTimeout(() => {
+    timers.schedule(() => {
       setPhase('sent')
-      window.setTimeout(() => {
+      timers.schedule(() => {
         setPhase('exiting')
-        window.setTimeout(advanceCard, EXIT_MS)
+        timers.schedule(advanceCard, EXIT_MS)
       }, SENT_HOLD_MS)
     }, 380)
-  }, [advanceCard, current, phase])
+  }, [advanceCard, current, phase, timers])
 
   const handlePass = useCallback(() => {
     if (!current || phase !== 'idle') return
     setExitMode('pass')
     setPhase('exiting')
-    window.setTimeout(advanceCard, PASS_EXIT_MS)
-  }, [advanceCard, current, phase])
+    timers.schedule(advanceCard, PASS_EXIT_MS)
+  }, [advanceCard, current, phase, timers])
 
   const resetQueue = () => {
+    timers.clearAll()
     setIndex(0)
     setPhase('idle')
     setExitMode('match')
@@ -81,6 +83,15 @@ export function HeroDiscoveryStack() {
   const showSent = phase === 'sent' || (phase === 'exiting' && exitMode === 'match')
   const matchBusy = phase === 'busy'
   const showPeek = phase === 'idle' && Boolean(next)
+
+  const cardMotionClass =
+    phase === 'exiting'
+      ? exitMode === 'pass'
+        ? 'is-exit-pass'
+        : 'is-exit-match'
+      : phase === 'idle'
+        ? 'is-enter'
+        : ''
 
   return (
     <div className="pm-hero-stack">
@@ -95,67 +106,36 @@ export function HeroDiscoveryStack() {
           </div>
         ) : null}
 
-        <AnimatePresence mode="popLayout">
-          {!exhausted && current ? (
-            <motion.div
-              key={current.id}
-              className="pm-hero-stack__card"
-              initial={reduceMotion ? false : { opacity: 0, y: 36, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={
-                reduceMotion
-                  ? { opacity: 0 }
-                  : exitMode === 'pass'
-                    ? {
-                        opacity: 0,
-                        x: -120,
-                        rotate: -5,
-                        scale: 0.94,
-                        transition: { duration: PASS_EXIT_MS / 1000 },
-                      }
-                    : {
-                        opacity: 0,
-                        y: -72,
-                        scale: 0.94,
-                        transition: { duration: EXIT_MS / 1000 },
-                      }
-              }
-              transition={{ type: 'spring', stiffness: 360, damping: 32 }}
-            >
-              <HeroPlayerCard
-                player={current}
-                showSentOverlay={showSent}
-                matchBusy={matchBusy}
-                canLike={canLike}
-                isPremium={isPremiumActive}
-                sentOverlayVariant={sentVariant}
-                onMatchRequest={handleMatchRequest}
-                onPass={handlePass}
-                onSuperLike={handleSuperLike}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="empty"
-              className="pm-hero-stack__empty"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <div className="pm-hero-stack__empty-icon">
-                <FiUsers />
-              </div>
-              <h3>Bugünlük öneriler tamamlandı</h3>
-              <p>
-                {canLike
-                  ? 'Yarın yeni oyuncular seni bekliyor.'
-                  : `Günlük ${DAILY_LIKES_LIMIT} beğeni hakkını kullandın. Yarın yenilenir.`}
-              </p>
-              <button type="button" onClick={resetQueue}>
-                <FiRefreshCw /> Baştan göster
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {!exhausted && current ? (
+          <div key={current.id} className={`pm-hero-stack__card ${cardMotionClass}`}>
+            <HeroPlayerCard
+              player={current}
+              showSentOverlay={showSent}
+              matchBusy={matchBusy}
+              canLike={canLike}
+              isPremium={isPremiumActive}
+              sentOverlayVariant={sentVariant}
+              onMatchRequest={handleMatchRequest}
+              onPass={handlePass}
+              onSuperLike={handleSuperLike}
+            />
+          </div>
+        ) : (
+          <div className="pm-hero-stack__empty pm-hero-stack__empty--enter">
+            <div className="pm-hero-stack__empty-icon">
+              <FiUsers />
+            </div>
+            <h3>Bugünlük öneriler tamamlandı</h3>
+            <p>
+              {canLike
+                ? 'Yarın yeni oyuncular seni bekliyor.'
+                : `Günlük ${DAILY_LIKES_LIMIT} beğeni hakkını kullandın. Yarın yenilenir.`}
+            </p>
+            <button type="button" onClick={resetQueue}>
+              <FiRefreshCw /> Baştan göster
+            </button>
+          </div>
+        )}
       </div>
 
       {!exhausted && current ? (

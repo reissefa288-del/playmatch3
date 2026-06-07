@@ -1,3 +1,4 @@
+import '../../styles/neon-crush.css'
 import { Navigate } from 'react-router-dom'
 
 /** Eski lobby rotası — doğrudan oyuna yönlendir. */

@@ -1,3 +1,5 @@
+import '../../styles/premium-feature-icons.css'
+import '../../styles/premium.css'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'

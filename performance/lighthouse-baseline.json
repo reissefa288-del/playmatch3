@@ -1,0 +1,142 @@
+{
+  "capturedAt": "2026-06-07T01:57:06.239Z",
+  "commit": "8bf495d",
+  "environment": "production-static-preview",
+  "device": "mobile-emulated",
+  "throttling": "slow-4g-cpu-4x",
+  "authSeed": "pm-auth-session + pm-user-profile (onboarding complete)",
+  "targets": {
+    "performance": 85,
+    "lcpMs": 2500,
+    "cls": 0.1,
+    "inpMs": 200,
+    "fcpMs": 1800,
+    "tbtMs": 300
+  },
+  "routes": {
+    "home": {
+      "path": "/",
+      "url": "http://127.0.0.1:4173/",
+      "performanceScore": 51,
+      "fcp": {
+        "score": 0.06,
+        "value": 5441.852375,
+        "displayValue": "5.4 s"
+      },
+      "lcp": {
+        "score": 0.01,
+        "value": 8915.2925,
+        "displayValue": "8.9 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0,
+        "displayValue": "0"
+      },
+      "tbt": {
+        "score": 0.65,
+        "value": 422,
+        "displayValue": "420 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 0.56,
+        "value": 5441.852375,
+        "displayValue": "5.4 s"
+      }
+    },
+    "games": {
+      "path": "/games",
+      "url": "http://127.0.0.1:4173/games",
+      "performanceScore": 59,
+      "fcp": {
+        "score": 0.06,
+        "value": 5485.877574999999,
+        "displayValue": "5.5 s"
+      },
+      "lcp": {
+        "score": 0,
+        "value": 10537.682249999998,
+        "displayValue": "10.5 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0.00009483711257479184,
+        "displayValue": "0"
+      },
+      "tbt": {
+        "score": 0.94,
+        "value": 151,
+        "displayValue": "150 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 0.55,
+        "value": 5485.877574999999,
+        "displayValue": "5.5 s"
+      }
+    },
+    "match": {
+      "path": "/match",
+      "url": "http://127.0.0.1:4173/match",
+      "performanceScore": 60,
+      "fcp": {
+        "score": 0.09,
+        "value": 5018.308275,
+        "displayValue": "5.0 s"
+      },
+      "lcp": {
+        "score": 0.03,
+        "value": 7683.0999,
+        "displayValue": "7.7 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0.00009859303782527864,
+        "displayValue": "0"
+      },
+      "tbt": {
+        "score": 0.9,
+        "value": 193,
+        "displayValue": "190 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 0.63,
+        "value": 5018.308275,
+        "displayValue": "5.0 s"
+      }
+    },
+    "chat": {
+      "path": "/chat",
+      "url": "http://127.0.0.1:4173/chat",
+      "performanceScore": 68,
+      "fcp": {
+        "score": 0.1,
+        "value": 4958.1206999999995,
+        "displayValue": "5.0 s"
+      },
+      "lcp": {
+        "score": 0.22,
+        "value": 5247.2807999999995,
+        "displayValue": "5.2 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0.00009859303782527864,
+        "displayValue": "0"
+      },
+      "tbt": {
+        "score": 0.99,
+        "value": 69,
+        "displayValue": "70 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 0.64,
+        "value": 4958.1206999999995,
+        "displayValue": "5.0 s"
+      }
+    }
+  }
+}

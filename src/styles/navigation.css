@@ -40,7 +40,22 @@
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  opacity: 0;
+  transition:
+    opacity var(--pm-dur-tab, 0.38s) var(--pm-ease-flagship, cubic-bezier(0.22, 1, 0.36, 1)),
+    visibility 0s linear var(--pm-dur-tab, 0.38s);
   will-change: opacity;
+}
+
+/* Tab atmosfer katmanları — tam viewport (transform fixed'i bozar, kullanma) */
+.pm-tab-panel[id^='pm-tab-']::before {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 100dvh;
+}
+
+.pm-tab-panel:not(.is-active)::before {
+  content: none !important;
 }
 
 .pm-tab-panel > .pm-app-shell {
@@ -82,7 +97,10 @@
 
 .pm-tab-panel.is-active {
   visibility: visible;
-  transform: none !important;
+  opacity: 1;
+  transition:
+    opacity var(--pm-dur-tab, 0.38s) var(--pm-ease-flagship, cubic-bezier(0.22, 1, 0.36, 1)),
+    visibility 0s linear 0s;
 }
 
 .pm-stack-overlay {

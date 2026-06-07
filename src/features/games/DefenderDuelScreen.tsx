@@ -1,3 +1,4 @@
+import '../../styles/defender-duel.css'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'

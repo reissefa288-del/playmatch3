@@ -6,18 +6,22 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { formatGemBalance } from '../../shared/formatGemBalance'
 
 const STORAGE_KEY = 'pm-gem-balance'
 const INITIAL = 100
 
-type GemBalanceContextValue = {
+type GemBalanceState = {
   balance: number
-  formatBalance: (value?: number) => string
+}
+
+type GemBalanceActions = {
   add: (amount: number) => void
   spend: (amount: number) => boolean
 }
 
-const GemBalanceContext = createContext<GemBalanceContextValue | null>(null)
+const GemBalanceStateContext = createContext<GemBalanceState | null>(null)
+const GemBalanceActionsContext = createContext<GemBalanceActions | null>(null)
 
 function readStored(): number {
   try {
@@ -40,10 +44,6 @@ export function GemBalanceProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
   }, [])
-
-  const formatBalance = useCallback((value = balance) => {
-    return value.toLocaleString('tr-TR')
-  }, [balance])
 
   const add = useCallback(
     (amount: number) => {
@@ -73,16 +73,38 @@ export function GemBalanceProvider({ children }: { children: ReactNode }) {
     [persist],
   )
 
-  const value = useMemo(
-    () => ({ balance, formatBalance, add, spend }),
-    [balance, formatBalance, add, spend],
-  )
+  const stateValue = useMemo(() => ({ balance }), [balance])
+  const actionsValue = useMemo(() => ({ add, spend }), [add, spend])
 
-  return <GemBalanceContext.Provider value={value}>{children}</GemBalanceContext.Provider>
+  return (
+    <GemBalanceActionsContext.Provider value={actionsValue}>
+      <GemBalanceStateContext.Provider value={stateValue}>{children}</GemBalanceStateContext.Provider>
+    </GemBalanceActionsContext.Provider>
+  )
 }
 
-export function useGemBalance() {
-  const ctx = useContext(GemBalanceContext)
-  if (!ctx) throw new Error('useGemBalance must be used within GemBalanceProvider')
+export function useGemBalanceState() {
+  const ctx = useContext(GemBalanceStateContext)
+  if (!ctx) throw new Error('useGemBalanceState must be used within GemBalanceProvider')
   return ctx
 }
+
+export function useGemBalanceActions() {
+  const ctx = useContext(GemBalanceActionsContext)
+  if (!ctx) throw new Error('useGemBalanceActions must be used within GemBalanceProvider')
+  return ctx
+}
+
+/** @deprecated Prefer useGemBalanceState / useGemBalanceActions for fewer rerenders. */
+export function useGemBalance() {
+  const { balance } = useGemBalanceState()
+  const { add, spend } = useGemBalanceActions()
+  return {
+    balance,
+    formatBalance: formatGemBalance,
+    add,
+    spend,
+  }
+}
+
+export { formatGemBalance as formatBalance }

@@ -1,5 +1,7 @@
+import '../../../styles/game-duel-ambient.css'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import duelVideo from '../../../reference/video.mp4'
+import { DUEL_VIDEO_POSTER } from '../../../shared/duelVideoPoster'
 import { SeamlessLoopVideo } from './SeamlessLoopVideo'
 
 const STARS = Array.from({ length: 36 }, (_, i) => ({
@@ -34,6 +36,18 @@ type GameDuelAmbientBgProps = {
 /** Paylaşılan premium AAA duel arka planı — video={false} ile GameDuelVideoBg üstünde */
 export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDuelAmbientBgProps) {
   const isBubble = variant === 'bubble'
+  const [videoSrc, setVideoSrc] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!video) return
+    let cancelled = false
+    import('../../../reference/video.mp4').then((mod) => {
+      if (!cancelled) setVideoSrc(mod.default)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [video])
 
   return (
     <motion.div
@@ -43,10 +57,20 @@ export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDue
       animate={{ opacity: 1 }}
       transition={{ duration: 0.55, ease: 'easeOut' }}
     >
-      {video ? (
+      {video && videoSrc ? (
         <div className="pm-duel-ambient__video" aria-hidden>
-          <SeamlessLoopVideo src={duelVideo} crossfadeSec={0.52} />
+          <SeamlessLoopVideo src={videoSrc} crossfadeSec={0.52} />
         </div>
+      ) : video ? (
+        <div
+          className="pm-duel-ambient__video pm-duel-ambient__video--poster"
+          aria-hidden
+          style={{
+            backgroundImage: `url(${DUEL_VIDEO_POSTER})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        />
       ) : null}
       <motion.div
         className="pm-duel-ambient__base"

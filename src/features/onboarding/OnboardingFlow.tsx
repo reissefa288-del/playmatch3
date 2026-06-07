@@ -1,9 +1,9 @@
+import '../../styles/onboarding.css'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { FiArrowLeft, FiArrowRight, FiCamera, FiCheck } from 'react-icons/fi'
 import { OnboardingAmbient } from './components/OnboardingAmbient'
-import { OnboardingPreviewCard } from './components/OnboardingPreviewCard'
 import { OnboardingStepHero } from './components/OnboardingStepHero'
 import { useAuthSession } from '../auth/useAuthSession'
 import {
@@ -215,8 +215,6 @@ export function OnboardingFlow() {
             <span key={s.id} className={`pm-onboard-dot${i <= stepIndex ? ' is-active' : ''}${i === stepIndex ? ' is-current' : ''}`} />
           ))}
         </div>
-
-        <OnboardingPreviewCard draft={draft} />
 
         <AnimatePresence mode="wait">
           <motion.div

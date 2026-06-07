@@ -1,3 +1,4 @@
+import '../../styles/legal.css'
 import { LegalDocumentScreen } from './LegalDocumentScreen'
 import { privacyPolicy } from './content/privacyPolicy'
 import { termsOfService } from './content/termsOfService'

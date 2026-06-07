@@ -2,7 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDailyLikes } from '../likes/useDailyLikes'
 import { DAILY_LIKES_LIMIT, matchDiscoverProfiles } from './data'
 import { filterMatchProfiles } from './filterMatchProfiles'
+import type { MatchDiscoverActions, MatchDiscoverState, MatchToastPayload } from './matchDiscoverTypes'
 import type { MatchGenderFilter } from './types'
+
+export type { MatchToastPayload } from './matchDiscoverTypes'
 
 export type DiscoverAction = 'like' | 'pass' | 'super' | 'invite'
 
@@ -10,13 +13,6 @@ type HistoryEntry = {
   profileId: string
   action: DiscoverAction
   consumedLike: boolean
-}
-
-export type MatchToastPayload = {
-  id: number
-  title: string
-  subtitle?: string
-  variant: 'premium' | 'invite' | 'warn' | 'success'
 }
 
 export function useMatchDiscover(gender: MatchGenderFilter) {
@@ -106,25 +102,48 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
   const canLike = Boolean(current) && (isUnlimited || remaining > 0)
   const canAct = Boolean(current) && !queueDone
 
-  return {
-    current,
-    peekLeft,
-    peekRight,
-    queueDone,
-    poolSize: pool.length,
-    likesRemaining: remaining,
-    dailyLimit: DAILY_LIKES_LIMIT,
-    isUnlimited,
-    toast,
-    dismissToast,
-    pass,
-    like,
-    superLike,
-    gameInvite,
-    undo,
-    canUndo,
-    canLike,
-    canAct,
-    notify: showToast,
-  }
+  const state = useMemo<MatchDiscoverState>(
+    () => ({
+      current,
+      peekLeft,
+      peekRight,
+      queueDone,
+      poolSize: pool.length,
+      likesRemaining: remaining,
+      dailyLimit: DAILY_LIKES_LIMIT,
+      isUnlimited,
+      toast,
+      canUndo,
+      canLike,
+      canAct,
+    }),
+    [
+      canAct,
+      canLike,
+      canUndo,
+      current,
+      isUnlimited,
+      peekLeft,
+      peekRight,
+      pool.length,
+      queueDone,
+      remaining,
+      toast,
+    ],
+  )
+
+  const actions = useMemo<MatchDiscoverActions>(
+    () => ({
+      dismissToast,
+      pass,
+      like,
+      superLike,
+      gameInvite,
+      undo,
+      notify: showToast,
+    }),
+    [dismissToast, gameInvite, like, pass, showToast, superLike, undo],
+  )
+
+  return { state, actions }
 }

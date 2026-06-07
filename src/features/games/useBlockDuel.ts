@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
 import {
   createBlockLane,
   getLaneView,
@@ -55,6 +56,8 @@ export function useBlockDuel() {
   const roundIntroRef = useRef(2.4)
   const DAS_DELAY = 0.07
   const DAS_REPEAT = 0.022
+
+  const documentVisible = useDocumentVisible()
 
   lane1Ref.current = lane1
   lane2Ref.current = lane2
@@ -168,7 +171,7 @@ export function useBlockDuel() {
   )
 
   useEffect(() => {
-    if (!running || winner) return
+    if (!running || winner || !documentVisible) return
 
     let last = performance.now()
     let raf = 0
@@ -262,7 +265,7 @@ export function useBlockDuel() {
 
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [running, winner, roundNumber, playEvents, handleKnockout, handleTimeUp, syncLanes])
+  }, [documentVisible, running, winner, roundNumber, playEvents, handleKnockout, handleTimeUp, syncLanes])
 
   const pressLeft = useCallback(() => {
     inputRef.current.left = true

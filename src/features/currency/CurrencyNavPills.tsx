@@ -1,9 +1,11 @@
 import { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { FiPlus } from 'react-icons/fi'
-import elmasIcon from '../../reference/elmas.png'
+import elmasIcon from '../../reference/opt/thumb/elmas.webp'
+import { LazyImage } from '../../shared/LazyImage'
 import { CurrencyPurchaseSheet } from './CurrencyPurchaseSheet'
-import { useGemBalance } from './GemBalanceProvider'
+import { formatGemBalance } from '../../shared/formatGemBalance'
+import { useGemBalanceState } from './GemBalanceProvider'
 import type { CurrencyKind } from './types'
 
 type CurrencyNavPillsProps = {
@@ -12,7 +14,7 @@ type CurrencyNavPillsProps = {
 
 export function CurrencyNavPills({ variant = 'default' }: CurrencyNavPillsProps) {
   const [shopKind, setShopKind] = useState<CurrencyKind | null>(null)
-  const { balance, formatBalance } = useGemBalance()
+  const { balance } = useGemBalanceState()
 
   const openGemsShop = useCallback(() => setShopKind('gems'), [])
   const closeShop = useCallback(() => setShopKind(null), [])
@@ -26,14 +28,14 @@ export function CurrencyNavPills({ variant = 'default' }: CurrencyNavPillsProps)
           type="button"
           className="pm-currency-nav__item is-gems"
           onClick={openGemsShop}
-          aria-label={`Elmas bakiyesi: ${formatBalance(balance)}. Satın almak için dokunun.`}
+          aria-label={`Elmas bakiyesi: ${formatGemBalance(balance)}. Satın almak için dokunun.`}
         >
           <span className="pm-currency-nav__icon pm-currency-nav__gem" aria-hidden>
             <span className="pm-currency-nav__gem-aura" aria-hidden />
             <span className="pm-currency-nav__gem-flare" aria-hidden />
-            <img src={elmasIcon} alt="" className="pm-currency-nav__gem-img" />
+            <LazyImage src={elmasIcon} alt="" className="pm-currency-nav__gem-img" width={28} height={28} />
           </span>
-          <span className="pm-currency-nav__amount">{formatBalance(balance)}</span>
+          <span className="pm-currency-nav__amount">{formatGemBalance(balance)}</span>
           <span className="pm-currency-nav__plus" aria-hidden>
             <FiPlus />
           </span>

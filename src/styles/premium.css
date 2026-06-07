@@ -2,6 +2,23 @@
 /* PlayMeet Premium — AAA cinematic membership (premium-final reference)      */
 /* -------------------------------------------------------------------------- */
 
+.pm-tab-panel#pm-tab-premium {
+  background: #060818;
+}
+
+.pm-tab-panel#pm-tab-premium::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 118% 85% at 50% -10%, rgba(170, 80, 255, 0.26), transparent 56%),
+    radial-gradient(ellipse 92% 70% at 100% 18%, rgba(255, 160, 80, 0.12), transparent 58%),
+    radial-gradient(ellipse 85% 62% at 0% 42%, rgba(255, 55, 160, 0.14), transparent 54%),
+    linear-gradient(165deg, #12082a 0%, #060818 42%, #1a0818 100%);
+}
+
 .pm-app-shell--premium {
   min-height: auto;
   height: auto;

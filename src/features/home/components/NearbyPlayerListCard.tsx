@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { memo, useState } from 'react'
 import { FiMapPin } from 'react-icons/fi'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
@@ -6,7 +6,7 @@ import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
 import { formatPlayerLevel } from '../../profile/profileLevel'
 import type { NearbyPlayer } from '../types'
-import { useNearbyLikes } from '../useNearbyLikes'
+import { useHasLiked } from '../NearbyLikesProvider'
 import { NearbyGameInviteButton, type NearbyInvitePhase } from './NearbyGameInviteButton'
 import { NearbyInviteBurst } from './NearbyInviteBurst'
 import { NearbyLikeBurst } from './NearbyLikeBurst'
@@ -19,10 +19,9 @@ type NearbyPlayerListCardProps = {
 
 const VISIBLE_INTERESTS = 2
 
-export function NearbyPlayerListCard({ player, index = 0 }: NearbyPlayerListCardProps) {
+export const NearbyPlayerListCard = memo(function NearbyPlayerListCard({ player, index = 0 }: NearbyPlayerListCardProps) {
   const reduceMotion = useReducedMotion()
-  const { hasLiked } = useNearbyLikes()
-  const liked = hasLiked(player.id)
+  const liked = useHasLiked(player.id)
   const [likePhase, setLikePhase] = useState<NearbyLikePhase>('idle')
   const [invitePhase, setInvitePhase] = useState<NearbyInvitePhase>('idle')
   const visibleInterests = player.interests.slice(0, VISIBLE_INTERESTS)
@@ -32,7 +31,6 @@ export function NearbyPlayerListCard({ player, index = 0 }: NearbyPlayerListCard
   return (
     <motion.article
       className={`pm-nearby-list-card pm-nearby-list-card--aaa${liked ? ' is-liked-card' : ''}`}
-      layout
       initial={reduceMotion ? false : { opacity: 0, y: 18 }}
       animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
       transition={{
@@ -102,4 +100,4 @@ export function NearbyPlayerListCard({ player, index = 0 }: NearbyPlayerListCard
       </div>
     </motion.article>
   )
-}
+})
