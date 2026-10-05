@@ -37,13 +37,13 @@
   object-position: center;
   opacity: 0;
   transition: opacity var(--pm-seamless-fade) linear;
-  will-change: opacity;
   transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 .pm-seamless-loop-video__el.is-active {
   opacity: 1;
+  will-change: opacity;
 }
 
 .pm-duel-ambient__video .pm-seamless-loop-video__el {

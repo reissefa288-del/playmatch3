@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiZap } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -19,7 +18,7 @@ export function DefenderDuelLobbyScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--defender">
       <div className="pm-artboard">
-        <motion.div className="pm-def-lobby" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-def-lobby">
           <GameDuelBackdrop />
 
           <button type="button" className="pm-def-back" onClick={handleBack} aria-label="Geri dön">
@@ -52,7 +51,7 @@ export function DefenderDuelLobbyScreen() {
               MAÇA BAŞLA
             </button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

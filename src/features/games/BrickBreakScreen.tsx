@@ -1,5 +1,4 @@
 import '../../styles/brick-break.css'
-import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { FiArrowLeft, FiChevronLeft, FiChevronRight } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -72,12 +71,12 @@ export function BrickBreakScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--brick">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-brick-screen"
           style={{ height: '100%', minHeight: 0 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.32 }}
+         
+         
+         
         >
           <GameDuelBackdrop />
 
@@ -183,7 +182,7 @@ export function BrickBreakScreen() {
               />
             </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

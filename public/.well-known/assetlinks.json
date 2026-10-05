@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.playmeet.twa",
+      "sha256_cert_fingerprints": [
+        "A1:D2:A4:FC:3B:39:7B:77:5E:6E:FA:E9:DB:64:C6:E2:6B:3C:54:0E:99:31:36:5A:F0:EC:5D:9D:BD:AD:24:BA"
+      ]
+    }
+  }
+]

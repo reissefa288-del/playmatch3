@@ -1,5 +1,4 @@
 import '../../styles/space-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -34,7 +33,7 @@ export function SpaceDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--space">
       <div className="pm-artboard">
-        <motion.div className="pm-space-screen-wrap" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-space-screen-wrap">
           <GameDuelBackdrop />
 
           <button type="button" className="pm-space-back" onClick={handleBack} aria-label="Geri dön">
@@ -80,7 +79,7 @@ export function SpaceDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div className="pm-space-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
+            <div className="pm-space-overlay" role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
                 <GameDuelRematchActions
@@ -89,9 +88,9 @@ export function SpaceDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

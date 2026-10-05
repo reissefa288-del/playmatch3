@@ -1,6 +1,4 @@
 import { IoHeart } from 'react-icons/io5'
-import { motion } from 'framer-motion'
-
 const PARTICLE_COUNT = 8
 
 type NearbyLikeBurstProps = {
@@ -9,11 +7,11 @@ type NearbyLikeBurstProps = {
 
 export function NearbyLikeBurst({ variant = 'card' }: NearbyLikeBurstProps) {
   return (
-    <motion.div
+    <div
       className={`pm-nearby-card__like-burst${variant === 'list' ? ' pm-nearby-card__like-burst--list' : ''}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+     
+     
+     
       role="status"
       aria-live="polite"
     >
@@ -34,6 +32,6 @@ export function NearbyLikeBurst({ variant = 'card' }: NearbyLikeBurstProps) {
           </span>
         ))}
       </div>
-    </motion.div>
+    </div>
   )
 }

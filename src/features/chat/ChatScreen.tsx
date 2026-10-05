@@ -1,11 +1,11 @@
-import '../../styles/chat-ambient.css'
-import '../../styles/chat.css'
+import '../../styles/chat-bundle.css'
 import { useCallback, useMemo, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
-import { chatThreads } from './data'
+import type { ChatThread } from './data'
+import { useChatThreads } from './useChatThreads'
 import { ChatHeader } from './components/ChatHeader'
 import { ChatList } from './components/ChatList'
 import { ChatSearch } from './components/ChatSearch'
@@ -16,11 +16,11 @@ function normalizeQuery(value: string) {
   return value.trim().toLocaleLowerCase('tr-TR')
 }
 
-function filterThreads(query: string) {
+function filterThreads(threads: ChatThread[], query: string) {
   const normalized = normalizeQuery(query)
-  if (!normalized) return chatThreads
+  if (!normalized) return threads
 
-  return chatThreads.filter(
+  return threads.filter(
     (thread) =>
       thread.name.toLocaleLowerCase('tr-TR').includes(normalized) ||
       thread.lastMessage.toLocaleLowerCase('tr-TR').includes(normalized),
@@ -31,21 +31,26 @@ export function ChatScreen() {
   const navigate = useNavigate()
   const [searchQuery, setSearchQuery] = useState('')
   const [newChatOpen, setNewChatOpen] = useState(false)
+  const { threads } = useChatThreads()
 
-  const filteredThreads = useMemo(() => filterThreads(searchQuery), [searchQuery])
+  const filteredThreads = useMemo(
+    () => filterThreads(threads, searchQuery),
+    [threads, searchQuery],
+  )
 
   const onlineUsers = useMemo(
     () =>
-      chatThreads
+      threads
         .filter((thread) => thread.isOnline && thread.portraitPosition)
         .slice(0, 4)
-        .map((thread) => ({
+        .map((thread, index) => ({
           id: thread.id,
           name: thread.name,
           portraitPosition: thread.portraitPosition!,
-          ring: thread.id === 'zeynep' || thread.id === 'damla' ? ('pink' as const) : ('cyan' as const),
+          portraitSrc: thread.portraitSrc,
+          ring: index % 2 === 0 ? ('pink' as const) : ('cyan' as const),
         })),
-    [],
+    [threads],
   )
 
   const openNewChat = useCallback(() => {
@@ -81,7 +86,11 @@ export function ChatScreen() {
             {filteredThreads.length > 0 ? (
               <ChatList threads={filteredThreads} />
             ) : (
-              <p className="pm-chat-list__empty">Aramanla eşleşen sohbet bulunamadı</p>
+              <p className="pm-chat-list__empty">
+                {searchQuery.trim()
+                  ? 'Aramanla eşleşen sohbet bulunamadı'
+                  : 'Henüz sohbet yok. Eşleştiğin kişilerle konuşmaya başla.'}
+              </p>
             )}
           </main>
         </div>

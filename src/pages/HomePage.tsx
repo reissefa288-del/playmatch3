@@ -1,5 +1,5 @@
-import { HomeScreen } from '../features/home/HomeScreen'
+import { HomeTabEntry } from '../features/home/HomeTabEntry'
 
 export default function HomePage() {
-  return <HomeScreen />
+  return <HomeTabEntry />
 }

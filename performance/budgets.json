@@ -1,0 +1,127 @@
+{
+  "version": 1,
+  "description": "PlayMeet performance budgets — bundle limits (CI enforced) and Lighthouse targets.",
+  "bundle": {
+    "gzipKb": {
+      "index.js": 12,
+      "app-providers.js": 140,
+      "app-shell.js": 26,
+      "shared-ui.js": 5,
+      "shared-hooks.js": 3,
+      "vendor-react.js": 65,
+    "vendor-sentry.js": 130,
+      "index.css": 10,
+      "HomeScreenBody.js": 8,
+      "home-shell.js": 9,
+      "profile-shell.js": 9,
+      "games-shell.js": 9,
+      "GamesScreenBody.js": 8,
+      "match-shell.js": 9,
+      "MatchScreen.js": 3,
+      "MatchScreenBody.js": 8,
+      "ChatScreen.js": 4,
+      "ProfileScreen.js": 6,
+      "PremiumScreen.js": 6,
+      "game-1942.js": 40,
+      "game-1942-engine.js": 5,
+      "game-1942-arena.js": 20,
+      "vendor-icons.js": 2,
+      "vendor-icons-fi.js": 3,
+      "vendor-icons-lu.js": 2,
+      "vendor-icons-pi.js": 2,
+      "vendor-icons-md.js": 2,
+      "vendor-icons-io5.js": 2,
+      "socket.js": 13
+    },
+    "forbiddenChunkPatterns": ["vendor-motion"],
+    "maxInitialJsGzipKb": 140,
+    "maxInitialCssGzipKb": 10,
+    "maxLazyTabJsGzipKb": 25
+  },
+  "media": {
+    "maxVideoFileMb": 2,
+    "maxDistImageAssetsMb": 5.5,
+    "maxDistCodeAssetsMb": 2.5,
+    "maxDistAssetsMbExcludingVideo": 8
+  },
+  "runtime": {
+    "maxMountedTabs": 2,
+    "pinnedTabIds": ["chat"]
+  },
+  "production": {
+    "minBrotliSavingsPercent": 12,
+    "rumSampleRate": 0.05,
+    "sourceMapsInDist": false
+  },
+  "rum": {
+    "targets": {
+      "lcpP75Ms": 2500,
+      "inpP75Ms": 200,
+      "clsP75": 0.1
+    }
+  },
+  "pwa": {
+    "maxPrecacheKb": 960
+  },
+  "photo": {
+    "maxBlurKb": 2
+  },
+  "games": {
+    "maxCanvasDpr": 2,
+    "duelRenderBatchFrames": 2
+  },
+  "lighthouse": {
+    "environment": "production-static-preview",
+    "targets": {
+      "performanceScore": 85,
+      "lcpMs": 2500,
+      "cls": 0.1,
+      "fcpMs": 1800,
+      "tbtMs": 300
+    },
+    "regressionFloors": {
+      "home": {
+        "performanceScore": 75,
+        "lcpMs": 3500,
+        "cls": 0.16,
+        "fcpMs": 2000,
+        "tbtMs": 650
+      },
+      "games": {
+        "performanceScore": 70,
+        "lcpMs": 3200,
+        "cls": 0.05,
+        "fcpMs": 2000,
+        "tbtMs": 250
+      },
+      "match": {
+        "performanceScore": 85,
+        "lcpMs": 2000,
+        "cls": 0.05,
+        "fcpMs": 1500,
+        "tbtMs": 250
+      },
+      "chat": {
+        "performanceScore": 90,
+        "lcpMs": 1500,
+        "cls": 0.05,
+        "fcpMs": 1500,
+        "tbtMs": 200
+      },
+      "profile": {
+        "performanceScore": 90,
+        "lcpMs": 1500,
+        "cls": 0.05,
+        "fcpMs": 1200,
+        "tbtMs": 200
+      },
+      "premium": {
+        "performanceScore": 85,
+        "lcpMs": 1500,
+        "cls": 0.05,
+        "fcpMs": 1200,
+        "tbtMs": 300
+      }
+    }
+  }
+}

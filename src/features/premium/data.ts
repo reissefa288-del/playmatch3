@@ -1,11 +1,6 @@
 import { FiEye, FiGift, FiHeart, FiMessageCircle, FiShield, FiZap } from 'react-icons/fi'
 import { LuCrown } from 'react-icons/lu'
 import type { IconType } from 'react-icons'
-import { bottomNavigation } from '../home/data'
-import type { BottomNavItem } from '../home/types'
-
-
-export const premiumBottomNavigation: BottomNavItem[] = bottomNavigation
 
 export const premiumHero = {
   title: 'PlayMeet Premium',

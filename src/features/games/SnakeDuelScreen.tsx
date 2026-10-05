@@ -1,5 +1,4 @@
 import '../../styles/snake-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -44,7 +43,7 @@ export function SnakeDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--snake">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className={[
             'pm-snake-screen',
             game.screenShake ? 'is-shake' : '',
@@ -52,8 +51,8 @@ export function SnakeDuelScreen() {
           ]
             .filter(Boolean)
             .join(' ')}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+         
+         
           onPointerDown={game.ensureAudio}
         >
           <GameDuelBackdrop />
@@ -62,60 +61,48 @@ export function SnakeDuelScreen() {
             <FiArrowLeft />
           </button>
           <div className="pm-snake-screen__stack">
-            <motion.header
+            <header
               className="pm-snake-header"
-              initial={{ opacity: 0, y: -12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.05, duration: 0.35 }}
+             
+             
+             
             >
               <h1 className="pm-snake-header__title">
-                <motion.span
+                <span
                   className="is-cyan"
-                  animate={{
-                    textShadow: [
-                      '0 0 8px rgba(96,165,250,0.3)',
-                      '0 0 18px rgba(96,165,250,0.55)',
-                      '0 0 8px rgba(96,165,250,0.3)',
-                    ],
-                  }}
-                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+                 
+                 
                 >
                   SNAKE
-                </motion.span>
-                <motion.span
+                </span>
+                <span
                   className="is-green"
-                  animate={{
-                    textShadow: [
-                      '0 0 8px rgba(84,226,145,0.25)',
-                      '0 0 16px rgba(84,226,145,0.5)',
-                      '0 0 8px rgba(84,226,145,0.25)',
-                    ],
-                  }}
-                  transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
+                 
+                 
                 >
                   DUEL
-                </motion.span>
+                </span>
               </h1>
               <p className="pm-snake-header__sub">YEM · ELMAS · KENARDAN GEÇ</p>
-            </motion.header>
+            </header>
 
-            <motion.section
+            <section
               className="pm-snake-hud"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.35 }}
+             
+             
+             
             >
               <div className="pm-snake-hud__side">
                 <GamePlayerPortrait src={FAKE_PORTRAIT_MALE} variant="cyan" active={canPlay} />
                 <p className="pm-snake-hud__name">EMİR</p>
-                <motion.strong
+                <strong
                   key={game.lane1.score}
-                  initial={{ scale: 1.2 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                 
+                 
+                 
                 >
                   {game.lane1.score}
-                </motion.strong>
+                </strong>
                 <span>
                   SET {game.lane1.matchPoints} · 💎 {game.lane1.diamondsCollected}
                 </span>
@@ -138,29 +125,25 @@ export function SnakeDuelScreen() {
               <div className="pm-snake-hud__side is-p2">
                 <GamePlayerPortrait src={opponent.portrait} variant="pink" active={canPlay} {...likeProps}/>
                 <p className="pm-snake-hud__name">ZEYNEP</p>
-                <motion.strong
+                <strong
                   key={game.lane2.score}
-                  initial={{ scale: 1.2 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 20 }}
+                 
+                 
+                 
                 >
                   {game.lane2.score}
-                </motion.strong>
+                </strong>
                 <span>
                   SET {game.lane2.matchPoints} · 💎 {game.lane2.diamondsCollected}
                 </span>
               </div>
-            </motion.section>
+            </section>
 
-            <motion.section
+            <section
               className="pm-snake-arena"
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{
-                opacity: cinematicOpen ? 0.35 : 1,
-                scale: cinematicOpen ? 0.96 : 1,
-                filter: cinematicOpen ? 'blur(2px) brightness(0.72)' : 'blur(0px) brightness(1)',
-              }}
-              transition={{ duration: 0.35 }}
+             
+             
+             
             >
               <div className="pm-snake-arena__lane-wrap">
                 <SnakeDuelGrid
@@ -174,20 +157,13 @@ export function SnakeDuelScreen() {
                   </p>
                 ) : null}
               </div>
-              <motion.img
+              <img
                 className="pm-snake-vs"
                 src={SNAKE_DUEL_ART.vsBadge}
                 alt=""
                 aria-hidden
-                animate={{
-                  scale: [1, 1.08, 1],
-                  filter: [
-                    'drop-shadow(0 0 8px rgba(84,226,145,0.4))',
-                    'drop-shadow(0 0 16px rgba(84,226,145,0.75))',
-                    'drop-shadow(0 0 8px rgba(84,226,145,0.4))',
-                  ],
-                }}
-                transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
+               
+               
               />
               <div className="pm-snake-arena__lane-wrap">
                 <SnakeDuelGrid
@@ -196,7 +172,7 @@ export function SnakeDuelScreen() {
                   roundElapsedSec={ROUND_SECONDS - game.roundTimeLeft}
                 />
               </div>
-            </motion.section>
+            </section>
 
             <SnakeDuelControls
               disabled={!canPlay}
@@ -220,7 +196,7 @@ export function SnakeDuelScreen() {
             onRestart={game.restartMatch}
             onExit={handleBack}
           />
-        </motion.div>
+        </div>
       </div>
     </div>
   )

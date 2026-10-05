@@ -1,5 +1,4 @@
 import '../../styles/chess-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -45,10 +44,10 @@ export function ChessDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--chess">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-chess-screen"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+         
+         
           onPointerDown={() => unlockChessDuelAudio()}
         >
           <GameDuelBackdrop />
@@ -100,7 +99,7 @@ export function ChessDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div className="pm-chess-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
+            <div className="pm-chess-overlay" role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
                 <GameDuelRematchActions
@@ -109,9 +108,9 @@ export function ChessDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

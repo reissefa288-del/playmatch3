@@ -1,4 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react'
+import { canvasDprCap } from '../../../shared/canvasDpr'
+import { releaseCanvas } from '../../../shared/releaseCanvas'
 import {
   BALL_RADIUS,
   BRICK_COLORS,
@@ -35,7 +37,7 @@ const BALL_SKIN = {
 } as const
 
 function canvasDpr() {
-  return Math.min(window.devicePixelRatio || 1, 1.5)
+  return canvasDprCap()
 }
 
 export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakCanvasProps) {
@@ -168,6 +170,7 @@ export function BrickBreakCanvas({ laneRef, accent, active = true }: BrickBreakC
     return () => {
       cancelAnimationFrame(raf)
       ro?.disconnect()
+      releaseCanvas(canvas)
     }
   }, [active, laneRef])
 

@@ -1391,6 +1391,54 @@
   color: #fff;
 }
 
+.pm-match-matches-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 24px;
+}
+
+.pm-match-matches-list__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(8, 12, 32, 0.72);
+}
+
+.pm-match-matches-list__avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pm-match-matches-list__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pm-match-matches-list__meta strong {
+  font-size: 0.95rem;
+  color: #eef2ff;
+}
+
+.pm-match-matches-list__meta span {
+  font-size: 0.8rem;
+  color: #9aa8d8;
+}
+
+.pm-match-matches-list__badge {
+  font-size: 1.1rem;
+  color: #ff7eb8;
+}
+
 .pm-match-empty__text {
   margin: 0.5rem 0 0;
   max-width: 260px;

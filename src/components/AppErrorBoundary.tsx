@@ -13,6 +13,9 @@ export class AppErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('PlayMeet render error:', error, info.componentStack)
+    void import('../shared/initProductionMonitoring').then(({ reportReactError }) => {
+      reportReactError(error, info.componentStack)
+    })
   }
 
   render() {

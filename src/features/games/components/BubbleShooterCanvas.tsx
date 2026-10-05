@@ -1,4 +1,5 @@
 import { useEffect, useRef, type MutableRefObject, type RefObject } from 'react'
+import { releaseCanvas } from '../../../shared/releaseCanvas'
 import {
   BUBBLE_RADIUS,
   DANGER_LINE_Y,
@@ -220,6 +221,7 @@ export function BubbleShooterCanvas({
     return () => {
       cancelAnimationFrame(raf)
       ro?.disconnect()
+      releaseCanvas(canvas)
     }
   }, [active, laneRef])
 

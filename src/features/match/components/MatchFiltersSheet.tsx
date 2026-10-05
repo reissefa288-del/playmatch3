@@ -1,5 +1,5 @@
-import { FiGlobe, FiSliders, FiUsers, FiX } from 'react-icons/fi'
 import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
+import { FiGlobe, FiSliders, FiUsers, FiX } from 'react-icons/fi'
 import { MATCH_GENDER_OPTIONS } from '../matchFilters'
 import type { MatchFilters } from '../types'
 

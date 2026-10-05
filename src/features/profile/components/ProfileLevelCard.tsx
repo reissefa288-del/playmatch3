@@ -1,13 +1,11 @@
 import { useEffect, useRef } from 'react'
 import { LuSparkles } from 'react-icons/lu'
-import { motion, useReducedMotion } from 'framer-motion'
 import levelBackdrop from '../../../reference/opt/thumb/arka.webp'
 import { LazyImage } from '../../../shared/LazyImage'
 import { formatXp } from '../profileLevel'
 import { useProfileLevel } from '../ProfileLevelProvider'
 
 export function ProfileLevelCard() {
-  const reduceMotion = useReducedMotion()
   const { level, xpInLevel, xpToNext, percent, lastGain } = useProfileLevel()
   const prevLevelRef = useRef(level)
   const leveledUp = level > prevLevelRef.current
@@ -17,21 +15,21 @@ export function ProfileLevelCard() {
   }, [level])
 
   return (
-    <section className="pm-profile-level-card" aria-label="Seviye bilgisi">
+    <section className={`pm-profile-level-card${leveledUp ? ' is-level-up' : ''}`} aria-label="Seviye bilgisi">
       <div className="pm-profile-level-badge">
         <span className="pm-profile-level-badge__bg" aria-hidden>
           <LazyImage src={levelBackdrop} alt="" className="pm-profile-level-badge__img" width={56} height={56} />
         </span>
         <span className="pm-profile-level-badge__shine" aria-hidden />
-        <motion.span
+        <span
           className="pm-profile-level-badge__num"
           key={level}
-          initial={leveledUp && !reduceMotion ? { scale: 0.7, opacity: 0 } : false}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+         
+         
+         
         >
           {level}
-        </motion.span>
+        </span>
       </div>
 
       <div className="pm-profile-level-card__body">
@@ -50,11 +48,11 @@ export function ProfileLevelCard() {
           aria-label={`Seviye ilerlemesi ${Math.round(percent)} yüzde`}
         >
           <span className="pm-profile-level-card__bar-track" aria-hidden />
-          <motion.span
+          <span
             className="pm-profile-level-card__bar-fill"
-            initial={false}
-            animate={{ width: `${percent}%` }}
-            transition={{ duration: 0.85, ease: [0.22, 1, 0.36, 1] }}
+           
+           
+           
           />
           <span className="pm-profile-level-card__bar-glow" aria-hidden />
         </div>
@@ -65,15 +63,15 @@ export function ProfileLevelCard() {
             <small>/ {formatXp(xpToNext)} XP</small>
           </p>
           {lastGain ? (
-            <motion.span
+            <span
               className="pm-profile-level-card__gain"
               role="status"
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+             
+             
+             
             >
               <LuSparkles aria-hidden />+{formatXp(lastGain)} XP
-            </motion.span>
+            </span>
           ) : (
             <span className="pm-profile-level-card__hint">Oyun oyna, XP kazan</span>
           )}

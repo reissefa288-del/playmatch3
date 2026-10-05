@@ -1,0 +1,4 @@
+# PlayMeet kapalı test — tester e-postaları (örnek)
+# Play Console → Testing → Testers → Create email list
+tester-a@gmail.com
+tester-b@gmail.com

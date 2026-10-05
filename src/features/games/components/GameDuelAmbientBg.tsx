@@ -1,8 +1,4 @@
 import '../../../styles/game-duel-ambient.css'
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { DUEL_VIDEO_POSTER } from '../../../shared/duelVideoPoster'
-import { SeamlessLoopVideo } from './SeamlessLoopVideo'
 
 const STARS = Array.from({ length: 36 }, (_, i) => ({
   id: i,
@@ -29,126 +25,33 @@ const BEAMS = Array.from({ length: 5 }, (_, i) => ({
 type GameDuelAmbientBgProps = {
   /** Bubble: gölgeleme kapalı, daha açık mavi/pembe ton */
   variant?: 'default' | 'bubble'
-  /** Arka plan videosu (video.mp4) */
-  video?: boolean
 }
 
-/** Paylaşılan premium AAA duel arka planı — video={false} ile GameDuelVideoBg üstünde */
-export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDuelAmbientBgProps) {
+/** Paylaşılan premium AAA duel arka planı (video ayrı — GameDuelVideoBg) */
+export function GameDuelAmbientBg({ variant = 'default' }: GameDuelAmbientBgProps) {
   const isBubble = variant === 'bubble'
-  const [videoSrc, setVideoSrc] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!video) return
-    let cancelled = false
-    import('../../../reference/video.mp4').then((mod) => {
-      if (!cancelled) setVideoSrc(mod.default)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [video])
 
   return (
-    <motion.div
-      className={`pm-duel-ambient${isBubble ? ' is-bubble' : ''}`}
-      aria-hidden
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.55, ease: 'easeOut' }}
-    >
-      {video && videoSrc ? (
-        <div className="pm-duel-ambient__video" aria-hidden>
-          <SeamlessLoopVideo src={videoSrc} crossfadeSec={0.52} />
-        </div>
-      ) : video ? (
-        <div
-          className="pm-duel-ambient__video pm-duel-ambient__video--poster"
-          aria-hidden
-          style={{
-            backgroundImage: `url(${DUEL_VIDEO_POSTER})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-          }}
-        />
-      ) : null}
-      <motion.div
-        className="pm-duel-ambient__base"
-        animate={{ backgroundPosition: ['0% 0%', '5% 2%', '2% 5%', '0% 0%'] }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pm-duel-ambient__nebula"
-        animate={{ rotate: [-2, 2, -2], scale: [1, 1.035, 1], opacity: [0.38, 0.54, 0.38] }}
-        transition={{ duration: 24, repeat: Infinity, ease: 'easeInOut' }}
-      />
+    <div className={`pm-duel-ambient${isBubble ? ' is-bubble' : ''}`} aria-hidden>
+      <div className="pm-duel-ambient__base" />
+      <div className="pm-duel-ambient__nebula" />
 
-      <motion.div
-        className="pm-duel-ambient__split pm-duel-ambient__split--cyan"
-        animate={{
-          opacity: isBubble ? [0.52, 0.72, 0.52] : [0.22, 0.42, 0.22],
-          x: ['-1%', '1.5%', '-1%'],
-        }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pm-duel-ambient__split pm-duel-ambient__split--pink"
-        animate={{
-          opacity: isBubble ? [0.5, 0.7, 0.5] : [0.2, 0.4, 0.2],
-          x: ['1%', '-1.5%', '1%'],
-        }}
-        transition={{ duration: 9.5, repeat: Infinity, ease: 'easeInOut', delay: 0.6 }}
-      />
+      <div className="pm-duel-ambient__split pm-duel-ambient__split--cyan" />
+      <div className="pm-duel-ambient__split pm-duel-ambient__split--pink" />
 
-      <motion.div
-        className="pm-duel-ambient__aurora pm-duel-ambient__aurora--cyan"
-        animate={{ x: ['-2%', '2.5%', '-2%'], y: [0, -8, 0], opacity: [0.26, 0.48, 0.32, 0.26] }}
-        transition={{ duration: 17, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pm-duel-ambient__aurora pm-duel-ambient__aurora--pink"
-        animate={{ x: ['2%', '-2.5%', '2%'], y: [0, 7, 0], opacity: [0.24, 0.44, 0.3, 0.24] }}
-        transition={{ duration: 19, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-      />
-      <motion.div
-        className="pm-duel-ambient__aurora pm-duel-ambient__aurora--gold"
-        animate={{ y: [0, -4, 0], opacity: [0.12, 0.26, 0.12] }}
-        transition={{ duration: 13, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-      />
+      <div className="pm-duel-ambient__aurora pm-duel-ambient__aurora--cyan" />
+      <div className="pm-duel-ambient__aurora pm-duel-ambient__aurora--pink" />
+      <div className="pm-duel-ambient__aurora pm-duel-ambient__aurora--gold" />
 
-      <motion.div
-        className="pm-duel-ambient__orb pm-duel-ambient__orb--cyan"
-        animate={{ opacity: [0.1, 0.22, 0.12], y: [0, -8, 0], scale: [1, 1.06, 1] }}
-        transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pm-duel-ambient__orb pm-duel-ambient__orb--pink"
-        animate={{ opacity: [0.09, 0.2, 0.1], y: [0, 7, 0], scale: [1, 1.05, 1] }}
-        transition={{ duration: 11.5, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
-      />
-      <motion.div
-        className="pm-duel-ambient__orb pm-duel-ambient__orb--center"
-        animate={{ opacity: [0.05, 0.14, 0.06], scale: [1, 1.08, 1] }}
-        transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 0.2 }}
-      />
+      <div className="pm-duel-ambient__orb pm-duel-ambient__orb--cyan" />
+      <div className="pm-duel-ambient__orb pm-duel-ambient__orb--pink" />
+      <div className="pm-duel-ambient__orb pm-duel-ambient__orb--center" />
 
-      <motion.div
-        className="pm-duel-ambient__horizon"
-        animate={{ opacity: [0.38, 0.62, 0.38] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-      />
-      <motion.div
-        className="pm-duel-ambient__grid"
-        animate={{ backgroundPosition: ['50% 0%', '50% 100%'] }}
-        transition={{ duration: 16, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="pm-duel-ambient__scan"
-        animate={{ y: ['-12%', '12%', '-12%'], opacity: [0.16, 0.32, 0.16] }}
-        transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      <div className="pm-duel-ambient__horizon" />
+      <div className="pm-duel-ambient__grid" />
+      <div className="pm-duel-ambient__scan" />
 
-      <motion.div className="pm-duel-ambient__beams" aria-hidden>
+      <div className="pm-duel-ambient__beams" aria-hidden>
         {BEAMS.map((beam) => (
           <span
             key={beam.id}
@@ -156,9 +59,9 @@ export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDue
             style={{ left: beam.left, animationDelay: `${beam.delay}s` }}
           />
         ))}
-      </motion.div>
+      </div>
 
-      <motion.div className="pm-duel-ambient__particles" aria-hidden>
+      <div className="pm-duel-ambient__particles" aria-hidden>
         {PARTICLES.map((particle) => (
           <span
             key={particle.id}
@@ -166,15 +69,11 @@ export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDue
             style={{ left: particle.left, top: particle.top, animationDelay: `${particle.delay}s` }}
           />
         ))}
-      </motion.div>
+      </div>
 
-      <motion.div
-        className="pm-duel-ambient__city"
-        animate={{ opacity: [0.35, 0.55, 0.35] }}
-        transition={{ duration: 7.5, repeat: Infinity, ease: 'easeInOut' }}
-      />
+      <div className="pm-duel-ambient__city" />
 
-      <motion.div className="pm-duel-ambient__stars" aria-hidden>
+      <div className="pm-duel-ambient__stars" aria-hidden>
         {STARS.map((star) => (
           <span
             key={star.id}
@@ -188,11 +87,11 @@ export function GameDuelAmbientBg({ variant = 'default', video = true }: GameDue
             }}
           />
         ))}
-      </motion.div>
+      </div>
 
       <span className="pm-duel-ambient__grain" />
       {!isBubble ? <span className="pm-duel-ambient__dim" /> : null}
       {!isBubble ? <span className="pm-duel-ambient__vignette" /> : null}
-    </motion.div>
+    </div>
   )
 }

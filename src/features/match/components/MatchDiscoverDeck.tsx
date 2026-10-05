@@ -1,11 +1,14 @@
-import { memo } from 'react'
-import { motion } from 'framer-motion'
+import { lazy, memo, Suspense, useState } from 'react'
+import { ModerationFlow } from '../../moderation/components/ModerationFlow'
 import { DAILY_LIKES_LIMIT } from '../data'
 import type { MatchDiscoverActions, MatchDiscoverState } from '../matchDiscoverTypes'
 import { MatchActionRow } from './MatchActionRow'
-import { MatchBoostPanel } from './MatchBoostPanel'
 import { MatchProfileCard } from './MatchProfileCard'
 import { MatchToast } from './MatchToast'
+
+const MatchBoostPanel = lazy(() =>
+  import('./MatchBoostPanel').then((module) => ({ default: module.MatchBoostPanel })),
+)
 
 type MatchDiscoverDeckProps = {
   state: MatchDiscoverState
@@ -16,71 +19,86 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
   state,
   actions,
 }: MatchDiscoverDeckProps) {
+  const [moderationOpen, setModerationOpen] = useState(false)
+
   if (state.poolSize === 0) {
     return (
-      <motion.div
+      <div
         className="pm-match-discover"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.35 }}
+       
+       
+       
       >
-        <motion.div
+        <div
           className="pm-match-discover-empty"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+         
+         
+         
         >
           <p className="pm-match-discover-empty__title">Profil bulunamadı</p>
           <p className="pm-match-discover-empty__text">
             Seçtiğin cinsiyet filtresine uygun profil yok. Filtreyi değiştirmeyi dene.
           </p>
-        </motion.div>
-        <MatchBoostPanel onNotify={actions.notify} />
+        </div>
+        <Suspense fallback={null}>
+          <MatchBoostPanel onNotify={actions.notify} />
+        </Suspense>
         <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
-      </motion.div>
+      </div>
     )
   }
 
   if (state.queueDone) {
     return (
-      <motion.div
+      <div
         className="pm-match-discover"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.35 }}
+       
+       
+       
       >
-        <motion.div
+        <div
           className="pm-match-discover-empty"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+         
+         
+         
         >
           <p className="pm-match-discover-empty__title">Keşif tamamlandı</p>
           <p className="pm-match-discover-empty__text">
             Bugünkü {state.poolSize} profili gördün. Yarın yeni oyuncular ve {DAILY_LIKES_LIMIT}{' '}
             beğeni hakkı seni bekliyor.
           </p>
-        </motion.div>
-        <MatchBoostPanel onNotify={actions.notify} />
+        </div>
+        <Suspense fallback={null}>
+          <MatchBoostPanel onNotify={actions.notify} />
+        </Suspense>
         <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
-      </motion.div>
+      </div>
     )
   }
 
   if (!state.current) return null
 
   return (
-    <motion.div
+    <div
       className="pm-match-discover"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
+     
+     
+     
     >
       <MatchProfileCard
         key={state.current.id}
         profile={state.current}
         peekLeftName={state.peekLeft?.name}
         peekRightName={state.peekRight?.name}
+        onOpenModeration={() => setModerationOpen(true)}
+      />
+      <ModerationFlow
+        open={moderationOpen}
+        targetUid={state.current.id}
+        targetName={state.current.name}
+        source="profile"
+        onClose={() => setModerationOpen(false)}
+        onBlocked={() => actions.pass()}
       />
       <MatchActionRow
         onUndo={actions.undo}
@@ -95,8 +113,10 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
         dailyLimit={state.dailyLimit}
         isUnlimited={state.isUnlimited}
       />
-      <MatchBoostPanel onNotify={actions.notify} />
+      <Suspense fallback={null}>
+        <MatchBoostPanel onNotify={actions.notify} />
+      </Suspense>
       <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
-    </motion.div>
+    </div>
   )
 })

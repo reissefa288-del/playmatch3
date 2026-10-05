@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react'
 import { FiChevronRight } from 'react-icons/fi'
-import { motion, useReducedMotion } from 'framer-motion'
 import { useProfileLevelActions } from '../../profile/ProfileLevelProvider'
 import { XP_GAME_POPULAR } from '../../profile/profileLevel'
 import type { HubGame } from '../data'
@@ -11,7 +10,6 @@ type PopularGamesGridProps = {
 }
 
 export function PopularGamesGrid({ games }: PopularGamesGridProps) {
-  const reduceMotion = useReducedMotion()
   const { addXp } = useProfileLevelActions()
 
   return (
@@ -23,26 +21,20 @@ export function PopularGamesGrid({ games }: PopularGamesGridProps) {
         </button>
       </header>
 
-      <motion.div
+      <div
         className="pm-games-grid"
-        initial="hidden"
-        animate="visible"
-        variants={{
-          hidden: {},
-          visible: { transition: { staggerChildren: 0.03 } },
-        }}
+       
+       
+       
       >
         {games.map((game) => (
-          <motion.article
+          <article
             key={game.id}
             className={`pm-game-card ${game.accent === 'pink' ? 'is-pink' : 'is-blue'}`}
             style={{ '--pm-card-art-pos': game.artPosition } as CSSProperties}
-            variants={{
-              hidden: { opacity: 0, y: 10, scale: 0.96 },
-              visible: { opacity: 1, y: 0, scale: 1 },
-            }}
-            whileHover={reduceMotion ? undefined : { y: -5, scale: 1.02 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.97 }}
+           
+           
+           
             onClick={() => addXp(XP_GAME_POPULAR)}
             role="button"
             tabIndex={0}
@@ -58,7 +50,7 @@ export function PopularGamesGrid({ games }: PopularGamesGridProps) {
               <span className="pm-game-card__art-gloss" aria-hidden />
               <game.icon />
             </GameCoverArt>
-            <motion.div className="pm-game-card__content">
+            <div className="pm-game-card__content">
               <h4>{game.title}</h4>
               <p className="pm-game-card__activity">{game.activity}</p>
               <div className="pm-game-card__badges">
@@ -66,10 +58,10 @@ export function PopularGamesGrid({ games }: PopularGamesGridProps) {
                 <small>{game.playersShort}</small>
                 <em>{game.badge}</em>
               </div>
-            </motion.div>
-          </motion.article>
+            </div>
+          </article>
         ))}
-      </motion.div>
+      </div>
     </section>
   )
 }

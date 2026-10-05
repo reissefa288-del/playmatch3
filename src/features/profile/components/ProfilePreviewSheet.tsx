@@ -3,8 +3,6 @@ import { createPortal } from 'react-dom'
 import { FiChevronLeft, FiChevronRight, FiMapPin, FiX } from 'react-icons/fi'
 import { MdVerified } from 'react-icons/md'
 import { PiCrownSimpleFill } from 'react-icons/pi'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-
 type ProfilePreviewSheetProps = {
   open: boolean
   onClose: () => void
@@ -21,10 +19,9 @@ export function ProfilePreviewSheet({
   photos,
   name,
   location,
-  isPremium = true,
+  isPremium = false,
   verified = true,
 }: ProfilePreviewSheetProps) {
-  const reduceMotion = useReducedMotion()
   const count = photos.length
   const [index, setIndex] = useState(0)
 
@@ -64,16 +61,16 @@ export function ProfilePreviewSheet({
   if (typeof document === 'undefined') return null
 
   return createPortal(
-    <AnimatePresence>
+    <>
       {open && count > 0 ? (
-        <motion.div
+        <div
           className="pm-profile-preview"
           role="dialog"
           aria-modal="true"
           aria-label="Profil önizlemesi"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+         
+         
+         
         >
           <button
             type="button"
@@ -82,12 +79,12 @@ export function ProfilePreviewSheet({
             onClick={onClose}
           />
 
-          <motion.div
+          <div
             className="pm-profile-preview__sheet"
-            initial={reduceMotion ? false : { opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={reduceMotion ? undefined : { opacity: 0, y: 16 }}
-            transition={{ type: 'spring', stiffness: 340, damping: 32 }}
+           
+           
+           
+           
           >
             <div className="pm-profile-preview__photo">
               <img
@@ -170,10 +167,10 @@ export function ProfilePreviewSheet({
                 </p>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       ) : null}
-    </AnimatePresence>,
+    </>,
     document.body,
   )
 }

@@ -1,5 +1,4 @@
 import '../../styles/defender-duel.css'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -124,7 +123,7 @@ export function DefenderDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--defender">
       <div className="pm-artboard">
-        <motion.div className="pm-def-screen-wrap" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-def-screen-wrap">
           <GameDuelBackdrop />
 
           <button type="button" className="pm-def-back" onClick={handleBack} aria-label="Geri dön">
@@ -201,13 +200,13 @@ export function DefenderDuelScreen() {
             />
           </div>
 
-          <AnimatePresence>
+          <>
             {overlayMessage && resultVariant ? (
-              <motion.div
+              <div
                 className={['pm-def-overlay', `is-${resultVariant}`].join(' ')}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+               
+               
+               
                 role="status"
               >
                 {resultVariant === 'win' ? (
@@ -218,11 +217,11 @@ export function DefenderDuelScreen() {
                   </div>
                 ) : null}
 
-                <motion.div
+                <div
                   className="pm-def-result-card"
-                  initial={{ opacity: 0, scale: 0.88, y: 18 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ type: 'spring', stiffness: 340, damping: 26 }}
+                 
+                 
+                 
                 >
                   <span className="pm-def-result-card__badge" aria-hidden />
                   <p className="pm-def-result-card__eyebrow">MAÇ SONUCU</p>
@@ -243,11 +242,11 @@ export function DefenderDuelScreen() {
                     primaryClassName="is-primary"
                     ghostClassName="is-ghost"
                   />
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             ) : null}
-          </AnimatePresence>
-        </motion.div>
+          </>
+        </div>
       </div>
     </div>
   )

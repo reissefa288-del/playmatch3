@@ -1,6 +1,8 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
+import { useIntervalWhenActive } from '../../../shared/useIntervalWhenActive'
+import { useRuntimeActive } from '../../../shared/useRuntimeActive'
+import { useState, type CSSProperties } from 'react'
 import { FiUsers } from 'react-icons/fi'
-import { motion, useReducedMotion } from 'framer-motion'
 import { useProfileLevelActions } from '../../profile/ProfileLevelProvider'
 import { XP_GAME_FEATURED } from '../../profile/profileLevel'
 import type { FeaturedGame } from '../data'
@@ -52,7 +54,7 @@ function FeaturedGameCard({ game, onPlay, addXp }: FeaturedGameCardProps) {
       <span className="pm-featured-card__glow" aria-hidden />
       <span className="pm-featured-card__badge">{game.badge}</span>
 
-      <GameCoverArt gameId={game.id} artSize="full" className="pm-featured-card__art">
+      <GameCoverArt gameId={game.id} artSize="thumb" className="pm-featured-card__art" lowPriority>
         <span className="pm-featured-card__art-gloss" aria-hidden />
         <game.icon />
       </GameCoverArt>
@@ -87,21 +89,18 @@ function FeaturedGameCard({ game, onPlay, addXp }: FeaturedGameCardProps) {
 }
 
 export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
-  const reduceMotion = useReducedMotion()
+  const reduceMotion = usePrefersReducedMotion()
+  const tabActive = useRuntimeActive('games')
   const { addXp } = useProfileLevelActions()
   const pages = chunkGames(games, CARDS_PER_PAGE)
   const [pageIndex, setPageIndex] = useState(0)
   const [paused, setPaused] = useState(false)
 
-  useEffect(() => {
-    if (reduceMotion || pages.length <= 1 || paused) return
-
-    const timer = window.setInterval(() => {
-      setPageIndex((current) => (current + 1) % pages.length)
-    }, AUTO_ADVANCE_MS)
-
-    return () => window.clearInterval(timer)
-  }, [pages.length, paused, reduceMotion])
+  useIntervalWhenActive(
+    tabActive && !reduceMotion && pages.length > 1 && !paused,
+    () => setPageIndex((current) => (current + 1) % pages.length),
+    AUTO_ADVANCE_MS,
+  )
 
   return (
     <section className="pm-games-featured-list" aria-label="Haftanın en çok oynanan oyunları">
@@ -120,23 +119,26 @@ export function FeaturedGamesRow({ games, onPlay }: FeaturedGamesRowProps) {
           }
         }}
       >
-        <motion.div
+        <div
           className="pm-games-featured-track"
-          animate={{ x: `-${pageIndex * 100}%` }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 0.52, ease: [0.22, 1, 0.36, 1] }
-          }
+          style={{
+            transform: `translateX(-${pageIndex * 100}%)`,
+            transition: reduceMotion ? 'none' : 'transform 0.52s cubic-bezier(0.22, 1, 0.36, 1)',
+          }}
         >
           {pages.map((page) => (
             <div key={page.map((game) => game.id).join('-')} className="pm-games-featured-page">
               {page.map((game) => (
-                <FeaturedGameCard key={game.id} game={game} onPlay={onPlay} addXp={addXp} />
+                <FeaturedGameCard
+                  key={game.id}
+                  game={game}
+                  onPlay={onPlay}
+                  addXp={addXp}
+                />
               ))}
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {pages.length > 1 ? (

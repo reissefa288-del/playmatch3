@@ -1,84 +1,85 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 import { FiRefreshCw, FiUsers } from 'react-icons/fi'
 import { DAILY_LIKES_LIMIT } from '../../../shared/dailyLikes'
 import { useManagedTimers } from '../../../shared/useManagedTimers'
+import { formatBalance, useGemBalanceActions, useGemBalanceState } from '../../currency/GemBalanceProvider'
 import { useDailyLikesActions, useDailyLikesState } from '../../likes/useDailyLikes'
 import { MatchLikesQuota } from '../../match/components/MatchLikesQuota'
 import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
-import { heroDiscoveryQueue } from '../data'
+import { heroDiscoveryQueue, HERO_DISCOVERY_DEMO_LABEL } from '../data'
+import {
+  advanceHeroStackIndex,
+  beginHeroMatchFlow,
+  beginHeroPassFlow,
+  beginHeroSuperLikeFlow,
+  getHeroStackSnapshot,
+  markHeroExitingPhase,
+  markHeroSentPhase,
+  resetHeroStack,
+  subscribeHeroStack,
+} from '../heroDiscoveryStackStore'
 import { HeroPlayerCard } from './HeroPlayerCard'
-
-type StackPhase = 'idle' | 'busy' | 'sent' | 'exiting'
-type ExitMode = 'match' | 'pass'
 
 const SENT_HOLD_MS = 1400
 const EXIT_MS = 480
 const PASS_EXIT_MS = 360
 
 export function HeroDiscoveryStack() {
+  const stack = useSyncExternalStore(subscribeHeroStack, getHeroStackSnapshot, getHeroStackSnapshot)
   const { active: isPremiumActive } = usePremiumSubscriptionState()
   const { remaining, isUnlimited } = useDailyLikesState()
   const { tryConsumeLike } = useDailyLikesActions()
+  const { spend } = useGemBalanceActions()
+  const { balance } = useGemBalanceState()
   const timers = useManagedTimers()
-  const [index, setIndex] = useState(0)
-  const [phase, setPhase] = useState<StackPhase>('idle')
-  const [exitMode, setExitMode] = useState<ExitMode>('match')
-  const [sentVariant, setSentVariant] = useState<'match' | 'super'>('match')
 
+  const { index, phase, exitMode, sentVariant } = stack
   const current = heroDiscoveryQueue[index]
   const next = heroDiscoveryQueue[index + 1]
   const exhausted = index >= heroDiscoveryQueue.length
   const canLike = isUnlimited || remaining > 0
 
-  const advanceCard = useCallback(() => {
-    setIndex((i) => i + 1)
-    setPhase('idle')
-    setExitMode('match')
-  }, [])
+  const scheduleExit = useCallback(
+    (delayMs: number) => {
+      timers.schedule(() => {
+        markHeroExitingPhase()
+        timers.schedule(advanceHeroStackIndex, delayMs)
+      }, SENT_HOLD_MS)
+    },
+    [timers],
+  )
 
   const handleMatchRequest = useCallback(() => {
     if (!current || phase !== 'idle' || !canLike) return
-    if (!tryConsumeLike()) return
-    setSentVariant('match')
-    setExitMode('match')
-    setPhase('busy')
-    timers.schedule(() => {
-      setPhase('sent')
+    void (async () => {
+      if (!(await tryConsumeLike())) return
+      beginHeroMatchFlow()
       timers.schedule(() => {
-        setPhase('exiting')
-        timers.schedule(advanceCard, EXIT_MS)
-      }, SENT_HOLD_MS)
-    }, 380)
-  }, [advanceCard, canLike, current, phase, timers, tryConsumeLike])
+        markHeroSentPhase()
+        scheduleExit(EXIT_MS)
+      }, 380)
+    })()
+  }, [canLike, current, phase, scheduleExit, timers, tryConsumeLike])
 
   const handleSuperLike = useCallback(() => {
     if (!current || phase !== 'idle') return
-    setSentVariant('super')
-    setExitMode('match')
-    setPhase('busy')
+    beginHeroSuperLikeFlow()
     timers.schedule(() => {
-      setPhase('sent')
-      timers.schedule(() => {
-        setPhase('exiting')
-        timers.schedule(advanceCard, EXIT_MS)
-      }, SENT_HOLD_MS)
+      markHeroSentPhase()
+      scheduleExit(EXIT_MS)
     }, 380)
-  }, [advanceCard, current, phase, timers])
+  }, [current, phase, scheduleExit, timers])
 
   const handlePass = useCallback(() => {
     if (!current || phase !== 'idle') return
-    setExitMode('pass')
-    setPhase('exiting')
-    timers.schedule(advanceCard, PASS_EXIT_MS)
-  }, [advanceCard, current, phase, timers])
+    beginHeroPassFlow()
+    timers.schedule(advanceHeroStackIndex, PASS_EXIT_MS)
+  }, [current, phase, timers])
 
-  const resetQueue = () => {
+  const resetQueue = useCallback(() => {
     timers.clearAll()
-    setIndex(0)
-    setPhase('idle')
-    setExitMode('match')
-    setSentVariant('match')
-  }
+    resetHeroStack()
+  }, [timers])
 
   const showSent = phase === 'sent' || (phase === 'exiting' && exitMode === 'match')
   const matchBusy = phase === 'busy'
@@ -95,6 +96,9 @@ export function HeroDiscoveryStack() {
 
   return (
     <div className="pm-hero-stack">
+      <p className="pm-hero-demo-label" role="status">
+        {HERO_DISCOVERY_DEMO_LABEL}
+      </p>
       {!exhausted ? (
         <MatchLikesQuota remaining={remaining} limit={DAILY_LIKES_LIMIT} isUnlimited={isUnlimited} />
       ) : null}
@@ -115,6 +119,9 @@ export function HeroDiscoveryStack() {
               canLike={canLike}
               isPremium={isPremiumActive}
               sentOverlayVariant={sentVariant}
+              gemBalance={balance}
+              gemSpend={spend}
+              gemBalanceLabel={formatBalance(balance)}
               onMatchRequest={handleMatchRequest}
               onPass={handlePass}
               onSuperLike={handleSuperLike}

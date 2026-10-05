@@ -1,7 +1,7 @@
+import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { FiCheck, FiX } from 'react-icons/fi'
-import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
 import { LegalDocumentBody } from './LegalDocumentBody'
 import type { LegalDocument } from './types'
 
@@ -45,7 +45,7 @@ export function LegalConsentSheet({
       />
       <div className="pm-legal-sheet__viewport pm-sheet-viewport-enter">
         <section
-          className={`pm-legal-sheet${reduceMotion ? '' : ' pm-sheet-slide-up-enter'}`}
+          className={`pm-legal-sheet pm-legal-sheet--auth${reduceMotion ? '' : ' pm-sheet-slide-up-enter'}`}
           role="dialog"
           aria-modal="true"
           aria-labelledby="pm-legal-sheet-title"

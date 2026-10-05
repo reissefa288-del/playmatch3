@@ -1,15 +1,14 @@
 {
-  "capturedAt": "2026-06-07T01:57:06.239Z",
-  "commit": "8bf495d",
+  "capturedAt": "2026-06-07T10:40:28.220Z",
+  "commit": "2166953",
   "environment": "production-static-preview",
   "device": "mobile-emulated",
   "throttling": "slow-4g-cpu-4x",
   "authSeed": "pm-auth-session + pm-user-profile (onboarding complete)",
   "targets": {
-    "performance": 85,
+    "performanceScore": 85,
     "lcpMs": 2500,
     "cls": 0.1,
-    "inpMs": 200,
     "fcpMs": 1800,
     "tbtMs": 300
   },
@@ -17,16 +16,47 @@
     "home": {
       "path": "/",
       "url": "http://127.0.0.1:4173/",
-      "performanceScore": 51,
+      "performanceScore": 96,
       "fcp": {
-        "score": 0.06,
-        "value": 5441.852375,
-        "displayValue": "5.4 s"
+        "score": 1,
+        "value": 643.0441666809082,
+        "displayValue": "0.6 s"
       },
       "lcp": {
-        "score": 0.01,
-        "value": 8915.2925,
-        "displayValue": "8.9 s"
+        "score": 0.94,
+        "value": 2259.5174925842284,
+        "displayValue": "2.3 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0.026601364589265028,
+        "displayValue": "0.027"
+      },
+      "tbt": {
+        "score": 0.91,
+        "value": 182.98243331909168,
+        "displayValue": "180 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 1,
+        "value": 1087.505511114231,
+        "displayValue": "1.1 s"
+      }
+    },
+    "games": {
+      "path": "/games",
+      "url": "http://127.0.0.1:4173/games",
+      "performanceScore": 93,
+      "fcp": {
+        "score": 1,
+        "value": 638.6980557891845,
+        "displayValue": "0.6 s"
+      },
+      "lcp": {
+        "score": 0.79,
+        "value": 2950.267835275268,
+        "displayValue": "3.0 s"
       },
       "cls": {
         "score": 1,
@@ -34,92 +64,30 @@
         "displayValue": "0"
       },
       "tbt": {
-        "score": 0.65,
-        "value": 422,
-        "displayValue": "420 ms"
+        "score": 0.93,
+        "value": 168.17164421081497,
+        "displayValue": "170 ms"
       },
       "inp": null,
       "speedIndex": {
-        "score": 0.56,
-        "value": 5441.852375,
-        "displayValue": "5.4 s"
-      }
-    },
-    "games": {
-      "path": "/games",
-      "url": "http://127.0.0.1:4173/games",
-      "performanceScore": 59,
-      "fcp": {
-        "score": 0.06,
-        "value": 5485.877574999999,
-        "displayValue": "5.5 s"
-      },
-      "lcp": {
-        "score": 0,
-        "value": 10537.682249999998,
-        "displayValue": "10.5 s"
-      },
-      "cls": {
         "score": 1,
-        "value": 0.00009483711257479184,
-        "displayValue": "0"
-      },
-      "tbt": {
-        "score": 0.94,
-        "value": 151,
-        "displayValue": "150 ms"
-      },
-      "inp": null,
-      "speedIndex": {
-        "score": 0.55,
-        "value": 5485.877574999999,
-        "displayValue": "5.5 s"
+        "value": 1100.3768949511823,
+        "displayValue": "1.1 s"
       }
     },
     "match": {
       "path": "/match",
       "url": "http://127.0.0.1:4173/match",
-      "performanceScore": 60,
+      "performanceScore": 100,
       "fcp": {
-        "score": 0.09,
-        "value": 5018.308275,
-        "displayValue": "5.0 s"
-      },
-      "lcp": {
-        "score": 0.03,
-        "value": 7683.0999,
-        "displayValue": "7.7 s"
-      },
-      "cls": {
         "score": 1,
-        "value": 0.00009859303782527864,
-        "displayValue": "0"
-      },
-      "tbt": {
-        "score": 0.9,
-        "value": 193,
-        "displayValue": "190 ms"
-      },
-      "inp": null,
-      "speedIndex": {
-        "score": 0.63,
-        "value": 5018.308275,
-        "displayValue": "5.0 s"
-      }
-    },
-    "chat": {
-      "path": "/chat",
-      "url": "http://127.0.0.1:4173/chat",
-      "performanceScore": 68,
-      "fcp": {
-        "score": 0.1,
-        "value": 4958.1206999999995,
-        "displayValue": "5.0 s"
+        "value": 650.5384152069092,
+        "displayValue": "0.7 s"
       },
       "lcp": {
-        "score": 0.22,
-        "value": 5247.2807999999995,
-        "displayValue": "5.2 s"
+        "score": 1,
+        "value": 1288.5795,
+        "displayValue": "1.3 s"
       },
       "cls": {
         "score": 1,
@@ -128,14 +96,107 @@
       },
       "tbt": {
         "score": 0.99,
-        "value": 69,
+        "value": 85.97684478759766,
+        "displayValue": "90 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 1,
+        "value": 1866.6578840353009,
+        "displayValue": "1.9 s"
+      }
+    },
+    "chat": {
+      "path": "/chat",
+      "url": "http://127.0.0.1:4173/chat",
+      "performanceScore": 99,
+      "fcp": {
+        "score": 1,
+        "value": 644.3470247741699,
+        "displayValue": "0.6 s"
+      },
+      "lcp": {
+        "score": 1,
+        "value": 707.358264779663,
+        "displayValue": "0.7 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0.00009859303782527864,
+        "displayValue": "0"
+      },
+      "tbt": {
+        "score": 0.98,
+        "value": 95.98383522033691,
+        "displayValue": "100 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 1,
+        "value": 773.6440352202692,
+        "displayValue": "0.8 s"
+      }
+    },
+    "profile": {
+      "path": "/profile",
+      "url": "http://127.0.0.1:4173/profile",
+      "performanceScore": 100,
+      "fcp": {
+        "score": 1,
+        "value": 632.1795483734131,
+        "displayValue": "0.6 s"
+      },
+      "lcp": {
+        "score": 1,
+        "value": 1038.3004,
+        "displayValue": "1.0 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0,
+        "displayValue": "0"
+      },
+      "tbt": {
+        "score": 0.99,
+        "value": 65.47065162658691,
         "displayValue": "70 ms"
       },
       "inp": null,
       "speedIndex": {
-        "score": 0.64,
-        "value": 4958.1206999999995,
-        "displayValue": "5.0 s"
+        "score": 1,
+        "value": 1044.6012264519566,
+        "displayValue": "1.0 s"
+      }
+    },
+    "premium": {
+      "path": "/premium",
+      "url": "http://127.0.0.1:4173/premium",
+      "performanceScore": 99,
+      "fcp": {
+        "score": 1,
+        "value": 937.0309,
+        "displayValue": "0.9 s"
+      },
+      "lcp": {
+        "score": 1,
+        "value": 1202.0412,
+        "displayValue": "1.2 s"
+      },
+      "cls": {
+        "score": 1,
+        "value": 0.00010798285095149567,
+        "displayValue": "0"
+      },
+      "tbt": {
+        "score": 0.96,
+        "value": 125.99999999999994,
+        "displayValue": "130 ms"
+      },
+      "inp": null,
+      "speedIndex": {
+        "score": 1,
+        "value": 1237.2080818526917,
+        "displayValue": "1.2 s"
       }
     }
   }

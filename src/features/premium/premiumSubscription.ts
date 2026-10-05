@@ -1,3 +1,5 @@
+import { isPremiumActiveFromCache } from './premiumEntitlementStore'
+
 export type PremiumSubscription = {
   active: boolean
   activatedAt: number | null
@@ -42,7 +44,7 @@ export function writePremiumSubscription(subscription: PremiumSubscription) {
 }
 
 export function isPremiumActive(): boolean {
-  return readPremiumSubscription().active === true
+  return isPremiumActiveFromCache()
 }
 
 export function activatePremium(packageId: string) {

@@ -1,0 +1,26 @@
+.pm-photo {
+  display: block;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.pm-photo__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.22s ease-out;
+}
+
+.pm-photo.is-loaded .pm-photo__img {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-photo__img {
+    transition: none;
+  }
+}

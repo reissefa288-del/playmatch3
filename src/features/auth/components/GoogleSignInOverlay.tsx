@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { AnimatePresence, motion } from 'framer-motion'
-import { FAKE_PORTRAIT_MALE } from '../../../shared/fakePortraits'
+import { LazyImage } from '../../../shared/LazyImage'
+import { createDevGoogleSession, mapFirebaseUserToSession, persistDevAuthSession } from '../authSession'
+import { isFirebaseConfigured } from '../firebaseApp'
+import { isPreviewDevAuth, preferLocalDevPersistence } from '../previewDevAuth'
+import { GoogleSignInError, signInWithGoogle, signInWithGooglePopupReliable } from '../firebaseAuth'
+import { shouldUseGoogleRedirectSignIn } from '../androidTwa'
+import { adoptDevAuthSession } from '../useAuthSession'
 
 export type GoogleAccount = {
   displayName: string
   email: string
   avatarUrl: string
-}
-
-const DEFAULT_ACCOUNT: GoogleAccount = {
-  displayName: 'Emirhan',
-  email: 'emirhan@gmail.com',
-  avatarUrl: FAKE_PORTRAIT_MALE,
 }
 
 type Phase = 'accounts' | 'loading' | 'success'
@@ -21,6 +20,7 @@ type GoogleSignInOverlayProps = {
   open: boolean
   onClose: () => void
   onComplete: (account: GoogleAccount) => void
+  onError?: (message: string) => void
 }
 
 function GoogleLogo() {
@@ -34,18 +34,26 @@ function GoogleLogo() {
   )
 }
 
-export function GoogleSignInOverlay({ open, onClose, onComplete }: GoogleSignInOverlayProps) {
+export function GoogleSignInOverlay({ open, onClose, onComplete, onError }: GoogleSignInOverlayProps) {
   const [phase, setPhase] = useState<Phase>('accounts')
+  const [account, setAccount] = useState<GoogleAccount | null>(null)
   const onCompleteRef = useRef(onComplete)
-  const account = DEFAULT_ACCOUNT
+  const onErrorRef = useRef(onError)
+  const signingInRef = useRef(false)
 
   useEffect(() => {
     onCompleteRef.current = onComplete
   }, [onComplete])
 
   useEffect(() => {
+    onErrorRef.current = onError
+  }, [onError])
+
+  useEffect(() => {
     if (!open) {
       setPhase('accounts')
+      setAccount(null)
+      signingInRef.current = false
       return
     }
     const prev = document.body.style.overflow
@@ -56,117 +64,175 @@ export function GoogleSignInOverlay({ open, onClose, onComplete }: GoogleSignInO
   }, [open])
 
   useEffect(() => {
-    if (phase !== 'loading') return
-    const signTimer = window.setTimeout(() => setPhase('success'), 1400)
-    return () => window.clearTimeout(signTimer)
-  }, [phase])
-
-  useEffect(() => {
-    if (phase !== 'success') return
+    if (phase !== 'success' || !account) return
     const doneTimer = window.setTimeout(() => {
-      onCompleteRef.current(DEFAULT_ACCOUNT)
+      onCompleteRef.current(account)
     }, 2400)
     return () => window.clearTimeout(doneTimer)
-  }, [phase])
+  }, [phase, account])
 
-  const handleContinue = () => setPhase('loading')
+  const handleContinue = async () => {
+    if (signingInRef.current) return
+    signingInRef.current = true
+    setPhase('loading')
 
-  if (typeof window === 'undefined') return null
+    try {
+      if (preferLocalDevPersistence()) {
+        if (!import.meta.env.DEV) {
+          throw new GoogleSignInError(
+            'not-configured',
+            'Firebase yapılandırması eksik. npm run firebase:init-env ile .env oluştur.',
+          )
+        }
+
+        await new Promise((resolve) => window.setTimeout(resolve, 650))
+        const devSession = createDevGoogleSession({
+          displayName: isPreviewDevAuth() ? 'Önizleme Oyuncu' : 'Google Oyuncu',
+          email: isPreviewDevAuth() ? 'preview@playmeet.local' : 'dev@playmeet.local',
+          avatarUrl: '',
+        })
+        persistDevAuthSession(devSession)
+        adoptDevAuthSession(devSession)
+        const nextAccount: GoogleAccount = {
+          displayName: devSession.displayName,
+          email: devSession.email,
+          avatarUrl: devSession.avatarUrl,
+        }
+        setAccount(nextAccount)
+        setPhase('success')
+        return
+      }
+
+      const useRedirect = shouldUseGoogleRedirectSignIn()
+      const result = useRedirect
+        ? await signInWithGoogle()
+        : { mode: 'popup' as const, user: await signInWithGooglePopupReliable() }
+      if (result.mode === 'redirect') return
+
+      const session = mapFirebaseUserToSession(result.user)
+      const nextAccount: GoogleAccount = {
+        displayName: session.displayName,
+        email: session.email,
+        avatarUrl: session.avatarUrl,
+      }
+      setAccount(nextAccount)
+      setPhase('success')
+    } catch (error) {
+      signingInRef.current = false
+      setPhase('accounts')
+
+      if (error instanceof GoogleSignInError) {
+        if (error.code === 'popup-closed' || error.code === 'redirect-cancelled') {
+          onClose()
+          return
+        }
+        onErrorRef.current?.(error.message)
+        return
+      }
+
+      onErrorRef.current?.('Google ile giriş yapılamadı. Lütfen tekrar dene.')
+    }
+  }
+
+  if (typeof window === 'undefined' || !open) return null
+
+  const successName = account?.displayName ?? 'Oyuncu'
 
   return createPortal(
-    <AnimatePresence>
-      {open ? (
-        <>
-          <motion.button
-            type="button"
-            className="pm-google-auth__backdrop"
-            aria-label="Kapat"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={phase === 'accounts' ? onClose : undefined}
-          />
-          <div className="pm-google-auth__viewport">
-            <motion.section
-              className="pm-google-auth__card"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby="pm-google-auth-title"
-              initial={{ opacity: 0, y: 28, scale: 0.94 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 20, scale: 0.96 }}
-              transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            >
-              <div className="pm-google-auth__card-glow" aria-hidden />
+    <>
+      <button
+        type="button"
+        className="pm-google-auth__backdrop pm-google-auth__backdrop--enter"
+        aria-label="Kapat"
+        onClick={phase === 'accounts' ? onClose : undefined}
+      />
+      <div className="pm-google-auth__viewport">
+        <section
+          className="pm-google-auth__card pm-google-auth__card--enter"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="pm-google-auth-title"
+        >
+          <div className="pm-google-auth__card-glow" aria-hidden />
 
-              {phase === 'accounts' ? (
-                <>
-                  <header className="pm-google-auth__header">
-                    <GoogleLogo />
-                    <h2 id="pm-google-auth-title">Google ile oturum aç</h2>
-                    <p>
-                      <strong>PlayMeet</strong> uygulamasına devam etmek için bir hesap seç
-                    </p>
-                  </header>
+          {phase === 'accounts' ? (
+            <>
+              <header className="pm-google-auth__header">
+                <GoogleLogo />
+                <h2 id="pm-google-auth-title">Google ile oturum aç</h2>
+                <p>
+                  <strong>PlayMeet</strong> uygulamasına devam etmek için bir hesap seç
+                </p>
+              </header>
 
-                  <button type="button" className="pm-google-auth__account is-selected">
-                    <img src={account.avatarUrl} alt="" className="pm-google-auth__avatar" />
-                    <span className="pm-google-auth__account-text">
-                      <strong>{account.displayName}</strong>
-                      <small>{account.email}</small>
-                    </span>
-                    <span className="pm-google-auth__account-check" aria-hidden />
-                  </button>
+              <button type="button" className="pm-google-auth__account is-selected">
+                <span className="pm-google-auth__avatar pm-google-auth__avatar--placeholder" aria-hidden>
+                  <GoogleLogo />
+                </span>
+                <span className="pm-google-auth__account-text">
+                  <strong>Google hesabın</strong>
+                  <small>Devam et ile hesap seç</small>
+                </span>
+                <span className="pm-google-auth__account-check" aria-hidden />
+              </button>
 
-                  <button type="button" className="pm-google-auth__continue" onClick={handleContinue}>
-                    Devam et
-                  </button>
-                  <button type="button" className="pm-google-auth__cancel" onClick={onClose}>
-                    İptal
-                  </button>
-                </>
-              ) : null}
+              <button type="button" className="pm-google-auth__continue" onClick={() => void handleContinue()}>
+                Devam et
+              </button>
+              <button type="button" className="pm-google-auth__cancel" onClick={onClose}>
+                İptal
+              </button>
+              <p className="pm-google-auth__hint">
+                Popup takılırsa <strong>handler</strong> sekmesini kapat; gizli sekme kullanma; Chrome’da
+                normal pencerede tekrar dene.
+              </p>
+            </>
+          ) : null}
 
-              {phase === 'loading' ? (
-                <div className="pm-google-auth__status">
-                  <div className="pm-google-auth__spinner">
-                    <GoogleLogo />
-                    <span className="pm-google-auth__spinner-ring" />
-                  </div>
-                  <p className="pm-google-auth__status-title">Bağlanılıyor…</p>
-                  <p className="pm-google-auth__status-sub">Google hesabın doğrulanıyor</p>
+          {phase === 'loading' ? (
+            <div className="pm-google-auth__status">
+              <div className="pm-google-auth__spinner">
+                <GoogleLogo />
+                <span className="pm-google-auth__spinner-ring" />
+              </div>
+              <p className="pm-google-auth__status-title">Bağlanılıyor…</p>
+              <p className="pm-google-auth__status-sub">Google hesabın doğrulanıyor</p>
+            </div>
+          ) : null}
+
+          {phase === 'success' ? (
+            <div className="pm-google-auth__status pm-google-auth__status--success pm-google-auth__status--success-enter">
+              {account?.avatarUrl ? (
+                <LazyImage
+                  src={account.avatarUrl}
+                  alt=""
+                  className="pm-google-auth__success-avatar"
+                  width={56}
+                  height={56}
+                  eager
+                />
+              ) : (
+                <div className="pm-google-auth__success-icon" aria-hidden>
+                  <svg viewBox="0 0 52 52">
+                    <circle cx="26" cy="26" r="24" fill="none" stroke="currentColor" strokeWidth="3" />
+                    <path
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="3.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M14 27l8 8 16-18"
+                    />
+                  </svg>
                 </div>
-              ) : null}
-
-              {phase === 'success' ? (
-                <motion.div
-                  className="pm-google-auth__status pm-google-auth__status--success"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ type: 'spring', damping: 18, stiffness: 280 }}
-                >
-                  <div className="pm-google-auth__success-icon" aria-hidden>
-                    <svg viewBox="0 0 52 52">
-                      <circle cx="26" cy="26" r="24" fill="none" stroke="currentColor" strokeWidth="3" />
-                      <path
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="3.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M14 27l8 8 16-18"
-                      />
-                    </svg>
-                  </div>
-                  <p className="pm-google-auth__status-title">Hoş geldin, {account.displayName}!</p>
-                  <p className="pm-google-auth__status-sub">Profilini oluşturmaya başlıyoruz…</p>
-                </motion.div>
-              ) : null}
-            </motion.section>
-          </div>
-        </>
-      ) : null}
-    </AnimatePresence>,
+              )}
+              <p className="pm-google-auth__status-title">Hoş geldin, {successName}!</p>
+              <p className="pm-google-auth__status-sub">Profilini oluşturmaya başlıyoruz…</p>
+            </div>
+          ) : null}
+        </section>
+      </div>
+    </>,
     document.body,
   )
 }

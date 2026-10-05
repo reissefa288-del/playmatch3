@@ -1,8 +1,8 @@
 import { memo, useState } from 'react'
 import { FiMapPin } from 'react-icons/fi'
 import { IoShieldCheckmark } from 'react-icons/io5'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { fakePortraitForProfile } from '../../../shared/fakePortraits'
+import { LazyImage } from '../../../shared/LazyImage'
+import { fakePortraitForGender } from '../../../shared/fakePortraits'
 import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
 import { formatPlayerLevel } from '../../profile/profileLevel'
 import type { NearbyPlayer } from '../types'
@@ -14,13 +14,11 @@ import { NearbyLikeButton, type NearbyLikePhase } from './NearbyLikeButton'
 
 type NearbyPlayerListCardProps = {
   player: NearbyPlayer
-  index?: number
 }
 
 const VISIBLE_INTERESTS = 2
 
-export const NearbyPlayerListCard = memo(function NearbyPlayerListCard({ player, index = 0 }: NearbyPlayerListCardProps) {
-  const reduceMotion = useReducedMotion()
+export const NearbyPlayerListCard = memo(function NearbyPlayerListCard({ player }: NearbyPlayerListCardProps) {
   const liked = useHasLiked(player.id)
   const [likePhase, setLikePhase] = useState<NearbyLikePhase>('idle')
   const [invitePhase, setInvitePhase] = useState<NearbyInvitePhase>('idle')
@@ -28,22 +26,21 @@ export const NearbyPlayerListCard = memo(function NearbyPlayerListCard({ player,
   const extraInterests = player.interests.length - visibleInterests.length
   const showBurst = likePhase === 'burst' || invitePhase === 'burst'
 
+  const portraitSrc =
+    player.portraitSrc?.trim() ||
+    (player.gender ? fakePortraitForGender(player.gender) : undefined)
+
   return (
-    <motion.article
+    <article
       className={`pm-nearby-list-card pm-nearby-list-card--aaa${liked ? ' is-liked-card' : ''}`}
-      initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
-      transition={{
-        type: 'spring',
-        stiffness: 360,
-        damping: 30,
-        delay: reduceMotion ? 0 : index * 0.04,
-      }}
+     
+     
+     
     >
-      <AnimatePresence mode="wait">
+      <>
         {likePhase === 'burst' ? <NearbyLikeBurst key="like-burst" variant="list" /> : null}
         {invitePhase === 'burst' ? <NearbyInviteBurst key="invite-burst" variant="list" /> : null}
-      </AnimatePresence>
+      </>
 
       {liked && !showBurst ? (
         <span className="pm-nearby-list-card__liked-badge" aria-label="Beğenildi">
@@ -51,13 +48,23 @@ export const NearbyPlayerListCard = memo(function NearbyPlayerListCard({ player,
         </span>
       ) : null}
 
-      <div
-        className="pm-nearby-list-card__portrait"
-        style={{
-          backgroundImage: `url(${fakePortraitForProfile(player.id, player.gender)})`,
-          backgroundPosition: player.portraitPosition,
-        }}
-      >
+      <div className="pm-nearby-list-card__portrait">
+        {portraitSrc ? (
+          <LazyImage
+            src={portraitSrc}
+            alt=""
+            className="pm-nearby-list-card__photo"
+            style={{ objectPosition: player.portraitPosition }}
+            width={72}
+            height={88}
+            draggable={false}
+          />
+        ) : (
+          <span
+            className="pm-nearby-list-card__photo pm-nearby-list-card__photo--placeholder"
+            aria-hidden
+          />
+        )}
         {player.isOnline ? <span className="pm-status-pill is-small">Online</span> : null}
       </div>
 
@@ -98,6 +105,6 @@ export const NearbyPlayerListCard = memo(function NearbyPlayerListCard({ player,
           onPhaseChange={setInvitePhase}
         />
       </div>
-    </motion.article>
+    </article>
   )
 })

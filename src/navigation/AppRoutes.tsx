@@ -2,11 +2,12 @@ import { Suspense, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { GameRouteFallback } from '../features/games/components/GameRouteFallback'
 import { BottomNavigation } from '../features/home/components/BottomNavigation'
-import { bottomNavigation } from '../features/home/data'
+import { getBottomNavigationItems } from '../features/home/bottomNavigation'
 import { lazyNamed } from '../shared/lazyNamed'
 import { MainTabLayout } from './MainTabLayout'
 import { resolveTabId } from './tabConfig'
 import { useNavDockHeight } from './useNavDockHeight'
+import { PushNotificationBridge } from '../features/push/PushNotificationBridge'
 
 const MessageScreen = lazyNamed(() => import('../features/chat/MessageScreen'), 'MessageScreen')
 const NearbyPlayersScreen = lazyNamed(() => import('../features/home/NearbyPlayersScreen'), 'NearbyPlayersScreen')
@@ -126,10 +127,11 @@ export function AppRoutes() {
 
   return (
     <div className="pm-app-frame">
+      <PushNotificationBridge />
       <MainTabLayout />
       {!stackOpen && activeTabId ? (
         <div className={`pm-nav-dock pm-app-shell--${activeTabId}`}>
-          <BottomNavigation items={bottomNavigation} activeTabId={activeTabId} />
+          <BottomNavigation items={getBottomNavigationItems()} activeTabId={activeTabId} />
         </div>
       ) : null}
       {stackOpen ? (

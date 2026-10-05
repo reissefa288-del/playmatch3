@@ -490,6 +490,48 @@
   box-shadow: 0 0 8px currentColor;
 }
 
+.pm-xox-placement-fx--animate {
+  animation: pm-xox-fx-fade 0.55s ease-out forwards;
+}
+
+.pm-xox-placement-fx--animate .pm-xox-placement-fx__ring--outer {
+  animation: pm-xox-ring-outer 0.48s ease-out forwards;
+}
+
+.pm-xox-placement-fx--animate .pm-xox-placement-fx__ring--inner {
+  animation: pm-xox-ring-inner 0.34s ease-out forwards;
+}
+
+.pm-xox-placement-fx--animate .pm-xox-placement-fx__spark {
+  animation: pm-xox-spark 0.42s ease-out var(--spark-delay, 0s) forwards;
+}
+
+@keyframes pm-xox-fx-fade {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes pm-xox-ring-outer {
+  from { transform: scale(0.2); opacity: 0.85; }
+  to { transform: scale(1.65); opacity: 0; }
+}
+
+@keyframes pm-xox-ring-inner {
+  from { transform: scale(0.35); opacity: 0.7; }
+  to { transform: scale(1.15); opacity: 0; }
+}
+
+@keyframes pm-xox-spark {
+  from {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translate(var(--spark-x, 0), var(--spark-y, 0)) scale(0.2);
+    opacity: 0;
+  }
+}
+
 .pm-xox-board__win-flash {
   position: absolute;
   inset: -7px;

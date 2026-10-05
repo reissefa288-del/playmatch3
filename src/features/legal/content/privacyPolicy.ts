@@ -31,7 +31,7 @@ export const privacyPolicy: LegalDocument = {
       bullets: [
         'Kimlik ve hesap: Google hesabınızdan alınan ad, e-posta adresi, profil fotoğrafı (OAuth ile giriş seçerseniz), kullanıcı kimliği',
         'Profil: yaş, cinsiyet, biyografi, ilgi alanları, oyun tercihleri, yüklediğiniz fotoğraflar, seviye ve rozet bilgileri',
-        'Konum: il/şehir düzeyinde konum, yakındaki oyuncular ve eşleşme için mesafe veya il bilgisi (tam GPS yalnızca izin vermeniz hâlinde)',
+        'Konum: açık rıza ile yaklaşık GPS koordinatları (geohash) ve isteğe bağlı şehir — yalnızca konum paylaşımını açtığında',
         'Etkileşim: beğeni, eşleşme, engelleme, raporlama, profil ziyaretleri, mesajlaşma içerikleri ve zaman damgaları',
         'Oyun: oyun skorları, düello geçmişi, seviye ilerlemesi ve oyun içi istatistikler',
         'Ödeme: abonelik durumu, satın alma geçmişi (ödeme kartı bilgileri doğrudan PlayMeet tarafından saklanmaz; mağaza/ödeme sağlayıcısı işler)',
@@ -90,7 +90,7 @@ export const privacyPolicy: LegalDocument = {
       id: 'retention',
       title: '8. Saklama Süreleri',
       paragraphs: [
-        'Kişisel veriler, işleme amacının gerektirdiği süre boyunca saklanır. Hesabınızı kapattığınızda profil ve mesaj verileriniz makul süre içinde silinir veya anonimleştirilir; yasal saklama, uyuşmazlık ve güvenlik logları için zorunlu süreler saklıdır.',
+        'Kişisel veriler, işleme amacının gerektirdiği süre boyunca saklanır. Hesabınızı sildiğinizde profil, fotoğraflar, beğeniler, eşleşmeler ve mesajlar silinir; moderasyon şikayet kayıtları ve güvenlik logları yasal süreler boyunca saklanabilir.',
         'Örnek: moderasyon kayıtları ve güvenlik logları genellikle 1–3 yıl; mali kayıtlar ilgili mevzuat gereği daha uzun süre tutulabilir.',
       ],
     },

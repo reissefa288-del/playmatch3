@@ -1,3 +1,7 @@
+@import './moderation.css';
+@import './home-nearby-demo.css';
+@import './location-consent.css';
+
 .pm-app-shell--nearby {
   background: transparent;
 }

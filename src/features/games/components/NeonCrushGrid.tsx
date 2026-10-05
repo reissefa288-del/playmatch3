@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import type { GemId, NeonCell, SpecialKind } from '../utils/neonCrushEngine'
@@ -83,31 +82,31 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
         <i className="pm-ncrush-board__chrome-scan" />
       </span>
 
-      <AnimatePresence>
+      <>
         {burst ? (
-          <motion.div
+          <div
             key={`burst-${fxTick}`}
             className={`pm-ncrush-board__line-burst is-tier-${burst.tier} is-${accent}`}
-            initial={{ opacity: 0, scale: 0.6, y: 12 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.85, y: -8 }}
-            transition={{ type: 'spring', stiffness: 480, damping: 22 }}
+           
+           
+           
+           
           >
             <span className="pm-ncrush-board__line-burst-title">{burst.label}</span>
             <span className="pm-ncrush-board__line-burst-combo">{burst.comboLabel}</span>
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
+      </>
 
-      <AnimatePresence>
+      <>
         {lane.fx && lane.fx.scoreGain > 0 ? (
-          <motion.div
+          <div
             key={fxTick}
             className={`pm-ncrush-board__score-pop is-${accent}`}
-            initial={{ opacity: 0, y: 8, scale: 0.85 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.9 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 24 }}
+           
+           
+           
+           
           >
             +{lane.fx.scoreGain.toLocaleString('tr-TR')}
             {burst ? (
@@ -115,36 +114,36 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
             ) : lane.fx.combo >= 2 ? (
               <small>COMBO ×{lane.fx.combo}</small>
             ) : null}
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
+      </>
 
-      <AnimatePresence>
+      <>
         {specialActivate ? (
-          <motion.div
+          <div
             key={`act-${fxTick}`}
             className={`pm-ncrush-board__special-toast is-activate is-${accent}`}
-            initial={{ opacity: 0, scale: 0.75, y: 6 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: -6 }}
-            transition={{ type: 'spring', stiffness: 460, damping: 24 }}
+           
+           
+           
+           
           >
             {specialActivate.label}
-          </motion.div>
+          </div>
         ) : null}
         {specialSpawn && !specialActivate ? (
-          <motion.div
+          <div
             key={`spawn-${fxTick}`}
             className={`pm-ncrush-board__special-toast is-spawn is-${accent}`}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.28 }}
+           
+           
+           
+           
           >
             {specialLabel(specialSpawn.kind)}
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
+      </>
 
       <div className="pm-ncrush-board__cells">
         <div className="pm-ncrush-board__grid" role="grid" aria-label="Neon tahta">
@@ -249,10 +248,9 @@ export function NeonCrushGrid({ lane, accent, interactive = false, selected = nu
           <strong className="pm-ncrush-board__round">{lane.roundScore.toLocaleString('tr-TR')}</strong>
         </div>
         <div className="pm-ncrush-board__bar" aria-hidden>
-          <motion.i
+          <i
             className={burst ? `is-tier-${burst.tier}` : ''}
-            animate={{ width: `${comboPct}%` }}
-            transition={{ type: 'spring', stiffness: 320, damping: 26 }}
+            style={{ width: `${comboPct}%` }}
           />
         </div>
       </div>

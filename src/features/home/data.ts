@@ -1,12 +1,8 @@
-import {
-  FiHeart,
-  FiHome,
-  FiMessageCircle,
-  FiUser,
-} from 'react-icons/fi'
-import { PiCrownSimpleFill } from 'react-icons/pi'
-import { LuGamepad2 } from 'react-icons/lu'
-import type { BottomNavItem, HeroDiscoveryPlayer, NearbyPlayer } from './types'
+/** ADIM 10.1 — demo keşfet / yakındakiler verisi (gerçek geo: useNearbyPlayers) */
+import type { HeroDiscoveryPlayer, NearbyPlayer } from './types'
+import { NEARBY_DEMO_LABEL } from './nearbyDemo'
+
+export const HERO_DISCOVERY_DEMO_LABEL = NEARBY_DEMO_LABEL
 
 const heroSocial = (
   lastGame: string,
@@ -255,12 +251,3 @@ export const premiumUnlockBanner = {
   perks: ['Sınırsız beğeni', 'Öncelikli eşleşme', 'Özel rozetler'],
   cta: "Premium'a Geç",
 }
-
-export const bottomNavigation: BottomNavItem[] = [
-  { id: 'home', label: 'Ana\u00a0Sayfa', icon: FiHome, active: true, to: '/' },
-  { id: 'match', label: 'Eşleşme', icon: FiHeart, to: '/match' },
-  { id: 'games', label: 'Oyunlar', icon: LuGamepad2, to: '/games' },
-  { id: 'chat', label: 'Sohbet', icon: FiMessageCircle, badge: 2, to: '/chat' },
-  { id: 'premium', label: 'Premium', icon: PiCrownSimpleFill, to: '/premium', variant: 'premium' },
-  { id: 'profile', label: 'Profil', icon: FiUser, to: '/profile' },
-]

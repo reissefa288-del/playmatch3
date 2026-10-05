@@ -1,5 +1,4 @@
 import '../../styles/simon-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback, useMemo } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -48,10 +47,10 @@ export function SimonDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--simon">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-simon-screen"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+         
+         
           onPointerDown={() => unlockSimonDuelAudio()}
         >
           <GameDuelBackdrop />
@@ -142,7 +141,7 @@ export function SimonDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div className="pm-simon-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
+            <div className="pm-simon-overlay" role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
                 <GameDuelRematchActions
@@ -151,9 +150,9 @@ export function SimonDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

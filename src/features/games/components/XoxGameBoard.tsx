@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import type { XoxBoard, XoxCell } from '../utils/xoxLogic'
 import { cellCenterPercent, findWinLine } from '../utils/xoxLogic'
@@ -53,23 +52,19 @@ export function XoxGameBoard({
       : null
 
   return (
-    <motion.div
+    <div
       className={`pm-xox-board-wrap ${interactive ? 'is-live' : ''} ${winLine ? 'has-win' : ''}`}
-      animate={
-        winLine
-          ? { x: [0, -4, 4, -3, 3, 0], scale: [1, 1.012, 1] }
-          : { x: 0, scale: 1 }
-      }
-      transition={{ duration: 0.45, ease: 'easeOut' }}
+     
+     
     >
-      <motion.div className="pm-xox-board-frame" aria-hidden>
+      <div className="pm-xox-board-frame" aria-hidden>
         <span className="pm-xox-board-frame__corner pm-xox-board-frame__corner--tl" />
         <span className="pm-xox-board-frame__corner pm-xox-board-frame__corner--tr" />
         <span className="pm-xox-board-frame__corner pm-xox-board-frame__corner--bl" />
         <span className="pm-xox-board-frame__corner pm-xox-board-frame__corner--br" />
-      </motion.div>
+      </div>
 
-      <motion.div className="pm-xox-board" role="grid" aria-label="Tic tac toe tahtası">
+      <div className="pm-xox-board" role="grid" aria-label="Tic tac toe tahtası">
         {board.map((cell, index) => (
           <XoxBoardCell
             key={index}
@@ -94,50 +89,50 @@ export function XoxGameBoard({
           <line x1="0" y1="200" x2="300" y2="200" className="pm-xox-grid-line pm-xox-grid-line--h2" />
         </svg>
 
-        <AnimatePresence>
+        <>
           {fxIndex != null && board[fxIndex] ? (
             <XoxPlacementFx key={`fx-${fxIndex}`} index={fxIndex} symbol={board[fxIndex]!} />
           ) : null}
-        </AnimatePresence>
+        </>
 
-        <AnimatePresence>
+        <>
           {winStroke ? (
-            <motion.svg
+            <svg
               key="win-line"
               className="pm-xox-board__win-line"
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+             
+             
+             
             >
-              <motion.line
+              <line
                 x1={winStroke.x1}
                 y1={winStroke.y1}
                 x2={winStroke.x2}
                 y2={winStroke.y2}
                 className="pm-xox-win-stroke"
-                initial={{ pathLength: 0, opacity: 0.4 }}
-                animate={{ pathLength: 1, opacity: 1 }}
-                transition={{ duration: 0.55, ease: 'easeOut' }}
+               
+               
+               
               />
-            </motion.svg>
+            </svg>
           ) : null}
-        </AnimatePresence>
-      </motion.div>
+        </>
+      </div>
 
-      <AnimatePresence>
+      <>
         {winLine ? (
-          <motion.div
+          <div
             className="pm-xox-board__win-flash"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 0.55, 0] }}
-            transition={{ duration: 0.65, ease: 'easeOut' }}
+           
+           
+           
             aria-hidden
           />
         ) : null}
-      </AnimatePresence>
-    </motion.div>
+      </>
+    </div>
   )
 }
 
@@ -178,34 +173,30 @@ function XoxBoardCell({
       disabled={!canPlace}
       aria-label={`Hücre ${index + 1}${cell ? `, ${cell}` : ''}`}
     >
-      <AnimatePresence mode="wait">
+      <>
         {cell ? (
-          <motion.div
+          <div
             key={cell}
             className="pm-xox-board__mark"
-            initial={{ opacity: 0, scale: 0.35, rotate: cell === 'X' ? -18 : 0 }}
-            animate={{
-              opacity: 1,
-              scale: isWinning ? 1.1 : 1,
-              rotate: 0,
-            }}
-            exit={{ opacity: 0, scale: 0.5 }}
-            transition={{ type: 'spring', stiffness: 520, damping: 22 }}
+           
+           
+           
+           
           >
             <XoxNeonMark symbol={cell} />
-          </motion.div>
+          </div>
         ) : canPlace && hoverSymbol ? (
-          <motion.div
+          <div
             key="ghost"
             className={`pm-xox-board__ghost is-${hoverSymbol.toLowerCase()}`}
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 0.28, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.92 }}
+           
+           
+           
           >
             <XoxNeonMark symbol={hoverSymbol} />
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
+      </>
     </button>
   )
 }

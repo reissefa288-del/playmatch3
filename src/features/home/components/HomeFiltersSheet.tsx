@@ -1,5 +1,5 @@
-import { FiMapPin, FiSliders, FiUsers, FiX } from 'react-icons/fi'
 import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
+import { FiMapPin, FiSliders, FiUsers, FiX } from 'react-icons/fi'
 import { HOME_DISTANCE_OPTIONS, HOME_GENDER_OPTIONS } from '../homeFilters'
 import type { HomeFilters } from '../types'
 

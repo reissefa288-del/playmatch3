@@ -1,5 +1,4 @@
 import '../../styles/pong-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -31,7 +30,7 @@ export function PongDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--pong">
       <div className="pm-artboard">
-        <motion.div className="pm-pong-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-pong-screen">
           <GameDuelBackdrop />
 
           <button type="button" className="pm-pong-back" onClick={handleBack} aria-label="Geri dön">
@@ -71,7 +70,7 @@ export function PongDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div className="pm-pong-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
+            <div className="pm-pong-overlay" role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
                 <GameDuelRematchActions
@@ -80,9 +79,9 @@ export function PongDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

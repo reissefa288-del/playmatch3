@@ -1,31 +1,32 @@
-import type { ComponentType, LazyExoticComponent } from 'react'
-import { lazyNamed } from '../shared/lazyNamed'
+import { ChatScreen } from '../features/chat/ChatScreen'
+import { GamesTabEntry } from '../features/games/GamesTabEntry'
+import { HomeTabEntry } from '../features/home/HomeTabEntry'
+import { MatchScreen } from '../features/match/MatchScreen'
+import { PremiumScreen } from '../features/premium/PremiumScreen'
+import { ProfileScreen } from '../features/profile/ProfileScreen'
+import type { ComponentType } from 'react'
 
 export type TabId = 'home' | 'match' | 'games' | 'chat' | 'premium' | 'profile'
 
 export type TabDefinition = {
   id: TabId
   path: string
-  Component: LazyExoticComponent<ComponentType> | ComponentType
+  Component: ComponentType
 }
 
-/** Bottom dock: 5 tabs (video 15:35 — Premium ayrı rota, dock’ta yok) */
+/** Bottom dock: 5 tabs (Premium ayrı rota, dock'ta yok) — sync import for instant tab switch */
 export const MAIN_TABS: TabDefinition[] = [
-  { id: 'home', path: '/', Component: lazyNamed(() => import('../features/home/HomeScreen'), 'HomeScreen') },
-  { id: 'match', path: '/match', Component: lazyNamed(() => import('../features/match/MatchScreen'), 'MatchScreen') },
-  { id: 'games', path: '/games', Component: lazyNamed(() => import('../features/games/GamesScreen'), 'GamesScreen') },
-  { id: 'chat', path: '/chat', Component: lazyNamed(() => import('../features/chat/ChatScreen'), 'ChatScreen') },
-  {
-    id: 'profile',
-    path: '/profile',
-    Component: lazyNamed(() => import('../features/profile/ProfileScreen'), 'ProfileScreen'),
-  },
+  { id: 'home', path: '/', Component: HomeTabEntry },
+  { id: 'match', path: '/match', Component: MatchScreen },
+  { id: 'games', path: '/games', Component: GamesTabEntry },
+  { id: 'chat', path: '/chat', Component: ChatScreen },
+  { id: 'profile', path: '/profile', Component: ProfileScreen },
 ]
 
 export const PREMIUM_TAB: TabDefinition = {
   id: 'premium',
   path: '/premium',
-  Component: lazyNamed(() => import('../features/premium/PremiumScreen'), 'PremiumScreen'),
+  Component: PremiumScreen,
 }
 
 export const TAB_ORDER: TabId[] = MAIN_TABS.map((tab) => tab.id)

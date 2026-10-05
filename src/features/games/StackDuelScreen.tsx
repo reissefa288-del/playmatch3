@@ -1,5 +1,4 @@
 import '../../styles/stack-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import {
   FiArrowLeft,
@@ -61,7 +60,7 @@ export function StackDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--stack">
       <div className="pm-artboard">
-        <motion.div className="pm-stack-screen" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-stack-screen">
           <GameDuelBackdrop />
           <StackDuelCinematic />
 
@@ -203,7 +202,7 @@ export function StackDuelScreen() {
           </footer>
 
           {overlayMessage ? (
-            <motion.div className="pm-stack-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
+            <div className="pm-stack-overlay" role="status">
               <p>{overlayMessage}</p>
               {game.roundScoreSummary && game.isRoundBreak ? (
                 <div className="pm-stack-overlay__scores" aria-label="Tur skorları">
@@ -226,9 +225,9 @@ export function StackDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

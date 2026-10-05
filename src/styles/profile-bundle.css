@@ -1,0 +1,5 @@
+/* Profile tab — single CSS entry */
+@import './photo-lightbox.css';
+@import './profile-ambient.css';
+@import './profile.css';
+@import './moderation.css';

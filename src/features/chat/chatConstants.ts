@@ -1,0 +1,5 @@
+export const CHAT_MESSAGES_PAGE_SIZE = 50
+
+export const CHAT_SEND_MIN_INTERVAL_MS = 800
+export const CHAT_SEND_WINDOW_MS = 60_000
+export const CHAT_SEND_MAX_PER_WINDOW = 25

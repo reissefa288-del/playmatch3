@@ -1,5 +1,4 @@
 import '../../styles/space-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiZap } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -20,7 +19,7 @@ export function SpaceDuelLobbyScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--space">
       <div className="pm-artboard">
-        <motion.div className="pm-space-lobby" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-space-lobby">
           <GameDuelBackdrop />
 
           <button type="button" className="pm-space-back" onClick={handleBack} aria-label="Geri dön">
@@ -53,7 +52,7 @@ export function SpaceDuelLobbyScreen() {
               MAÇA BAŞLA
             </button>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   )

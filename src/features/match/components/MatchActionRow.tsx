@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import { FiHeart, FiStar, FiX } from 'react-icons/fi'
 import { LuGamepad2, LuRotateCcw } from 'react-icons/lu'
-import { motion } from 'framer-motion'
 import { DAILY_LIKES_LIMIT } from '../data'
 import { MatchLikesQuota } from './MatchLikesQuota'
 
@@ -33,14 +32,14 @@ export function MatchActionRow({
   isUnlimited = false,
 }: MatchActionRowProps) {
   return (
-    <motion.div
+    <div
       className="pm-match-actions-block"
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1, duration: 0.45 }}
+     
+     
+     
     >
       <MatchLikesQuota remaining={likesRemaining} limit={dailyLimit} isUnlimited={isUnlimited} />
-      <motion.div className="pm-match-actions">
+      <div className="pm-match-actions">
       <ActionCircle
         label="Geri Al"
         variant="muted"
@@ -83,8 +82,8 @@ export function MatchActionRow({
         onClick={onSuperLike}
         disabled={!canAct}
       />
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }
 
@@ -118,20 +117,20 @@ function ActionCircle({
             : ''
 
   return (
-    <motion.button
+    <button
       type="button"
       aria-label={label}
       aria-disabled={disabled}
       disabled={disabled}
       onClick={onClick}
       className={`pm-match-action ${isLarge ? 'pm-match-action--lg' : 'pm-match-action--sm'} ${variantClass}${disabled ? ' is-disabled' : ''}`}
-      whileHover={disabled ? undefined : { scale: large ? 1.07 : 1.055, y: -2 }}
-      whileTap={disabled ? undefined : { scale: 0.94 }}
-      transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+     
+     
+     
     >
       <span className="pm-match-action__icon" aria-hidden>
         {icon}
       </span>
-    </motion.button>
+    </button>
   )
 }

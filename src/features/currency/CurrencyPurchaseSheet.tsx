@@ -1,6 +1,6 @@
-import { FiStar, FiX, FiZap } from 'react-icons/fi'
-import { LazyImage } from '../../shared/LazyImage'
 import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
+import { FiStar, FiX, FiZap } from 'react-icons/fi'
+import { CurrencyImage } from './CurrencyImage'
 import { currencyMeta, GEM_MOR_PACKAGE_IDS, morGemIcon } from './currencyPackages'
 import { useGemBalance } from './GemBalanceProvider'
 import type { CurrencyKind } from './types'
@@ -57,7 +57,7 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
             <header className="pm-currency-shop__head">
               <div className="pm-currency-shop__hero">
                 <span className="pm-currency-shop__hero-rays" aria-hidden />
-                <LazyImage src={meta.icon} alt="" className="pm-currency-shop__hero-icon" width={64} height={64} />
+                <CurrencyImage src={meta.icon} alt="" className="pm-currency-shop__hero-icon" width={64} height={64} />
                 <span className="pm-currency-shop__hero-glow" aria-hidden />
                 <span className="pm-currency-shop__hero-spark" aria-hidden />
               </div>
@@ -110,7 +110,7 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
                     {showMorGem ? (
                       <div className="pm-currency-shop__pkg-mor-hero" aria-hidden>
                         <span className="pm-currency-shop__pkg-mor-hero-glow" />
-                        <LazyImage src={morGemIcon} alt="" width={48} height={48} />
+                        <CurrencyImage src={morGemIcon} alt="" width={48} height={48} />
                       </div>
                     ) : null}
                     <div className="pm-currency-shop__pkg-main">

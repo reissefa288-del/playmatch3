@@ -1,0 +1,96 @@
+.pm-location-consent {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 1201;
+  width: min(100%, 480px);
+  transform: translateX(-50%);
+  border-radius: 20px 20px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 24, 42, 0.98), rgba(10, 14, 28, 0.98));
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+  padding: 18px 18px calc(18px + env(safe-area-inset-bottom, 0px));
+}
+
+.pm-location-consent__head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pm-location-consent__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(96, 180, 255, 0.12);
+  color: #8ec8ff;
+  flex-shrink: 0;
+}
+
+.pm-location-consent__head h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: #f2f6ff;
+}
+
+.pm-location-consent__head p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.pm-location-consent__list {
+  margin: 0 0 14px;
+  padding-left: 18px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.pm-location-consent__list li + li {
+  margin-top: 6px;
+}
+
+.pm-location-consent__error {
+  margin: 0 0 12px;
+  color: #ffb4b4;
+  font-size: 0.84rem;
+}
+
+.pm-location-consent__actions {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 8px;
+}
+
+.pm-location-consent__secondary,
+.pm-location-consent__primary {
+  padding: 13px 14px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-location-consent__secondary {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.pm-location-consent__primary {
+  border: 1px solid rgba(96, 180, 255, 0.35);
+  background: rgba(96, 180, 255, 0.16);
+  color: #d8ecff;
+}
+
+.pm-location-consent__primary:disabled,
+.pm-location-consent__secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

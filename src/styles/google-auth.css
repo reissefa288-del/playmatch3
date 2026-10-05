@@ -112,6 +112,28 @@
   border: 2px solid rgba(26, 115, 232, 0.25);
 }
 
+.pm-google-auth__avatar--placeholder {
+  display: grid;
+  place-items: center;
+  background: #fff;
+}
+
+.pm-google-auth__avatar--placeholder .pm-google-auth__logo {
+  width: 28px;
+  height: 28px;
+  margin: 0;
+}
+
+.pm-google-auth__success-avatar {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid rgba(52, 168, 83, 0.35);
+  display: block;
+}
+
 .pm-google-auth__account-text {
   flex: 1;
   min-width: 0;
@@ -190,6 +212,22 @@
   color: #5f6368;
   font-size: 0.8rem;
   cursor: pointer;
+}
+
+.pm-google-auth__hint {
+  position: relative;
+  z-index: 1;
+  margin: 10px 0 0;
+  padding: 0 4px;
+  color: #80868b;
+  font-size: 0.68rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.pm-google-auth__hint strong {
+  color: #5f6368;
+  font-weight: 600;
 }
 
 .pm-google-auth__status {
@@ -285,11 +323,53 @@
   to { stroke-dashoffset: 0; }
 }
 
+.pm-google-auth__backdrop--enter {
+  animation: pm-google-backdrop-in 0.28s ease both;
+}
+
+.pm-google-auth__card--enter {
+  animation: pm-google-card-in 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pm-google-auth__status--success-enter {
+  animation: pm-google-success-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pm-google-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pm-google-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes pm-google-success-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .pm-google-auth__card-glow,
   .pm-google-auth__spinner-ring,
   .pm-google-auth__success-icon circle,
-  .pm-google-auth__success-icon path {
+  .pm-google-auth__success-icon path,
+  .pm-google-auth__backdrop--enter,
+  .pm-google-auth__card--enter,
+  .pm-google-auth__status--success-enter {
     animation: none;
     stroke-dashoffset: 0;
   }

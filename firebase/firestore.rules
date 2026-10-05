@@ -1,0 +1,141 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function hasAppCheck() {
+      return request.app != null;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && hasAppCheck();
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function matchDocIdFor(uidA, uidB) {
+      return uidA < uidB ? uidA + '_' + uidB : uidB + '_' + uidA;
+    }
+
+    function isMatchPartner(userId) {
+      return isSignedIn()
+        && request.auth.uid != userId
+        && exists(/databases/$(database)/documents/matches/$(matchDocIdFor(request.auth.uid, userId)));
+    }
+
+    match /users/{userId} {
+      function isDiscoverableProfile() {
+        return resource.data.onboardingCompleted == true;
+      }
+
+      // ADIM 3.1 — scoped read: owner, keşfet (onboarding tam), eşleşme partneri
+      allow get: if isOwner(userId)
+        || (isSignedIn() && isDiscoverableProfile())
+        || (isSignedIn() && isMatchPartner(userId));
+
+      allow list: if isSignedIn()
+        && userId != request.auth.uid
+        && resource.data.onboardingCompleted == true;
+
+      allow create: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == userId;
+      allow delete: if isOwner(userId);
+
+      match /fcmTokens/{tokenId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId)
+          && request.resource.data.token is string
+          && request.resource.data.token.size() > 0
+          && request.resource.data.platform in ['web', 'twa']
+          && request.resource.data.createdAt is int
+          && request.resource.data.updatedAt is int;
+        allow delete: if isOwner(userId);
+      }
+    }
+
+    match /likes/{likeId} {
+      // ADIM 3.2 — sadece gönderen veya alıcı okuyabilir
+      allow get: if isSignedIn()
+        && (resource.data.fromUid == request.auth.uid || resource.data.toUid == request.auth.uid);
+
+      allow list: if isSignedIn()
+        && resource.data.fromUid == request.auth.uid;
+
+      allow create: if isSignedIn()
+        && request.resource.data.fromUid == request.auth.uid
+        && request.resource.data.toUid is string
+        && request.resource.data.fromUid != request.resource.data.toUid
+        && request.resource.data.source in ['discover', 'game']
+        && request.resource.data.createdAt is int
+        && likeId == request.resource.data.fromUid + '_' + request.resource.data.toUid;
+      allow update, delete: if false;
+    }
+
+    function isMatchParticipant(matchId) {
+      let matchDoc = get(/databases/$(database)/documents/matches/$(matchId));
+      return isSignedIn()
+        && (matchDoc.data.userA == request.auth.uid || matchDoc.data.userB == request.auth.uid);
+    }
+
+    match /matches/{matchId} {
+      allow read: if isMatchParticipant(matchId);
+      // ADIM 4.2 — yalnızca Cloud Function (Admin SDK) oluşturur
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if isMatchParticipant(matchId);
+        allow create: if isMatchParticipant(matchId)
+          && request.resource.data.senderUid == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 2000
+          && request.resource.data.createdAt is int
+          && request.resource.data.readAt == null;
+        allow update: if isMatchParticipant(matchId)
+          && resource.data.senderUid != request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt'])
+          && request.resource.data.readAt is int;
+        allow delete: if false;
+      }
+    }
+
+    match /dailyLikes/{userId} {
+      allow read: if isOwner(userId);
+      // ADIM 4.3 — yalnızca Cloud Function (Admin SDK) yazar
+      allow create, update, delete: if false;
+    }
+
+    match /reports/{reportId} {
+      allow read: if false;
+      allow create: if isSignedIn()
+        && request.resource.data.reporterUid == request.auth.uid
+        && request.resource.data.targetUid is string
+        && request.resource.data.reporterUid != request.resource.data.targetUid
+        && request.resource.data.reason is string
+        && request.resource.data.reason.size() > 0
+        && request.resource.data.details is string
+        && request.resource.data.createdAt is int
+        && request.resource.data.source in ['profile', 'chat'];
+      allow update, delete: if false;
+    }
+
+    match /blocks/{blockId} {
+      allow read: if isSignedIn()
+        && (resource.data.blockerUid == request.auth.uid || resource.data.blockedUid == request.auth.uid);
+      allow create: if isSignedIn()
+        && request.resource.data.blockerUid == request.auth.uid
+        && request.resource.data.blockedUid is string
+        && request.resource.data.blockerUid != request.resource.data.blockedUid
+        && request.resource.data.createdAt is int
+        && blockId == request.resource.data.blockerUid + '_' + request.resource.data.blockedUid;
+      allow delete: if isSignedIn() && resource.data.blockerUid == request.auth.uid;
+      allow update: if false;
+    }
+  }
+}

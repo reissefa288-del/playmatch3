@@ -1,8 +1,6 @@
 import { useCallback, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-
 export type LightboxPhoto = {
   id: string
   objectPosition: string
@@ -25,7 +23,6 @@ export function PhotoLightbox({
   index,
   onIndexChange,
 }: PhotoLightboxProps) {
-  const reduceMotion = useReducedMotion()
   const count = photos.length
   const current = photos[index] ?? photos[0]
 
@@ -51,16 +48,16 @@ export function PhotoLightbox({
   if (typeof document === 'undefined') return null
 
   return createPortal(
-    <AnimatePresence>
+    <>
       {open && current ? (
-        <motion.div
+        <div
           className="pm-photo-lightbox"
           role="dialog"
           aria-modal="true"
           aria-label="Fotoğraf büyütme"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+         
+         
+         
         >
           <button
             type="button"
@@ -69,12 +66,12 @@ export function PhotoLightbox({
             onClick={onClose}
           />
 
-          <motion.div
+          <div
             className="pm-photo-lightbox__frame"
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={reduceMotion ? undefined : { opacity: 0, scale: 0.96 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+           
+           
+           
+           
           >
             <div className="pm-photo-lightbox__top">
               <span>
@@ -86,16 +83,16 @@ export function PhotoLightbox({
             </div>
 
             <div className="pm-photo-lightbox__stage">
-              <motion.img
+              <img
                 key={current.id}
                 src={imageSrc}
                 alt=""
                 className="pm-photo-lightbox__img"
                 style={{ objectPosition: current.objectPosition }}
                 draggable={false}
-                initial={reduceMotion ? false : { opacity: 0, scale: 0.98 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.25 }}
+               
+               
+               
               />
 
               {count > 1 ? (
@@ -148,10 +145,10 @@ export function PhotoLightbox({
                 />
               ))}
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       ) : null}
-    </AnimatePresence>,
+    </>,
     document.body,
   )
 }

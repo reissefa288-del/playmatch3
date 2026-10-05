@@ -21,9 +21,9 @@ export function NearbyPlayersList({ players, layout = 'list' }: NearbyPlayersLis
 
   return (
     <ul className={`pm-nearby-players-list${layout === 'grid' ? ' is-grid' : ''}`}>
-      {sortedPlayers.map((player, index) => (
+      {sortedPlayers.map((player) => (
         <li key={player.id}>
-          <NearbyPlayerListCard player={player} index={index} />
+          <NearbyPlayerListCard player={player} />
         </li>
       ))}
     </ul>

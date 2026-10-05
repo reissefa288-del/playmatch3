@@ -1,11 +1,9 @@
 import {
-  DAILY_LIKES_LIMIT,
-  dailyLikesDayKey,
-  dailyLikesRemaining,
   DAILY_LIKES_STORAGE_KEY,
-  readDailyLikesQuota,
+  dailyLikesDayKey,
 } from '../../shared/dailyLikes'
-import { isPremiumActive, readPremiumSubscriptionRaw } from '../premium/premiumSubscription'
+import { readPremiumSubscriptionRaw } from '../premium/premiumSubscription'
+import { readCachedDailyLikesUsed, readDailyLikesViewFromCache } from './dailyLikesCache'
 
 type Listener = () => void
 
@@ -40,8 +38,7 @@ export function notifyDailyLikesSyncChanged() {
 }
 
 export function getDailyLikesSyncSnapshot() {
-  const { day, used } = readDailyLikesQuota()
-  return `${day}:${used}:${readPremiumSubscriptionRaw() ?? ''}`
+  return `${dailyLikesDayKey()}:${readCachedDailyLikesUsed()}:${readPremiumSubscriptionRaw() ?? ''}`
 }
 
 export type DailyLikesView = {
@@ -53,17 +50,5 @@ export type DailyLikesView = {
 }
 
 export function readDailyLikesView(): DailyLikesView {
-  const premiumActive = isPremiumActive()
-  const quota = readDailyLikesQuota()
-  const used = quota.day === dailyLikesDayKey() ? quota.used : 0
-  const remaining = dailyLikesRemaining(used)
-  const isUnlimited = premiumActive
-
-  return {
-    limit: DAILY_LIKES_LIMIT,
-    used,
-    remaining,
-    isUnlimited,
-    canSendLike: isUnlimited || remaining > 0,
-  }
+  return readDailyLikesViewFromCache()
 }

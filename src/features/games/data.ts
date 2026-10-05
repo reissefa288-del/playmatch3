@@ -261,11 +261,8 @@ export const gamesGrid: HubGame[] = [
   },
 ]
 
-export type GamesHeroStat = {
-  id: string
-  icon: IconType
-  label: string
-}
+export type { GamesHeroStat } from './gamesHeroStats'
+export { gamesHeroStats } from './gamesHeroStats'
 
 export type GamesMiniCard = {
   id: string
@@ -300,11 +297,6 @@ export type GamesMiniCard = {
   color: 'is-pink' | 'is-blue' | 'is-green' | 'is-orange' | 'is-violet'
   isMore?: boolean
 }
-
-export const gamesHeroStats: GamesHeroStat[] = [
-  { id: 'online', icon: IoGameControllerOutline, label: '3.842 oyuncu çevrimiçi' },
-  { id: 'active', icon: FiZap, label: '42 aktif maç' },
-]
 
 export const popularGamesCards: GamesMiniCard[] = [
   {

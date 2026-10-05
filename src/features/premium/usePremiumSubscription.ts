@@ -1,12 +1,15 @@
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
+import { useAuthSession } from '../auth/useAuthSession'
 import {
-  activatePremium as persistPremium,
-  readPremiumSubscription,
-  readPremiumSubscriptionRaw,
-} from './premiumSubscription'
+  hydratePremiumEntitlement,
+  readCachedPremiumEntitlement,
+} from './premiumEntitlementStore'
+import { isPremiumEntitlementActive } from './premiumEntitlementStore'
+import { purchasePremiumPackage } from './playBillingBridge'
 import { notifyDailyLikesSyncChanged } from '../likes/dailyLikesSync'
 
 let listeners = new Set<() => void>()
+let cacheTick = 0
 
 function subscribe(listener: () => void) {
   listeners.add(listener)
@@ -14,24 +17,38 @@ function subscribe(listener: () => void) {
 }
 
 function emit() {
+  cacheTick += 1
   listeners.forEach((listener) => listener())
 }
 
-function getSnapshot(): string | null {
-  return readPremiumSubscriptionRaw()
+function getSnapshot(): number {
+  return cacheTick
 }
 
 export function usePremiumSubscriptionState() {
   useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
-  return readPremiumSubscription()
+  const entitlement = readCachedPremiumEntitlement()
+  return {
+    active: isPremiumEntitlementActive(entitlement),
+    activatedAt: entitlement.updatedAt || null,
+    packageId: entitlement.productId,
+  }
 }
 
 export function usePremiumSubscriptionActions() {
-  const activatePremium = useCallback((packageId: string) => {
-    persistPremium(packageId)
-    emit()
-    notifyDailyLikesSyncChanged()
-  }, [])
+  const { session } = useAuthSession()
+  const uid = session?.uid ?? null
+
+  const activatePremium = useCallback(
+    async (packageId: string) => {
+      if (!uid) throw new Error('Giriş gerekli.')
+      await purchasePremiumPackage(uid, packageId)
+      await hydratePremiumEntitlement(uid)
+      emit()
+      notifyDailyLikesSyncChanged()
+    },
+    [uid],
+  )
 
   return useMemo(() => ({ activatePremium }), [activatePremium])
 }
@@ -47,5 +64,10 @@ export function usePremiumSubscription() {
 }
 
 export function notifyPremiumSubscriptionChanged() {
+  emit()
+}
+
+export async function refreshPremiumForUser(uid: string | null): Promise<void> {
+  await hydratePremiumEntitlement(uid)
   emit()
 }

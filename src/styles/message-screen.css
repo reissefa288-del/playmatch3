@@ -59,3 +59,31 @@
 .pm-message-bubble p {
   margin: 0;
 }
+
+.pm-message-thread__load-more {
+  display: flex;
+  justify-content: center;
+  padding: 8px 0 12px;
+}
+
+.pm-message-thread__load-more button {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.pm-message-thread__load-more button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.pm-message-input__error {
+  margin: 0 16px 8px;
+  color: #ffb4b4;
+  font-size: 0.82rem;
+  text-align: center;
+}

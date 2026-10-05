@@ -61,6 +61,7 @@ export type NearbyPlayer = {
   gender?: PlayerGender
   isOnline?: boolean
   verified?: boolean
+  portraitSrc?: string
   portraitPosition: string
   recentActivity?: string
 }

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useIntervalWhenActive } from '../../shared/useIntervalWhenActive'
 import { useRuntimeActive } from '../../shared/useRuntimeActive'
 
 const ACTIVE_MIN = 210
@@ -58,30 +59,24 @@ export function useLiveSocialStats() {
     }, 520)
   }, [])
 
-  useEffect(() => {
-    if (!visible) return
-    const id = setInterval(() => {
-      setActiveCount((prev) => {
-        const next = nextActiveCount(prev)
-        if (next !== prev) flash('active')
-        return next
-      })
-      setWaitingCount((prev) => {
-        const next = nextWaitingCount(prev)
-        if (next !== prev) flash('wait', next > prev)
-        return next
-      })
-    }, TICK_MS)
-    return () => clearInterval(id)
-  }, [flash, visible])
+  useIntervalWhenActive(visible, () => {
+    setActiveCount((prev) => {
+      const next = nextActiveCount(prev)
+      if (next !== prev) flash('active')
+      return next
+    })
+    setWaitingCount((prev) => {
+      const next = nextWaitingCount(prev)
+      if (next !== prev) flash('wait', next > prev)
+      return next
+    })
+  }, TICK_MS)
 
-  useEffect(() => {
-    if (!visible) return
-    const id = setInterval(() => {
-      setTickerIndex((i) => (i + 1) % TICKER_MESSAGES.length)
-    }, 5500)
-    return () => clearInterval(id)
-  }, [visible])
+  useIntervalWhenActive(
+    visible,
+    () => setTickerIndex((i) => (i + 1) % TICKER_MESSAGES.length),
+    5500,
+  )
 
   useEffect(() => {
     return () => {

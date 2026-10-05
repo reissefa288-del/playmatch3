@@ -1,0 +1,3 @@
+/* Chat tab — single CSS entry */
+@import './chat-ambient.css';
+@import './chat.css';

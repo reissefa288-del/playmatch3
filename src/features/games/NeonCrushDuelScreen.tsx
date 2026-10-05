@@ -1,5 +1,4 @@
 import '../../styles/neon-crush.css'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useRef } from 'react'
 import { unlockNeonCrushAudio } from './utils/neonCrushSounds'
 import { FiArrowLeft, FiClock, FiZap } from 'react-icons/fi'
@@ -97,15 +96,15 @@ export function NeonCrushDuelScreen() {
                   crown={game.leader === 'p1'}
                 />
                 <p className="pm-ncrush-hud__name">EMİR</p>
-                <motion.strong
+                <strong
                   key={game.lane1.roundScore}
                   className="pm-ncrush-hud__score"
-                  initial={{ scale: 1.2, filter: 'brightness(1.4)' }}
-                  animate={{ scale: 1, filter: 'brightness(1)' }}
-                  transition={{ type: 'spring', stiffness: 520, damping: 24 }}
+                 
+                 
+                 
                 >
                   {formatScore(game.lane1.roundScore)}
-                </motion.strong>
+                </strong>
               </div>
 
               <div className="pm-ncrush-hud__center">
@@ -128,46 +127,46 @@ export function NeonCrushDuelScreen() {
                   active={game.running}
                   crown={game.leader === 'p2'} {...likeProps}/>
                 <p className="pm-ncrush-hud__name">ZEYNEP</p>
-                <motion.strong
+                <strong
                   key={game.lane2.roundScore}
                   className="pm-ncrush-hud__score"
-                  initial={{ scale: 1.12, filter: 'brightness(1.25)' }}
-                  animate={{ scale: 1, filter: 'brightness(1)' }}
-                  transition={{ type: 'spring', stiffness: 480, damping: 24 }}
+                 
+                 
+                 
                 >
                   {formatScore(game.lane2.roundScore)}
-                </motion.strong>
+                </strong>
               </div>
             </section>
 
             <div className="pm-ncrush-score-race" aria-label="Canlı skor yarışı">
-              <motion.span
+              <span
                 className="pm-ncrush-score-race__fill is-cyan"
-                animate={{ width: `${game.scoreRace.p1}%` }}
-                transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+               
+               
               />
-              <motion.span
+              <span
                 className="pm-ncrush-score-race__fill is-pink"
-                animate={{ width: `${game.scoreRace.p2}%` }}
-                transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+               
+               
               />
               <span className="pm-ncrush-score-race__mid" aria-hidden />
             </div>
 
-            <AnimatePresence>
+            <>
               {game.pressureToast ? (
-                <motion.p
+                <p
                   key={game.pressureToast}
                   className="pm-ncrush-pressure-banner"
-                  initial={{ opacity: 0, y: -8, scale: 0.92 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -6 }}
+                 
+                 
+                 
                   role="status"
                 >
                   {game.pressureToast}
-                </motion.p>
+                </p>
               ) : null}
-            </AnimatePresence>
+            </>
 
             <section
               className={`pm-ncrush-arena${showFinale ? ' has-result' : ''}`}

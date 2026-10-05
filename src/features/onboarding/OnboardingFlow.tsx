@@ -1,7 +1,6 @@
 import '../../styles/onboarding.css'
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import { FiArrowLeft, FiArrowRight, FiCamera, FiCheck } from 'react-icons/fi'
 import { OnboardingAmbient } from './components/OnboardingAmbient'
 import { OnboardingStepHero } from './components/OnboardingStepHero'
@@ -26,7 +25,15 @@ export function OnboardingFlow() {
   const [searchParams] = useSearchParams()
   const forceRestart = searchParams.get('restart') === '1'
   const { session, isAuthenticated } = useAuthSession()
-  const { profile, isOnboardingComplete, completeOnboarding, resetProfile } = useUserProfile()
+  const {
+    profile,
+    isOnboardingComplete,
+    isProfileLoading,
+    isProfileSaving,
+    profileError,
+    completeOnboarding,
+    resetProfile,
+  } = useUserProfile()
   const [stepIndex, setStepIndex] = useState(0)
   const [draft, setDraft] = useState<UserProfile>(() => ({
     ...profile,
@@ -43,12 +50,14 @@ export function OnboardingFlow() {
   useLayoutEffect(() => {
     if (!forceRestart || restarted.current) return
     restarted.current = true
-    resetProfile()
-    setStepIndex(0)
-    setDraft({
-      ...createEmptyProfile(),
-      name: session?.displayName || '',
-      photoUrl: session?.avatarUrl || '',
+    void resetProfile().then(() => {
+      setStepIndex(0)
+      setDraft({
+        ...createEmptyProfile(),
+        name: session?.displayName || '',
+        photoUrl: session?.avatarUrl || '',
+        photoUrls: session?.avatarUrl ? [session.avatarUrl, '', ''] : ['', '', ''],
+      })
     })
   }, [forceRestart, resetProfile, session?.avatarUrl, session?.displayName])
 
@@ -94,7 +103,7 @@ export function OnboardingFlow() {
     }
   }, [draft, step.id])
 
-  const goNext = useCallback(() => {
+  const goNext = useCallback(async () => {
     const message = validateStep()
     if (message) {
       setError(message)
@@ -105,15 +114,19 @@ export function OnboardingFlow() {
       setError(null)
       return
     }
-    completeOnboarding({
-      ...draft,
-      name: draft.name.trim(),
-      bio: draft.bio.trim(),
-      email: session?.email ?? draft.email,
-    })
-    syncMatchFiltersFromOnboarding(draft.matchPreference)
-    navigate('/', { replace: true })
-  }, [completeOnboarding, draft, navigate, session?.email, stepIndex, validateStep])
+    try {
+      await completeOnboarding({
+        ...draft,
+        name: draft.name.trim(),
+        bio: draft.bio.trim(),
+        email: session?.email ?? draft.email,
+      })
+      syncMatchFiltersFromOnboarding(draft.matchPreference)
+      navigate('/', { replace: true })
+    } catch {
+      setError(profileError ?? 'Profil kaydedilemedi. İnternet bağlantını kontrol edip tekrar dene.')
+    }
+  }, [completeOnboarding, draft, navigate, profileError, session?.email, stepIndex, validateStep])
 
   const goBack = useCallback(() => {
     if (stepIndex > 0) {
@@ -177,6 +190,10 @@ export function OnboardingFlow() {
     return <Navigate to="/welcome" replace />
   }
 
+  if (isProfileLoading) {
+    return null
+  }
+
   if (isOnboardingComplete && !forceRestart) {
     return <Navigate to="/" replace />
   }
@@ -216,14 +233,14 @@ export function OnboardingFlow() {
           ))}
         </div>
 
-        <AnimatePresence mode="wait">
-          <motion.div
+        <>
+          <div
             key={step.id}
             className="pm-onboard-body"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.22, ease: 'easeOut' }}
+           
+           
+           
+           
           >
             <OnboardingStepHero step={step} />
 
@@ -365,12 +382,21 @@ export function OnboardingFlow() {
                 {error}
               </p>
             ) : null}
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        </>
 
         <footer className="pm-onboard-footer">
-          <button type="button" className="pm-onboard-next" onClick={goNext}>
-            {stepIndex === ONBOARDING_STEPS.length - 1 ? 'PlayMeet\'e Başla' : 'Devam et'}
+          <button
+            type="button"
+            className="pm-onboard-next"
+            onClick={() => void goNext()}
+            disabled={isProfileSaving}
+          >
+            {isProfileSaving
+              ? 'Kaydediliyor…'
+              : stepIndex === ONBOARDING_STEPS.length - 1
+                ? 'PlayMeet\'e Başla'
+                : 'Devam et'}
             <FiArrowRight aria-hidden />
           </button>
         </footer>

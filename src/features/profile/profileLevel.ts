@@ -1,4 +1,5 @@
-export const PROFILE_XP_STORAGE_KEY = 'pm-profile-total-xp'
+/** v2 — demo seviye 42 / 9k XP yerine sıfırdan başlar */
+export const PROFILE_XP_STORAGE_KEY = 'pm-profile-total-xp-v2'
 
 /** XP needed to complete level `level` and reach level+1 */
 export function xpNeededForLevel(level: number): number {
@@ -13,7 +14,7 @@ export function totalXpAtLevelStart(level: number): number {
   return total
 }
 
-export const DEFAULT_TOTAL_XP = totalXpAtLevelStart(42) + 7280
+export const DEFAULT_TOTAL_XP = 0
 
 export type LevelSnapshot = {
   level: number

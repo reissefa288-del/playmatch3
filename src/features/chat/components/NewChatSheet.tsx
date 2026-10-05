@@ -1,9 +1,9 @@
+import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import { useEffect, useMemo, useState } from 'react'
 import { FiMessageCircle, FiSearch, FiX } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
-import { matchedProfiles } from '../../match/data'
 import type { MatchProfile } from '../../match/data'
+import { useMatchConnections } from '../../match/useMatchConnections'
 
 type NewChatSheetProps = {
   open: boolean
@@ -25,14 +25,15 @@ function profileMatchesQuery(profile: MatchProfile, query: string) {
 }
 
 export function NewChatSheet({ open, onClose }: NewChatSheetProps) {
-  const navigate = useNavigate()
   const reduceMotion = usePrefersReducedMotion()
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
+  const { matches } = useMatchConnections()
 
   const filteredProfiles = useMemo(() => {
     const normalized = normalizeQuery(query)
-    return matchedProfiles.filter((profile) => profileMatchesQuery(profile, normalized))
-  }, [query])
+    return matches.filter((profile) => profileMatchesQuery(profile, normalized))
+  }, [matches, query])
 
   useEffect(() => {
     if (!open) {

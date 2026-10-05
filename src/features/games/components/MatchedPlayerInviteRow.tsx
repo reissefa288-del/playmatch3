@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { FiCheckCircle } from 'react-icons/fi'
 import { IoGameController } from 'react-icons/io5'
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import type { MatchProfile } from '../../match/data'
 import { useHasGameMatchedInvite, useGameMatchedInvitesActions } from '../GameMatchedInvitesProvider'
 import { NearbyInviteBurst } from '../../home/components/NearbyInviteBurst'
@@ -13,7 +12,6 @@ type MatchedPlayerInviteRowProps = {
 }
 
 export function MatchedPlayerInviteRow({ profile }: MatchedPlayerInviteRowProps) {
-  const reduceMotion = useReducedMotion()
   const { sendInvite } = useGameMatchedInvitesActions()
   const invited = useHasGameMatchedInvite(profile.id)
   const [burst, setBurst] = useState(false)
@@ -54,19 +52,19 @@ export function MatchedPlayerInviteRow({ profile }: MatchedPlayerInviteRowProps)
       </div>
 
       <div className="pm-games-invite-row__action">
-        <AnimatePresence>{burst ? <NearbyInviteBurst variant="list" /> : null}</AnimatePresence>
-        <motion.button
+        <>{burst ? <NearbyInviteBurst variant="list" /> : null}</>
+        <button
           type="button"
           className={`pm-games-invite-row__btn${invited ? ' is-invited' : ''}`}
           aria-label={invited ? `${profile.name} davet edildi` : `${profile.name} oyuna davet et`}
           aria-pressed={invited}
           disabled={burst}
           onClick={handleInvite}
-          whileTap={reduceMotion || burst ? undefined : { scale: 0.94 }}
+         
         >
           <IoGameController aria-hidden />
           {invited ? 'Gönderildi' : 'Davet Et'}
-        </motion.button>
+        </button>
       </div>
     </li>
   )

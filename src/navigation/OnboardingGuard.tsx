@@ -5,7 +5,11 @@ import { useUserProfile } from '../features/onboarding/useUserProfile'
 const ONBOARDING_PATH = '/onboarding'
 
 export function OnboardingGuard({ children }: { children: ReactNode }) {
-  const { isOnboardingComplete } = useUserProfile()
+  const { isOnboardingComplete, isProfileLoading } = useUserProfile()
+
+  if (isProfileLoading) {
+    return null
+  }
 
   if (!isOnboardingComplete) {
     return <Navigate to={ONBOARDING_PATH} replace />

@@ -1,6 +1,8 @@
-import { matchDiscoverProfiles } from '../match/data'
 import type { MatchProfile } from '../match/data'
-import { readUserProfile } from '../onboarding/onboardingProfile'
+import { fetchDiscoverProfiles } from '../match/firestoreMatch'
+import { isFirebaseConfigured } from '../auth/firebaseApp'
+import { fakePortraitForGender } from '../../shared/fakePortraits'
+import { readCachedUserProfile } from '../profile/userProfileStore'
 import type { FakePortraitGender } from '../../shared/fakePortraits'
 
 export type QuickMatchGame = {
@@ -47,9 +49,10 @@ const QUICK_MATCH_GAME_ALIASES: Record<string, string> = {
 
 export const QUICK_MATCH_SESSION_KEY = 'pm-quick-match-session'
 
-/** Eşleşme tercihinden kullanıcı cinsiyetini tahmin eder (erkek → kadın arar). */
 export function resolveUserGender(): FakePortraitGender {
-  const pref = readUserProfile()?.matchPreference ?? 'female'
+  const profile = readCachedUserProfile()
+  if (profile.gender) return profile.gender
+  const pref = profile.matchPreference ?? 'female'
   if (pref === 'male') return 'female'
   if (pref === 'female') return 'male'
   return Math.random() > 0.5 ? 'male' : 'female'
@@ -79,15 +82,57 @@ function pickRandom<T>(items: T[]): T {
   return items[Math.floor(Math.random() * items.length)]!
 }
 
-export function buildQuickMatch(userGender?: FakePortraitGender, gameId?: string | null): QuickMatchResult {
+function createBotOpponent(gender: FakePortraitGender): MatchProfile {
+  const name = gender === 'female' ? 'PlayBot' : 'Neo-X'
+  return {
+    id: `bot-${gender}`,
+    name,
+    age: 22,
+    gender,
+    portraitSrc: fakePortraitForGender(gender),
+    online: true,
+    compatibility: 80,
+    province: 'Türkiye',
+    distance: 'Bot',
+    location: 'PlayMeet Bot',
+    tags: [{ id: 'bot', label: 'Bot', icon: 'gamepad' }],
+    favoriteGames: [{ id: 'duel', label: 'Duel', emoji: '⚔️' }],
+    bio: 'Hızlı düello için bot rakip.',
+    photos: [
+      {
+        id: 'bot-1',
+        src: fakePortraitForGender(gender),
+        objectPosition: '50% 12%',
+      },
+    ],
+  }
+}
+
+export async function buildQuickMatchAsync(
+  viewerUid: string | null,
+  userGender?: FakePortraitGender,
+  gameId?: string | null,
+): Promise<QuickMatchResult> {
   const opponentGender = resolveOpponentGender(userGender)
-  const pool = matchDiscoverProfiles.filter((profile) => profile.gender === opponentGender)
-  const onlineFirst = [...pool].sort((a, b) => Number(b.online) - Number(a.online))
-  const opponent = pickRandom(onlineFirst.length > 0 ? onlineFirst : matchDiscoverProfiles)
   const fixedGame = resolveQuickMatchGame(gameId)
   const game = fixedGame ?? pickRandom(QUICK_MATCH_GAMES)
 
-  return { opponent, game }
+  if (viewerUid && isFirebaseConfigured()) {
+    const pool = await fetchDiscoverProfiles(viewerUid, opponentGender)
+    if (pool.length > 0) {
+      return { opponent: pickRandom(pool), game }
+    }
+  }
+
+  return { opponent: createBotOpponent(opponentGender), game }
+}
+
+/** @deprecated sync fallback — QuickMatchScreen uses buildQuickMatchAsync */
+export function buildQuickMatch(userGender?: FakePortraitGender, gameId?: string | null): QuickMatchResult {
+  const opponentGender = resolveOpponentGender(userGender)
+  const fixedGame = resolveQuickMatchGame(gameId)
+  const game = fixedGame ?? pickRandom(QUICK_MATCH_GAMES)
+  return { opponent: createBotOpponent(opponentGender), game }
 }
 
 export function persistQuickMatchSession(result: QuickMatchResult) {

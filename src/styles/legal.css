@@ -144,6 +144,37 @@
   pointer-events: none;
 }
 
+.pm-legal-sheet--auth {
+  max-height: min(78dvh, 640px);
+}
+
+.pm-legal-sheet--auth .pm-legal-sheet__header {
+  padding: 12px 14px 10px;
+}
+
+.pm-legal-sheet--auth .pm-legal-sheet__header-text h2 {
+  font-size: 0.9rem;
+}
+
+.pm-legal-sheet--auth .pm-legal-sheet__header-text p {
+  font-size: 0.68rem;
+}
+
+.pm-legal-sheet--auth .pm-legal-sheet__body {
+  padding: 12px 14px 6px;
+  font-size: 0.78rem;
+}
+
+.pm-legal-sheet--auth .pm-legal-sheet__footer {
+  padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.pm-legal-sheet--auth .pm-legal-sheet__accept {
+  padding: 11px 14px;
+  font-size: 0.78rem;
+  border-radius: 12px;
+}
+
 .pm-legal-sheet {
   position: relative;
   display: flex;

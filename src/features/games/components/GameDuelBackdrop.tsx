@@ -1,12 +1,12 @@
 import { GameDuelAmbientBg } from './GameDuelAmbientBg'
 import { GameDuelVideoBg } from './GameDuelVideoBg'
 
-/** video.mp4 + neon ambient (paylaşılan duel arka planı) */
+/** Tüm duel oyunları — paylaşılan video.mp4 arka planı + ambient (CSS ile gizlenir) */
 export function GameDuelBackdrop() {
   return (
     <>
       <GameDuelVideoBg />
-      <GameDuelAmbientBg video={false} />
+      <GameDuelAmbientBg />
     </>
   )
 }

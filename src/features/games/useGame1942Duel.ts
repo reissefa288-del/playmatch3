@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimers } from '../../shared/useManagedTimers'
 import { loadGame1942DuelRuntime, type Game1942DuelRuntime } from './game1942DuelRuntime'
 import type { Game1942State } from './utils/game1942DuelEngine'
 import type { Y42Particle } from './utils/game1942DuelFx'
@@ -33,6 +34,7 @@ export function useGame1942Duel() {
   const seedRef = useRef(194201)
   const lastTickRef = useRef(performance.now())
   const loopRef = useRef<number | null>(null)
+  const syncTickRef = useRef(0)
   const fxP1Ref = useRef(fxP1)
   const fxP2Ref = useRef(fxP2)
   const shakeP1Ref = useRef(shakeP1Until)
@@ -42,6 +44,7 @@ export function useGame1942Duel() {
   shakeP1Ref.current = shakeP1Until
 
   const documentVisible = useDocumentVisible()
+  const duelTimers = useManagedTimers()
 
   useEffect(() => {
     let cancelled = false
@@ -55,6 +58,8 @@ export function useGame1942Duel() {
     })
     return () => {
       cancelled = true
+      runtimeRef.current = null
+      gameRef.current = null
     }
   }, [])
 
@@ -76,7 +81,10 @@ export function useGame1942Duel() {
       const dt = Math.min(48, t - lastTickRef.current)
       lastTickRef.current = t
       if (!endedRef.current) {
-        setNow(t)
+        syncTickRef.current += 1
+        if (syncTickRef.current % 2 === 0) {
+          startTransition(() => setNow(t))
+        }
       }
 
       if (endedRef.current) {
@@ -135,7 +143,10 @@ export function useGame1942Duel() {
 
         const next = { ...prev, p1, p2 }
         gameRef.current = next
-        setGame(next)
+        syncTickRef.current += 1
+        if (syncTickRef.current % 2 === 0) {
+          startTransition(() => setGame(next))
+        }
 
         const duelWinner = resolveDuelWinner(next)
         if (duelWinner) {
@@ -148,9 +159,13 @@ export function useGame1942Duel() {
       fxP1Ref.current = p1Fx
       fxP2Ref.current = p2Fx
       shakeP1Ref.current = shakeP1
-      setFxP1(p1Fx)
-      setFxP2(p2Fx)
-      setShakeP1Until(shakeP1)
+      if (p1Fx.length > 0 || p2Fx.length > 0 || shakeP1 > t || syncTickRef.current % 3 === 0) {
+        startTransition(() => {
+          setFxP1(p1Fx)
+          setFxP2(p2Fx)
+          setShakeP1Until(shakeP1)
+        })
+      }
 
       loopRef.current = window.requestAnimationFrame(tick)
     }
@@ -158,8 +173,9 @@ export function useGame1942Duel() {
     loopRef.current = window.requestAnimationFrame(tick)
     return () => {
       if (loopRef.current != null) window.cancelAnimationFrame(loopRef.current)
+      duelTimers.clearAll()
     }
-  }, [documentVisible, engineReady, running])
+  }, [documentVisible, duelTimers, engineReady, running])
 
   const setShipX = useCallback(
     (x: number) => {

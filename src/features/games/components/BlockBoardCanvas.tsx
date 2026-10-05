@@ -1,4 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react'
+import { canvasDprCap } from '../../../shared/canvasDpr'
+import { releaseCanvas } from '../../../shared/releaseCanvas'
 import { useDocumentVisible } from '../../../shared/useDocumentVisible'
 import {
   BLOCK_COLS,
@@ -52,7 +54,7 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
     let height = 0
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = canvasDprCap()
       const rect = canvas.getBoundingClientRect()
       width = Math.max(1, Math.floor(rect.width * dpr))
       height = Math.max(1, Math.floor(rect.height * dpr))
@@ -74,7 +76,7 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
       const h = height
       if (w < 1 || h < 1) return
 
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = canvasDprCap()
 
       const padX = w * 0.06
       const padY = h * 0.04
@@ -235,6 +237,7 @@ export function BlockBoardCanvas({ laneRef, accent }: BlockBoardCanvasProps) {
     return () => {
       cancelAnimationFrame(raf)
       ro.disconnect()
+      releaseCanvas(canvas)
     }
   }, [accent, documentVisible, laneRef])
 

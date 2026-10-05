@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import type { ColorId, ColorLaneState } from '../utils/colorMatchEngine'
 import { COLS, isTargetColor, remainingMatches, ROWS } from '../utils/colorMatchEngine'
@@ -26,17 +25,17 @@ function TargetsPanel({ lane }: { lane: ColorLaneState }) {
       <span className="pm-cmatch-targets__label">HEDEF RENKLER</span>
       <div className="pm-cmatch-targets__row" role="list" aria-label="Hedef renkler">
         {lane.targets.map((color) => (
-          <motion.div
+          <div
             key={`${lane.targetKey}-${color}`}
             className={`pm-cmatch-targets__chip is-${color}`}
             role="listitem"
-            initial={{ scale: 0.9, opacity: 0.7 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 22 }}
+           
+           
+           
           >
             <span className="pm-cmatch-targets__swatch" aria-hidden />
             <span className="pm-cmatch-targets__name">{COLOR_LABELS[color]}</span>
-          </motion.div>
+          </div>
         ))}
       </div>
       <span className="pm-cmatch-targets__hint">
@@ -88,7 +87,7 @@ export function ColorMatchGrid({ lane, accent, interactive = false, onTap }: Pro
                   : ''
 
             return (
-              <motion.button
+              <button
                 key={`${lane.targetKey}-${index}`}
                 type="button"
                 role="gridcell"
@@ -103,7 +102,7 @@ export function ColorMatchGrid({ lane, accent, interactive = false, onTap }: Pro
                   .join(' ')}
                 disabled={!interactive || cell.cleared}
                 onClick={() => onTap?.(index)}
-                whileTap={interactive && !cell.cleared ? { scale: 0.9 } : undefined}
+               
                 aria-label={
                   cell.cleared
                     ? `${COLOR_LABELS[cell.color]} eşleşti`
@@ -122,7 +121,7 @@ export function ColorMatchGrid({ lane, accent, interactive = false, onTap }: Pro
                 {isTapAnim && tapAnim.fx === 'miss' ? (
                   <span className="pm-cmatch-cell__ripple is-miss" aria-hidden />
                 ) : null}
-              </motion.button>
+              </button>
             )
           })}
         </div>

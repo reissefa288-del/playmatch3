@@ -1,5 +1,4 @@
 import '../../../styles/game-portrait.css'
-import { motion } from 'framer-motion'
 import { LazyImage } from '../../../shared/LazyImage'
 import { GameOpponentLikeButton } from './GameOpponentLikeButton'
 
@@ -29,14 +28,13 @@ export function GamePlayerPortrait({
 
   return (
     <div className="pm-game-portrait-wrap">
-      <motion.div
+      <div
         className={`pm-game-portrait is-${variant} ${active ? 'is-active' : ''}`}
-        layout
       >
         {crown ? <span className="pm-game-portrait__crown" aria-hidden>♛</span> : null}
         <LazyImage src={src} alt="" className="pm-game-portrait__photo" width={72} height={72} />
         {label ? <span className="pm-game-portrait__label">{label}</span> : null}
-      </motion.div>
+      </div>
       {showLike ? (
         <GameOpponentLikeButton playerId={likePlayerId} playerName={likePlayerName} />
       ) : null}

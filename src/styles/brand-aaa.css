@@ -1,9 +1,27 @@
 /* PlayMeet wordmark — sol hizalı, sade */
 
+.pm-navbar,
+.pm-navbar__right,
+.pm-brand {
+  display: flex;
+  align-items: center;
+}
+
 .pm-navbar {
   width: 100%;
   align-self: stretch;
   box-sizing: border-box;
+  flex: 0 0 auto;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: nowrap;
+  min-height: 44px;
+}
+
+.pm-navbar__right {
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+  gap: 6px;
 }
 
 .pm-brand--aaa {

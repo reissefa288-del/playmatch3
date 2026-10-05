@@ -1,3 +1,4 @@
+import { canvasDprCap } from '../../../shared/canvasDpr'
 import {
   COLOR_HEX,
   SPECIAL_KIND_META,
@@ -126,7 +127,7 @@ export function placementScale(key: string, state: BubbleVisualState): number {
 }
 
 export function canvasDpr(): number {
-  return Math.min(window.devicePixelRatio || 1, 1.5)
+  return canvasDprCap()
 }
 
 export function prepareCanvasCtx(ctx: CanvasRenderingContext2D) {

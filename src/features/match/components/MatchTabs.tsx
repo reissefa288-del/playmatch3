@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion'
 import type { MatchTabId } from '../data'
 import { matchTabs } from '../data'
+import { useMatchConnections } from '../useMatchConnections'
 
 type MatchTabsProps = {
   active: MatchTabId
@@ -8,14 +8,16 @@ type MatchTabsProps = {
 }
 
 export function MatchTabs({ active, onChange }: MatchTabsProps) {
+  const { matchCount } = useMatchConnections()
+
   return (
-    <motion.div
+    <div
       className="pm-match-tabs"
       role="tablist"
       aria-label="Eşleşme sekmeleri"
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.06, duration: 0.4 }}
+     
+     
+     
     >
       {matchTabs.map((tab) => {
         const isActive = tab.id === active
@@ -29,12 +31,12 @@ export function MatchTabs({ active, onChange }: MatchTabsProps) {
             className={`pm-match-tabs__btn${isActive ? ' is-active' : ''}`}
           >
             <span className="pm-match-tabs__label">{tab.label}</span>
-            {tab.badge != null ? (
-              <span className="pm-match-tabs__badge">{tab.badge}</span>
+            {tab.id === 'matches' && matchCount > 0 ? (
+              <span className="pm-match-tabs__badge">{matchCount}</span>
             ) : null}
           </button>
         )
       })}
-    </motion.div>
+    </div>
   )
 }

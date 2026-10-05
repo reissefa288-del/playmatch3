@@ -1,12 +1,13 @@
+import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import { Link } from 'react-router-dom'
 import kasaIcon from '../../../reference/opt/thumb/kasa.webp'
 import { LazyImage } from '../../../shared/LazyImage'
-import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import { premiumUnlockBanner } from '../data'
+import { isPremiumFeatureEnabled } from '../../premium/premiumAvailability'
 
 export function PremiumUnlockCard() {
   const reduceMotion = usePrefersReducedMotion()
-
+  if (!isPremiumFeatureEnabled()) return null
   return (
     <section
       className={`pm-premium-unlock pm-home-lower-block${reduceMotion ? '' : ' pm-enter-fade-up'}`}

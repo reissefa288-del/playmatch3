@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import type { StackLaneEvent } from '../utils/stackDuelEngine'
 
 type StackHitReactionProps = {
@@ -10,11 +9,11 @@ export function StackHitReaction({ event, accent }: StackHitReactionProps) {
   if (event === 'over') return null
 
   return (
-    <motion.div
+    <div
       className={`pm-stack-hit is-${accent} is-${event}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+     
+     
+     
       aria-hidden
     >
       <span className="pm-stack-hit__flash" />
@@ -30,6 +29,6 @@ export function StackHitReaction({ event, accent }: StackHitReactionProps) {
         </span>
       ) : null}
       {event === 'miss' ? <span className="pm-stack-hit__crack" /> : null}
-    </motion.div>
+    </div>
   )
 }

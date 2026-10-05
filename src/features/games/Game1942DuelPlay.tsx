@@ -1,8 +1,6 @@
-import { AnimatePresence, motion } from 'framer-motion'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
-import { Game1942DuelArena } from './components/Game1942DuelArena'
 import { GameDuelBackdrop } from './components/GameDuelBackdrop'
 import { GameOpponentLikeButton } from './components/GameOpponentLikeButton'
 import { GameDuelRematchActions } from './components/GameDuelRematchActions'
@@ -10,6 +8,10 @@ import { START_LIVES } from './utils/game1942DuelConstants'
 import { useGame1942Duel } from './useGame1942Duel'
 import { useGameOpponent } from './useGameOpponent'
 import { GameRouteFallback } from './components/GameRouteFallback'
+
+const Game1942DuelArena = lazy(() =>
+  import('./components/Game1942DuelArena').then((module) => ({ default: module.Game1942DuelArena })),
+)
 
 function LivesHeart({
   filled,
@@ -137,7 +139,7 @@ export function Game1942DuelPlay() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--1942">
       <div className="pm-artboard">
-        <motion.div className="pm-y42-screen-wrap" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+        <div className="pm-y42-screen-wrap">
           <GameDuelBackdrop />
 
           <button type="button" className="pm-y42-back" onClick={handleBack} aria-label="Geri dön">
@@ -202,27 +204,29 @@ export function Game1942DuelPlay() {
               </div>
             </section>
 
-            <Game1942DuelArena
-              p1={game.p1}
-              p2={game.p2}
-              now={duel.now}
-              fxP1={duel.fxP1}
-              fxP2={duel.fxP2}
-              shakeP1Until={duel.shakeP1Until}
-              muzzleP1Until={duel.muzzleP1Until}
-              disabled={!canPlay}
-              onShipX={duel.setShipX}
-              enemyGlyph={enemyGlyph}
-            />
+            <Suspense fallback={<GameRouteFallback />}>
+              <Game1942DuelArena
+                p1={game.p1}
+                p2={game.p2}
+                now={duel.now}
+                fxP1={duel.fxP1}
+                fxP2={duel.fxP2}
+                shakeP1Until={duel.shakeP1Until}
+                muzzleP1Until={duel.muzzleP1Until}
+                disabled={!canPlay}
+                onShipX={duel.setShipX}
+                enemyGlyph={enemyGlyph}
+              />
+            </Suspense>
           </div>
 
-          <AnimatePresence>
+          <>
             {overlayMessage && resultVariant ? (
-              <motion.div
+              <div
                 className={['pm-y42-overlay', `is-${resultVariant}`, 'is-match-end'].join(' ')}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
+               
+               
+               
                 role="status"
               >
                 {resultVariant === 'win' ? (
@@ -233,11 +237,11 @@ export function Game1942DuelPlay() {
                   </div>
                 ) : null}
 
-                <motion.div
+                <div
                   className="pm-y42-result-card"
-                  initial={{ opacity: 0, scale: 0.88, y: 18 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ type: 'spring', stiffness: 340, damping: 26 }}
+                 
+                 
+                 
                 >
                   <span className="pm-y42-result-card__badge" aria-hidden />
                   <p className="pm-y42-result-card__eyebrow">MAÇ SONUCU</p>
@@ -258,11 +262,11 @@ export function Game1942DuelPlay() {
                     primaryClassName="is-primary"
                     ghostClassName="is-ghost"
                   />
-                </motion.div>
-              </motion.div>
+                </div>
+              </div>
             ) : null}
-          </AnimatePresence>
-        </motion.div>
+          </>
+        </div>
       </div>
     </div>
   )

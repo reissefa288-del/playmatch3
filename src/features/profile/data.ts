@@ -6,13 +6,6 @@ import {
 } from 'react-icons/io5'
 import { LuTrophy } from 'react-icons/lu'
 import type { IconType } from 'react-icons'
-import { bottomNavigation } from '../home/data'
-import type { BottomNavItem } from '../home/types'
-
-
-export const profileBottomNavigation: BottomNavItem[] = bottomNavigation.map((item) =>
-  item.id === 'profile' ? { ...item, to: '/profile' } : item,
-)
 
 export const profileUser = {
   username: 'Emirhan',
@@ -26,10 +19,10 @@ export const profileUser = {
 }
 
 export const profileRank = {
-  tier: 'Efsane',
-  label: 'Seviye 42',
-  current: 7280,
-  max: 9000,
+  tier: 'Çaylak',
+  label: 'Seviye 1',
+  current: 0,
+  max: 5000,
   emblem: LuTrophy,
 }
 
@@ -73,10 +66,10 @@ export type ProfileStat = {
 }
 
 export const profileStats: ProfileStat[] = [
-  { id: 'friends', value: '245', label: 'Arkadaş' },
-  { id: 'likes', value: '1.2K', label: 'Beğeni' },
-  { id: 'visitors', value: '312', label: 'Ziyaretçi' },
-  { id: 'matches', value: '98', label: 'Ortak Match' },
+  { id: 'friends', value: '0', label: 'Arkadaş' },
+  { id: 'likes', value: '0', label: 'Beğeni' },
+  { id: 'visitors', value: '0', label: 'Ziyaretçi' },
+  { id: 'matches', value: '0', label: 'Ortak Match' },
 ]
 
 export type ProfileAchievement = {

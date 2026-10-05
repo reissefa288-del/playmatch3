@@ -1,0 +1,36 @@
+{
+  "packageId": "app.playmeet.twa",
+  "host": "playmeet.app",
+  "name": "PlayMeet",
+  "launcherName": "PlayMeet",
+  "display": "standalone",
+  "themeColor": "#060818",
+  "themeColorDark": "#060818",
+  "navigationColor": "#060818",
+  "navigationColorDark": "#060818",
+  "navigationDividerColor": "#060818",
+  "navigationDividerColorDark": "#060818",
+  "backgroundColor": "#060818",
+  "enableNotifications": true,
+  "startUrl": "/",
+  "iconUrl": "https://playmeet.app/icons/icon-512.png",
+  "maskableIconUrl": "https://playmeet.app/icons/icon-maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://playmeet.app/manifest.webmanifest",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "orientation": "portrait",
+  "fingerprints": [
+    "A1:D2:A4:FC:3B:39:7B:77:5E:6E:FA:E9:DB:64:C6:E2:6B:3C:54:0E:99:31:36:5A:F0:EC:5D:9D:BD:AD:24:BA"
+  ],
+  "additionalTrustedOrigins": []
+}

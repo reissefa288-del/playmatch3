@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react'
-import { tickIntervalMs, type SnakeLaneState } from '../utils/snakeDuelEngine'
+import { canvasDprCap } from '../../../shared/canvasDpr'
+import { releaseCanvas } from '../../../shared/releaseCanvas'
+import { useDocumentVisible } from '../../../shared/useDocumentVisible'
 import { drawSnakeArena, type SnakeAccent } from '../utils/snakeDuelVisuals'
+import { tickIntervalMs, type SnakeLaneState } from '../utils/snakeDuelEngine'
 
 type Props = {
   lane: SnakeLaneState
@@ -10,6 +13,7 @@ type Props = {
 
 export function SnakeArenaCanvas({ lane, accent, roundElapsedSec = 0 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const documentVisible = useDocumentVisible()
   const laneRef = useRef(lane)
   const accentRef = useRef(accent)
   const elapsedRef = useRef(roundElapsedSec)
@@ -18,6 +22,7 @@ export function SnakeArenaCanvas({ lane, accent, roundElapsedSec = 0 }: Props) {
   elapsedRef.current = roundElapsedSec
 
   useEffect(() => {
+    if (!documentVisible) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d', { alpha: true })
@@ -30,7 +35,7 @@ export function SnakeArenaCanvas({ lane, accent, roundElapsedSec = 0 }: Props) {
     let tickAt = performance.now()
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      const dpr = canvasDprCap()
       const rect = canvas.getBoundingClientRect()
       const w = Math.max(1, Math.floor(rect.width * dpr))
       const h = Math.max(1, Math.floor(rect.height * dpr))
@@ -74,8 +79,9 @@ export function SnakeArenaCanvas({ lane, accent, roundElapsedSec = 0 }: Props) {
     return () => {
       cancelAnimationFrame(raf)
       ro?.disconnect()
+      releaseCanvas(canvas)
     }
-  }, [])
+  }, [documentVisible])
 
   return (
     <canvas

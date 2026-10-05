@@ -2,7 +2,6 @@ import '../../styles/premium-feature-icons.css'
 import '../../styles/premium.css'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { motion } from 'framer-motion'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
 import { premiumFeatures, premiumPackages } from './data'
@@ -13,8 +12,17 @@ import { PremiumSheet } from './components/PremiumSheet'
 import { PremiumTitleBar } from './components/PremiumTitleBar'
 import { PremiumToast } from './components/PremiumToast'
 import { usePremiumScreen } from './usePremiumScreen'
+import { isPremiumFeatureEnabled } from './premiumAvailability'
+import { PremiumComingSoon } from './PremiumComingSoon'
 
 export function PremiumScreen() {
+  if (!isPremiumFeatureEnabled()) {
+    return <PremiumComingSoon />
+  }
+  return <PremiumScreenEnabled />
+}
+
+function PremiumScreenEnabled() {
   const premium = usePremiumScreen()
 
   useEffect(() => {
@@ -43,13 +51,13 @@ export function PremiumScreen() {
       : null
 
   return (
-    <motion.div
+    <div
       className="pm-app-shell pm-app-shell--premium"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.35 }}
+     
+     
+     
     >
-      <motion.div className="pm-artboard">
+      <div className="pm-artboard">
         <AmbientParticles />
         <main className="pm-premium">
           <Navbar />
@@ -64,8 +72,8 @@ export function PremiumScreen() {
           />
         </main>
         <PremiumToast toast={premium.toast} onDismiss={premium.dismissToast} />
-      </motion.div>
+      </div>
       {sheetPortal}
-    </motion.div>
+    </div>
   )
 }

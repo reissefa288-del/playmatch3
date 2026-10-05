@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDocumentVisible } from '../../shared/useDocumentVisible'
 import { useManagedTimeout } from '../../shared/useManagedTimeout'
+import { useManagedTimers } from '../../shared/useManagedTimers'
 import { pickBotDirection } from './utils/snakeDuelBot'
 import {
   canRespawnLane,
@@ -63,7 +64,7 @@ export function useSnakeDuel() {
   const [winner, setWinner] = useState<MatchWinner | null>(null)
   const [screenShake, setScreenShake] = useState(false)
   const [playerDeathMsg, setPlayerDeathMsg] = useState<string | null>(null)
-  const deathMsgTimerRef = useRef(0)
+  const deathMsgTimerRef = useRef<number | null>(null)
   const respawnAtMsRef = useRef({ p1: 0, p2: 0 })
   const [tutorialOpen, setTutorialOpen] = useState(
     () => typeof window !== 'undefined' && !window.localStorage.getItem(TUTORIAL_KEY),
@@ -77,8 +78,8 @@ export function useSnakeDuel() {
   const endedRef = useRef(false)
   const seedRef = useRef(301)
   const loopActiveRef = useRef(false)
-  const shakeTimerRef = useRef(0)
   const breakTimer = useManagedTimeout()
+  const fxTimers = useManagedTimers()
   const documentVisible = useDocumentVisible()
 
   lane1Ref.current = lane1
@@ -86,9 +87,8 @@ export function useSnakeDuel() {
 
   const pulseShake = useCallback(() => {
     setScreenShake(true)
-    window.clearTimeout(shakeTimerRef.current)
-    shakeTimerRef.current = window.setTimeout(() => setScreenShake(false), 380)
-  }, [])
+    fxTimers.schedule(() => setScreenShake(false), 380)
+  }, [fxTimers])
 
   const endRound = useCallback(() => {
     if (roundEndingRef.current) return
@@ -174,8 +174,14 @@ export function useSnakeDuel() {
         pulseShake()
         respawnAtMsRef.current.p1 = Date.now() + DEATH_RESPAWN_MS
         setPlayerDeathMsg(deathMessage())
-        window.clearTimeout(deathMsgTimerRef.current)
-        deathMsgTimerRef.current = window.setTimeout(() => setPlayerDeathMsg(null), DEATH_RESPAWN_MS + 400)
+        if (deathMsgTimerRef.current != null) fxTimers.clear(deathMsgTimerRef.current)
+        deathMsgTimerRef.current = fxTimers.schedule(
+          () => {
+            deathMsgTimerRef.current = null
+            setPlayerDeathMsg(null)
+          },
+          DEATH_RESPAWN_MS + 400,
+        )
       } else if (l1.pickupFx?.kind === 'diamond' && l1.pickupFx.tick !== prev1.pickupFx?.tick) {
         pulseShake()
       }
@@ -242,10 +248,10 @@ export function useSnakeDuel() {
   useEffect(() => {
     return () => {
       breakTimer.clear()
-      window.clearTimeout(shakeTimerRef.current)
-      window.clearTimeout(deathMsgTimerRef.current)
+      if (deathMsgTimerRef.current != null) fxTimers.clear(deathMsgTimerRef.current)
+      fxTimers.clearAll()
     }
-  }, [breakTimer])
+  }, [breakTimer, fxTimers])
 
   const setDirection = useCallback(
     (dir: Direction) => {

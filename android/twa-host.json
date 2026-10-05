@@ -1,0 +1,4 @@
+{
+  "host": "playmeet.app",
+  "note": "Firebase Hosting domain'iniz farklıysa (ör. myapp.web.app) host'u güncelleyip npm run twa:sync-host çalıştırın."
+}

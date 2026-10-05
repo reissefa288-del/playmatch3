@@ -1,7 +1,6 @@
 import { memo } from 'react'
 import { Link } from 'react-router-dom'
 import { MdVerified } from 'react-icons/md'
-import { motion } from 'framer-motion'
 import { fakePortraitForProfile } from '../../../shared/fakePortraits'
 import type { ChatThread } from '../data'
 
@@ -10,12 +9,28 @@ type ChatListItemProps = {
   index: number
 }
 
+function chatListItemPropsEqual(prev: ChatListItemProps, next: ChatListItemProps) {
+  if (prev.index !== next.index) return false
+  const a = prev.thread
+  const b = next.thread
+  return (
+    a.id === b.id &&
+    a.lastMessage === b.lastMessage &&
+    a.time === b.time &&
+    a.unread === b.unread &&
+    a.isOnline === b.isOnline &&
+    a.highlighted === b.highlighted &&
+    a.lastSeen === b.lastSeen &&
+    a.name === b.name &&
+    a.portraitSrc === b.portraitSrc
+  )
+}
+
 export const ChatListItem = memo(function ChatListItem({ thread, index }: ChatListItemProps) {
   return (
-    <motion.div
-      initial={false}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.02, duration: 0.28 }}
+    <div
+      className="pm-fade-up-enter"
+      style={{ animationDelay: `${index * 0.04}s` }}
     >
       <Link
         to={`/chat/${thread.id}`}
@@ -31,7 +46,7 @@ export const ChatListItem = memo(function ChatListItem({ thread, index }: ChatLi
             style={
               thread.portraitPosition
                 ? {
-                    backgroundImage: `url(${fakePortraitForProfile(thread.id)})`,
+                    backgroundImage: `url(${thread.portraitSrc ?? fakePortraitForProfile(thread.id)})`,
                     backgroundPosition: thread.portraitPosition,
                   }
                 : undefined
@@ -62,6 +77,6 @@ export const ChatListItem = memo(function ChatListItem({ thread, index }: ChatLi
 
         {thread.unread ? <span className="pm-chat-item__badge">{thread.unread}</span> : null}
       </Link>
-    </motion.div>
+    </div>
   )
-})
+}, chatListItemPropsEqual)

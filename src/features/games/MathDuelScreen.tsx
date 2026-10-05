@@ -1,5 +1,4 @@
 import '../../styles/math-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiAward, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -39,11 +38,11 @@ function ComboBar({ combo, fill, variant }: { combo: number; fill: number; varia
     <div className={`pm-math-combo is-${variant}${combo >= 3 ? ' is-hot' : ''}`}>
       <span>COMBO x{combo}</span>
       <div className="pm-math-combo__track">
-        <motion.i
+        <i
           key={`${combo}-${fill}`}
-          initial={{ width: 0 }}
-          animate={{ width: `${Math.round(fill * 100)}%` }}
-          transition={{ type: 'spring', stiffness: 320, damping: 24 }}
+         
+         
+         
         />
       </div>
     </div>
@@ -94,10 +93,10 @@ export function MathDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--math">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className={`pm-math-screen ${screenFx}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+         
+         
         >
           <GameDuelBackdrop />
           <MathDuelAmbient />
@@ -131,9 +130,9 @@ export function MathDuelScreen() {
                 <p className="pm-math-hud__label">OYUNCU 1</p>
                 <p className="pm-math-hud__score">
                   <FiAward aria-hidden />
-                  <motion.span key={game.lane1.score} initial={{ scale: 1.15 }} animate={{ scale: 1 }}>
+                  <span key={game.lane1.score}>
                     {formatScore(game.lane1.score)}
-                  </motion.span>
+                  </span>
                 </p>
                 <Hearts lives={game.lane1.lives} variant="cyan" />
                 <ComboBar combo={game.lane1.combo} fill={game.lane1.comboFill} variant="cyan" />
@@ -162,9 +161,9 @@ export function MathDuelScreen() {
                 <p className="pm-math-hud__label">OYUNCU 2</p>
                 <p className="pm-math-hud__score">
                   <FiAward aria-hidden />
-                  <motion.span key={game.lane2.score} initial={{ scale: 1.15 }} animate={{ scale: 1 }}>
+                  <span key={game.lane2.score}>
                     {formatScore(game.lane2.score)}
-                  </motion.span>
+                  </span>
                 </p>
                 <Hearts lives={game.lane2.lives} variant="pink" />
                 <ComboBar combo={game.lane2.combo} fill={game.lane2.comboFill} variant="pink" />
@@ -173,17 +172,11 @@ export function MathDuelScreen() {
             </article>
           </section>
 
-          <motion.section
+          <section
             className="pm-math-arena"
             aria-label="İki oyuncu soru alanları"
-            animate={
-              game.lane1.feedback === 'correct'
-                ? { scale: [1, 1.01, 1] }
-                : game.lane1.feedback === 'wrong'
-                  ? { x: [0, -2, 2, 0] }
-                  : { scale: 1, x: 0 }
-            }
-            transition={{ duration: 0.35 }}
+           
+           
           >
             <MathDuelSide
               lane={game.lane1}
@@ -196,7 +189,7 @@ export function MathDuelScreen() {
               <span className="pm-math-arena__beam" />
             </span>
             <MathDuelSide lane={game.lane2} problem={game.problem2} accent="pink" />
-          </motion.section>
+          </section>
 
           <footer className="pm-math-footer">
             <span className="is-cyan">
@@ -209,15 +202,15 @@ export function MathDuelScreen() {
           </footer>
 
           {overlayMessage ? (
-            <motion.div
+            <div
               className={`pm-math-overlay${!game.running ? ' is-end' : ' is-round'}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+             
+             
               role="status"
             >
-              <motion.p initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+              <p>
                 {overlayMessage}
-              </motion.p>
+              </p>
               {!game.running ? (
                 <GameDuelRematchActions
                   onRestart={() => {
@@ -228,9 +221,9 @@ export function MathDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

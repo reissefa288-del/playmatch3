@@ -1,24 +1,46 @@
+import { useState, type FormEvent } from 'react'
 import { FiMic, FiPlus, FiSmile } from 'react-icons/fi'
-import { motion } from 'framer-motion'
 
-export function MessageInput() {
+type MessageInputProps = {
+  onSend: (text: string) => void | Promise<void>
+  disabled?: boolean
+  sending?: boolean
+}
+
+export function MessageInput({ onSend, disabled = false, sending = false }: MessageInputProps) {
+  const [value, setValue] = useState('')
+
+  async function handleSubmit(event: FormEvent) {
+    event.preventDefault()
+    const text = value.trim()
+    if (!text || disabled || sending) return
+    setValue('')
+    await onSend(text)
+  }
+
   return (
-    <motion.footer
-      className="pm-message-input"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.15, duration: 0.4 }}
-    >
-      <motion.button type="button" className="pm-message-input__side" aria-label="Ekle" whileTap={{ scale: 0.94 }}>
+    <form className="pm-message-input" onSubmit={handleSubmit}>
+      <button type="button" className="pm-message-input__side" aria-label="Ekle">
         <FiPlus />
-      </motion.button>
+      </button>
       <label className="pm-message-input__field">
-        <input type="text" placeholder="Mesajını yaz..." />
+        <input
+          type="text"
+          placeholder="Mesajını yaz..."
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          disabled={disabled || sending}
+        />
         <FiSmile className="pm-message-input__emoji" aria-hidden />
       </label>
-      <motion.button type="button" className="pm-message-input__side" aria-label="Sesli mesaj" whileTap={{ scale: 0.94 }}>
+      <button
+        type="submit"
+        className="pm-message-input__side"
+        aria-label="Mesaj gönder"
+        disabled={disabled || sending || !value.trim()}
+      >
         <FiMic />
-      </motion.button>
-    </motion.footer>
+      </button>
+    </form>
   )
 }

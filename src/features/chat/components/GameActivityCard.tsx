@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import type { ChatDetail } from '../data'
 
 type GameActivityCardProps = {
@@ -7,11 +6,11 @@ type GameActivityCardProps = {
 
 export function GameActivityCard({ lastGame }: GameActivityCardProps) {
   return (
-    <motion.section
+    <section
       className="pm-message-activity"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.06, duration: 0.4 }}
+     
+     
+     
       aria-label="Son oyun aktivitesi"
     >
       <span className="pm-message-activity__icon" aria-hidden>
@@ -24,14 +23,14 @@ export function GameActivityCard({ lastGame }: GameActivityCardProps) {
           <span className="pm-message-activity__ago">{lastGame.playedAgo}</span>
         </p>
       </div>
-      <motion.button
+      <button
         type="button"
         className="pm-message-activity__cta"
-        whileHover={{ scale: 1.03, filter: 'brightness(1.08)' }}
-        whileTap={{ scale: 0.96 }}
+       
+       
       >
         Tekrar Oyna
-      </motion.button>
-    </motion.section>
+      </button>
+    </section>
   )
 }

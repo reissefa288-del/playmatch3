@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import {
   COLS,
   DIAMOND_LIFETIME_TICKS,
@@ -31,7 +30,7 @@ export function SnakeDuelGrid({ lane, accent, roundElapsedSec = 0 }: Props) {
   const diamondUrgent = lane.diamond !== null && lane.diamondTicks > 0 && lane.diamondTicks <= 8
 
   return (
-    <motion.div
+    <div
       className={[
         'pm-snake-board',
         'is-nokia',
@@ -43,19 +42,19 @@ export function SnakeDuelGrid({ lane, accent, roundElapsedSec = 0 }: Props) {
       ]
         .filter(Boolean)
         .join(' ')}
-      initial={{ opacity: 0, y: 8, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ type: 'spring', stiffness: 420, damping: 28 }}
+     
+     
+     
     >
       <div className="pm-snake-board__meta">
-        <motion.span
+        <span
           key={lane.score}
-          initial={{ scale: 1.35, color: accent === 'cyan' ? '#93c5fd' : '#fbcfe8' }}
-          animate={{ scale: 1, color: accent === 'cyan' ? '#60a5fa' : '#f9a8d4' }}
-          transition={{ type: 'spring', stiffness: 520, damping: 18 }}
+         
+         
+         
         >
           {lane.score}
-        </motion.span>
+        </span>
         <small>
           UZ {lane.length} · 💎 {lane.diamondsCollected}
         </small>
@@ -67,21 +66,21 @@ export function SnakeDuelGrid({ lane, accent, roundElapsedSec = 0 }: Props) {
         <span className="pm-snake-board__corner pm-snake-board__corner--bl" aria-hidden />
         <span className="pm-snake-board__corner pm-snake-board__corner--br" aria-hidden />
 
-        <AnimatePresence>
+        <>
           {fx ? (
-            <motion.div
+            <div
               key={fx.tick}
               className={`pm-snake-board__pickup-pop is-${fx.kind} is-${accent}`}
-              initial={{ opacity: 0, y: 10, scale: 0.7 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -16, scale: 0.85 }}
-              transition={{ type: 'spring', stiffness: 560, damping: 22 }}
+             
+             
+             
+             
             >
               +{fx.scoreGain}
               {fx.kind === 'diamond' ? <em>ELMAS</em> : null}
-            </motion.div>
+            </div>
           ) : null}
-        </AnimatePresence>
+        </>
 
         {lane.diamond !== null ? (
           <div
@@ -95,23 +94,23 @@ export function SnakeDuelGrid({ lane, accent, roundElapsedSec = 0 }: Props) {
 
         <div className="pm-snake-board__playfield">
           <SnakeArenaCanvas lane={lane} accent={accent} roundElapsedSec={roundElapsedSec} />
-          <AnimatePresence>
+          <>
             {fx ? (
-              <motion.div
+              <div
                 key={`burst-${fx.tick}`}
                 className="pm-snake-board__burst-anchor"
                 style={burstPosition(fx.cell)}
-                initial={{ opacity: 1, scale: 0.6 }}
-                animate={{ opacity: 0, scale: 1.5 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.45, ease: 'easeOut' }}
+               
+               
+               
+               
               >
                 <SnakePickupBurst accent={accent} kind={fx.kind} />
-              </motion.div>
+              </div>
             ) : null}
-          </AnimatePresence>
+          </>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

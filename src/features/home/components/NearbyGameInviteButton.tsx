@@ -1,7 +1,6 @@
 import { useState, type MouseEvent } from 'react'
 import { FiLock } from 'react-icons/fi'
 import { IoGameController } from 'react-icons/io5'
-import { motion, useReducedMotion } from 'framer-motion'
 import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
 import { useNearbyLikesActions, useHasInvited } from '../NearbyLikesProvider'
 
@@ -22,7 +21,6 @@ export function NearbyGameInviteButton({
   onPhaseChange,
   className = '',
 }: NearbyGameInviteButtonProps) {
-  const reduceMotion = useReducedMotion()
   const { active: isPremiumActive } = usePremiumSubscriptionState()
   const { sendInvite } = useNearbyLikesActions()
   const invited = useHasInvited(playerId)
@@ -55,7 +53,7 @@ export function NearbyGameInviteButton({
       : 'Oyuna davet için Premium gerekir'
 
   return (
-    <motion.button
+    <button
       type="button"
       className={`pm-nearby-card__invite-btn${isPremiumActive ? '' : ' is-locked'}${invited ? ' is-invited' : ''}${lockedHint ? ' is-locked-hint' : ''} ${className}`.trim()}
       aria-label={label}
@@ -63,12 +61,12 @@ export function NearbyGameInviteButton({
       title={!isPremiumActive ? 'Premium ile oyuna davet gönder' : undefined}
       disabled={busy}
       onClick={handleClick}
-      whileTap={reduceMotion || busy ? undefined : { scale: 0.88 }}
+     
     >
       <IoGameController className="pm-nearby-card__invite-btn-icon" aria-hidden />
       {!isPremiumActive && !invited ? (
         <FiLock className="pm-nearby-card__invite-btn-lock" aria-hidden />
       ) : null}
-    </motion.button>
+    </button>
   )
 }

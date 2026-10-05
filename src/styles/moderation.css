@@ -1,0 +1,222 @@
+.pm-moderation-sheet__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  border: 0;
+  background: rgba(4, 8, 18, 0.72);
+  cursor: pointer;
+}
+
+.pm-moderation-sheet {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  z-index: 1201;
+  width: min(100%, 480px);
+  transform: translateX(-50%);
+  border-radius: 20px 20px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(18, 24, 42, 0.98), rgba(10, 14, 28, 0.98));
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.45);
+  padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.pm-moderation-sheet__title {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  text-align: center;
+}
+
+.pm-moderation-sheet__actions {
+  display: grid;
+  gap: 8px;
+}
+
+.pm-moderation-sheet__action,
+.pm-moderation-sheet__cancel {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f2f6ff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-moderation-sheet__action.is-danger {
+  border-color: rgba(255, 120, 120, 0.28);
+  background: rgba(255, 80, 80, 0.1);
+  color: #ffb4b4;
+}
+
+.pm-moderation-sheet__cancel {
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pm-report-sheet {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 1201;
+  width: min(calc(100% - 24px), 420px);
+  transform: translate(-50%, -50%);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(180deg, rgba(18, 24, 42, 0.98), rgba(10, 14, 28, 0.98));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  padding: 18px;
+}
+
+.pm-report-sheet__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.pm-report-sheet__head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #f4f7ff;
+}
+
+.pm-report-sheet__head p {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.pm-report-sheet__close {
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.pm-report-sheet__field {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.pm-report-sheet__field span {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pm-report-sheet__field select,
+.pm-report-sheet__field textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4f7ff;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.pm-report-sheet__field textarea {
+  min-height: 88px;
+  resize: vertical;
+}
+
+.pm-report-sheet__submit {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 180, 255, 0.35);
+  background: rgba(80, 140, 255, 0.18);
+  color: #d8e8ff;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-report-sheet__submit:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.pm-delete-account-sheet__warning {
+  margin: 0 0 12px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pm-delete-account-sheet__confirm-label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pm-delete-account-sheet__confirm-label input {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4f7ff;
+  padding: 10px 12px;
+  font: inherit;
+}
+
+.pm-delete-account-sheet__delete {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 120, 120, 0.35);
+  background: rgba(255, 80, 80, 0.14);
+  color: #ffb4b4;
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-delete-account-sheet__delete:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.pm-profile-account__delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 120, 120, 0.22);
+  background: rgba(255, 80, 80, 0.05);
+  color: #ff9f9f;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-profile-account__delete:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.pm-match-name-row__menu,
+.pm-message-header__actions button[aria-label='Diğer'] {
+  cursor: pointer;
+}
+
+.pm-match-name-row__menu {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 1.1rem;
+  padding: 4px;
+}

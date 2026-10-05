@@ -1,4 +1,3 @@
-import { motion, useReducedMotion } from 'framer-motion'
 import type { QuickPlayOption } from '../data'
 
 type QuickPlaySectionProps = {
@@ -6,7 +5,6 @@ type QuickPlaySectionProps = {
 }
 
 export function QuickPlaySection({ options }: QuickPlaySectionProps) {
-  const reduceMotion = useReducedMotion()
   const [primary, ...secondary] = options
 
   return (
@@ -21,13 +19,13 @@ export function QuickPlaySection({ options }: QuickPlaySectionProps) {
       <p className="pm-quick-play__subtitle">Rastgele oyuncularla hemen bir oyuna başla!</p>
 
       <div className="pm-quick-play__layout">
-        <motion.article
+        <article
           className={`pm-quick-play-card is-primary ${primary.accent === 'pink' ? 'is-pink' : 'is-blue'}`}
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4 }}
-          whileHover={reduceMotion ? undefined : { y: -4, scale: 1.01 }}
-          whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+         
+         
+         
+         
+         
         >
           <span className="pm-quick-play-card__glow" aria-hidden />
           <div className="pm-quick-play-card__icon">
@@ -35,52 +33,52 @@ export function QuickPlaySection({ options }: QuickPlaySectionProps) {
           </div>
           <h4>{primary.title}</h4>
           <p>{primary.subtitle}</p>
-          <motion.button
+          <button
             type="button"
-            whileHover={reduceMotion ? undefined : { scale: 1.04, y: -1 }}
-            whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+           
+           
           >
             <span className="pm-quick-play-card__btn-shine" aria-hidden />
             {primary.cta}
-          </motion.button>
+          </button>
           <small>
             <span className="pm-games-online-dot" /> {primary.online}
           </small>
-        </motion.article>
+        </article>
 
         <div className="pm-quick-play__stack">
-          {secondary.map((option, index) => (
-            <motion.article
+          {secondary.map((option) => (
+            <article
               key={option.id}
               className={`pm-quick-play-card is-secondary ${option.accent === 'pink' ? 'is-pink' : 'is-blue'}`}
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.06, duration: 0.4 }}
-              whileHover={reduceMotion ? undefined : { y: -3, scale: 1.01 }}
-              whileTap={reduceMotion ? undefined : { scale: 0.98 }}
+             
+             
+             
+             
+             
             >
               <span className="pm-quick-play-card__glow" aria-hidden />
               <div className="pm-quick-play-card__head">
-                <motion.div className="pm-quick-play-card__icon">
+                <div className="pm-quick-play-card__icon">
                   <option.icon />
-                </motion.div>
+                </div>
                 <div>
                   <h4>{option.title}</h4>
                   <p>{option.subtitle}</p>
                 </div>
               </div>
 
-              <motion.button
+              <button
                 type="button"
-                whileHover={reduceMotion ? undefined : { scale: 1.03 }}
-                whileTap={reduceMotion ? undefined : { scale: 0.96 }}
+               
+               
               >
                 {option.cta}
-              </motion.button>
+              </button>
               <small>
                 <span className="pm-games-online-dot" /> {option.online}
               </small>
-            </motion.article>
+            </article>
           ))}
         </div>
       </div>

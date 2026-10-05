@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import { colOf, rowOf, type MatchSegment } from '../utils/neonCrushEngine'
 
 type Props = {
@@ -27,7 +26,7 @@ export function NeonMatchParticles({ segments, accent, tick }: Props) {
   return (
     <div className="pm-ncrush-match-particles" aria-hidden>
       {points.map((p) => (
-        <motion.i
+        <i
           key={`${tick}-${p.key}`}
           className={[
             'pm-ncrush-match-particles__dot',
@@ -40,9 +39,9 @@ export function NeonMatchParticles({ segments, accent, tick }: Props) {
             gridColumn: p.col + 1,
             gridRow: p.row + 1,
           }}
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{ opacity: [0, 1, 0], scale: [0, 1.8, 0.2], y: [0, -18, -36] }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+         
+         
+         
         />
       ))}
     </div>

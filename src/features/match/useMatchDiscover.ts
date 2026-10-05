@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useAuthSession } from '../auth/useAuthSession'
 import { useDailyLikes } from '../likes/useDailyLikes'
-import { DAILY_LIKES_LIMIT, matchDiscoverProfiles } from './data'
-import { filterMatchProfiles } from './filterMatchProfiles'
+import { DAILY_LIKES_LIMIT } from './data'
+import { fetchDiscoverProfilesPage, type DiscoverPageCursor } from './firestoreMatch'
+import { DISCOVER_PREFETCH_THRESHOLD } from './discoverConstants'
+import { sendLikeAndRefresh } from './matchConnectionsStore'
 import type { MatchDiscoverActions, MatchDiscoverState, MatchToastPayload } from './matchDiscoverTypes'
+import type { MatchProfile } from './data'
 import type { MatchGenderFilter } from './types'
 
 export type { MatchToastPayload } from './matchDiscoverTypes'
@@ -16,14 +20,22 @@ type HistoryEntry = {
 }
 
 export function useMatchDiscover(gender: MatchGenderFilter) {
-  const pool = useMemo(() => filterMatchProfiles(matchDiscoverProfiles, gender), [gender])
+  const { session } = useAuthSession()
+  const uid = session?.uid ?? null
   const { remaining, isUnlimited, tryConsumeLike } = useDailyLikes()
 
+  const [pool, setPool] = useState<MatchProfile[]>([])
+  const [poolLoading, setPoolLoading] = useState(true)
+  const [cursor, setCursor] = useState<DiscoverPageCursor>(null)
+  const [hasMore, setHasMore] = useState(true)
   const [index, setIndex] = useState(0)
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [toast, setToast] = useState<MatchToastPayload | null>(null)
+  const [acting, setActing] = useState(false)
   const toastId = useRef(0)
   const prevGender = useRef(gender)
+  const loadGen = useRef(0)
+  const prefetching = useRef(false)
 
   useEffect(() => {
     if (prevGender.current === gender) return
@@ -31,12 +43,70 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
     setIndex(0)
     setHistory([])
     setToast(null)
+    setCursor(null)
+    setHasMore(true)
   }, [gender])
+
+  useEffect(() => {
+    if (!uid) {
+      setPool([])
+      setPoolLoading(false)
+      setCursor(null)
+      setHasMore(false)
+      return
+    }
+
+    const generation = ++loadGen.current
+    setPoolLoading(true)
+    setCursor(null)
+    setHasMore(true)
+
+    void fetchDiscoverProfilesPage(uid, gender, null)
+      .then((page) => {
+        if (generation !== loadGen.current) return
+        setPool(page.profiles)
+        setCursor(page.nextCursor)
+        setHasMore(page.hasMore)
+        setIndex(0)
+        setHistory([])
+      })
+      .finally(() => {
+        if (generation !== loadGen.current) return
+        setPoolLoading(false)
+      })
+  }, [uid, gender])
+
+  useEffect(() => {
+    if (!uid || poolLoading || !hasMore || prefetching.current) return
+    if (pool.length - index > DISCOVER_PREFETCH_THRESHOLD) return
+
+    prefetching.current = true
+    const generation = loadGen.current
+
+    void fetchDiscoverProfilesPage(uid, gender, cursor)
+      .then((page) => {
+        if (generation !== loadGen.current) return
+        if (page.profiles.length === 0) {
+          setHasMore(page.hasMore)
+          return
+        }
+        setPool((current) => {
+          const seen = new Set(current.map((profile) => profile.id))
+          const next = page.profiles.filter((profile) => !seen.has(profile.id))
+          return next.length > 0 ? [...current, ...next] : current
+        })
+        setCursor(page.nextCursor)
+        setHasMore(page.hasMore)
+      })
+      .finally(() => {
+        prefetching.current = false
+      })
+  }, [cursor, gender, hasMore, index, pool.length, poolLoading, uid])
 
   const current = pool[index] ?? null
   const peekLeft = index > 0 ? pool[index - 1]! : null
   const peekRight = index < pool.length - 1 ? pool[index + 1]! : null
-  const queueDone = pool.length === 0 || index >= pool.length
+  const queueDone = !poolLoading && (pool.length === 0 || index >= pool.length)
 
   const dismissToast = useCallback(() => setToast(null), [])
 
@@ -60,12 +130,12 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
   }, [])
 
   const pass = useCallback(() => {
-    if (!current) return
+    if (!current || acting) return
     advance({ profileId: current.id, action: 'pass', consumedLike: false })
-  }, [advance, current])
+  }, [acting, advance, current])
 
   const like = useCallback(() => {
-    if (!current) return
+    if (!current || acting || !uid) return
     if (!isUnlimited && remaining <= 0) {
       showToast(
         'Beğeni hakkın bitti',
@@ -74,21 +144,49 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
       )
       return
     }
-    if (!tryConsumeLike()) return
-    advance({ profileId: current.id, action: 'like', consumedLike: true })
-  }, [advance, current, isUnlimited, remaining, showToast, tryConsumeLike])
+
+    setActing(true)
+    void (async () => {
+      if (!(await tryConsumeLike())) {
+        showToast('Beğeni hakkın bitti', 'warn', `Yarın ${DAILY_LIKES_LIMIT} yeni hak tanımlanacak`)
+        setActing(false)
+        return
+      }
+
+      try {
+        const result = await sendLikeAndRefresh(uid, current.id, 'discover')
+        advance({ profileId: current.id, action: 'like', consumedLike: true })
+        if (result.matched) {
+          showToast('Eşleşme!', 'premium', `${current.name} ile eşleştiniz`)
+        }
+      } catch {
+        showToast('Beğeni gönderilemedi', 'warn', 'Bağlantını kontrol edip tekrar dene.')
+      } finally {
+        setActing(false)
+      }
+    })()
+  }, [
+    acting,
+    advance,
+    current,
+    isUnlimited,
+    remaining,
+    showToast,
+    tryConsumeLike,
+    uid,
+  ])
 
   const superLike = useCallback(() => {
-    if (!current) return
+    if (!current || acting) return
     advance({ profileId: current.id, action: 'super', consumedLike: false })
     showToast('Premium beğeni gönderildi', 'premium', `${current.name} profiline öne çıktın`)
-  }, [advance, current, showToast])
+  }, [acting, advance, current, showToast])
 
   const gameInvite = useCallback(() => {
-    if (!current) return
+    if (!current || acting) return
     advance({ profileId: current.id, action: 'invite', consumedLike: false })
     showToast('Oyun daveti gönderildi', 'invite', `${current.name} lobine davet edildi`)
-  }, [advance, current, showToast])
+  }, [acting, advance, current, showToast])
 
   const undo = useCallback(() => {
     const last = history[history.length - 1]
@@ -99,8 +197,8 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
   }, [history])
 
   const canUndo = history.length > 0
-  const canLike = Boolean(current) && (isUnlimited || remaining > 0)
-  const canAct = Boolean(current) && !queueDone
+  const canLike = Boolean(current) && (isUnlimited || remaining > 0) && !acting
+  const canAct = Boolean(current) && !queueDone && !acting && !poolLoading
 
   const state = useMemo<MatchDiscoverState>(
     () => ({
@@ -108,7 +206,7 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
       peekLeft,
       peekRight,
       queueDone,
-      poolSize: pool.length,
+      poolSize: poolLoading ? 0 : pool.length,
       likesRemaining: remaining,
       dailyLimit: DAILY_LIKES_LIMIT,
       isUnlimited,
@@ -126,6 +224,7 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
       peekLeft,
       peekRight,
       pool.length,
+      poolLoading,
       queueDone,
       remaining,
       toast,

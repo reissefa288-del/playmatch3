@@ -63,7 +63,6 @@
 
 .pm-match-hero-card {
   transform-style: preserve-3d;
-  will-change: transform;
   animation: pm-match-card-float 9s var(--pm-ease-luxe) infinite alternate;
 }
 

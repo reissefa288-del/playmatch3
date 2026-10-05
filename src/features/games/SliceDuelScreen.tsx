@@ -1,5 +1,4 @@
 import '../../styles/slice-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback } from 'react'
 import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -36,10 +35,10 @@ export function SliceDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--slice">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-slice-screen"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+         
+         
           onPointerDown={() => unlockSliceDuelAudio()}
         >
           <GameDuelBackdrop />
@@ -90,7 +89,7 @@ export function SliceDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div className="pm-slice-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} role="status">
+            <div className="pm-slice-overlay" role="status">
               <p>{overlayMessage}</p>
               {!duel.running ? (
                 <GameDuelRematchActions
@@ -99,9 +98,9 @@ export function SliceDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

@@ -289,7 +289,6 @@
 .pm-games-featured-track {
   display: flex;
   width: 100%;
-  will-change: transform;
 }
 
 .pm-games-featured-page {
@@ -361,6 +360,7 @@
 }
 
 .pm-featured-card__art {
+  position: relative;
   margin-top: 9px;
   width: 100%;
   height: 136px;
@@ -379,15 +379,73 @@
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-.pm-featured-card__art.has-game-cover {
+.pm-featured-card__art.has-game-cover svg {
+  opacity: 0;
+}
+
+.pm-featured-card__art.has-game-cover--img {
   background:
     linear-gradient(160deg, rgba(3, 6, 23, 0.35), rgba(3, 6, 23, 0.12)),
-    var(--pm-game-art-image) center / cover no-repeat,
     rgba(8, 12, 34, 0.88);
 }
 
-.pm-featured-card__art.has-game-cover svg {
+.pm-game-cover-art__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.pm-featured-card__art.has-game-cover--img > *:not(.pm-game-cover-art__img) {
+  position: relative;
+  z-index: 1;
+}
+
+.pm-game-card__art.has-game-cover--img {
+  background:
+    linear-gradient(160deg, rgba(3, 6, 23, 0.48), rgba(3, 6, 23, 0.2)),
+    rgba(10, 15, 45, 0.9);
+}
+
+.pm-game-card__art.has-game-cover--img svg {
   opacity: 0;
+}
+
+.pm-games-mini-card__art.has-game-cover--img::before {
+  inset: 0;
+  border: 0;
+  border-radius: inherit;
+  z-index: 1;
+  background: linear-gradient(160deg, rgba(3, 6, 23, 0.28), rgba(3, 6, 23, 0.08));
+}
+
+.pm-games-mini-card__art.has-game-cover--img.is-color-match::before,
+.pm-games-mini-card__art.has-game-cover--img.is-snake-duel::before,
+.pm-games-mini-card__art.has-game-cover--img.is-snake::before,
+.pm-games-mini-card__art.has-game-cover--img.is-pong-duel::before,
+.pm-games-mini-card__art.has-game-cover--img.is-pong::before,
+.pm-games-mini-card__art.has-game-cover--img.is-simon-duel::before {
+  background: linear-gradient(160deg, rgba(3, 6, 23, 0.1), rgba(3, 6, 23, 0.02));
+}
+
+.pm-games-mini-card__art.has-game-cover--img::after {
+  display: none;
+}
+
+.pm-games-mini-card__art.has-game-cover--img .pm-games-mini-card__icon {
+  opacity: 0;
+}
+
+/* P2: img cover — devre dışı bırak hardcoded thumb background’ları */
+.pm-games-mini-card__art.has-game-cover--img.is-brick-break::before,
+.pm-games-mini-card__art.has-game-cover--img.is-bubble-shooter::before,
+.pm-games-mini-card__art.has-game-cover--img.is-math::before,
+.pm-games-mini-card__art.has-game-cover--img.is-math-duel::before {
+  background: linear-gradient(160deg, rgba(3, 6, 23, 0.28), rgba(3, 6, 23, 0.08));
 }
 
 .pm-featured-card h4 {
@@ -567,13 +625,6 @@
     var(--pm-games-reference) var(--pm-card-art-pos, 50% 50%) / 620px auto no-repeat,
     radial-gradient(circle at 30% 15%, rgba(255, 95, 195, 0.44), transparent 60%),
     radial-gradient(circle at 82% 80%, rgba(72, 164, 255, 0.4), transparent 58%),
-    rgba(10, 15, 45, 0.9);
-}
-
-.pm-game-card__art.has-game-cover {
-  background:
-    linear-gradient(160deg, rgba(3, 6, 23, 0.48), rgba(3, 6, 23, 0.2)),
-    var(--pm-game-art-image) center / cover no-repeat,
     rgba(10, 15, 45, 0.9);
 }
 
@@ -769,11 +820,7 @@
   animation: pm-games-online-pulse 1.9s ease-in-out infinite;
 }
 
-.pm-app-shell--games .pm-navbar {
-  padding: 2px 0;
-}
-
-/* Brand uses shared .pm-brand__logo — no frame */
+/* games-final.jpeg redesign — hero/shell styles live in games-hero.css (P1) */
 
 .pm-app-shell--games .pm-pill {
   box-shadow:
@@ -889,255 +936,7 @@
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* games-final.jpeg redesign override                                         */
-/* -------------------------------------------------------------------------- */
-
-.pm-tab-panel#pm-tab-games {
-  background: #060818;
-  overflow-anchor: none;
-  scroll-padding-bottom: 16px;
-}
-
-.pm-tab-panel#pm-tab-games::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 140% 90% at 0% 0%, rgba(40, 148, 255, 0.5), transparent 52%),
-    radial-gradient(ellipse 130% 85% at 100% 8%, rgba(255, 60, 200, 0.45), transparent 50%),
-    radial-gradient(ellipse 120% 75% at 50% 100%, rgba(120, 80, 255, 0.35), transparent 48%),
-    radial-gradient(ellipse 100% 70% at 20% 55%, rgba(50, 130, 255, 0.22), transparent 45%),
-    radial-gradient(ellipse 90% 65% at 85% 65%, rgba(255, 90, 180, 0.2), transparent 42%),
-    linear-gradient(165deg, #0c1438 0%, #060818 38%, #140a22 72%, #060818 100%);
-  animation: pm-games-bg-drift 18s ease-in-out infinite alternate;
-}
-
-.pm-app-shell--games {
-  background: transparent;
-  min-height: auto;
-  height: auto;
-}
-
-.pm-app-shell--games .pm-artboard {
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-  background: transparent;
-  flex: 0 0 auto;
-}
-
-.pm-app-shell--games .pm-artboard::before {
-  display: none;
-}
-
-.pm-app-shell--games .pm-ambient-wrap {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100dvh;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.pm-app-shell--games .pm-games {
-  --pm-layout-pad: 16px;
-  width: 100%;
-  flex: 0 0 auto;
-  padding: var(--pm-layout-pad) var(--pm-layout-pad) 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  color: #fff;
-  position: relative;
-  z-index: 1;
-  isolation: isolate;
-  animation: none;
-}
-
-.pm-games-hero-block {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.pm-app-shell--games .pm-games::before,
-.pm-app-shell--games .pm-games::after {
-  display: none;
-}
-
-.pm-games-hero {
-  position: relative;
-  overflow: hidden;
-  margin-top: 2px;
-  border-radius: 18px;
-  border: 1px solid rgba(168, 140, 255, 0.5);
-  padding: 18px;
-  min-height: 196px;
-  background:
-    linear-gradient(180deg, rgba(5, 8, 28, 0.14), rgba(5, 8, 28, 0.48)),
-    var(--pm-games-reference, none) 56% 42%/cover no-repeat,
-    radial-gradient(circle at 18% 12%, rgba(255, 70, 200, 0.28), transparent 45%),
-    radial-gradient(circle at 82% 16%, rgba(70, 150, 255, 0.3), transparent 48%),
-    #070a20;
-  box-shadow:
-    0 0 36px rgba(130, 80, 255, 0.24),
-    0 0 48px rgba(72, 162, 255, 0.16),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  animation: pm-games-hero-breathe 10s ease-in-out infinite alternate;
-}
-
-.pm-games-hero::before {
-  content: '';
-  position: absolute;
-  inset: -40% -18%;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 20% 28%, rgba(255, 86, 206, 0.3), transparent 42%),
-    radial-gradient(circle at 78% 34%, rgba(84, 188, 255, 0.28), transparent 44%);
-  mix-blend-mode: screen;
-  opacity: 0.55;
-  animation: pm-games-hero-flares 7s ease-in-out infinite alternate;
-}
-
-.pm-games-hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), transparent 45%);
-  opacity: 0.4;
-}
-
-.pm-games-hero__eyebrow {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: #f06ad1;
-}
-
-.pm-games-hero h1 {
-  position: relative;
-  z-index: 1;
-  margin: 4px 0 6px;
-  font-size: 56px;
-  line-height: 0.95;
-  letter-spacing: -0.04em;
-}
-
-.pm-games-hero > p {
-  position: relative;
-  z-index: 1;
-  margin: 0;
-  max-width: 180px;
-  font-size: 14px;
-  line-height: 1.4;
-  color: #d5ddff;
-}
-
-.pm-games-hero__stats {
-  position: relative;
-  z-index: 2;
-  margin-top: 8px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.pm-games-hero__stats--below {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
-.pm-games-hero__stat-pill {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 12px;
-  border-radius: 11px;
-  border: 1px solid rgba(142, 166, 255, 0.42);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 48%),
-    rgba(7, 11, 34, 0.88);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #e2ecff;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.32),
-    0 10px 24px rgba(0, 0, 0, 0.3),
-    0 0 26px rgba(98, 156, 255, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.11);
-  overflow: hidden;
-}
-
-.pm-games-hero__stat-pill::before {
-  content: '';
-  position: absolute;
-  inset: -110% -35%;
-  pointer-events: none;
-  opacity: 0.35;
-  background: linear-gradient(110deg, transparent 41%, rgba(255, 255, 255, 0.22) 50%, transparent 59%);
-  animation: pm-games-pill-shine 7s ease-in-out infinite;
-}
-
-.pm-games-hero__stat-pill svg {
-  position: relative;
-  z-index: 1;
-  color: #b4d9ff;
-  font-size: 13px;
-  filter: drop-shadow(0 0 10px rgba(108, 188, 255, 0.45));
-}
-
-.pm-games-hero__stat-pill span {
-  position: relative;
-  z-index: 1;
-}
-
-.pm-games-hero__stat-pill.is-online {
-  border-color: rgba(90, 214, 168, 0.52);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.32),
-    0 10px 24px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(58, 214, 156, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.11);
-}
-
-.pm-games-hero__stat-pill.is-online svg {
-  color: #6bf3bc;
-  filter: drop-shadow(0 0 10px rgba(70, 242, 177, 0.58));
-  animation: pm-games-online-pulse-fast 1.8s ease-in-out infinite;
-}
-
-.pm-games-hero__stat-pill.is-online span {
-  color: #77c8ff;
-}
-
-.pm-games-hero__stat-pill.is-active {
-  border-color: rgba(188, 130, 255, 0.58);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.32),
-    0 10px 24px rgba(0, 0, 0, 0.3),
-    0 0 30px rgba(188, 130, 255, 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.11);
-}
-
-.pm-games-hero__stat-pill.is-active svg {
-  color: #c998ff;
-  filter: drop-shadow(0 0 10px rgba(201, 152, 255, 0.62));
-  animation: pm-games-active-pulse 2.2s ease-in-out infinite;
-}
-
-.pm-games-hero__stat-pill.is-active span {
-  color: #d7a8ff;
-}
+/* games-final.jpeg redesign override — tab/hero shell in games-hero.css */
 
 .pm-app-shell--games .pm-games-search {
   display: flex;
@@ -1932,32 +1731,8 @@
     radial-gradient(circle at 90% 50%, rgba(172, 186, 255, 0.8) 0 16%, transparent 17%);
 }
 
-.pm-games-mini-card__art.has-game-cover::before {
-  inset: 0;
-  border: 0;
-  border-radius: inherit;
-  background:
-    linear-gradient(160deg, rgba(3, 6, 23, 0.28), rgba(3, 6, 23, 0.08)),
-    var(--pm-game-art-image) center / cover no-repeat;
-}
-
-.pm-games-mini-card__art.has-game-cover.is-color-match::before,
-.pm-games-mini-card__art.has-game-cover.is-snake-duel::before,
-.pm-games-mini-card__art.has-game-cover.is-snake::before,
-.pm-games-mini-card__art.has-game-cover.is-pong-duel::before,
-.pm-games-mini-card__art.has-game-cover.is-pong::before,
-.pm-games-mini-card__art.has-game-cover.is-simon-duel::before {
-  background:
-    linear-gradient(160deg, rgba(3, 6, 23, 0.1), rgba(3, 6, 23, 0.02)),
-    var(--pm-game-art-image) center top / cover no-repeat;
-}
-
-.pm-games-mini-card__art.has-game-cover::after {
-  display: none;
-}
-
-.pm-games-mini-card__art.has-game-cover .pm-games-mini-card__icon {
-  opacity: 0;
+.pm-games-mini-card.is-more .pm-games-mini-card__art {
+  position: relative;
 }
 
 .pm-games-mini-card strong {
@@ -2259,39 +2034,7 @@
   100% { transform: translate3d(-4px, -6px, 0) scale(1.06); opacity: 0.52; }
 }
 
-@keyframes pm-games-pill-shine {
-  0% { transform: translateX(-30%); }
-  100% { transform: translateX(30%); }
-}
-
-@keyframes pm-games-active-pulse {
-  0%,
-  100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(201, 152, 255, 0.5)); }
-  50% { transform: scale(1.12); filter: drop-shadow(0 0 14px rgba(201, 152, 255, 0.8)); }
-}
-
-@keyframes pm-games-online-pulse-fast {
-  0%,
-  100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(70, 242, 177, 0.48)); }
-  50% { transform: scale(1.1); filter: drop-shadow(0 0 14px rgba(70, 242, 177, 0.78)); }
-}
-
-@keyframes pm-games-hero-breathe {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-1px); }
-}
-
-@keyframes pm-games-hero-flares {
-  0% { transform: translate3d(-2%, 0, 0) scale(1); opacity: 0.48; }
-  100% { transform: translate3d(2%, -2%, 0) scale(1.04); opacity: 0.66; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .pm-games-hero,
-  .pm-games-hero::before,
-  .pm-games-hero__stat-pill::before,
-  .pm-games-hero__stat-pill.is-online svg,
-  .pm-games-hero__stat-pill.is-active svg,
   .pm-games-shelf::before,
   .pm-games-cta-card::before,
   .pm-games-cta-card__visual,

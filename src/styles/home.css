@@ -1,26 +1,7 @@
 /* -------------------------------------------------------------------------- */
-/* PlayMeet Home — fixed mobile artboard layout (390 target, ≤430 cap)        */
+/* PlayMeet Home — tab-specific layout (base artboard: navigation.css)      */
 /* No viewport-height scaling. No flex/grid compression. Overflow = scroll.  */
 /* -------------------------------------------------------------------------- */
-
-.pm-app-shell {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  box-sizing: border-box;
-}
-
-.pm-artboard {
-  --pm-layout-pad: 14px;
-  width: var(--pm-w);
-  max-width: min(430px, 100vw);
-  flex: 1 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  box-sizing: border-box;
-}
 
 .pm-app-shell--home {
   min-height: auto;
@@ -77,9 +58,7 @@
 .pm-nearby-card__footer,
 .pm-quest-card,
 .pm-quest-card__action,
-.pm-quick-action,
-.pm-bottom-nav,
-.pm-bottom-nav__item {
+.pm-quick-action {
   display: flex;
   align-items: center;
 }
@@ -871,6 +850,8 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 210px;
 }
 
 .pm-nearby-card__image {
@@ -878,15 +859,28 @@
   width: 100%;
   height: 156px;
   min-height: 156px;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center 12%;
   padding: 0;
   box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+
+.pm-nearby-card__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  display: block;
 }
 
 .pm-nearby-card__meta {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   justify-content: space-between;
+  padding: 8px;
+  pointer-events: none;
 }
 
 .pm-nearby-card__body {
@@ -1075,112 +1069,4 @@
 
 .pm-quick-action--blue svg {
   color: #60b6ff;
-}
-
-/* --- Bottom dock (fixed geometry, matches artboard width) ---------------- */
-
-.pm-bottom-nav {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 0;
-  z-index: 50;
-  width: var(--pm-content-w);
-  max-width: calc(min(430px, 100vw) - 2 * var(--pm-inset-x));
-  height: auto;
-  min-height: 76px;
-  box-sizing: border-box;
-  background: rgba(2, 5, 18, 0.96);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-bottom: none;
-  border-radius: 22px 22px 0 0;
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  align-items: stretch;
-  justify-items: stretch;
-  padding: 8px 4px calc(8px + env(safe-area-inset-bottom));
-  gap: 0;
-}
-
-.pm-bottom-nav__item {
-  position: relative;
-  display: flex;
-  flex: none;
-  min-width: 0;
-  width: 100%;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 5px;
-  background: transparent;
-  border: 0;
-  color: #b8abc9;
-  font-size: 10px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 6px 2px 4px;
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-a.pm-bottom-nav__item {
-  color: #b8abc9;
-  text-decoration: none;
-}
-
-.pm-bottom-nav__icon {
-  position: relative;
-  flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.pm-bottom-nav__label {
-  flex: 0 0 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 100%;
-  font-size: 9px;
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  white-space: nowrap;
-  text-align: center;
-  text-decoration: none;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.pm-bottom-nav__icon em {
-  position: absolute;
-  right: -6px;
-  top: -6px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: 99px;
-  font-style: normal;
-  font-size: 9px;
-  display: grid;
-  place-content: center;
-  background: #ff2d8f;
-  color: #fff;
-  box-shadow: 0 0 10px #ff2d8f;
-}
-
-.pm-bottom-nav__item.is-active {
-  color: #ff63ce;
-}
-
-.pm-bottom-nav__item.is-active .pm-bottom-nav__icon {
-  color: #ff63ce;
-  filter: drop-shadow(0 0 8px rgba(255, 73, 192, 0.9));
 }

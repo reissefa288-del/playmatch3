@@ -2,17 +2,17 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
+import { useAuthSession } from '../auth/useAuthSession'
 import {
-  DAILY_LIKES_LIMIT,
-  dailyLikesDayKey,
-  readDailyLikesQuota,
-  writeDailyLikesQuota,
-} from '../../shared/dailyLikes'
-import { isPremiumActive } from '../premium/premiumSubscription'
+  hydrateDailyLikesCache,
+  resetDailyLikesCache,
+  tryConsumeDailyLike,
+} from './dailyLikesCache'
 import {
   getDailyLikesSyncSnapshot,
   notifyDailyLikesSyncChanged,
@@ -22,28 +22,29 @@ import {
 } from './dailyLikesSync'
 
 type DailyLikesActions = {
-  tryConsumeLike: () => boolean
+  tryConsumeLike: () => Promise<boolean>
 }
 
 const DailyLikesActionsContext = createContext<DailyLikesActions | null>(null)
 
 export function DailyLikesProvider({ children }: { children: ReactNode }) {
-  const tryConsumeLike = useCallback(() => {
-    if (isPremiumActive()) return true
+  const { session } = useAuthSession()
+  const uid = session?.uid ?? null
 
-    const current = readDailyLikesQuota()
-    const day = dailyLikesDayKey()
-    const usedToday = current.day === day ? current.used : 0
-
-    if (usedToday >= DAILY_LIKES_LIMIT) {
+  useEffect(() => {
+    if (!uid) {
+      resetDailyLikesCache()
       notifyDailyLikesSyncChanged()
-      return false
+      return
     }
+    void hydrateDailyLikesCache(uid).then(() => notifyDailyLikesSyncChanged())
+  }, [uid])
 
-    writeDailyLikesQuota({ day, used: usedToday + 1 })
-    notifyDailyLikesSyncChanged()
-    return true
-  }, [])
+  const tryConsumeLike = useCallback(async () => {
+    const ok = await tryConsumeDailyLike(uid)
+    if (ok) notifyDailyLikesSyncChanged()
+    return ok
+  }, [uid])
 
   const actionsValue = useMemo(() => ({ tryConsumeLike }), [tryConsumeLike])
 

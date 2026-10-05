@@ -1,6 +1,4 @@
 import { IoGameController } from 'react-icons/io5'
-import { motion } from 'framer-motion'
-
 const PARTICLE_COUNT = 8
 
 type NearbyInviteBurstProps = {
@@ -9,11 +7,11 @@ type NearbyInviteBurstProps = {
 
 export function NearbyInviteBurst({ variant = 'card' }: NearbyInviteBurstProps) {
   return (
-    <motion.div
+    <div
       className={`pm-nearby-card__invite-burst${variant === 'list' ? ' pm-nearby-card__invite-burst--list' : ''}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
+     
+     
+     
       role="status"
       aria-live="polite"
     >
@@ -34,6 +32,6 @@ export function NearbyInviteBurst({ variant = 'card' }: NearbyInviteBurstProps) 
           </span>
         ))}
       </div>
-    </motion.div>
+    </div>
   )
 }

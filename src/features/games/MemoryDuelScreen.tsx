@@ -1,5 +1,4 @@
 import '../../styles/memory-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { FiArrowLeft, FiClock } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -61,11 +60,11 @@ export function MemoryDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--memory">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-memory-screen"
           style={{ height: '100%', minHeight: 0 }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+         
+         
         >
           <GameDuelBackdrop />
           <MemoryDuelAmbient />
@@ -146,20 +145,20 @@ export function MemoryDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div
+            <div
               className={`pm-memory-overlay${!game.running ? ' is-victory' : game.isRoundBreak ? ' is-round' : ''}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+             
+             
               role="status"
             >
               <span className="pm-memory-overlay__shine" aria-hidden />
-              <motion.p
-                initial={{ opacity: 0, y: 12, scale: 0.92 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 380, damping: 26 }}
+              <p
+               
+               
+               
               >
                 {overlayMessage}
-              </motion.p>
+              </p>
               {!game.running ? (
                 <GameDuelRematchActions
                   onRestart={handleRestart}
@@ -167,9 +166,9 @@ export function MemoryDuelScreen() {
                   opponentName={opponent.name}
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

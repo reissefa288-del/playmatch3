@@ -68,3 +68,5 @@ export function useHomeFilters() {
     toggleOnlineQuick,
   }
 }
+
+export type HomeFiltersController = ReturnType<typeof useHomeFilters>

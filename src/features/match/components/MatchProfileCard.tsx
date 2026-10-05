@@ -1,11 +1,14 @@
-import { useCallback, useState } from 'react'
-import { FiChevronLeft, FiChevronRight, FiHeart, FiMapPin, FiX } from 'react-icons/fi'
+import { lazy, memo, Suspense, useCallback, useState } from 'react'
+import { FiChevronLeft, FiChevronRight, FiHeart, FiMapPin, FiMoreVertical, FiX } from 'react-icons/fi'
 import { LuGamepad2, LuTarget, LuTrophy } from 'react-icons/lu'
 import { MdVerified } from 'react-icons/md'
-import { motion } from 'framer-motion'
-import { PhotoLightbox } from '../../../shared/PhotoLightbox'
+import { LazyImage } from '../../../shared/LazyImage'
 import type { MatchProfile, MatchStyleTag } from '../data'
 import { MatchPortraitCarousel } from './MatchPortraitCarousel'
+
+const PhotoLightbox = lazy(() =>
+  import('../../../shared/PhotoLightbox').then((mod) => ({ default: mod.PhotoLightbox })),
+)
 
 const tagIcons = {
   gamepad: LuGamepad2,
@@ -22,12 +25,21 @@ type MatchProfileCardProps = {
   profile: MatchProfile
   peekLeftName?: string
   peekRightName?: string
+  onOpenModeration?: () => void
 }
 
-export function MatchProfileCard({
+function matchProfileCardPropsEqual(prev: MatchProfileCardProps, next: MatchProfileCardProps) {
+  if (prev.profile.id !== next.profile.id) return false
+  if (prev.peekLeftName !== next.peekLeftName) return false
+  if (prev.peekRightName !== next.peekRightName) return false
+  return true
+}
+
+export const MatchProfileCard = memo(function MatchProfileCard({
   profile: p,
   peekLeftName,
   peekRightName,
+  onOpenModeration,
 }: MatchProfileCardProps) {
   const count = p.photos.length
   const [photoIndex, setPhotoIndex] = useState(0)
@@ -58,14 +70,10 @@ export function MatchProfileCard({
 
   const canPrev = photosOpen && photoIndex > 0
   const canNext = photosOpen && photoIndex < count - 1
+  const mainPhoto = p.photos[0] ?? { src: p.portraitSrc, objectPosition: '50% 20%' }
 
   return (
-    <motion.div
-      className={`pm-match-card-wrap${photosOpen ? ' is-photos-mode' : ''}`}
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div className={`pm-match-card-wrap${photosOpen ? ' is-photos-mode' : ''}`}>
       <div className="pm-match-peek pm-match-peek--left" aria-hidden>
         <div className="pm-match-peek__card" />
         <span className="pm-match-peek__name">{peekLeftName ?? '···'}</span>
@@ -88,11 +96,7 @@ export function MatchProfileCard({
           >
             {photosOpen ? (
               <>
-                <MatchPortraitCarousel
-                  photos={p.photos}
-                  imageSrc={p.portraitSrc}
-                  index={photoIndex}
-                />
+                <MatchPortraitCarousel photos={p.photos} index={photoIndex} />
                 <button
                   type="button"
                   className="pm-portrait-zoom-hit"
@@ -101,12 +105,15 @@ export function MatchProfileCard({
                 />
               </>
             ) : (
-              <img
-                src={p.portraitSrc}
+              <LazyImage
+                src={mainPhoto.src}
                 alt=""
                 className="pm-match-portrait-img"
-                style={{ objectPosition: p.photos[0]?.objectPosition ?? '50% 12%' }}
+                style={{ objectPosition: mainPhoto.objectPosition }}
                 draggable={false}
+                priority
+                width={390}
+                height={520}
               />
             )}
 
@@ -194,6 +201,16 @@ export function MatchProfileCard({
                 <MdVerified className="pm-match-verified" aria-label="Doğrulanmış" />
               ) : null}
               <span className="pm-match-age">{p.age}</span>
+              {onOpenModeration ? (
+                <button
+                  type="button"
+                  className="pm-match-name-row__menu"
+                  aria-label="Diğer"
+                  onClick={onOpenModeration}
+                >
+                  <FiMoreVertical aria-hidden />
+                </button>
+              ) : null}
             </div>
 
             <p className="pm-match-location">
@@ -222,14 +239,18 @@ export function MatchProfileCard({
         </div>
       </aside>
 
-      <PhotoLightbox
-        open={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-        imageSrc={p.portraitSrc}
-        photos={p.photos}
-        index={photoIndex}
-        onIndexChange={setPhotoIndex}
-      />
-    </motion.div>
+      {lightboxOpen ? (
+        <Suspense fallback={null}>
+          <PhotoLightbox
+            open={lightboxOpen}
+            onClose={() => setLightboxOpen(false)}
+            imageSrc={p.portraitSrc}
+            photos={p.photos}
+            index={photoIndex}
+            onIndexChange={setPhotoIndex}
+          />
+        </Suspense>
+      ) : null}
+    </div>
   )
-}
+}, matchProfileCardPropsEqual)

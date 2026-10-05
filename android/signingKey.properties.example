@@ -1,0 +1,5 @@
+# Kopyala: signingKey.properties (gitignore'da — commit etme)
+storeFile=playmeet-upload.keystore
+storePassword=YOUR_KEYSTORE_PASSWORD
+keyAlias=playmeet
+keyPassword=YOUR_KEY_PASSWORD

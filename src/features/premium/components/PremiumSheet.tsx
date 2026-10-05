@@ -1,7 +1,7 @@
+import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import { useState } from 'react'
 import { FiCheck, FiGift, FiX } from 'react-icons/fi'
 import { LuCrown } from 'react-icons/lu'
-import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import type { PremiumPackage } from '../data'
 import { premiumPackages } from '../data'
 import type { PremiumSheetKind } from '../usePremiumScreen'

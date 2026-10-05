@@ -1,64 +1,64 @@
 import { useCallback, useSyncExternalStore } from 'react'
+import { useAuthSession } from '../auth/useAuthSession'
 import {
-  clearUserProfile,
-  createEmptyProfile,
-  readUserProfileRaw,
-  writeUserProfile,
-  type UserProfile,
-} from './onboardingProfile'
-
-let listeners = new Set<() => void>()
-
-function subscribe(listener: () => void) {
-  listeners.add(listener)
-  return () => listeners.delete(listener)
-}
-
-function emit() {
-  listeners.forEach((listener) => listener())
-}
-
-function getSnapshot(): string | null {
-  return readUserProfileRaw()
-}
-
-function parseProfile(raw: string | null): UserProfile {
-  if (!raw) return createEmptyProfile()
-  try {
-    return JSON.parse(raw) as UserProfile
-  } catch {
-    return createEmptyProfile()
-  }
-}
+  completeUserOnboarding,
+  getUserProfileSnapshot,
+  resetUserOnboarding,
+  saveUserProfileRemote,
+  subscribeUserProfile,
+  updateUserPhotoSlot,
+} from '../profile/userProfileStore'
+import type { UserProfile } from '../profile/types'
 
 export function useUserProfile() {
-  const raw = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
-  const profile = parseProfile(raw)
+  const { session } = useAuthSession()
+  const { profile, loading, saving, error, source } = useSyncExternalStore(
+    subscribeUserProfile,
+    getUserProfileSnapshot,
+    getUserProfileSnapshot,
+  )
 
-  const saveProfile = useCallback((next: UserProfile) => {
-    writeUserProfile(next)
-    emit()
-  }, [])
+  const uid = session?.uid ?? null
 
-  const completeOnboarding = useCallback((next: UserProfile) => {
-    writeUserProfile({
-      ...next,
-      onboardingCompleted: true,
-      completedAt: Date.now(),
-    })
-    emit()
-  }, [])
+  const saveProfile = useCallback(
+    async (next: UserProfile) => {
+      if (!uid) throw new Error('not_authenticated')
+      await saveUserProfileRemote(uid, next)
+    },
+    [uid],
+  )
 
-  const resetProfile = useCallback(() => {
-    clearUserProfile()
-    emit()
-  }, [])
+  const completeOnboarding = useCallback(
+    async (next: UserProfile) => {
+      if (!uid) throw new Error('not_authenticated')
+      await completeUserOnboarding(uid, next)
+    },
+    [uid],
+  )
+
+  const resetProfile = useCallback(async () => {
+    if (!uid) return
+    await resetUserOnboarding(uid)
+  }, [uid])
+
+  const updatePhotoSlot = useCallback(
+    async (slot: number, file: File) => {
+      if (!uid) throw new Error('not_authenticated')
+      return updateUserPhotoSlot(uid, slot, file)
+    },
+    [uid],
+  )
 
   return {
     profile,
     isOnboardingComplete: profile.onboardingCompleted,
+    isProfileLoading: loading,
+    isProfileSaving: saving,
+    profileError: error,
+    profileSource: source,
     saveProfile,
     completeOnboarding,
     resetProfile,
+    updatePhotoSlot,
   }
 }

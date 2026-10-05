@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
 import { useDocumentVisible } from '../../shared/useDocumentVisible'
+import { useManagedTimers } from '../../shared/useManagedTimers'
 import { botThinkDelayMs, pickBotSwap } from './utils/neonCrushBot'
 import { recordNeonCrushScore } from './utils/neonCrushLeaderboard'
 import {
@@ -88,29 +89,26 @@ export function useNeonCrushDuel() {
   lane2Ref.current = lane2
 
   const documentVisible = useDocumentVisible()
+  const duelTimers = useManagedTimers()
 
   const clearBot = useCallback(() => {
-    if (botTimerRef.current != null) window.clearTimeout(botTimerRef.current)
+    if (botTimerRef.current != null) duelTimers.clear(botTimerRef.current)
     botTimerRef.current = null
-    if (botChainTimerRef.current != null) window.clearTimeout(botChainTimerRef.current)
+    if (botChainTimerRef.current != null) duelTimers.clear(botChainTimerRef.current)
     botChainTimerRef.current = null
-  }, [])
+  }, [duelTimers])
 
   const clearAnimTimers = useCallback(() => {
-    if (p1AnimTimerRef.current != null) window.clearTimeout(p1AnimTimerRef.current)
-    if (p2AnimTimerRef.current != null) window.clearTimeout(p2AnimTimerRef.current)
-    if (p1SettleTimerRef.current != null) window.clearTimeout(p1SettleTimerRef.current)
-    if (p2SettleTimerRef.current != null) window.clearTimeout(p2SettleTimerRef.current)
-    p1AnimTimerRef.current = null
-    p2AnimTimerRef.current = null
-    p1SettleTimerRef.current = null
-    p2SettleTimerRef.current = null
-  }, [])
+    for (const ref of [p1AnimTimerRef, p2AnimTimerRef, p1SettleTimerRef, p2SettleTimerRef]) {
+      if (ref.current != null) duelTimers.clear(ref.current)
+      ref.current = null
+    }
+  }, [duelTimers])
 
   const clearPressureTimer = useCallback(() => {
-    if (pressureTimerRef.current != null) window.clearTimeout(pressureTimerRef.current)
+    if (pressureTimerRef.current != null) duelTimers.clear(pressureTimerRef.current)
     pressureTimerRef.current = null
-  }, [])
+  }, [duelTimers])
 
   const applyOpponentPressure = useCallback(
     (intensity: PressureIntensity) => {
@@ -137,7 +135,7 @@ export function useNeonCrushDuel() {
       setBoardKey((k) => k + 1)
 
       clearPressureTimer()
-      pressureTimerRef.current = window.setTimeout(() => {
+      pressureTimerRef.current = duelTimers.schedule(() => {
         setPressureToast(null)
         const cleared = { ...lane2Ref.current, pressure: null, settle: null }
         lane2Ref.current = cleared
@@ -145,7 +143,7 @@ export function useNeonCrushDuel() {
         pressureTimerRef.current = null
       }, 900)
     },
-    [clearPressureTimer],
+    [clearPressureTimer, duelTimers],
   )
 
   const bumpBoards = useCallback((seedBump: number) => {
@@ -169,7 +167,7 @@ export function useNeonCrushDuel() {
       combo: number,
     ) => {
       const timerRef = lane === 1 ? p1AnimTimerRef : p2AnimTimerRef
-      if (timerRef.current != null) window.clearTimeout(timerRef.current)
+      if (timerRef.current != null) duelTimers.clear(timerRef.current)
 
       const withFx = { ...preview, fx }
       if (lane === 1) {
@@ -180,7 +178,7 @@ export function useNeonCrushDuel() {
         setLane2(withFx)
       }
 
-      timerRef.current = window.setTimeout(() => {
+      timerRef.current = duelTimers.schedule(() => {
         const previewCells = (lane === 1 ? lane1Ref.current : lane2Ref.current).cells
         const rushMult =
           lane === 1 &&
@@ -215,8 +213,8 @@ export function useNeonCrushDuel() {
 
         if (spawnIndices.length > 0) {
           const settleRef = lane === 1 ? p1SettleTimerRef : p2SettleTimerRef
-          if (settleRef.current != null) window.clearTimeout(settleRef.current)
-          settleRef.current = window.setTimeout(() => {
+          if (settleRef.current != null) duelTimers.clear(settleRef.current)
+          settleRef.current = duelTimers.schedule(() => {
             settleRef.current = null
             const clearSettle = (l: NeonLaneState) => ({ ...l, settle: null })
             if (lane === 1) {
@@ -240,7 +238,7 @@ export function useNeonCrushDuel() {
         }
       }, MATCH_ANIM_MS)
     },
-    [applyOpponentPressure],
+    [applyOpponentPressure, duelTimers],
   )
 
   const endMatchRef = useRef<() => void>(() => {})
@@ -267,7 +265,7 @@ export function useNeonCrushDuel() {
     clearBot()
     if (endedRef.current || matchEndingRef.current) return
     const delay = botThinkDelayMs(lane2Ref.current.combo)
-    botTimerRef.current = window.setTimeout(() => {
+    botTimerRef.current = duelTimers.schedule(() => {
       if (endedRef.current || matchEndingRef.current) return
       const [a, b] = pickBotSwap(lane2Ref.current.cells, seedRef.current)
       if (a < 0) {
@@ -306,13 +304,13 @@ export function useNeonCrushDuel() {
         result.scoreGain,
         result.combo,
       )
-      if (botChainTimerRef.current != null) window.clearTimeout(botChainTimerRef.current)
-      botChainTimerRef.current = window.setTimeout(() => {
+      if (botChainTimerRef.current != null) duelTimers.clear(botChainTimerRef.current)
+      botChainTimerRef.current = duelTimers.schedule(() => {
         botChainTimerRef.current = null
         scheduleBotRef.current()
       }, MATCH_ANIM_MS + 40)
     }, delay)
-  }, [bumpBoards, clearBot, commitLaneSwap])
+  }, [bumpBoards, clearBot, commitLaneSwap, duelTimers])
 
   scheduleBotRef.current = scheduleBot
 
@@ -322,15 +320,16 @@ export function useNeonCrushDuel() {
       clearBot()
       clearAnimTimers()
       clearPressureTimer()
+      duelTimers.clearAll()
     }
-  }, [clearAnimTimers, clearBot, clearPressureTimer])
+  }, [clearAnimTimers, clearBot, clearPressureTimer, duelTimers])
 
   useEffect(() => {
     if (!running || endedRef.current || !documentVisible) return
     const timer = window.setInterval(() => {
       if (matchEndingRef.current) return
       timeRef.current = Math.max(0, timeRef.current - 1)
-      setTimeLeft(timeRef.current)
+      startTransition(() => setTimeLeft(timeRef.current))
       if (timeRef.current === FINAL_RUSH_SECONDS) playNeonCrushSound('rush')
       if (timeRef.current === 0) endMatchRef.current()
     }, 1000)

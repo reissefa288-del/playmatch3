@@ -55,7 +55,6 @@
   border-radius: 50%;
   filter: blur(56px);
   opacity: 0.62;
-  will-change: transform;
 }
 
 .pm-ambient-orb--blue {

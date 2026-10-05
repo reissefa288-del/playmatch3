@@ -1,9 +1,7 @@
-import { motion } from 'framer-motion'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
   blockHeightForCount,
   calcDropDistancePx,
-  FALL_DURATION_MS,
   isLaneEliminated,
   isLaneInDanger,
   landingBottomPx,
@@ -73,10 +71,10 @@ export function StackDuelTower({
   const reactionClass = reacting ? ` is-reacting is-reacting--${lane.lastEvent}` : ''
 
   return (
-    <motion.div
+    <div
       className={`pm-stack-tower is-${accent}${interactive ? ' is-interactive' : ''}${reactionClass}${inDanger ? ' is-danger' : ''}${eliminated ? ' is-eliminated' : ''}`}
-      animate={lane.shake > 0 ? { x: [0, -5, 5, -3, 0] } : { x: 0 }}
-      transition={{ duration: 0.28, ease: 'easeOut' }}
+     
+     
     >
       <span className="pm-stack-tower__bloom" aria-hidden />
       <span className="pm-stack-tower__volumetric" aria-hidden />
@@ -198,7 +196,7 @@ export function StackDuelTower({
               }}
               aria-hidden
             />
-            <motion.span
+            <span
               className="pm-stack-block is-falling"
               style={{
                 ['--block-x' as string]: `${lane.falling.x * 100}%`,
@@ -206,12 +204,9 @@ export function StackDuelTower({
                 ['--block-color' as string]: lane.falling.color,
                 top: SLIDE_TOP_PX,
               }}
-              initial={{ y: 0, opacity: 1 }}
-              animate={{ y: dropPx, opacity: 1 }}
-              transition={{ duration: FALL_DURATION_MS / 1000, ease: 'linear' }}
-              onAnimationComplete={handleLand}
+              onAnimationEnd={handleLand}
             />
-            <motion.span
+            <span
               className="pm-stack-fall-trail"
               style={{
                 ['--block-x' as string]: `${lane.falling.x * 100}%`,
@@ -219,9 +214,9 @@ export function StackDuelTower({
                 ['--block-color' as string]: lane.falling.color,
                 top: SLIDE_TOP_PX,
               }}
-              initial={{ y: 0, opacity: 0.55, scaleY: 0.15 }}
-              animate={{ y: dropPx * 0.5, opacity: 0, scaleY: 0.9 }}
-              transition={{ duration: FALL_DURATION_MS / 1000, ease: 'linear' }}
+             
+             
+             
               aria-hidden
             />
           </>
@@ -237,40 +232,40 @@ export function StackDuelTower({
       ) : null}
 
       {lane.perfectPop ? (
-        <motion.span
+        <span
           className={`pm-stack-tower__perfect is-${lane.lastEvent ?? 'place'}`}
-          initial={{ opacity: 0, y: 16, scale: 0.5 }}
-          animate={{ opacity: 1, y: -8, scale: 1 }}
-          transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+         
+         
+         
         >
           <span className="pm-stack-tower__perfect-glow" aria-hidden />
           <span className="pm-stack-tower__perfect-text">{lane.perfectPop}</span>
-        </motion.span>
+        </span>
       ) : null}
 
       {lane.combo >= MEGA_COMBO_AT ? (
-        <motion.span
+        <span
           className="pm-stack-tower__mega-badge"
-          initial={{ opacity: 0, scale: 0.6 }}
-          animate={{ opacity: 1, scale: 1 }}
+         
+         
         >
           x2 PUAN
-        </motion.span>
+        </span>
       ) : null}
 
       {lane.combo > 1 ? (
-        <motion.span
+        <span
           className={`pm-stack-tower__combo${lane.combo >= 4 ? ' is-mega' : lane.combo >= 2 ? ' is-hot' : ''}`}
           key={lane.combo}
-          initial={{ opacity: 0, scale: 0.4, y: 12 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: 'spring', stiffness: 500, damping: 18 }}
+         
+         
+         
         >
           <span className="pm-stack-tower__combo-streak" aria-hidden />
           <span className="pm-stack-tower__combo-label">COMBO</span>
           <strong>x{lane.combo}</strong>
-        </motion.span>
+        </span>
       ) : null}
-    </motion.div>
+    </div>
   )
 }

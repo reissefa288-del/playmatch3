@@ -265,6 +265,44 @@
   box-shadow: 0 0 20px rgba(255, 60, 180, 0.2);
 }
 
+.pm-hero-card__sent-overlay .pm-hero-card__sent-badge {
+  animation: pm-hero-sent-badge 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pm-hero-card__sent-overlay strong {
+  animation: pm-fade-up-enter 0.32s ease-out 0.08s both;
+}
+
+.pm-hero-card__sent-overlay .pm-hero-card__sent-sub {
+  animation: pm-fade-up-enter 0.32s ease-out 0.14s both;
+}
+
+.pm-hero-card__sent-overlay .pm-hero-card__sent-chip {
+  animation: pm-hero-sent-chip 0.28s ease-out 0.2s both;
+}
+
+@keyframes pm-hero-sent-badge {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pm-hero-sent-chip {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 /* Gate note + action buttons — home-hero-actions.css */
 
 .pm-hero-stack__empty {

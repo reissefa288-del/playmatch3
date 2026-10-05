@@ -1,8 +1,9 @@
+import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import { memo, useEffect, useState } from 'react'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { MdEmojiEvents } from 'react-icons/md'
-import { fakePortraitForProfile } from '../../../shared/fakePortraits'
-import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
+import { LazyImage } from '../../../shared/LazyImage'
+import { fakePortraitForGender } from '../../../shared/fakePortraits'
 import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
 import { formatPlayerLevel } from '../../profile/profileLevel'
 import type { NearbyPlayer } from '../types'
@@ -28,6 +29,10 @@ export const NearbyPlayerCard = memo(function NearbyPlayerCard({
     return () => window.clearTimeout(id)
   }, [likePhase, onDismissed, player.id, reduceMotion])
 
+  const portraitSrc =
+    player.portraitSrc?.trim() ||
+    (player.gender ? fakePortraitForGender(player.gender) : undefined)
+
   return (
     <article
       className={[
@@ -43,13 +48,20 @@ export const NearbyPlayerCard = memo(function NearbyPlayerCard({
 
       {likePhase === 'burst' ? <NearbyLikeBurst /> : null}
 
-      <div
-        className="pm-nearby-card__image"
-        style={{
-          backgroundImage: `url(${fakePortraitForProfile(player.id, player.gender)})`,
-          backgroundPosition: player.portraitPosition,
-        }}
-      >
+      <div className="pm-nearby-card__image">
+        {portraitSrc ? (
+          <LazyImage
+            src={portraitSrc}
+            alt=""
+            className="pm-nearby-card__photo"
+            style={{ objectPosition: player.portraitPosition }}
+            width={156}
+            height={156}
+            draggable={false}
+          />
+        ) : (
+          <span className="pm-nearby-card__photo pm-nearby-card__photo--placeholder" aria-hidden />
+        )}
         <div className="pm-nearby-card__meta">
           {player.isOnline ? <span className="pm-status-pill is-small">Online</span> : <span />}
           <span className="pm-distance-pill">{player.distance}</span>

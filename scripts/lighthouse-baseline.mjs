@@ -8,10 +8,11 @@
  *   performance/lighthouse-baseline.json
  */
 import { spawn } from 'node:child_process'
-import { createReadStream, existsSync, mkdirSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createServer } from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { handleDistRequest } from './serve-dist-static.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(__dirname, '..')
@@ -20,18 +21,30 @@ const outDir = path.join(root, 'performance')
 const outFile = path.join(outDir, 'lighthouse-baseline.json')
 const port = 4173
 
+const budgetsFile = path.join(outDir, 'budgets.json')
+
 const ROUTES = [
   { id: 'home', path: '/' },
   { id: 'games', path: '/games' },
   { id: 'match', path: '/match' },
   { id: 'chat', path: '/chat' },
+  { id: 'profile', path: '/profile' },
+  { id: 'premium', path: '/premium' },
 ]
 
-const TARGETS = {
-  performance: 85,
+function loadTargets() {
+  try {
+    const raw = readFileSync(budgetsFile, 'utf8')
+    return JSON.parse(raw).lighthouse?.targets ?? null
+  } catch {
+    return null
+  }
+}
+
+const TARGETS = loadTargets() ?? {
+  performanceScore: 85,
   lcpMs: 2500,
   cls: 0.1,
-  inpMs: 200,
   fcpMs: 1800,
   tbtMs: 300,
 }
@@ -51,6 +64,7 @@ localStorage.setItem('pm-user-profile', JSON.stringify({
   age: 24,
   matchPreference: 'both',
   photoUrl: '',
+  photoUrls: ['', '', ''],
   interests: ['Gamer', 'FPS', 'Strateji', 'Sohbet'],
   bio: 'Performance audit seed profile',
   email: 'lighthouse@playmeet.test',
@@ -93,30 +107,10 @@ function waitForServer(url, timeoutMs = 30_000) {
   })
 }
 
-function mime(filePath) {
-  if (filePath.endsWith('.html')) return 'text/html; charset=utf-8'
-  if (filePath.endsWith('.js')) return 'text/javascript; charset=utf-8'
-  if (filePath.endsWith('.css')) return 'text/css; charset=utf-8'
-  if (filePath.endsWith('.webp')) return 'image/webp'
-  if (filePath.endsWith('.woff2')) return 'font/woff2'
-  if (filePath.endsWith('.json')) return 'application/json'
-  if (filePath.endsWith('.svg')) return 'image/svg+xml'
-  if (filePath.endsWith('.mp4')) return 'video/mp4'
-  return 'application/octet-stream'
-}
-
 function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
-      const urlPath = decodeURIComponent((req.url ?? '/').split('?')[0])
-      let filePath = path.join(distDir, urlPath === '/' ? 'index.html' : urlPath)
-
-      if (!existsSync(filePath) || statSync(filePath).isDirectory()) {
-        filePath = path.join(distDir, 'index.html')
-      }
-
-      res.writeHead(200, { 'Content-Type': mime(filePath) })
-      createReadStream(filePath).pipe(res)
+      handleDistRequest(req, res, distDir)
     })
 
     server.listen(port, '127.0.0.1', () => resolve(server))
@@ -207,7 +201,7 @@ async function gitHead() {
 async function main() {
   if (!existsSync(distDir)) {
     console.log('Building production bundle…')
-    await run('npm', ['run', 'build'], { cwd: root })
+    await run('npm', ['run', 'build:production'], { cwd: root })
   }
 
   mkdirSync(outDir, { recursive: true })

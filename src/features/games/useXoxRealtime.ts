@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { createGameSocket, type Socket } from './gameSocketClient'
+import type { Socket } from './gameSocketClient'
 import {
   fetchWithTimeout,
   gameServerApiUrl,
@@ -204,6 +204,7 @@ export function useXoxRealtime({ onMatchXp }: UseXoxRealtimeOptions) {
     setIdentity(null)
 
     try {
+      const { createGameSocket } = await import('./gameSocketClient')
       const client = getGameServerClientConfig()
       const token = await ensureAuthToken(client.apiBase)
       const socket = client.usePageOrigin

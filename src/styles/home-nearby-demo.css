@@ -1,0 +1,52 @@
+.pm-nearby-demo-banner {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 196, 96, 0.22);
+  background: rgba(255, 180, 60, 0.08);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.pm-nearby-demo-banner strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #ffd08a;
+}
+
+.pm-nearby-demo-banner p {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.pm-nearby-demo-banner__cta {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 196, 96, 0.35);
+  background: rgba(255, 180, 60, 0.12);
+  color: #ffe0b0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-hero-demo-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 auto 8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 196, 96, 0.22);
+  background: rgba(255, 180, 60, 0.08);
+  color: #ffd08a;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}

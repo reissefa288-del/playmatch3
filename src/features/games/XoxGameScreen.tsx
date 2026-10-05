@@ -1,5 +1,4 @@
 import '../../styles/xox-game.css'
-import { AnimatePresence, motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -126,12 +125,12 @@ export function XoxGameScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--xox">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-xox-screen"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.34 }}
+         
+         
+         
+         
         >
           <GameDuelBackdrop />
 
@@ -182,20 +181,20 @@ export function XoxGameScreen() {
           ) : null}
 
           {showHud ? (
-            <AnimatePresence mode="wait">
-              <motion.div
+            <>
+              <div
                 key={`${turnLabel}-${xox.phase}`}
                 className={`pm-xox-turn-pill is-${xox.phase === 'queueing' || xox.phase === 'authenticating' ? 'neutral' : activeTurnSide}`}
-                initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.97 }}
-                transition={{ duration: 0.22 }}
+               
+               
+               
+               
               >
                 <span className="pm-xox-turn-pill__dot pm-xox-turn-pill__dot--pink" />
                 <span className="pm-xox-turn-pill__label">{turnLabel}</span>
                 <span className="pm-xox-turn-pill__dot pm-xox-turn-pill__dot--blue" />
-              </motion.div>
-            </AnimatePresence>
+              </div>
+            </>
           ) : null}
 
           <div className="pm-xox-board-stage">
@@ -208,13 +207,13 @@ export function XoxGameScreen() {
             />
           </div>
 
-          <AnimatePresence>
+          <>
             {xox.phase === 'ended' || xox.room.winner ? (
-              <motion.footer
+              <footer
                 className="pm-xox-footer"
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
+               
+               
+               
               >
                 {xox.room.winner ? (
                   <p className="pm-xox-footer__result">
@@ -233,9 +232,9 @@ export function XoxGameScreen() {
                     RÖVANŞ
                   </button>
                 </div>
-              </motion.footer>
+              </footer>
             ) : null}
-          </AnimatePresence>
+          </>
 
           {xox.phase === 'queueing' || xox.phase === 'authenticating' ? (
             <div className="pm-xox-loader" aria-live="polite">
@@ -252,7 +251,7 @@ export function XoxGameScreen() {
               </button>
             </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

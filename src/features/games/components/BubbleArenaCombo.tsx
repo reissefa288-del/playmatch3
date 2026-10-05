@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 
 const COMBO_FLASH_MS = 1050
@@ -60,25 +59,21 @@ export function BubbleArenaCombo({ combo, variant }: BubbleArenaComboProps) {
       aria-live="polite"
       aria-hidden={!visible}
     >
-      <AnimatePresence>
+      <>
         {visible ? (
-          <motion.div
+          <div
             key={`${variant}-${flash}`}
             className="pm-bubble-arena-combo__burst"
-            initial={{ scale: 0.5, opacity: 0, y: 10 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.92, opacity: 0, y: -12 }}
-            transition={{
-              type: 'spring',
-              stiffness: 520,
-              damping: 24,
-            }}
+           
+           
+           
+           
           >
             <span className="pm-bubble-arena-combo__label">COMBO</span>
             <strong className="pm-bubble-arena-combo__mult">×{flash}</strong>
-          </motion.div>
+          </div>
         ) : null}
-      </AnimatePresence>
+      </>
     </div>
   )
 }

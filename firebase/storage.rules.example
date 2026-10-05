@@ -1,0 +1,44 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function hasAppCheck() {
+      return request.app != null;
+    }
+
+    function isSignedIn() {
+      return request.auth != null && hasAppCheck();
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function matchDocIdFor(uidA, uidB) {
+      return uidA < uidB ? uidA + '_' + uidB : uidB + '_' + uidA;
+    }
+
+    function isDiscoverableUser(userId) {
+      return firestore.get(/databases/(default)/documents/users/$(userId)).data.onboardingCompleted == true;
+    }
+
+    function isMatchPartner(userId) {
+      return isSignedIn()
+        && request.auth.uid != userId
+        && firestore.exists(/databases/(default)/documents/matches/$(matchDocIdFor(request.auth.uid, userId)));
+    }
+
+    // ADIM 3.5 — scoped read: sahip, keşfet (onboarding tam), eşleşme partneri
+    match /users/{userId}/photos/{fileName} {
+      allow read: if isOwner(userId)
+        || (isSignedIn() && isDiscoverableUser(userId))
+        || (isSignedIn() && isMatchPartner(userId));
+
+      allow write: if isOwner(userId)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+
+      allow delete: if isOwner(userId);
+    }
+  }
+}

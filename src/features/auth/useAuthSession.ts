@@ -1,69 +1,141 @@
 import { useCallback, useSyncExternalStore } from 'react'
-import { clearAuthSession, readAuthSessionRaw, writeAuthSession, type AuthSession } from './authSession'
-import { clearUserProfile, readUserProfile } from '../onboarding/onboardingProfile'
+import type { User } from 'firebase/auth'
+import {
+  clearDevAuthSession,
+  mapFirebaseUserToSession,
+  readDevAuthSession,
+  type AuthSession,
+} from './authSession'
+import { isFirebaseConfigured } from './firebaseApp'
+import { isPreviewDevAuth, preferLocalDevPersistence, shouldDevAutoRegisteredHome } from './previewDevAuth'
+import { handleGoogleRedirectResult, signOutFromFirebase, subscribeFirebaseAuth } from './firebaseAuth'
+import { hydrateDailyLikesCache, resetDailyLikesCache } from '../likes/dailyLikesCache'
+import { notifyDailyLikesSyncChanged } from '../likes/dailyLikesSync'
+import { refreshPremiumForUser } from '../premium/usePremiumSubscription'
+import { refreshMatchConnections } from '../match/matchConnectionsStore'
+import { refreshBlockedPartners } from '../moderation/blocksStore'
+import { bindProfileToUid, clearUserProfileStore } from '../profile/userProfileStore'
 
-export type GoogleSignInProfile = Pick<AuthSession, 'displayName' | 'email' | 'avatarUrl'>
+type AuthStoreSnapshot = {
+  session: AuthSession | null
+  loading: boolean
+}
 
-let listeners = new Set<() => void>()
+let snapshot: AuthStoreSnapshot = {
+  session: preferLocalDevPersistence() ? readDevAuthSession() : null,
+  loading: isFirebaseConfigured() && !isPreviewDevAuth() && !shouldDevAutoRegisteredHome(),
+}
+
+const listeners = new Set<() => void>()
+
+function emit() {
+  listeners.forEach((listener) => listener())
+}
 
 function subscribe(listener: () => void) {
   listeners.add(listener)
   return () => listeners.delete(listener)
 }
 
-function emit() {
-  listeners.forEach((listener) => listener())
+function getSnapshot(): AuthStoreSnapshot {
+  return snapshot
 }
 
-function getSnapshot(): string | null {
-  return readAuthSessionRaw()
+function setSnapshot(next: AuthStoreSnapshot) {
+  snapshot = next
+  emit()
 }
 
-function parseSession(raw: string | null): AuthSession | null {
-  if (!raw) return null
-  try {
-    return JSON.parse(raw) as AuthSession
-  } catch {
-    return null
+function applyAuthSession(session: AuthSession) {
+  void bindProfileToUid(session.uid)
+  void refreshBlockedPartners(session.uid)
+  void refreshMatchConnections(session.uid)
+  void hydrateDailyLikesCache(session.uid).then(() => notifyDailyLikesSyncChanged())
+  void refreshPremiumForUser(session.uid)
+  setSnapshot({ session, loading: false })
+}
+
+/** Firebase olmadan yerel dev — Google overlay sonrası oturumu bağla. */
+export function adoptDevAuthSession(session: AuthSession) {
+  if (!preferLocalDevPersistence()) return
+  applyAuthSession(session)
+}
+
+function applyFirebaseUser(user: User | null) {
+  if (user) {
+    applyAuthSession(mapFirebaseUserToSession(user))
+    return
+  }
+
+  clearUserProfileStore()
+  resetDailyLikesCache()
+  void refreshPremiumForUser(null)
+  void refreshBlockedPartners(null)
+  void refreshMatchConnections(null)
+  const devSession = readDevAuthSession()
+  setSnapshot({
+    session: devSession,
+    loading: false,
+  })
+  if (devSession) {
+    void bindProfileToUid(devSession.uid)
   }
 }
 
+let unsubscribeFirebase: (() => void) | null = null
+
+function ensureAuthSubscription() {
+  if (unsubscribeFirebase) return
+
+  if (preferLocalDevPersistence()) {
+    const devSession = readDevAuthSession()
+    setSnapshot({
+      session: devSession,
+      loading: false,
+    })
+    if (devSession) {
+      void bindProfileToUid(devSession.uid)
+    }
+    return
+  }
+
+  unsubscribeFirebase = subscribeFirebaseAuth((user) => {
+    applyFirebaseUser(user)
+  })
+
+  void handleGoogleRedirectResult()
+    .then((user) => {
+      if (user) applyFirebaseUser(user)
+    })
+    .catch(() => {
+      /* onAuthStateChanged reflects signed-out state */
+    })
+}
+
+ensureAuthSubscription()
+
 export function useAuthSession() {
-  const raw = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
-  const session = parseSession(raw)
+  const { session, loading } = useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 
-  const signInWithGoogle = useCallback((profile: GoogleSignInProfile) => {
-    const existing = readUserProfile()
-    const keepProfile =
-      existing?.onboardingCompleted === true && existing.email === profile.email
-
-    if (!keepProfile) {
-      clearUserProfile()
+  const signOut = useCallback(async () => {
+    if (isFirebaseConfigured()) {
+      await signOutFromFirebase()
     }
-
-    const next: AuthSession = {
-      provider: 'google',
-      acceptedTerms: true,
-      acceptedPrivacy: true,
-      signedInAt: Date.now(),
-      displayName: profile.displayName,
-      email: profile.email,
-      avatarUrl: profile.avatarUrl,
+    clearDevAuthSession()
+    clearUserProfileStore()
+    resetDailyLikesCache()
+    void refreshPremiumForUser(null)
+    void refreshMatchConnections(null)
+    notifyDailyLikesSyncChanged()
+    if (preferLocalDevPersistence()) {
+      setSnapshot({ session: null, loading: false })
     }
-    writeAuthSession(next)
-    emit()
-  }, [])
-
-  const signOut = useCallback(() => {
-    clearAuthSession()
-    clearUserProfile()
-    emit()
   }, [])
 
   return {
     session,
     isAuthenticated: session != null,
-    signInWithGoogle,
+    isAuthLoading: loading,
     signOut,
   }
 }

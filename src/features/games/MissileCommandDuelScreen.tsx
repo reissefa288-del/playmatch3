@@ -1,5 +1,4 @@
 import '../../styles/missile-command-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { FiArrowLeft } from 'react-icons/fi'
 import { useNavigate } from 'react-router-dom'
@@ -81,10 +80,10 @@ export function MissileCommandDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--missile">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-missile-screen-wrap"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+         
+         
           onPointerDown={handleUnlockAudio}
         >
           <GameDuelBackdrop />
@@ -151,10 +150,10 @@ export function MissileCommandDuelScreen() {
           </div>
 
           {overlayMessage ? (
-            <motion.div
+            <div
               className={['pm-missile-overlay', overlayVariant(duel)].filter(Boolean).join(' ')}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
+             
+             
               role="status"
             >
               {overlayBadge ? <span className="pm-missile-overlay__badge">{overlayBadge}</span> : null}
@@ -168,9 +167,9 @@ export function MissileCommandDuelScreen() {
                   primaryClassName="pm-missile-overlay__cta"
                 />
               ) : null}
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

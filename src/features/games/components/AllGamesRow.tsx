@@ -1,6 +1,8 @@
-import { useEffect, useState, type HTMLAttributes } from 'react'
+import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
+import { useIntervalWhenActive } from '../../../shared/useIntervalWhenActive'
+import { useRuntimeActive } from '../../../shared/useRuntimeActive'
+import { useState, type HTMLAttributes } from 'react'
 import { FiChevronRight } from 'react-icons/fi'
-import { motion, useReducedMotion } from 'framer-motion'
 import type { GamesMiniCard } from '../data'
 import { GamesMiniCardTile } from './GamesMiniCardTile'
 
@@ -23,20 +25,17 @@ function chunkGames<T>(items: T[], size: number): T[][] {
 }
 
 export function AllGamesRow({ games, onPlay, onShowAll, getCardHandlers }: AllGamesRowProps) {
-  const reduceMotion = useReducedMotion()
+  const reduceMotion = usePrefersReducedMotion()
+  const tabActive = useRuntimeActive('games')
   const pages = chunkGames(games, CARDS_PER_PAGE)
   const [pageIndex, setPageIndex] = useState(0)
   const [paused, setPaused] = useState(false)
 
-  useEffect(() => {
-    if (reduceMotion || pages.length <= 1 || paused) return
-
-    const timer = window.setInterval(() => {
-      setPageIndex((current) => (current + 1) % pages.length)
-    }, AUTO_ADVANCE_MS)
-
-    return () => window.clearInterval(timer)
-  }, [pages.length, paused, reduceMotion])
+  useIntervalWhenActive(
+    tabActive && !reduceMotion && pages.length > 1 && !paused,
+    () => setPageIndex((current) => (current + 1) % pages.length),
+    AUTO_ADVANCE_MS,
+  )
 
   return (
     <section className="pm-games-featured-list pm-games-all-games-list" aria-label="Tüm oyunlar">
@@ -60,14 +59,12 @@ export function AllGamesRow({ games, onPlay, onShowAll, getCardHandlers }: AllGa
           }
         }}
       >
-        <motion.div
+        <div
           className="pm-games-featured-track"
-          animate={{ x: `-${pageIndex * 100}%` }}
-          transition={
-            reduceMotion
-              ? { duration: 0 }
-              : { duration: 0.52, ease: [0.22, 1, 0.36, 1] }
-          }
+          style={{
+            transform: `translateX(-${pageIndex * 100}%)`,
+            transition: reduceMotion ? 'none' : 'transform 0.52s cubic-bezier(0.22, 1, 0.36, 1)',
+          }}
         >
           {pages.map((page) => (
             <div key={page.map((game) => game.id).join('-')} className="pm-games-featured-page">
@@ -77,11 +74,12 @@ export function AllGamesRow({ games, onPlay, onShowAll, getCardHandlers }: AllGa
                   game={game}
                   onPlay={onPlay}
                   cardHandlers={getCardHandlers?.(game)}
+                  eager={pageIndex === 0}
                 />
               ))}
             </div>
           ))}
-        </motion.div>
+        </div>
       </div>
 
       {pages.length > 1 ? (

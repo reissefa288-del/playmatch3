@@ -7,12 +7,14 @@ export type GamesMiniCardTileProps = {
   game: GamesMiniCard
   onPlay?: (game: GamesMiniCard) => void
   cardHandlers?: HTMLAttributes<HTMLElement>
+  eager?: boolean
 }
 
 export const GamesMiniCardTile = memo(function GamesMiniCardTile({
   game,
   onPlay,
   cardHandlers,
+  eager = false,
 }: GamesMiniCardTileProps) {
   function playGame() {
     if (game.isMore) return
@@ -38,6 +40,7 @@ export const GamesMiniCardTile = memo(function GamesMiniCardTile({
         gameId={game.id}
         artKind={game.artKind}
         className={`pm-games-mini-card__art is-${game.artKind}`}
+        eager={eager}
       >
         <game.icon className="pm-games-mini-card__icon" />
       </GameCoverArt>

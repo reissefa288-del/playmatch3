@@ -1,6 +1,7 @@
+import { useEffect } from 'react'
+import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
 import { FiBell, FiHeart, FiMessageCircle, FiTrash2, FiUsers, FiX, FiZap } from 'react-icons/fi'
 import { LuGamepad2 } from 'react-icons/lu'
-import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
 import type { AppNotification, NotificationKind } from './types'
 
 const kindIcon: Record<NotificationKind, typeof FiHeart> = {
@@ -37,6 +38,10 @@ export function NotificationsSheet({
   onItemAction,
 }: NotificationsSheetProps) {
   const reduceMotion = usePrefersReducedMotion()
+
+  useEffect(() => {
+    if (open) void import('../../styles/notifications.css')
+  }, [open])
 
   if (!open) return null
 

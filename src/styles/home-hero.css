@@ -1,0 +1,10 @@
+/* P5 — Home LCP shell CSS (hero + chrome; body bundle loads lazily) */
+@import './home.css';
+@import './home-ambient.css';
+@import './home-hero-stack.css';
+@import './home-hero-aaa.css';
+@import './home-hero-actions.css';
+
+.pm-home-hero-lcp-shell {
+  min-height: clamp(20rem, 56vw, 30rem);
+}

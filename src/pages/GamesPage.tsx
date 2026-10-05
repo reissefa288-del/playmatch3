@@ -1,5 +1,5 @@
-import { GamesScreen } from '../features/games/GamesScreen'
+import { GamesTabEntry } from '../features/games/GamesTabEntry'
 
 export default function GamesPage() {
-  return <GamesScreen />
+  return <GamesTabEntry />
 }

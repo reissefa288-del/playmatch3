@@ -1,5 +1,6 @@
 /* Paylaşılan video.mp4 arka planı — duel oyunları */
 
+.pm-app-shell--game-play,
 .pm-brick-screen,
 .pm-block-screen,
 .pm-xox-screen,
@@ -17,7 +18,15 @@
 .pm-chess-screen,
 .pm-memory-screen,
 .pm-bubble-screen,
-.pm-stack-screen {
+.pm-stack-screen,
+.pm-missile-screen-wrap,
+.pm-missile-lobby,
+.pm-def-screen-wrap,
+.pm-def-lobby,
+.pm-space-screen-wrap,
+.pm-space-lobby,
+.pm-y42-screen-wrap,
+.pm-y42-lobby {
   --duel-video-focus-x: 50%;
   --duel-video-focus-y: 64%;
   --duel-video-scale: 1.14;
@@ -104,25 +113,8 @@
     linear-gradient(90deg, rgba(0, 0, 0, 0.08) 0%, transparent 22%, transparent 78%, rgba(0, 0, 0, 0.08) 100%);
 }
 
-/* Bubble Shooter görünümüyle birebir: ambient kapalı, sadece video katmanı */
-.pm-brick-screen .pm-duel-ambient,
-.pm-block-screen .pm-duel-ambient,
-.pm-xox-screen .pm-duel-ambient,
-.pm-math-screen .pm-duel-ambient,
-.pm-cmatch-lobby .pm-duel-ambient,
-.pm-cmatch-screen .pm-duel-ambient,
-.pm-ncrush-lobby .pm-duel-ambient,
-.pm-ncrush-screen .pm-duel-ambient,
-.pm-snake-screen .pm-duel-ambient,
-.pm-pong-lobby .pm-duel-ambient,
-.pm-pong-screen .pm-duel-ambient,
-.pm-simon-screen .pm-duel-ambient,
-.pm-slice-screen .pm-duel-ambient,
-.pm-chess-lobby .pm-duel-ambient,
-.pm-chess-screen .pm-duel-ambient,
-.pm-memory-screen .pm-duel-ambient,
-.pm-bubble-screen .pm-duel-ambient,
-.pm-stack-screen .pm-duel-ambient {
+/* Video görünsün — statik ambient katmanı oyun ekranlarında kapalı */
+.pm-app-shell--game-play .pm-duel-ambient {
   display: none;
 }
 

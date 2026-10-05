@@ -43,12 +43,20 @@ export function usePremiumScreen() {
 
   const confirmUpgrade = useCallback(() => {
     if (!selectedPackage) return
-    activatePremium(selectedPackage.id)
-    setSheet(null)
-    showToast(
-      'Premium aktif!',
-      `${selectedPackage.duration} paketin tanımlandı. Oyuna davet artık açık.`,
-    )
+    void activatePremium(selectedPackage.id)
+      .then(() => {
+        setSheet(null)
+        showToast(
+          'Premium aktif!',
+          `${selectedPackage.duration} paketin tanımlandı. Oyuna davet artık açık.`,
+        )
+      })
+      .catch((error: unknown) => {
+        showToast(
+          'Satın alma tamamlanamadı',
+          error instanceof Error ? error.message : 'Play Store veya stub modunu kontrol et.',
+        )
+      })
   }, [activatePremium, selectedPackage, showToast])
 
   const confirmGift = useCallback(

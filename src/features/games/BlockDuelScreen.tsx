@@ -1,5 +1,4 @@
 import '../../styles/block-duel.css'
-import { motion } from 'framer-motion'
 import { useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
@@ -109,11 +108,11 @@ export function BlockDuelScreen() {
   return (
     <div className="pm-app-shell pm-app-shell--game-play pm-app-shell--block">
       <div className="pm-artboard">
-        <motion.div
+        <div
           className="pm-block-screen"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.32 }}
+         
+         
+         
         >
           <GameDuelBackdrop />
 
@@ -162,28 +161,24 @@ export function BlockDuelScreen() {
               </article>
             </section>
 
-            <motion.section
+            <section
               className="pm-block-duel"
               aria-label="Oyun alanları"
               key={game.shakeKey}
-              animate={{ x: [0, -3, 3, -2, 2, 0] }}
-              transition={{ duration: 0.24, ease: 'easeOut' }}
+             
+             
             >
-              <motion.div
+              <div
                 className={`pm-block-arena is-p1 ${!game.lane1.alive ? 'is-dead' : ''}`}
-                animate={
-                  game.roundIntro > 0
-                    ? { scale: [1, 1.015, 1], opacity: [0.9, 1, 0.9] }
-                    : { scale: 1, opacity: 1 }
-                }
-                transition={game.roundIntro > 0 ? { duration: 0.7, repeat: Infinity } : { duration: 0.2 }}
+               
+               
               >
                 <BlockBoardCanvas laneRef={game.lane1ViewRef} accent="cyan" />
-              </motion.div>
+              </div>
               <div className={`pm-block-arena is-p2 ${!game.lane2.alive ? 'is-dead' : ''}`}>
                 <BlockBoardCanvas laneRef={game.lane2ViewRef} accent="pink" />
               </div>
-            </motion.section>
+            </section>
 
             <section className="pm-block-controls" aria-label="Kontroller">
               <button
@@ -235,14 +230,14 @@ export function BlockDuelScreen() {
               <div className="pm-block-stats__panel is-p1">
                 <div>
                   <span>FÜZYON</span>
-                  <motion.strong
+                  <strong
                     key={game.lane1.fusions}
-                    initial={{ scale: 1.2 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: 'spring', stiffness: 400, damping: 14 }}
+                   
+                   
+                   
                   >
                     {game.lane1.fusions}
-                  </motion.strong>
+                  </strong>
                 </div>
                 <div>
                   <span>ZİNCİR</span>
@@ -263,18 +258,18 @@ export function BlockDuelScreen() {
           </div>
 
           {game.roundIntro > 0 && !overlayMessage ? (
-            <motion.div
+            <div
               className="pm-block-round-intro"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
+             
+             
             >
               <span>ROUND {game.roundNumber}</span>
               <strong>BAŞLA!</strong>
-            </motion.div>
+            </div>
           ) : null}
 
           {overlayMessage ? (
-            <motion.div className="pm-block-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="pm-block-overlay">
               <p>{overlayMessage}</p>
               <p className="pm-block-overlay__sub">
                 {game.matchPoints.p1} — {game.matchPoints.p2}
@@ -285,9 +280,9 @@ export function BlockDuelScreen() {
                 opponentName={opponent.name}
                 primaryClassName="pm-block-overlay__btn"
               />
-            </motion.div>
+            </div>
           ) : null}
-        </motion.div>
+        </div>
       </div>
     </div>
   )

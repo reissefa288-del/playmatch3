@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react'
+import { useDocumentVisible } from '../../shared/useDocumentVisible'
 import { useManagedTimeout } from '../../shared/useManagedTimeout'
+import { useManagedTimers } from '../../shared/useManagedTimers'
 import { botThinkDelayMs, shouldBotDrop } from './utils/stackDuelBot'
 import {
   beginFall,
@@ -27,6 +29,7 @@ type MatchResult = 'p1' | 'p2' | 'draw'
 type RoundScoreSummary = { p1: number; p2: number; winner: MatchResult }
 
 export function useStackDuel() {
+  const documentVisible = useDocumentVisible()
   const [lane1, setLane1] = useState<StackLaneState>(() => createLane(1, 42))
   const [lane2, setLane2] = useState<StackLaneState>(() => createLane(2, 42))
   const [roundNumber, setRoundNumber] = useState(1)
@@ -50,6 +53,7 @@ export function useStackDuel() {
   const botTimerRef = useRef<number | null>(null)
   const botCommitTimerRef = useRef<number | null>(null)
   const popTimerRef = useRef<number | null>(null)
+  const syncTickRef = useRef(0)
   const lastTickRef = useRef(performance.now())
 
   lane1Ref.current = lane1
@@ -57,6 +61,15 @@ export function useStackDuel() {
   runningRef.current = running
 
   const breakTimer = useManagedTimeout()
+  const duelTimers = useManagedTimers()
+
+  const clearTimerRef = useCallback(
+    (ref: { current: number | null }) => {
+      if (ref.current != null) duelTimers.clear(ref.current)
+      ref.current = null
+    },
+    [duelTimers],
+  )
 
   const playLaneEvent = useCallback((event: StackLaneEvent, combo: number) => {
     if (event === 'perfect') playStackDuelSound('perfect')
@@ -66,28 +79,31 @@ export function useStackDuel() {
   }, [])
 
   const clearPopLater = useCallback(() => {
-    if (popTimerRef.current) window.clearTimeout(popTimerRef.current)
-    popTimerRef.current = window.setTimeout(() => {
-      setLane1((l) => (l.perfectPop ? { ...l, perfectPop: null } : l))
-      setLane2((l) => (l.perfectPop ? { ...l, perfectPop: null } : l))
+    clearTimerRef(popTimerRef)
+    popTimerRef.current = duelTimers.schedule(() => {
+      popTimerRef.current = null
+      startTransition(() => {
+        setLane1((l) => (l.perfectPop ? { ...l, perfectPop: null } : l))
+        setLane2((l) => (l.perfectPop ? { ...l, perfectPop: null } : l))
+      })
     }, 900)
-  }, [])
+  }, [clearTimerRef, duelTimers])
 
   const clearBotCommitTimer = useCallback(() => {
-    if (botCommitTimerRef.current != null) window.clearTimeout(botCommitTimerRef.current)
-    botCommitTimerRef.current = null
-  }, [])
+    clearTimerRef(botCommitTimerRef)
+  }, [clearTimerRef])
 
   const endRoundRef = useRef<() => void>(() => {})
   const tryEndRoundEarlyRef = useRef<() => void>(() => {})
 
   const scheduleBot = useCallback(() => {
-    if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
+    clearTimerRef(botTimerRef)
     clearBotCommitTimer()
     if (!runningRef.current || endedRef.current || roundEndingRef.current) return
 
     const delay = botThinkDelayMs(lane2Ref.current.combo)
-    botTimerRef.current = window.setTimeout(() => {
+    botTimerRef.current = duelTimers.schedule(() => {
+      botTimerRef.current = null
       if (!runningRef.current || endedRef.current) return
       const lane = lane2Ref.current
       const seed = roundSeedRef.current + lane.blocks.length
@@ -97,7 +113,7 @@ export function useStackDuel() {
           lane2Ref.current = started
           setLane2(started)
           clearBotCommitTimer()
-          botCommitTimerRef.current = window.setTimeout(() => {
+          botCommitTimerRef.current = duelTimers.schedule(() => {
             botCommitTimerRef.current = null
             setLane2((l) => {
               const result = commitFall(l, seed + 7)
@@ -113,7 +129,7 @@ export function useStackDuel() {
       }
       scheduleBot()
     }, delay)
-  }, [clearBotCommitTimer, playLaneEvent])
+  }, [clearBotCommitTimer, clearTimerRef, duelTimers, playLaneEvent])
 
   const endRound = useCallback(() => {
     if (roundEndingRef.current) return
@@ -232,6 +248,7 @@ export function useStackDuel() {
   }, [lane1.lives, lane1.finished, lane2.lives, lane2.finished, endRound])
 
   useEffect(() => {
+    if (!documentVisible) return
     const id = window.setInterval(() => {
       if (!runningRef.current || endedRef.current) return
       const now = performance.now()
@@ -240,34 +257,45 @@ export function useStackDuel() {
       const dt = Math.min(0.05, (now - lastTickRef.current) / 1000)
       lastTickRef.current = now
 
-      setLane1((l) => {
-        const next = decayLaneFx(tickActive(l, dt))
-        lane1Ref.current = next
-        return next
-      })
-      setLane2((l) => {
-        const next = decayLaneFx(tickActive(l, dt))
-        lane2Ref.current = next
-        return next
-      })
+      const prev1 = lane1Ref.current
+      const prev2 = lane2Ref.current
+      const next1 = decayLaneFx(tickActive(prev1, dt))
+      const next2 = decayLaneFx(tickActive(prev2, dt))
+      lane1Ref.current = next1
+      lane2Ref.current = next2
+
+      syncTickRef.current += 1
+      const needsUi =
+        next1.falling !== prev1.falling ||
+        next2.falling !== prev2.falling ||
+        syncTickRef.current % 2 === 0
+      if (needsUi) {
+        startTransition(() => {
+          setLane1(next1)
+          setLane2(next2)
+        })
+      }
 
       if (!roundEndingRef.current) {
         roundTimeRef.current = Math.max(0, roundTimeRef.current - TICK_MS / 1000)
-        setRoundTimeLeft(Math.ceil(roundTimeRef.current))
+        if (syncTickRef.current % 4 === 0) {
+          startTransition(() => setRoundTimeLeft(Math.ceil(roundTimeRef.current)))
+        }
         if (roundTimeRef.current <= 0) endRound()
       }
     }, TICK_MS)
     return () => window.clearInterval(id)
-  }, [endRound])
+  }, [documentVisible, endRound])
 
   useEffect(() => {
     scheduleBot()
     return () => {
-      if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
+      clearTimerRef(botTimerRef)
       clearBotCommitTimer()
-      if (popTimerRef.current) window.clearTimeout(popTimerRef.current)
+      clearTimerRef(popTimerRef)
+      duelTimers.clearAll()
     }
-  }, [clearBotCommitTimer, scheduleBot])
+  }, [clearBotCommitTimer, clearTimerRef, duelTimers, scheduleBot])
 
   const movePlayer = useCallback((dir: -1 | 1) => {
     if (!runningRef.current || roundEndingRef.current) return
@@ -307,8 +335,7 @@ export function useStackDuel() {
   const restartMatch = useCallback(() => {
     breakTimer.clear()
     clearBotCommitTimer()
-    if (botTimerRef.current) window.clearTimeout(botTimerRef.current)
-    botTimerRef.current = null
+    clearTimerRef(botTimerRef)
     endedRef.current = false
     roundEndingRef.current = false
     roundBreakUntilRef.current = 0

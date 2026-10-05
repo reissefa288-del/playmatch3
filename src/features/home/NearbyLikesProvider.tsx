@@ -6,6 +6,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react'
+import { recordProfileLikeSent } from '../profile/profileStats'
 
 const LIKES_STORAGE_KEY = 'pm-nearby-likes'
 const INVITES_STORAGE_KEY = 'pm-nearby-game-invites'
@@ -66,6 +67,7 @@ export function NearbyLikesProvider({ children }: { children: ReactNode }) {
     likedIds = new Set(likedIds)
     likedIds.add(id)
     persistIdSet(LIKES_STORAGE_KEY, likedIds)
+    recordProfileLikeSent()
     emit()
   }, [])
 

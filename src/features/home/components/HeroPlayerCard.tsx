@@ -1,4 +1,4 @@
-import { memo, useState } from 'react'
+import { lazy, memo, Suspense, useState } from 'react'
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -10,16 +10,20 @@ import {
   FiStar,
   FiX,
 } from 'react-icons/fi'
-import { motion } from 'framer-motion'
 import { IoShieldCheckmark } from 'react-icons/io5'
 import { LuGamepad2 } from 'react-icons/lu'
 import { MdEmojiEvents } from 'react-icons/md'
-import { fakePortraitForGender } from '../../../shared/fakePortraits'
-import { LazyImage } from '../../../shared/LazyImage'
-import { PhotoLightbox, type LightboxPhoto } from '../../../shared/PhotoLightbox'
-import { formatBalance, useGemBalanceActions, useGemBalanceState } from '../../currency/GemBalanceProvider'
+import { fakePhotoSetForGender } from '../../../shared/fakePortraits'
+import { PhotoImage } from '../../../shared/PhotoImage'
+import { formatBalance } from '../../currency/GemBalanceProvider'
 import { INTEREST_EMOJI } from '../../onboarding/onboardingSteps'
 import type { HeroDiscoveryPlayer, HeroDiscoveryTag } from '../types'
+
+const PhotoLightbox = lazy(() =>
+  import('../../../shared/PhotoLightbox').then((mod) => ({ default: mod.PhotoLightbox })),
+)
+
+export type LightboxPhoto = import('../../../shared/PhotoLightbox').LightboxPhoto
 
 export type HeroPlayerCardProps = {
   player: HeroDiscoveryPlayer
@@ -33,6 +37,9 @@ export type HeroPlayerCardProps = {
   onGameInvite?: () => void
   onSuperLike?: () => void
   sentOverlayVariant?: 'match' | 'super'
+  gemBalance?: number
+  gemSpend?: (amount: number) => boolean
+  gemBalanceLabel?: string
 }
 
 export const SUPER_LIKE_GEM_COST = 5
@@ -51,6 +58,24 @@ const heroLightboxPhotos: LightboxPhoto[] = heroPhotoPositions.map((objectPositi
 
 const VISIBLE_INTERESTS = 3
 
+function heroPlayerCardPropsEqual(prev: HeroPlayerCardProps, next: HeroPlayerCardProps) {
+  if (prev.isPeek !== next.isPeek) return false
+  if (prev.player.id !== next.player.id) return false
+  if (prev.showSentOverlay !== next.showSentOverlay) return false
+  if (prev.matchBusy !== next.matchBusy) return false
+  if (prev.canLike !== next.canLike) return false
+  if (prev.isPremium !== next.isPremium) return false
+  if (prev.sentOverlayVariant !== next.sentOverlayVariant) return false
+  if (prev.gemBalance !== next.gemBalance) return false
+  if (prev.gemBalanceLabel !== next.gemBalanceLabel) return false
+  if (prev.onMatchRequest !== next.onMatchRequest) return false
+  if (prev.onPass !== next.onPass) return false
+  if (prev.onSuperLike !== next.onSuperLike) return false
+  if (prev.onGameInvite !== next.onGameInvite) return false
+  if (prev.gemSpend !== next.gemSpend) return false
+  return true
+}
+
 export const HeroPlayerCard = memo(function HeroPlayerCard({
   player,
   showSentOverlay = false,
@@ -63,16 +88,17 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
   onGameInvite,
   onSuperLike,
   sentOverlayVariant = 'match',
+  gemBalance,
+  gemSpend,
+  gemBalanceLabel,
 }: HeroPlayerCardProps) {
-  const { spend } = useGemBalanceActions()
-  const { balance } = useGemBalanceState()
   const [inviteHint, setInviteHint] = useState<'locked' | 'sent' | null>(null)
   const [superHint, setSuperHint] = useState<'gems' | 'sent' | null>(null)
   const [photosOpen, setPhotosOpen] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [photoIndex, setPhotoIndex] = useState(0)
-  const portraitSrc = fakePortraitForGender(player.gender, 'display')
-  const portraitFull = fakePortraitForGender(player.gender, 'full')
+  const portraitPhoto = fakePhotoSetForGender(player.gender)
+  const portraitFull = portraitPhoto.full.webp
   const actionsLocked = showSentOverlay || matchBusy || isPeek
   const visibleInterests = player.interests.slice(0, VISIBLE_INTERESTS)
   const extraInterests = player.interests.length - visibleInterests.length
@@ -90,7 +116,7 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
 
   const onSuperLikeClick = () => {
     if (actionsLocked) return
-    if (!spend(SUPER_LIKE_GEM_COST)) {
+    if (!gemSpend?.(SUPER_LIKE_GEM_COST)) {
       setSuperHint('gems')
       window.setTimeout(() => setSuperHint(null), 3800)
       return
@@ -117,15 +143,15 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
       <span className="pm-hero-card__border-glow" aria-hidden />
       <span className="pm-hero-card__shine" aria-hidden />
       {showSentOverlay ? (
-        <motion.div className="pm-hero-card__sent-overlay" role="status">
+        <div className="pm-hero-card__sent-overlay" role="status">
           <span className="pm-hero-card__sent-aurora" aria-hidden />
           <span className="pm-hero-card__sent-ring pm-hero-card__sent-ring--a" aria-hidden />
           <span className="pm-hero-card__sent-ring pm-hero-card__sent-ring--b" aria-hidden />
-          <motion.div
+          <div
             className="pm-hero-card__sent-badge"
-            initial={{ scale: 0.6, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ type: 'spring', stiffness: 420, damping: 22 }}
+           
+           
+           
           >
             <span className="pm-hero-card__sent-icon" aria-hidden>
               <FiCheck />
@@ -133,37 +159,37 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
             <span className="pm-hero-card__sent-ping" aria-hidden>
               <FiSend />
             </span>
-          </motion.div>
-          <motion.strong
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 }}
+          </div>
+          <strong
+           
+           
+           
           >
             {sentOverlayVariant === 'super'
               ? 'Süper beğeni gönderildi'
               : 'Eşleşme isteği gönderildi'}
-          </motion.strong>
-          <motion.p
+          </strong>
+          <p
             className="pm-hero-card__sent-sub"
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.14 }}
+           
+           
+           
           >
             {sentOverlayVariant === 'super'
               ? `${player.name} profiline öne çıktın`
               : 'Karşı tarafa bildirim gitti'}
-          </motion.p>
-          <motion.span
+          </p>
+          <span
             className="pm-hero-card__sent-chip"
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
+           
+           
+           
           >
             {sentOverlayVariant === 'super'
               ? `${SUPER_LIKE_GEM_COST} elmas · öncelikli bildirim`
               : 'Premium bildirim · anında iletildi'}
-          </motion.span>
-        </motion.div>
+          </span>
+        </div>
       ) : null}
 
       <div className="pm-hero-card__body">
@@ -173,14 +199,16 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
             role="img"
             aria-label={player.name}
           >
-            <LazyImage
-              src={portraitSrc}
+            <PhotoImage
+              photo={portraitPhoto}
               alt=""
               className="pm-hero-card__portrait-img"
+              sizes="(max-width: 480px) 390px, 960px"
               style={{ objectPosition: heroPhotoPositions[photoIndex] }}
               draggable={false}
               width={390}
               height={440}
+              priority={!isPeek}
             />
             {photosOpen ? (
               <button
@@ -315,7 +343,7 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
             <FiStar aria-hidden />
             <span>
               Süper beğeni için <strong>{SUPER_LIKE_GEM_COST} elmas</strong> gerekir. Bakiye:{' '}
-              <strong>{formatBalance(balance)}</strong>
+              <strong>{gemBalanceLabel ?? formatBalance(gemBalance ?? 0)}</strong>
             </span>
           </p>
         ) : null}
@@ -394,14 +422,18 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
         </button>
       </div>
 
-      <PhotoLightbox
-        open={lightboxOpen}
-        onClose={() => setLightboxOpen(false)}
-        imageSrc={portraitFull}
-        photos={heroLightboxPhotos}
-        index={photoIndex}
-        onIndexChange={setPhotoIndex}
-      />
+      {lightboxOpen ? (
+        <Suspense fallback={null}>
+          <PhotoLightbox
+            open={lightboxOpen}
+            onClose={() => setLightboxOpen(false)}
+            imageSrc={portraitFull}
+            photos={heroLightboxPhotos}
+            index={photoIndex}
+            onIndexChange={setPhotoIndex}
+          />
+        </Suspense>
+      ) : null}
     </article>
   )
-})
+}, heroPlayerCardPropsEqual)

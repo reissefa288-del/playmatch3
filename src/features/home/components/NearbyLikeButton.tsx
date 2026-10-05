@@ -1,6 +1,5 @@
 import { useState, type MouseEvent } from 'react'
 import { IoHeart } from 'react-icons/io5'
-import { motion, useReducedMotion } from 'framer-motion'
 import { useNearbyLikesActions, useHasLiked } from '../NearbyLikesProvider'
 
 export type NearbyLikePhase = 'idle' | 'burst' | 'exit'
@@ -25,7 +24,6 @@ export function NearbyLikeButton({
   onPhaseChange,
   className = '',
 }: NearbyLikeButtonProps) {
-  const reduceMotion = useReducedMotion()
   const { sendLike } = useNearbyLikesActions()
   const alreadyLiked = useHasLiked(playerId)
   const [phase, setPhase] = useState<NearbyLikePhase>('idle')
@@ -50,22 +48,18 @@ export function NearbyLikeButton({
 
   return (
     <div className={`pm-nearby-card__like-wrap ${className}`.trim()}>
-      <motion.button
+      <button
         type="button"
         className={`pm-nearby-card__like-btn${showLikedStyle ? ' is-liked' : ''}${variant === 'list' ? ' pm-nearby-list-card__like-btn' : ''}`}
         aria-label={alreadyLiked ? `${playerName} beğenildi` : `${playerName} beğen`}
         disabled={busy}
         onClick={handleLike}
-        whileTap={reduceMotion || busy ? undefined : { scale: 0.88 }}
-        animate={
-          phase === 'burst' && !reduceMotion
-            ? { scale: [1, 1.28, 1.05] }
-            : { scale: 1 }
-        }
-        transition={{ duration: 0.38 }}
+       
+       
+       
       >
         <IoHeart className="pm-nearby-card__like-btn-icon" aria-hidden />
-      </motion.button>
+      </button>
     </div>
   )
 }

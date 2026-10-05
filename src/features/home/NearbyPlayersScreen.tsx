@@ -1,38 +1,27 @@
 import '../../styles/home-nearby-screen.css'
-import { useMemo } from 'react'
 import { FiArrowLeft, FiMapPin } from 'react-icons/fi'
-import { motion, useReducedMotion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { AmbientParticles } from './components/AmbientParticles'
 import { Navbar } from './components/Navbar'
+import { NearbyEmptyState } from './components/NearbyEmptyState'
 import { NearbyPlayersList } from './components/NearbyPlayersList'
-import { filterNearbyPlayers } from './filterDiscovery'
-import { nearbyPlayers } from './data'
+import { LocationConsentSheet } from '../location/components/LocationConsentSheet'
 import { useHomeFilters } from './useHomeFilters'
+import { useNearbyPlayers } from './useNearbyPlayers'
 
 export function NearbyPlayersScreen() {
   const navigate = useNavigate()
-  const reduceMotion = useReducedMotion()
   const { applied } = useHomeFilters()
-
-  const visibleNearby = useMemo(
-    () => filterNearbyPlayers(nearbyPlayers, applied),
-    [applied],
-  )
+  const { players: visibleNearby, needsLocation, location } = useNearbyPlayers(applied)
 
   return (
-    <motion.div className="pm-app-shell pm-app-shell--nearby">
+    <div className="pm-app-shell pm-app-shell--nearby">
       <div className="pm-artboard">
         <AmbientParticles />
         <main className="pm-nearby-screen">
           <Navbar />
 
-          <motion.header
-            className="pm-nearby-screen__hero"
-            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-          >
+          <header className="pm-nearby-screen__hero">
             <button
               type="button"
               className="pm-nearby-screen__back"
@@ -48,11 +37,26 @@ export function NearbyPlayersScreen() {
             <h1 className="pm-nearby-screen__title">
               <FiMapPin aria-hidden /> Yakındaki Oyuncular
             </h1>
-          </motion.header>
+          </header>
 
-          <NearbyPlayersList players={visibleNearby} />
+          {visibleNearby.length === 0 ? (
+            <NearbyEmptyState
+              needsLocation={needsLocation}
+              onEnableLocation={location.openConsent}
+            />
+          ) : (
+            <NearbyPlayersList players={visibleNearby} />
+          )}
         </main>
       </div>
-    </motion.div>
+
+      <LocationConsentSheet
+        open={location.consentOpen}
+        loading={location.loading}
+        error={location.error}
+        onAccept={() => void location.enableSharing()}
+        onDecline={location.closeConsent}
+      />
+    </div>
   )
 }

@@ -2,7 +2,7 @@
 
 :root {
   --pm-ease-flagship: cubic-bezier(0.22, 1, 0.36, 1);
-  --pm-dur-tab: 0.38s;
+  --pm-dur-tab: 0ms;
   --pm-dur-stack: 0.4s;
 }
 
@@ -207,6 +207,7 @@
 
 .pm-stack-overlay-enter {
   animation: pm-stack-enter var(--pm-dur-stack) var(--pm-ease-flagship) both;
+  will-change: opacity, transform;
 }
 
 .pm-toast-enter {
@@ -248,10 +249,19 @@
 .pm-nearby-card.is-exiting {
   animation: pm-nearby-card-exit 0.42s var(--pm-ease-flagship) forwards;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 
 .pm-bottom-nav__indicator {
   animation: pm-nav-indicator-enter 0.32s var(--pm-ease-flagship) both;
+}
+
+.pm-pressable:active {
+  transform: scale(0.96);
+}
+
+.pm-hover-lift:hover {
+  transform: scale(1.03);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -274,5 +284,10 @@
   .pm-toast-enter .pm-match-toast__icon,
   .pm-toast-enter .pm-match-toast__body {
     animation: none !important;
+  }
+
+  .pm-pressable:active,
+  .pm-hover-lift:hover {
+    transform: none;
   }
 }

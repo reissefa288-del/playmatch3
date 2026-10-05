@@ -2,7 +2,7 @@ import { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { FiPlus } from 'react-icons/fi'
 import elmasIcon from '../../reference/opt/thumb/elmas.webp'
-import { LazyImage } from '../../shared/LazyImage'
+import { CurrencyImage } from './CurrencyImage'
 import { CurrencyPurchaseSheet } from './CurrencyPurchaseSheet'
 import { formatGemBalance } from '../../shared/formatGemBalance'
 import { useGemBalanceState } from './GemBalanceProvider'
@@ -33,7 +33,7 @@ export function CurrencyNavPills({ variant = 'default' }: CurrencyNavPillsProps)
           <span className="pm-currency-nav__icon pm-currency-nav__gem" aria-hidden>
             <span className="pm-currency-nav__gem-aura" aria-hidden />
             <span className="pm-currency-nav__gem-flare" aria-hidden />
-            <LazyImage src={elmasIcon} alt="" className="pm-currency-nav__gem-img" width={28} height={28} />
+            <CurrencyImage src={elmasIcon} alt="" className="pm-currency-nav__gem-img" width={28} height={28} />
           </span>
           <span className="pm-currency-nav__amount">{formatGemBalance(balance)}</span>
           <span className="pm-currency-nav__plus" aria-hidden>

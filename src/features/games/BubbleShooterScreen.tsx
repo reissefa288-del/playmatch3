@@ -1,5 +1,4 @@
 import '../../styles/bubble-shooter.css'
-import { motion } from 'framer-motion'
 import { useCallback, useEffect, useRef, type PointerEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
@@ -316,19 +315,19 @@ export function BubbleShooterScreen() {
           </div>
 
           {playing && game.roundMessage && game.isRoundBreak ? (
-            <motion.div
+            <div
               className="pm-bubble-round-break"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
+             
+             
+             
               role="status"
             >
               <p>{game.roundMessage}</p>
-            </motion.div>
+            </div>
           ) : null}
 
           {!game.running && overlayMessage ? (
-            <motion.div className="pm-bubble-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <div className="pm-bubble-overlay">
               <p>{overlayMessage}</p>
               <p className="pm-bubble-overlay__sub">
                 {game.lane1.matchPoints} — {game.lane2.matchPoints}
@@ -342,7 +341,7 @@ export function BubbleShooterScreen() {
                 opponentName={opponent.name}
                 primaryClassName="pm-bubble-overlay__btn"
               />
-            </motion.div>
+            </div>
           ) : null}
         </div>
       </div>

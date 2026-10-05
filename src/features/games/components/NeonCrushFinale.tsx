@@ -1,4 +1,3 @@
-import { AnimatePresence, motion } from 'framer-motion'
 import { GameDuelRematchActions } from './GameDuelRematchActions'
 
 type Props = {
@@ -20,12 +19,12 @@ export function NeonCrushFinale({ winner, p1Score, p2Score, onRestart, onExit, o
     winner === 'draw' ? 'BERABERE' : winner === 'p1' ? 'KAZANDIN!' : 'KAYBETTİN'
 
   return (
-    <AnimatePresence>
-      <motion.div
+    <>
+      <div
         className={`pm-ncrush-result is-${winner}`}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 10 }}
+       
+       
+       
         role="status"
         aria-label="Maç sonucu"
       >
@@ -44,7 +43,7 @@ export function NeonCrushFinale({ winner, p1Score, p2Score, onRestart, onExit, o
           opponentName={opponentName}
           primaryClassName="pm-ncrush-result__cta"
         />
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </>
   )
 }

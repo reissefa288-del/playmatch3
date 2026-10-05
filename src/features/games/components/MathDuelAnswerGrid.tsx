@@ -1,4 +1,3 @@
-import { motion } from 'framer-motion'
 import type { MathLaneState, MathProblem } from '../utils/mathDuelEngine'
 import { MathAnswerFx } from './MathAnswerFx'
 import { MathFeedbackToast } from './MathFeedbackToast'
@@ -36,16 +35,16 @@ export function MathDuelAnswerGrid({
           const wrongPick = selected && index !== problem.correctIndex
           const revealCorrect = showReveal && index === problem.correctIndex
           return (
-            <motion.button
+            <button
               key={`${problem.id}-${index}`}
               type="button"
               className={`pm-math-cell${selected ? ' is-selected' : ''}${correctPick ? ' is-hit' : ''}${wrongPick ? ' is-miss' : ''}${revealCorrect ? ' is-reveal' : ''}`}
               aria-label={`Cevap ${value}`}
               disabled={!interactive || lane.answered || !lane.lives}
               onClick={() => onPick?.(index)}
-              initial={{ opacity: 0, scale: 0.9, y: 6 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: index * 0.04, type: 'spring', stiffness: 400, damping: 22 }}
+             
+             
+             
             >
               <span className="pm-math-cell__edge" aria-hidden />
               <span className="pm-math-cell__glow" aria-hidden />
@@ -58,7 +57,7 @@ export function MathDuelAnswerGrid({
                   Doğru
                 </span>
               ) : null}
-            </motion.button>
+            </button>
           )
         })}
       </div>

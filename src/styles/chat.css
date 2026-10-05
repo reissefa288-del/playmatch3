@@ -391,6 +391,28 @@
   gap: 12px;
 }
 
+.pm-chat-list.is-virtual {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.pm-chat-list.is-virtual::-webkit-scrollbar {
+  display: none;
+}
+
+.pm-chat-list__window {
+  position: relative;
+  width: 100%;
+}
+
+.pm-chat-list__row {
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
 .pm-chat-list__empty {
   margin: 24px 0 0;
   padding: 18px 16px;
@@ -637,6 +659,8 @@
     border-color 0.28s ease;
   position: relative;
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 76px;
 }
 
 .pm-chat-item::before {

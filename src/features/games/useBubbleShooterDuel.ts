@@ -114,8 +114,6 @@ export function useBubbleShooterDuel() {
   const fireRef = useRef(false)
   const swapRef = useRef(false)
   const botRef = useRef<BotBrain>(createBotBrain(0))
-  const rivalAimTimerRef = useRef(0)
-
   lane1Ref.current = lane1
   lane2Ref.current = lane2
   lane1RenderRef.current = lane1
@@ -124,6 +122,7 @@ export function useBubbleShooterDuel() {
   runningRef.current = running
 
   const breakTimer = useManagedTimeout()
+  const rivalAimTimer = useManagedTimeout()
 
   const syncLanesToReact = useCallback((l1: LaneState, l2: LaneState, timeDisplay: number) => {
     setLane1(l1)
@@ -132,10 +131,9 @@ export function useBubbleShooterDuel() {
   }, [])
 
   const flashRivalAim = useCallback(() => {
-    window.clearTimeout(rivalAimTimerRef.current)
     setRivalAimFlash(true)
-    rivalAimTimerRef.current = window.setTimeout(() => setRivalAimFlash(false), 480)
-  }, [])
+    rivalAimTimer.schedule(() => setRivalAimFlash(false), 480)
+  }, [rivalAimTimer])
 
   const playEvents = useCallback(
     (events: LaneEvent[], side: 'p1' | 'p2') => {
@@ -347,10 +345,10 @@ export function useBubbleShooterDuel() {
 
   useEffect(() => {
     return () => {
-      window.clearTimeout(rivalAimTimerRef.current)
+      rivalAimTimer.clear()
       breakTimer.clear()
     }
-  }, [breakTimer])
+  }, [breakTimer, rivalAimTimer])
 
   const setAimDirection = useCallback((dir: -1 | 0 | 1) => {
     if (dir !== 0) unlockBubbleAudio()

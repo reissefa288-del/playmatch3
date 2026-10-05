@@ -1,0 +1,4 @@
+{
+  "host": "your-project-id.web.app",
+  "note": "Firebase Hosting URL'niz veya custom domain. Kopyala: twa-host.json → npm run twa:sync-host"
+}
