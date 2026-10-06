@@ -6,5 +6,7 @@ export function loadAppFonts() {
   fontsStarted = true
 
   void import('@fontsource/inter/latin-ext-400.css')
+  void import('@fontsource/inter/latin-ext-500.css')
+  void import('@fontsource/inter/latin-ext-600.css')
   void import('@fontsource/inter/latin-ext-700.css')
 }

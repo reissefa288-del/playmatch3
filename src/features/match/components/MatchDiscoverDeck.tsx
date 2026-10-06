@@ -1,10 +1,19 @@
-import { lazy, memo, Suspense, useState } from 'react'
+import { lazy, memo, Suspense, useState, useSyncExternalStore } from 'react'
 import { ModerationFlow } from '../../moderation/components/ModerationFlow'
 import { DAILY_LIKES_LIMIT } from '../data'
 import type { MatchDiscoverActions, MatchDiscoverState } from '../matchDiscoverTypes'
 import { MatchActionRow } from './MatchActionRow'
 import { MatchProfileCard } from './MatchProfileCard'
 import { MatchToast } from './MatchToast'
+import { CheckInFeed } from '../../home/CheckInFeed'
+import { CheckInShader } from '../../home/CheckInShader'
+import { HomeCheckIn, useCheckedInPlace } from '../../home/HomeCheckIn'
+import {
+  getVenuePresenceServerSnapshot,
+  getVenuePresenceSnapshot,
+  subscribeVenuePresence,
+} from '../../home/checkInPresence'
+import { getCheckInCheckedInAt } from '../../home/checkInStore'
 
 const MatchBoostPanel = lazy(() =>
   import('./MatchBoostPanel').then((module) => ({ default: module.MatchBoostPanel })),
@@ -13,42 +22,82 @@ const MatchBoostPanel = lazy(() =>
 type MatchDiscoverDeckProps = {
   state: MatchDiscoverState
   actions: MatchDiscoverActions
+  showCheckIn?: boolean
 }
 
 export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
   state,
   actions,
+  showCheckIn = false,
 }: MatchDiscoverDeckProps) {
   const [moderationOpen, setModerationOpen] = useState(false)
+  const checkedIn = useCheckedInPlace()
+  const presence = useSyncExternalStore(
+    subscribeVenuePresence,
+    getVenuePresenceSnapshot,
+    getVenuePresenceServerSnapshot,
+  )
+
+  if (showCheckIn && checkedIn) {
+    const here = presence.ready && presence.placeId === checkedIn.id ? presence.people : []
+    return (
+      <div className="pm-match-discover">
+        <HomeCheckIn />
+        <div className="pm-checkin-stage">
+          <CheckInShader />
+          <CheckInFeed people={here} youAt={getCheckInCheckedInAt()} />
+        </div>
+        <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
+      </div>
+    )
+  }
 
   if (state.poolSize === 0) {
+    const atPlace = showCheckIn && checkedIn
+    if (atPlace && state.poolLoading) {
+      return (
+        <div className="pm-match-discover">
+          <HomeCheckIn />
+        </div>
+      )
+    }
     return (
-      <div
-        className="pm-match-discover"
-       
-       
-       
-      >
-        <div
-          className="pm-match-discover-empty"
-         
-         
-         
-        >
-          <p className="pm-match-discover-empty__title">Profil bulunamadı</p>
+      <div className="pm-match-discover">
+        {showCheckIn ? <HomeCheckIn /> : null}
+        <div className="pm-match-discover-empty">
+          <p className="pm-match-discover-empty__title">
+            {atPlace ? 'Henüz burada kimse yok' : 'Profil bulunamadı'}
+          </p>
           <p className="pm-match-discover-empty__text">
-            Seçtiğin cinsiyet filtresine uygun profil yok. Filtreyi değiştirmeyi dene.
+            {atPlace
+              ? 'Şu an bu ilçede başka kimse yok. Check-in’in 3 saat açık kalır; biri gelince burada belirir.'
+              : 'Seçtiğin cinsiyet filtresine uygun profil yok. Filtreyi değiştirmeyi dene.'}
           </p>
         </div>
-        <Suspense fallback={null}>
-          <MatchBoostPanel onNotify={actions.notify} />
-        </Suspense>
+        {atPlace ? null : (
+          <Suspense fallback={null}>
+            <MatchBoostPanel onNotify={actions.notify} />
+          </Suspense>
+        )}
         <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
       </div>
     )
   }
 
   if (state.queueDone) {
+    if (showCheckIn && checkedIn) {
+      return (
+        <div className="pm-match-discover">
+          <HomeCheckIn />
+          <div className="pm-match-discover-empty">
+            <p className="pm-match-discover-empty__title">Buradakileri gördün</p>
+            <p className="pm-match-discover-empty__text">
+              Yeni biri check-in yapınca burada belirir. Check-in’in 3 saat açık kalır.
+            </p>
+          </div>
+        </div>
+      )
+    }
     return (
       <div
         className="pm-match-discover"
@@ -113,6 +162,7 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
         dailyLimit={state.dailyLimit}
         isUnlimited={state.isUnlimited}
       />
+      {showCheckIn ? <HomeCheckIn /> : null}
       <Suspense fallback={null}>
         <MatchBoostPanel onNotify={actions.notify} />
       </Suspense>

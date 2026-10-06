@@ -125,6 +125,31 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    match /checkIns/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create, update: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.placeId is string
+        && request.resource.data.placeId.size() > 0
+        && request.resource.data.placeId.size() <= 180
+        && request.resource.data.venue is string
+        && request.resource.data.venue.size() >= 2
+        && request.resource.data.venue.size() <= 60
+        && request.resource.data.city is string
+        && request.resource.data.city.size() > 0
+        && request.resource.data.city.size() <= 40
+        && request.resource.data.district is string
+        && request.resource.data.district.size() <= 40
+        && request.resource.data.checkedInAt is int
+        && request.resource.data.expiresAt is int
+        && request.resource.data.expiresAt == request.resource.data.checkedInAt + 10800000
+        && request.resource.data.checkedInAt <= request.time.toMillis() + 120000
+        && request.resource.data.checkedInAt >= request.time.toMillis() - 10800000
+        && request.resource.data.expiresAt > request.time.toMillis();
+      allow delete: if isOwner(userId);
+    }
+
     match /blocks/{blockId} {
       allow read: if isSignedIn()
         && (resource.data.blockerUid == request.auth.uid || resource.data.blockedUid == request.auth.uid);

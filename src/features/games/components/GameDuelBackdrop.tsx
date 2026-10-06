@@ -1,12 +1,10 @@
-import { GameDuelAmbientBg } from './GameDuelAmbientBg'
-import { GameDuelVideoBg } from './GameDuelVideoBg'
+import { GameDuelAmbientBg, type GameDuelTheme } from './GameDuelAmbientBg'
 
-/** Tüm duel oyunları — paylaşılan video.mp4 arka planı + ambient (CSS ile gizlenir) */
-export function GameDuelBackdrop() {
-  return (
-    <>
-      <GameDuelVideoBg />
-      <GameDuelAmbientBg />
-    </>
-  )
+type GameDuelBackdropProps = {
+  theme?: GameDuelTheme
+}
+
+/** Tüm duel oyunları — ortak gökyüzü arka planı */
+export function GameDuelBackdrop({ theme = 'default' }: GameDuelBackdropProps) {
+  return <GameDuelAmbientBg theme={theme} />
 }

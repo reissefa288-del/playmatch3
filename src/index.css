@@ -22,11 +22,107 @@ body {
   background: #060818;
   color: #fff;
   -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
 }
 
 button,
-input {
+input,
+textarea,
+select {
   font: inherit;
+}
+
+/* Tek yazı tipi ve tek düzen: başlık 22/600, gövde 15/500, not 13/500 */
+body,
+body * {
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+
+.pm-location h1,
+.pm-match-head h1,
+.pm-chat-header h1,
+.pm-chat-new-sheet__head h2,
+.pm-games-header h1,
+.pm-games-all__head h2,
+.pm-games-cta-card__title strong,
+.pm-games-invite-sheet__head h2,
+.pm-quick-match__head h1,
+.pm-premium-title-bar__copy h1,
+.pm-premium-hero__content h2,
+.pm-premium-section__head h2,
+.pm-premium-sheet__head-copy h2,
+.pm-premium-soon__title,
+.pm-profile-hero-card__meta h1,
+.pm-profile-preview__meta h2,
+.pm-profile-about h2,
+.pm-onboard-body h1,
+.pm-legal-header__text h1,
+.pm-legal-section h2,
+.pm-legal-sheet__header-text h2,
+.pm-nearby-screen__title,
+.pm-nearby-sheet__head h2,
+.pm-checkin__head h2,
+.pm-match-name-row h2,
+.pm-hero-card__details h2,
+.pm-home-filters__head h2,
+.pm-notifications__head h2,
+.pm-currency-shop__head h2,
+.pm-location-consent__head h2,
+.pm-google-auth__header h2,
+.pm-report-sheet__head h2 {
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.3px !important;
+  line-height: 1.15 !important;
+  color: #f7f8fc !important;
+  text-shadow: none !important;
+  text-transform: none !important;
+  background: none !important;
+  -webkit-text-fill-color: #f7f8fc !important;
+}
+
+.pm-chat-item__name-row strong,
+.pm-match-about-text,
+.pm-profile-about p,
+.pm-profile-photo-editor__title,
+.pm-profile-insight-card__title {
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.4 !important;
+  text-transform: none !important;
+  text-shadow: none !important;
+  color: #f7f8fc !important;
+}
+
+.pm-match-head p,
+.pm-games-header p,
+.pm-games-header__eyebrow,
+.pm-games-cta-card__title span,
+.pm-premium-title-bar__copy p,
+.pm-premium-soon__text,
+.pm-premium-soon__eyebrow,
+.pm-onboard-subtitle,
+.pm-legal-header__text p,
+.pm-checkin__head p,
+.pm-notifications__sub,
+.pm-currency-shop__head p,
+.pm-match-location,
+.pm-match-age,
+.pm-match-tag,
+.pm-match-about-label,
+.pm-bottom-nav__label {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.35 !important;
+  text-transform: none !important;
+  color: rgba(255, 255, 255, 0.62) !important;
+  text-shadow: none !important;
+}
+
+.pm-bottom-nav__item.is-active .pm-bottom-nav__label {
+  color: #f7f8fc !important;
 }
 
 #root {

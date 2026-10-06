@@ -1,15 +1,35 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { useAuthSession } from '../auth/useAuthSession'
 import { useDailyLikes } from '../likes/useDailyLikes'
 import { DAILY_LIKES_LIMIT } from './data'
 import { fetchDiscoverProfilesPage, type DiscoverPageCursor } from './firestoreMatch'
 import { DISCOVER_PREFETCH_THRESHOLD } from './discoverConstants'
 import { sendLikeAndRefresh } from './matchConnectionsStore'
+import {
+  createGameTestBotOpponent,
+  GAME_TEST_BOT_ID,
+  isGameTestBotPlayerId,
+  mergeHomeFemaleBots,
+  shouldUseGameTestBot,
+} from '../games/gameTestBot'
+import { findCheckInPlace } from '../home/checkInPlaces'
+import {
+  getVenuePresenceServerSnapshot,
+  getVenuePresenceSnapshot,
+  subscribeVenuePresence,
+  watchVenuePresence,
+} from '../home/checkInPresence'
 import type { MatchDiscoverActions, MatchDiscoverState, MatchToastPayload } from './matchDiscoverTypes'
 import type { MatchProfile } from './data'
 import type { MatchGenderFilter } from './types'
 
 export type { MatchToastPayload } from './matchDiscoverTypes'
+
+function withTestBot(profiles: MatchProfile[]) {
+  if (!shouldUseGameTestBot()) return profiles
+  if (profiles.some((profile) => profile.id === GAME_TEST_BOT_ID)) return profiles
+  return [createGameTestBotOpponent(), ...profiles]
+}
 
 export type DiscoverAction = 'like' | 'pass' | 'super' | 'invite'
 
@@ -19,12 +39,27 @@ type HistoryEntry = {
   consumedLike: boolean
 }
 
-export function useMatchDiscover(gender: MatchGenderFilter) {
+export function useMatchDiscover(
+  gender: MatchGenderFilter,
+  options?: { homeBots?: boolean; venueId?: string | null },
+) {
+  const venue = findCheckInPlace(options?.venueId)
+  const venueId = venue?.id ?? null
+  const presence = useSyncExternalStore(
+    subscribeVenuePresence,
+    getVenuePresenceSnapshot,
+    getVenuePresenceServerSnapshot,
+  )
+  const homeBots = options?.homeBots === true && gender !== 'male' && !venue
+  const seed = (profiles: MatchProfile[]) => {
+    if (venue) return []
+    return homeBots ? mergeHomeFemaleBots(profiles) : withTestBot(profiles)
+  }
   const { session } = useAuthSession()
   const uid = session?.uid ?? null
   const { remaining, isUnlimited, tryConsumeLike } = useDailyLikes()
 
-  const [pool, setPool] = useState<MatchProfile[]>([])
+  const [pool, setPool] = useState<MatchProfile[]>(() => seed([]))
   const [poolLoading, setPoolLoading] = useState(true)
   const [cursor, setCursor] = useState<DiscoverPageCursor>(null)
   const [hasMore, setHasMore] = useState(true)
@@ -44,12 +79,36 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
     setHistory([])
     setToast(null)
     setCursor(null)
-    setHasMore(true)
-  }, [gender])
+    setHasMore(!venueId)
+  }, [gender, venueId])
+
+  const prevVenueId = useRef(venueId)
+  useEffect(() => {
+    watchVenuePresence(venueId, uid)
+    if (prevVenueId.current === venueId) return
+    prevVenueId.current = venueId
+    setIndex(0)
+    setHistory([])
+  }, [uid, venueId])
 
   useEffect(() => {
+    if (!venueId) return
+    if (!presence.ready || presence.placeId !== venueId) {
+      setPoolLoading(true)
+      setHasMore(false)
+      return
+    }
+    setPool(presence.people.map((person) => person.profile))
+    setPoolLoading(false)
+    setCursor(null)
+    setHasMore(false)
+  }, [presence, venueId])
+
+  useEffect(() => {
+    if (venueId) return
+
     if (!uid) {
-      setPool([])
+      setPool(seed([]))
       setPoolLoading(false)
       setCursor(null)
       setHasMore(false)
@@ -64,20 +123,24 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
     void fetchDiscoverProfilesPage(uid, gender, null)
       .then((page) => {
         if (generation !== loadGen.current) return
-        setPool(page.profiles)
+        setPool(seed(page.profiles))
         setCursor(page.nextCursor)
         setHasMore(page.hasMore)
         setIndex(0)
         setHistory([])
       })
+      .catch(() => {
+        if (generation !== loadGen.current) return
+        setPool((current) => seed(current))
+      })
       .finally(() => {
         if (generation !== loadGen.current) return
         setPoolLoading(false)
       })
-  }, [uid, gender])
+  }, [uid, gender, homeBots, venueId])
 
   useEffect(() => {
-    if (!uid || poolLoading || !hasMore || prefetching.current) return
+    if (!uid || venueId || poolLoading || !hasMore || prefetching.current) return
     if (pool.length - index > DISCOVER_PREFETCH_THRESHOLD) return
 
     prefetching.current = true
@@ -101,7 +164,7 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
       .finally(() => {
         prefetching.current = false
       })
-  }, [cursor, gender, hasMore, index, pool.length, poolLoading, uid])
+  }, [cursor, gender, hasMore, index, pool.length, poolLoading, uid, venueId])
 
   const current = pool[index] ?? null
   const peekLeft = index > 0 ? pool[index - 1]! : null
@@ -154,11 +217,13 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
       }
 
       try {
-        const result = await sendLikeAndRefresh(uid, current.id, 'discover')
-        advance({ profileId: current.id, action: 'like', consumedLike: true })
-        if (result.matched) {
-          showToast('Eşleşme!', 'premium', `${current.name} ile eşleştiniz`)
+        if (!isGameTestBotPlayerId(current.id)) {
+          const result = await sendLikeAndRefresh(uid, current.id, 'discover')
+          if (result.matched) {
+            showToast('Eşleşme!', 'premium', `${current.name} ile eşleştiniz`)
+          }
         }
+        advance({ profileId: current.id, action: 'like', consumedLike: true })
       } catch {
         showToast('Beğeni gönderilemedi', 'warn', 'Bağlantını kontrol edip tekrar dene.')
       } finally {
@@ -206,7 +271,8 @@ export function useMatchDiscover(gender: MatchGenderFilter) {
       peekLeft,
       peekRight,
       queueDone,
-      poolSize: poolLoading ? 0 : pool.length,
+      poolSize: pool.length,
+      poolLoading,
       likesRemaining: remaining,
       dailyLimit: DAILY_LIKES_LIMIT,
       isUnlimited,

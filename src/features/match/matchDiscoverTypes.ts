@@ -13,6 +13,7 @@ export type MatchDiscoverState = {
   peekRight: MatchProfile | null
   queueDone: boolean
   poolSize: number
+  poolLoading: boolean
   likesRemaining: number
   dailyLimit: number
   isUnlimited: boolean

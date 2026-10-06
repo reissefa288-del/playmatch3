@@ -222,21 +222,26 @@ a.pm-bottom-nav__item {
 }
 
 .pm-bottom-nav__label {
-  flex: 0 0 12px;
+  flex: 0 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
   max-width: 100%;
-  font-size: 9px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   line-height: 1;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.62);
   white-space: nowrap;
   text-align: center;
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.pm-bottom-nav__item.is-active .pm-bottom-nav__label {
+  color: #f7f8fc;
 }
 
 .pm-bottom-nav__icon em {

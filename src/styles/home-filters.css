@@ -54,8 +54,10 @@
 
 .pm-home-filters__head h2 {
   margin: 0;
-  font-size: 18px;
-  color: #f4f6ff;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #f7f8fc;
 }
 
 .pm-home-filters__close {
@@ -83,8 +85,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  color: #c5d4ff;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
 }
 
 .pm-home-filters__chips {
@@ -99,15 +102,16 @@
   border-radius: 19px;
   border: 1px solid rgba(100, 140, 255, 0.35);
   background: rgba(8, 12, 36, 0.85);
-  color: #dce6ff;
+  color: rgba(255, 255, 255, 0.62);
   font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
 }
 
 .pm-home-filters__chip.is-active {
   border-color: rgba(255, 90, 200, 0.65);
   background: rgba(255, 60, 180, 0.18);
-  color: #fff;
+  color: #f7f8fc;
   box-shadow: 0 0 16px rgba(255, 60, 180, 0.2);
 }
 
@@ -116,8 +120,9 @@
   align-items: center;
   gap: 10px;
   margin: 8px 0 16px;
-  font-size: 14px;
-  color: #d8e4ff;
+  font-size: 15px;
+  font-weight: 500;
+  color: #f7f8fc;
   cursor: pointer;
 }
 

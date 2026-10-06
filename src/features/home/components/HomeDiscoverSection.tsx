@@ -4,6 +4,7 @@ import { useUserProfile } from '../../onboarding/useUserProfile'
 import { MatchDiscoverDeck } from '../../match/components/MatchDiscoverDeck'
 import { useMatchDiscover } from '../../match/useMatchDiscover'
 import { homeGenderToDiscoverFilter } from '../homeDiscoverGender'
+import { useCheckedInPlace } from '../HomeCheckIn'
 import type { HomeFilters } from '../types'
 
 type HomeDiscoverSectionProps = {
@@ -17,7 +18,11 @@ export function HomeDiscoverSection({ filters }: HomeDiscoverSectionProps) {
     () => homeGenderToDiscoverFilter(filters.gender, profile.matchPreference),
     [filters.gender, profile.matchPreference],
   )
-  const { state, actions } = useMatchDiscover(discoverGender)
+  const place = useCheckedInPlace()
+  const { state, actions } = useMatchDiscover(discoverGender, {
+    homeBots: true,
+    venueId: place?.id ?? null,
+  })
 
-  return <MatchDiscoverDeck state={state} actions={actions} />
+  return <MatchDiscoverDeck state={state} actions={actions} showCheckIn />
 }

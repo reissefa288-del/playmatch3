@@ -1,10 +1,29 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAuthSession } from '../auth/useAuthSession'
+import { GAME_TEST_BOT_ID, GAME_TEST_BOT_NAME, resolveTestBotOpponentGender, shouldUseGameTestBot } from '../games/gameTestBot'
 import { fetchNearbyFirestoreUsers } from '../location/firestoreLocation'
 import { useLocationSharing } from '../location/useLocationSharing'
+import { fakePortraitForGender } from '../../shared/fakePortraits'
 import { filterNearbyPlayers } from './filterDiscovery'
-import type { HomeFilters } from './types'
-import type { NearbyPlayer } from './types'
+import type { HomeFilters, NearbyPlayer } from './types'
+
+/** Geçici — yakındaki oyuncular denemesi. Kaldırılacak. */
+function nearbyTestBot(): NearbyPlayer {
+  const gender = resolveTestBotOpponentGender()
+  return {
+    id: GAME_TEST_BOT_ID,
+    name: GAME_TEST_BOT_NAME,
+    age: 22,
+    level: 3,
+    interests: ['Oyun', 'Sohbet'],
+    distance: '1 km',
+    gender,
+    isOnline: true,
+    portraitSrc: fakePortraitForGender(gender),
+    portraitPosition: '50% 12%',
+    recentActivity: 'Test bot',
+  }
+}
 
 export function useNearbyPlayers(filters: HomeFilters) {
   const { session } = useAuthSession()
@@ -37,10 +56,12 @@ export function useNearbyPlayers(filters: HomeFilters) {
     void reload()
   }, [reload])
 
-  const players = useMemo(
-    () => filterNearbyPlayers(realPlayers, filters),
-    [filters, realPlayers],
-  )
+  const testBot = useMemo(() => nearbyTestBot(), [])
+
+  const players = useMemo(() => {
+    const filtered = filterNearbyPlayers(realPlayers, filters).filter((player) => player.id !== GAME_TEST_BOT_ID)
+    return shouldUseGameTestBot() ? [testBot, ...filtered] : filtered
+  }, [filters, realPlayers, testBot])
 
   return {
     players,
