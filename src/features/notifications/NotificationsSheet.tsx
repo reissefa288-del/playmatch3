@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
 import { FiBell, FiHeart, FiMessageCircle, FiTrash2, FiUsers, FiX, FiZap } from 'react-icons/fi'
 import { LuGamepad2 } from 'react-icons/lu'
+import { ShopGlassShader } from '../currency/ShopGlassShader'
 import type { AppNotification, NotificationKind } from './types'
 
 const kindIcon: Record<NotificationKind, typeof FiHeart> = {
@@ -60,9 +61,7 @@ export function NotificationsSheet({
         aria-labelledby="pm-notifications-title"
         style={{ transform: 'translate(-50%, -50%)' }}
       >
-        <span className="pm-notifications__aura" aria-hidden />
-        <span className="pm-notifications__rim" aria-hidden />
-
+        <ShopGlassShader />
         <header className="pm-notifications__head">
           <div className="pm-notifications__head-brand">
             <span className="pm-notifications__bell" aria-hidden>
@@ -70,9 +69,11 @@ export function NotificationsSheet({
             </span>
             <div className="pm-notifications__head-title">
               <h2 id="pm-notifications-title">Bildirimler</h2>
-              <p className="pm-notifications__sub">
-                {unreadCount > 0 ? `${unreadCount} okunmamış bildirim` : 'Tüm bildirimler okundu'}
-              </p>
+              {unreadCount > 0 ? (
+                <p className="pm-notifications__sub">{unreadCount} okunmamış</p>
+              ) : items.length > 0 ? (
+                <p className="pm-notifications__sub">Tümü okundu</p>
+              ) : null}
             </div>
           </div>
           <button type="button" className="pm-notifications__close" onClick={onClose} aria-label="Kapat">
@@ -86,8 +87,8 @@ export function NotificationsSheet({
               <span className="pm-notifications__empty-icon" aria-hidden>
                 <FiBell />
               </span>
-              <strong>Şimdilik sessiz</strong>
-              <p>Yeni bildirim geldiğinde burada görünecek.</p>
+              <strong>Bildirim yok</strong>
+              <p>Eşleşme, beğeni ve davet burada durur.</p>
             </li>
           ) : (
             items.map((item) => {

@@ -1,0 +1,159 @@
+.pm-crossed {
+  color: #f7f8fc;
+}
+
+.pm-crossed__head h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+}
+
+.pm-crossed__head p,
+.pm-crossed__empty {
+  margin: 6px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.pm-crossed__list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pm-crossed__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(8, 10, 28, 0.62);
+}
+
+.pm-crossed__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.pm-crossed__photo {
+  width: 56px;
+  height: 56px;
+  flex: 0 0 auto;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.pm-crossed__photo--empty {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.pm-crossed__meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pm-crossed__meta strong,
+.pm-crossed__meta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pm-crossed__meta strong {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.pm-crossed__meta span {
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.pm-crossed__like {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6a5cff, #c45ad4);
+  color: #f7f8fc;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pm-crossed__like:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.pm-crossed-card {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: grid;
+  place-items: end center;
+}
+
+.pm-crossed-card__backdrop {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(2, 4, 14, 0.62);
+  cursor: pointer;
+}
+
+.pm-crossed-card__sheet {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 430px);
+  max-height: min(88dvh, 760px);
+  overflow: auto;
+  padding: 12px 12px calc(16px + env(safe-area-inset-bottom));
+}
+
+.pm-crossed-card__close {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-left: auto;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(8, 10, 24, 0.72);
+  color: #f7f8fc;
+  cursor: pointer;
+}

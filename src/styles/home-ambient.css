@@ -119,33 +119,6 @@
 .pm-ambient-particle:nth-child(13) { left: 62%; top: 88%; animation-delay: -2.7s; }
 .pm-ambient-particle:nth-child(14) { left: 28%; top: 52%; animation-delay: -0.3s; }
 
-.pm-ambient-streaks {
-  position: absolute;
-  inset: 0;
-  opacity: 0.4;
-}
-
-.pm-ambient-streak {
-  position: absolute;
-  height: 1px;
-  width: 140%;
-  left: -20%;
-  background: linear-gradient(90deg, transparent, rgba(120, 200, 255, 0.4), transparent);
-}
-
-.pm-ambient-streak--a {
-  top: 22%;
-  transform: rotate(-8deg);
-  animation: pm-streak-slide 12s linear infinite;
-}
-
-.pm-ambient-streak--b {
-  top: 58%;
-  transform: rotate(6deg);
-  background: linear-gradient(90deg, transparent, rgba(255, 120, 200, 0.35), transparent);
-  animation: pm-streak-slide 16s linear infinite reverse;
-}
-
 .pm-app-shell--home .pm-home {
   position: relative;
   z-index: 1;
@@ -202,20 +175,10 @@
   }
 }
 
-@keyframes pm-streak-slide {
-  0% {
-    transform: translateX(-30%) rotate(-8deg);
-  }
-  100% {
-    transform: translateX(30%) rotate(-8deg);
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pm-tab-panel#pm-tab-home::before,
   .pm-ambient-orb,
-  .pm-ambient-particle,
-  .pm-ambient-streak {
+  .pm-ambient-particle {
     animation: none;
   }
 }

@@ -25,7 +25,11 @@ export function BottomNavigation({ items, activeTabId }: BottomNavigationProps) 
   const { pathname } = useLocation()
 
   return (
-    <nav className="pm-bottom-nav" aria-label="Alt Menü">
+    <nav
+      className="pm-bottom-nav"
+      aria-label="Alt Menü"
+      style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}
+    >
       {items.map((item) => {
         const labelClass = `pm-bottom-nav__label ${item.variant === 'premium' ? 'is-premium-label' : ''}`
         const active = isItemActive(item, pathname, activeTabId)

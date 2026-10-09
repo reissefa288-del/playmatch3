@@ -69,6 +69,15 @@ export function advanceHeroStackIndex() {
   })
 }
 
+export function rewindHeroStack() {
+  if (snapshot.index <= 0) return
+  patch({
+    index: snapshot.index - 1,
+    phase: 'idle',
+    exitMode: 'match',
+  })
+}
+
 export function beginHeroMatchFlow() {
   patch({ sentVariant: 'match', exitMode: 'match', phase: 'busy' })
 }

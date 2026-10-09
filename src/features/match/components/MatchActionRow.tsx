@@ -1,6 +1,11 @@
-import type { ReactNode } from 'react'
-import { FiHeart, FiStar, FiX } from 'react-icons/fi'
-import { LuGamepad2, LuRotateCcw } from 'react-icons/lu'
+import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useNavigate } from 'react-router-dom'
+import actionUndo from '../assets/action-undo.png'
+import actionPass from '../assets/action-pass.png'
+import actionLike from '../assets/action-like.png'
+import actionInvite from '../assets/action-invite.png'
+import actionSuper from '../assets/action-super.png'
+import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
 import { DAILY_LIKES_LIMIT } from '../data'
 import { MatchLikesQuota } from './MatchLikesQuota'
 
@@ -31,6 +36,25 @@ export function MatchActionRow({
   dailyLimit = DAILY_LIKES_LIMIT,
   isUnlimited = false,
 }: MatchActionRowProps) {
+  const navigate = useNavigate()
+  const { active: isPremium } = usePremiumSubscriptionState()
+  const [burst, setBurst] = useState(false)
+
+  const handleUndo = () => {
+    if (!isPremium) {
+      navigate('/premium', { state: { notice: 'Geri almak için Premium almalısın.' } })
+      return
+    }
+    if (canUndo) onUndo()
+  }
+
+  const handleLike = () => {
+    if (!canAct || !canLike) return
+    setBurst(true)
+    window.setTimeout(() => setBurst(false), 700)
+    onLike()
+  }
+
   return (
     <div
       className="pm-match-actions-block"
@@ -41,20 +65,20 @@ export function MatchActionRow({
       <MatchLikesQuota remaining={likesRemaining} limit={dailyLimit} isUnlimited={isUnlimited} />
       <div className="pm-match-actions">
       <ActionCircle
-        label="Geri Al"
+        label={isPremium ? 'Geri al' : 'Geri almak için Premium al'}
         variant="muted"
-        icon={<LuRotateCcw />}
-        onClick={onUndo}
-        disabled={!canUndo}
+        icon={<img src={actionUndo} alt="" />}
+        onClick={handleUndo}
+        disabled={isPremium ? !canUndo : false}
       />
       <ActionCircle
         label="Geç"
         variant="pass"
-        icon={<FiX />}
+        icon={<img src={actionPass} alt="" />}
         onClick={onPass}
         disabled={!canAct}
       />
-      <div className="pm-match-action-like-slot">
+      <div className={`pm-match-action-like-slot${burst ? ' is-burst' : ''}`}>
         <ActionCircle
           label={
             canLike
@@ -63,22 +87,29 @@ export function MatchActionRow({
           }
           variant="match"
           large
-          icon={<FiHeart />}
-          onClick={onLike}
+          icon={<img src={actionLike} alt="" />}
+          onClick={handleLike}
           disabled={!canAct || !canLike}
         />
+        {burst ? (
+          <span className="pm-like-burst" aria-hidden>
+            {Array.from({ length: 6 }, (_, i) => (
+              <i key={i} style={{ '--i': i } as CSSProperties} />
+            ))}
+          </span>
+        ) : null}
       </div>
       <ActionCircle
         label="Oyuna davet et"
         variant="invite"
-        icon={<LuGamepad2 />}
+        icon={<img src={actionInvite} alt="" />}
         onClick={onInvite}
         disabled={!canAct}
       />
       <ActionCircle
         label="Süper beğeni"
         variant="super"
-        icon={<FiStar />}
+        icon={<img src={actionSuper} alt="" />}
         onClick={onSuperLike}
         disabled={!canAct}
       />

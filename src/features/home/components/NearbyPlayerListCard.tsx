@@ -65,7 +65,7 @@ export const NearbyPlayerListCard = memo(function NearbyPlayerListCard({ player 
             aria-hidden
           />
         )}
-        {player.isOnline ? <span className="pm-status-pill is-small">Online</span> : null}
+        {player.isOnline ? <span className="pm-status-pill is-small">Çevrimiçi</span> : null}
       </div>
 
       <div className="pm-nearby-list-card__body">

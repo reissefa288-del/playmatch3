@@ -1,9 +1,12 @@
+import { useState } from 'react'
 import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
 import { FiStar, FiX, FiZap } from 'react-icons/fi'
 import { CurrencyImage } from './CurrencyImage'
+import { CurrencyPaymentSheet } from './CurrencyPaymentSheet'
+import { ShopGlassShader } from './ShopGlassShader'
 import { currencyMeta, GEM_MOR_PACKAGE_IDS, morGemIcon } from './currencyPackages'
 import { useGemBalance } from './GemBalanceProvider'
-import type { CurrencyKind } from './types'
+import type { CurrencyKind, CurrencyPackage } from './types'
 
 type CurrencyPurchaseSheetProps = {
   kind: CurrencyKind | null
@@ -21,6 +24,7 @@ const PARTICLE_COUNT = 10
 export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetProps) {
   const reduceMotion = usePrefersReducedMotion()
   const { balance, add, formatBalance } = useGemBalance()
+  const [paying, setPaying] = useState<CurrencyPackage | null>(null)
 
   const meta = kind ? currencyMeta[kind] : null
 
@@ -43,6 +47,7 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
           aria-modal="true"
           aria-labelledby="pm-currency-shop-title"
         >
+          {kind === 'gems' ? <ShopGlassShader /> : null}
           <span className="pm-currency-shop__ambient" aria-hidden />
           <span className="pm-currency-shop__aura" aria-hidden />
           <span className="pm-currency-shop__particles" aria-hidden>
@@ -56,10 +61,16 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
           <div className="pm-currency-shop__body">
             <header className="pm-currency-shop__head">
               <div className="pm-currency-shop__hero">
-                <span className="pm-currency-shop__hero-rays" aria-hidden />
-                <CurrencyImage src={meta.icon} alt="" className="pm-currency-shop__hero-icon" width={64} height={64} />
                 <span className="pm-currency-shop__hero-glow" aria-hidden />
-                <span className="pm-currency-shop__hero-spark" aria-hidden />
+                <CurrencyImage src={meta.icon} alt="" className="pm-currency-shop__hero-icon" width={52} height={52} />
+                <span
+                  className="pm-currency-shop__hero-sheen"
+                  aria-hidden
+                  style={{
+                    WebkitMaskImage: `url(${meta.icon})`,
+                    maskImage: `url(${meta.icon})`,
+                  }}
+                />
               </div>
               <div className="pm-currency-shop__head-copy">
                 <p className="pm-currency-shop__eyebrow">
@@ -110,7 +121,14 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
                     {showMorGem ? (
                       <div className="pm-currency-shop__pkg-mor-hero" aria-hidden>
                         <span className="pm-currency-shop__pkg-mor-hero-glow" />
-                        <CurrencyImage src={morGemIcon} alt="" width={48} height={48} />
+                        <CurrencyImage src={morGemIcon} alt="" width={76} height={76} />
+                        <span
+                          className="pm-currency-shop__pkg-mor-hero-sheen"
+                          style={{
+                            WebkitMaskImage: `url(${morGemIcon})`,
+                            maskImage: `url(${morGemIcon})`,
+                          }}
+                        />
                       </div>
                     ) : null}
                     <div className="pm-currency-shop__pkg-main">
@@ -133,10 +151,7 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
                     <button
                       type="button"
                       className="pm-currency-shop__buy"
-                      onClick={() => {
-                        if (kind === 'gems') add(total)
-                        onClose()
-                      }}
+                      onClick={() => setPaying(pkg)}
                     >
                       Satın Al
                     </button>
@@ -146,11 +161,26 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
             </div>
 
             <p className="pm-currency-shop__note">
-              Demo mağaza — ödeme entegrasyonu yakında. Satın alınca bakiye anında güncellenir.
+              Satın Al ödeme sayfasını açar. Onaylayınca bakiye güncellenir.
             </p>
           </div>
         </div>
       </div>
+      {paying ? (
+        <CurrencyPaymentSheet
+          title={meta.title}
+          amount={paying.amount}
+          bonus={paying.bonus}
+          priceLabel={paying.priceLabel}
+          unit={kind === 'gems' ? 'elmas' : 'altın'}
+          onBack={() => setPaying(null)}
+          onPay={() => {
+            if (kind === 'gems') add(paying.amount + (paying.bonus ?? 0))
+            setPaying(null)
+            onClose()
+          }}
+        />
+      ) : null}
     </>
   )
 }

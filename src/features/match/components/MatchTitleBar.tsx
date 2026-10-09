@@ -12,7 +12,6 @@ export function MatchTitleBar() {
        
       >
         <h1>Eşleşme</h1>
-        <p>Yeni insanlarla tanış, oyun arkadaşı bul! ✨</p>
       </div>
     </header>
   )

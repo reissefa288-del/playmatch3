@@ -6,6 +6,7 @@ import type { MatchProfile } from '../match/data'
 import { readCachedUserProfile } from '../profile/userProfileStore'
 import {
   fakePortraitForGender,
+  fakePortraitFrames,
   type FakePortraitGender,
 } from '../../shared/fakePortraits'
 
@@ -45,16 +46,16 @@ export function resolveTestBotOpponentGender(userGender?: FakePortraitGender): F
 }
 
 const HOME_FEMALE_BOTS = [
-  'Elif',
-  'Zeynep',
-  'Defne',
-  'Ece',
-  'Azra',
-  'Selin',
-  'İlayda',
-  'Damla',
-  'Nehir',
-  'Lara',
+  { name: 'Elif', bio: 'Akşamları oyun, gündüzleri kahve.' },
+  { name: 'Zeynep', bio: 'Rekabeti seven biriyim.' },
+  { name: 'Defne', bio: 'Yeni oyunlar denemeyi severim.' },
+  { name: 'Ece', bio: 'Sakin bir maç, sonra sohbet.' },
+  { name: 'Azra', bio: 'Takım oyunlarında iyiyim.' },
+  { name: 'Selin', bio: 'Hafta sonu uzun maçlar bana göre.' },
+  { name: 'İlayda', bio: 'Kaybetmeyi de kazanmayı da severim.' },
+  { name: 'Damla', bio: 'Bir el daha diyemem.' },
+  { name: 'Nehir', bio: 'Müzik açık, oyun da açık.' },
+  { name: 'Lara', bio: 'Yeni insanlarla oynamayı severim.' },
 ] as const
 
 /** Antalya Muratpaşa check-in listesi için geçici bot. Beğeni gerçek hesaba gitmez. */
@@ -67,35 +68,35 @@ export function createMuratpasaCheckInBot(): MatchProfile {
     gender: 'female',
     portraitSrc: portrait,
     online: true,
-    compatibility: 0,
+    compatibility: 87,
     province: 'Antalya',
     distance: 'Burada',
     location: 'Muratpaşa, Antalya',
     tags: [{ id: 'checkin-bot', label: 'Bot', icon: 'gamepad' }],
     favoriteGames: [{ id: 'duel', label: 'Duel', emoji: '🎮' }],
-    bio: 'Muratpaşa’da check-in yaptı.',
-    photos: [{ id: 'bot-checkin-muratpasa', src: portrait, objectPosition: '50% 12%' }],
+    bio: 'Bu akşam bir el oynamak isterim.',
+    photos: fakePortraitFrames('female', 'bot-checkin-muratpasa'),
   }
 }
 
 /** Ana sayfa destesi — gerçek profil değil, ekran boş kalmasın diye. */
 export function createHomeFemaleBots(): MatchProfile[] {
   const portrait = fakePortraitForGender('female')
-  return HOME_FEMALE_BOTS.map((name, index) => ({
+  return HOME_FEMALE_BOTS.map((bot, index) => ({
     id: `bot-home-${index + 1}`,
-    name: `${name} · Bot`,
+    name: `${bot.name} · Bot`,
     age: 21 + index,
     gender: 'female' as const,
     portraitSrc: portrait,
     online: index % 2 === 0,
-    compatibility: 0,
+    compatibility: [91, 84, 88, 76, 93, 81, 86, 79, 90][index] ?? 84,
     province: 'Bot',
     distance: `${index + 1} km`,
     location: 'Bot',
     tags: [{ id: 'home-bot', label: 'Bot', icon: 'gamepad' as const }],
     favoriteGames: [{ id: 'duel', label: 'Duel', emoji: '🎮' }],
-    bio: 'Ana sayfa denemesi için geçici bot profil.',
-    photos: [{ id: `home-bot-${index + 1}`, src: portrait, objectPosition: '50% 12%' }],
+    bio: bot.bio,
+    photos: fakePortraitFrames('female', `home-bot-${index + 1}`),
   }))
 }
 
@@ -121,14 +122,8 @@ export function createGameTestBotOpponent(
     location: 'Yerel test rakibi',
     tags: [{ id: 'test-bot', label: 'Test bot', icon: 'gamepad' }],
     favoriteGames: [{ id: 'duel', label: 'Duel', emoji: '🤖' }],
-    bio: 'Oyunları denemek için geçici bot rakip.',
-    photos: [
-      {
-        id: 'test-bot-1',
-        src: fakePortraitForGender(gender),
-        objectPosition: '50% 12%',
-      },
-    ],
+    bio: 'Bir el oynayalım mı?',
+    photos: fakePortraitFrames(gender, 'test-bot'),
   }
 }
 

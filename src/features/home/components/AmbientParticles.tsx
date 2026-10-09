@@ -13,10 +13,6 @@ export function AmbientParticles() {
           <span key={i} className="pm-ambient-particle" />
         ))}
       </div>
-      <div className="pm-ambient-streaks" aria-hidden>
-        <span className="pm-ambient-streak pm-ambient-streak--a" />
-        <span className="pm-ambient-streak pm-ambient-streak--b" />
-      </div>
     </div>
   )
 }

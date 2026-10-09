@@ -3,21 +3,34 @@ import type { MatchPhoto } from '../data'
 type MatchPortraitCarouselProps = {
   photos: MatchPhoto[]
   index: number
+  dragPx?: number
+  dragging?: boolean
 }
 
-export function MatchPortraitCarousel({ photos, index }: MatchPortraitCarouselProps) {
-  const current = photos[index] ?? photos[0]
-
+export function MatchPortraitCarousel({
+  photos,
+  index,
+  dragPx = 0,
+  dragging = false,
+}: MatchPortraitCarouselProps) {
   return (
     <div className="pm-match-photo-carousel">
-      <img
-        key={current.id}
-        src={current.src}
-        alt=""
-        className="pm-match-portrait-img"
-        style={{ objectPosition: current.objectPosition }}
-        draggable={false}
-      />
+      <div
+        className={`pm-match-photo-track${dragging ? ' is-dragging' : ''}`}
+        style={{ transform: `translateX(calc(-${index * 100}% + ${dragPx}px))` }}
+      >
+        {photos.map((photo) => (
+          <div key={photo.id} className="pm-match-photo-slide">
+            <img
+              src={photo.src}
+              alt=""
+              className="pm-match-portrait-img"
+              style={{ objectPosition: photo.objectPosition }}
+              draggable={false}
+            />
+          </div>
+        ))}
+      </div>
     </div>
   )
 }

@@ -31,8 +31,6 @@ export function CurrencyNavPills({ variant = 'default' }: CurrencyNavPillsProps)
           aria-label={`Elmas bakiyesi: ${formatGemBalance(balance)}. Satın almak için dokunun.`}
         >
           <span className="pm-currency-nav__icon pm-currency-nav__gem" aria-hidden>
-            <span className="pm-currency-nav__gem-aura" aria-hidden />
-            <span className="pm-currency-nav__gem-flare" aria-hidden />
             <CurrencyImage src={elmasIcon} alt="" className="pm-currency-nav__gem-img" width={28} height={28} />
           </span>
           <span className="pm-currency-nav__amount">{formatGemBalance(balance)}</span>

@@ -70,6 +70,14 @@ export async function tryConsumeDailyLike(uid: string | null): Promise<boolean> 
   return true
 }
 
+/** Yerel sayaç. Sunucu kotası bir sonraki okumada yeniden hizalanır. */
+export function refundCachedDailyLike() {
+  ensureDay()
+  if (isPremiumActiveFromCache() || cachedUsed <= 0) return
+  cachedUsed -= 1
+  writeDailyLikesQuota({ day: cachedDay, used: cachedUsed })
+}
+
 export function readDailyLikesViewFromCache() {
   const premiumActive = isPremiumActiveFromCache()
   const used = readCachedDailyLikesUsed()

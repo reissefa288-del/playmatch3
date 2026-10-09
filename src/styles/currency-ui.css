@@ -51,9 +51,9 @@
   padding: 0;
   margin: 0;
   cursor: pointer;
-  background: rgba(2, 4, 14, 0.82);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(2, 4, 14, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
 }
 
 .pm-currency-shop__viewport {
@@ -77,20 +77,35 @@
   overflow: auto;
   border-radius: 22px;
   padding: 18px 16px 20px;
-  border: 1px solid rgba(120, 160, 255, 0.4);
+  border: 1px solid rgba(120, 160, 255, 0.38);
   box-shadow:
     0 0 0 1px rgba(0, 0, 0, 0.35),
-    0 28px 90px rgba(0, 0, 0, 0.55),
-    0 0 56px rgba(80, 140, 255, 0.16),
-    0 0 40px rgba(255, 80, 180, 0.1);
+    0 24px 80px rgba(0, 0, 0, 0.55),
+    0 0 48px rgba(255, 60, 180, 0.1),
+    0 0 64px rgba(80, 140, 255, 0.14);
   background:
-    radial-gradient(ellipse 90% 50% at 50% 0%, rgba(120, 180, 255, 0.2), transparent 58%),
-    radial-gradient(ellipse 70% 45% at 90% 15%, rgba(255, 80, 180, 0.12), transparent 55%),
-    linear-gradient(165deg, #0f1638 0%, #070b22 55%, #060818 100%);
+    radial-gradient(ellipse 90% 55% at 50% 0%, rgba(255, 80, 180, 0.14), transparent 58%),
+    radial-gradient(ellipse 70% 40% at 80% 20%, rgba(60, 120, 255, 0.12), transparent 55%),
+    linear-gradient(165deg, #10183c 0%, #070b22 100%);
 }
 
 .pm-currency-shop--premium {
   overflow: hidden;
+}
+
+.pm-currency-shop__glass {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.pm-currency-shop__glass canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 .pm-currency-shop__frame-glow {
@@ -153,6 +168,7 @@
   position: relative;
   width: 52px;
   height: 52px;
+  overflow: visible;
 }
 
 .pm-currency-shop__hero-icon {
@@ -161,14 +177,49 @@
   object-fit: contain;
   position: relative;
   z-index: 1;
+  filter: drop-shadow(0 0 8px rgba(255, 140, 220, 0.65));
 }
 
 .pm-currency-shop__hero-glow {
   position: absolute;
-  inset: -8px;
+  inset: -28px;
+  z-index: 0;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(90, 160, 255, 0.55), transparent 70%);
-  opacity: 0.65;
+  background: radial-gradient(
+    circle,
+    rgba(255, 170, 220, 0.55) 0%,
+    rgba(168, 80, 230, 0.2) 42%,
+    rgba(80, 30, 140, 0.06) 68%,
+    transparent 80%
+  );
+  filter: blur(16px);
+  animation: pm-hero-hold 5.6s ease-in-out infinite;
+}
+
+@keyframes pm-hero-hold {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.pm-currency-shop__hero-sheen {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  background: linear-gradient(155deg, rgba(255, 255, 255, 0.28) 0%, transparent 38%);
+  mix-blend-mode: screen;
+  animation: none;
 }
 
 .pm-currency-shop__head h2 {
@@ -332,22 +383,95 @@
   width: 76px;
   height: 76px;
   object-fit: contain;
-  filter: drop-shadow(0 0 16px rgba(180, 120, 255, 0.95));
-  animation: pm-currency-shop-mor-hero-sparkle 2.6s ease-in-out infinite;
+  filter: drop-shadow(0 10px 14px rgba(40, 8, 70, 0.45));
+  animation: none;
 }
 
 .pm-currency-shop__pkg-mor-hero-glow {
   position: absolute;
-  inset: -10px;
+  inset: -6px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(160, 100, 255, 0.6), transparent 68%);
-  filter: blur(10px);
-  animation: pm-currency-shop-mor-hero-glow 2.4s ease-in-out infinite alternate;
+  background: radial-gradient(circle, rgba(176, 120, 255, 0.38) 0%, rgba(90, 40, 180, 0.12) 46%, transparent 70%);
+  filter: blur(6px);
+  animation: pm-gem-bloom 5.2s ease-in-out infinite;
+}
+
+.pm-currency-shop__pkg-mor-hero-sheen {
+  position: absolute;
+  z-index: 3;
+  width: 76px;
+  height: 76px;
+  pointer-events: none;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.28) 0%, transparent 28%),
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 38%,
+      rgba(255, 255, 255, 0.08) 44%,
+      rgba(255, 255, 255, 0.82) 50%,
+      rgba(214, 186, 255, 0.28) 56%,
+      transparent 64%,
+      transparent 100%
+    );
+  background-size: 100% 100%, 240% 100%;
+  background-position: 0 0, 140% 0;
+  background-repeat: no-repeat;
+  mix-blend-mode: screen;
+  animation: pm-gem-facet 5.6s ease-in-out infinite;
 }
 
 .pm-currency-shop__pkg.is-popular .pm-currency-shop__pkg-mor-hero img {
-  filter: drop-shadow(0 0 18px rgba(255, 200, 120, 0.45))
-    drop-shadow(0 0 22px rgba(190, 130, 255, 1));
+  filter: drop-shadow(0 10px 16px rgba(70, 20, 90, 0.5));
+}
+
+.pm-currency-shop__pkg.is-popular .pm-currency-shop__pkg-mor-hero-sheen {
+  background:
+    linear-gradient(160deg, rgba(255, 244, 214, 0.34) 0%, transparent 28%),
+    linear-gradient(
+      112deg,
+      transparent 0%,
+      transparent 38%,
+      rgba(255, 236, 190, 0.16) 44%,
+      rgba(255, 255, 255, 0.88) 50%,
+      rgba(255, 196, 120, 0.32) 56%,
+      transparent 64%,
+      transparent 100%
+    );
+  background-size: 100% 100%, 240% 100%;
+  background-position: 0 0, 140% 0;
+  animation-delay: 1.4s;
+}
+
+@keyframes pm-gem-bloom {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.03);
+  }
+}
+
+@keyframes pm-gem-facet {
+  0%,
+  58% {
+    background-position: 0 0, 150% 0;
+  }
+  78% {
+    background-position: 0 0, -40% 0;
+  }
+  100% {
+    background-position: 0 0, -40% 0;
+  }
 }
 
 @keyframes pm-currency-shop-mor-hero-glow {
@@ -414,17 +538,15 @@
   width: 100%;
   height: 44px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(92deg, #38bdf8 0%, #6366f1 38%, #ec4899 100%);
-  color: #fff;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  border: none;
+  background: linear-gradient(92deg, #4d63e8 0%, #8d4eb8 100%);
+  color: #f7f8fc;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
   cursor: pointer;
-  box-shadow:
-    0 8px 24px rgba(99, 102, 241, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: none;
+  transition: transform 0.15s ease;
   overflow: hidden;
 }
 
@@ -433,10 +555,8 @@
 }
 
 .pm-currency-shop__pkg.is-popular .pm-currency-shop__buy {
-  background: linear-gradient(92deg, #fbbf24 0%, #f472b6 45%, #a855f7 100%);
-  box-shadow:
-    0 8px 28px rgba(244, 114, 182, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(92deg, #5c6ef5 0%, #c45a9a 100%);
+  box-shadow: none;
 }
 
 .pm-currency-shop__note {
@@ -449,6 +569,112 @@
   color: #8a9bcf;
 }
 
+.pm-currency-pay__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 220;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  background: rgba(2, 4, 14, 0.72);
+}
+
+.pm-currency-pay__viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 221;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  pointer-events: none;
+}
+
+.pm-currency-pay {
+  pointer-events: auto;
+  width: min(calc(100% - 24px), var(--pm-w, 390px));
+  max-width: min(430px, calc(100vw - 24px));
+  border-radius: 22px;
+  padding: 18px 16px 16px;
+  border: 1px solid rgba(120, 160, 255, 0.4);
+  background: linear-gradient(165deg, #0f1638 0%, #070b22 55%, #060818 100%);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.55);
+}
+
+.pm-currency-pay__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pm-currency-pay__head p {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.pm-currency-pay__head h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #f7f8fc;
+}
+
+.pm-currency-pay__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(100, 140, 255, 0.32);
+  background: rgba(8, 14, 40, 0.88);
+}
+
+.pm-currency-pay__summary span,
+.pm-currency-pay__summary em {
+  font-style: normal;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.pm-currency-pay__summary strong {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+  color: #f7f8fc;
+}
+
+.pm-currency-pay__confirm {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(92deg, #4d63e8 0%, #8d4eb8 100%);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pm-currency-pay__back {
+  width: 100%;
+  margin-top: 8px;
+  height: 40px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
 /* --- AAA premium shop effects --------------------------------------------- */
 
 .pm-currency-shop__body {
@@ -457,7 +683,7 @@
 }
 
 .pm-currency-shop--aaa {
-  animation: pm-currency-shop-breathe 5s ease-in-out infinite;
+  animation: none;
 }
 
 .pm-currency-shop__ambient {
@@ -636,12 +862,20 @@
 }
 
 .pm-currency-shop--aaa .pm-currency-shop__hero-glow {
-  animation: pm-currency-shop-hero-pulse 2.8s ease-in-out infinite;
+  animation: pm-hero-hold 5.6s ease-in-out infinite;
 }
 
 .pm-currency-shop--aaa .pm-currency-shop__hero-icon {
-  filter: drop-shadow(0 4px 18px rgba(120, 180, 255, 0.55));
-  animation: pm-currency-shop-diamond-shimmer 3.6s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 140, 220, 0.65));
+  animation: none;
+}
+
+.pm-currency-shop__ambient,
+.pm-currency-shop__aura,
+.pm-currency-shop__particles,
+.pm-currency-shop__frame-glow,
+.pm-currency-shop__frame-ring {
+  display: none;
 }
 
 .pm-currency-shop__eyebrow span {
@@ -947,5 +1181,11 @@
     background: none;
     -webkit-background-clip: unset;
     background-clip: unset;
+  }
+
+  .pm-currency-shop__pkg-mor-hero-sheen,
+  .pm-currency-shop__hero-sheen {
+    animation: none;
+    background-position: 0 0, 46% 0;
   }
 }

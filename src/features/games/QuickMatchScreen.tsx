@@ -4,7 +4,9 @@ import { FiArrowLeft, FiZap } from 'react-icons/fi'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { AmbientParticles } from '../home/components/AmbientParticles'
 import { useAuthSession } from '../auth/useAuthSession'
+import { shouldUseGameTestBot } from './gameTestBot'
 import {
+  buildQuickMatch,
   buildQuickMatchAsync,
   opponentGenderLabel,
   persistQuickMatchSession,
@@ -56,14 +58,23 @@ export function QuickMatchScreen() {
     ]
 
     const foundTimer = window.setTimeout(() => {
-      void buildQuickMatchAsync(session?.uid ?? null, userGender, selectedGameId).then((result) => {
+      const finish = (result: QuickMatchResult) => {
         if (cancelled) return
         setMatch(result)
         persistQuickMatchSession(result)
         setPhase('found')
         setStatusLine(`${result.opponent.name} ile eşleşildi!`)
-      })
-    }, randomSearchDelay())
+      }
+
+      if (shouldUseGameTestBot()) {
+        finish(buildQuickMatch(userGender, selectedGameId))
+        return
+      }
+
+      void buildQuickMatchAsync(session?.uid ?? null, userGender, selectedGameId)
+        .then(finish)
+        .catch(() => finish(buildQuickMatch(userGender, selectedGameId)))
+    }, shouldUseGameTestBot() ? 700 : randomSearchDelay())
 
     return () => {
       cancelled = true

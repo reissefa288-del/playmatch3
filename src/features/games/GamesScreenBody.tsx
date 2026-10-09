@@ -8,8 +8,7 @@ import { AmbientParticles } from '../home/components/AmbientParticles'
 import { Navbar } from '../home/components/Navbar'
 import { useProfileLevelActions } from '../profile/ProfileLevelProvider'
 import { XP_GAME_FEATURED } from '../profile/profileLevel'
-import { featuredGames, popularGamesCards, type FeaturedGame, type GamesMiniCard } from './data'
-import { FeaturedGamesRow } from './components/FeaturedGamesRow'
+import { popularGamesCards, type GamesMiniCard } from './data'
 import { AllGamesRow } from './components/AllGamesRow'
 import { GamesCatalogGrid } from './components/GamesCatalogGrid'
 import { GameInviteSheet } from './components/GameInviteSheet'
@@ -17,8 +16,7 @@ import { preloadSnakeDuel } from './snakeDuelPreload'
 import { prefetchPopularGameRoutes } from '../../navigation/prefetchGameRoutes'
 import { quickMatchPath } from './quickMatch'
 import { gamesShellVars } from './gamesShellTheme'
-import { GamesHeroStatsLive } from './components/GamesHeroStatsLive'
-import { FiSearch, FiSliders, FiUserPlus, FiUsers, FiZap } from 'react-icons/fi'
+import { FiUserPlus, FiUsers, FiZap } from 'react-icons/fi'
 
 export function GamesPopularCatalog() {
   const { addXp } = useProfileLevelActions()
@@ -95,14 +93,6 @@ export function GamesScreenBody() {
     [navigate],
   )
 
-  const handleFeaturedPlay = useCallback(
-    (game: FeaturedGame) => {
-      addXp(XP_GAME_FEATURED)
-      openQuickMatchForGame(game.id)
-    },
-    [addXp, openQuickMatchForGame],
-  )
-
   const handleMiniCardClick = useCallback(
     (game: GamesMiniCard, xp: number) => {
       if (game.isMore) return
@@ -119,27 +109,11 @@ export function GamesScreenBody() {
 
   return (
     <>
-      <GamesHeroStatsLive />
       <AmbientParticles />
-      <div className="pm-games-search">
-        <label className="pm-games-search__field">
-          <FiSearch aria-hidden />
-          <input type="text" placeholder="Oyun ara..." aria-label="Oyun ara" />
-        </label>
-        <button type="button" className="pm-games-search__filter" aria-label="Filtrele">
-          <FiSliders />
-        </button>
-      </div>
-
-      <FeaturedGamesRow games={featuredGames} onPlay={handleFeaturedPlay} />
-
-      <AllGamesRow
-        games={popularGamesCards}
-        onPlay={(game) => handleMiniCardClick(game, XP_GAME_FEATURED)}
-        onShowAll={() => navigate('/games/popular')}
-        getCardHandlers={snakeDuelPreloadHandlers}
-      />
-
+      <section className="pm-games-play" aria-label="Hızlı oyna">
+      <header className="pm-games-section-head">
+        <h3>Hızlı Oyna</h3>
+      </header>
       <section className="pm-games-cta-grid">
         <article className="pm-games-cta-card is-random">
           <span className="pm-games-cta-card__edge" aria-hidden />
@@ -207,6 +181,14 @@ export function GamesScreenBody() {
           </button>
         </article>
       </section>
+      </section>
+
+      <AllGamesRow
+        games={popularGamesCards}
+        onPlay={(game) => handleMiniCardClick(game, XP_GAME_FEATURED)}
+        onShowAll={() => navigate('/games/popular')}
+        getCardHandlers={snakeDuelPreloadHandlers}
+      />
       {inviteSheetPortal}
     </>
   )

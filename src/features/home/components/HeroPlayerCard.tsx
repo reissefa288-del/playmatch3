@@ -1,4 +1,4 @@
-import { lazy, memo, Suspense, useState } from 'react'
+import { lazy, memo, Suspense, useState, type CSSProperties } from 'react'
 import {
   FiChevronLeft,
   FiChevronRight,
@@ -11,7 +11,7 @@ import {
   FiX,
 } from 'react-icons/fi'
 import { IoShieldCheckmark } from 'react-icons/io5'
-import { LuGamepad2 } from 'react-icons/lu'
+import { LuGamepad2, LuRotateCcw } from 'react-icons/lu'
 import { MdEmojiEvents } from 'react-icons/md'
 import { fakePhotoSetForGender } from '../../../shared/fakePortraits'
 import { PhotoImage } from '../../../shared/PhotoImage'
@@ -36,6 +36,8 @@ export type HeroPlayerCardProps = {
   onPass?: () => void
   onGameInvite?: () => void
   onSuperLike?: () => void
+  canUndo?: boolean
+  onUndo?: () => void
   sentOverlayVariant?: 'match' | 'super'
   gemBalance?: number
   gemSpend?: (amount: number) => boolean
@@ -71,6 +73,8 @@ function heroPlayerCardPropsEqual(prev: HeroPlayerCardProps, next: HeroPlayerCar
   if (prev.onMatchRequest !== next.onMatchRequest) return false
   if (prev.onPass !== next.onPass) return false
   if (prev.onSuperLike !== next.onSuperLike) return false
+  if (prev.canUndo !== next.canUndo) return false
+  if (prev.onUndo !== next.onUndo) return false
   if (prev.onGameInvite !== next.onGameInvite) return false
   if (prev.gemSpend !== next.gemSpend) return false
   return true
@@ -87,6 +91,8 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
   onPass,
   onGameInvite,
   onSuperLike,
+  canUndo = false,
+  onUndo,
   sentOverlayVariant = 'match',
   gemBalance,
   gemSpend,
@@ -218,7 +224,7 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
                 onClick={() => setLightboxOpen(true)}
               />
             ) : null}
-            {player.isOnline ? <span className="pm-status-pill">Online</span> : null}
+            {player.isOnline ? <span className="pm-status-pill">Çevrimiçi</span> : null}
             {!isPeek && !photosOpen ? (
               <div className="pm-hero-card__photos-cta-wrap">
                 <button type="button" className="pm-hero-card__photos-cta" onClick={openPhotos}>
@@ -320,7 +326,7 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
         </div>
       </div>
 
-      <div className="pm-hero-card__actions pm-hero-card__actions--spread">
+      <div className="pm-hero-card__actions">
         {inviteHint === 'locked' ? (
           <p className="pm-hero-card__invite-hint" role="status">
             <FiLock aria-hidden />
@@ -356,70 +362,86 @@ export const HeroPlayerCard = memo(function HeroPlayerCard({
           </p>
         ) : null}
 
-        <button
-          type="button"
-          className="pm-hero-btn pm-hero-btn--pass"
-          disabled={actionsLocked}
-          onClick={onPass}
-        >
-          <span className="pm-hero-btn__icon" aria-hidden>
-            <FiX />
-          </span>
-          <span className="pm-hero-btn__label">Geç</span>
-        </button>
+        <div className="pm-hero-card__action-row">
+          <button
+            type="button"
+            className="pm-hero-btn pm-hero-btn--pass"
+            disabled={actionsLocked}
+            aria-label="Geç"
+            onClick={onPass}
+          >
+            <span className="pm-hero-btn__icon" aria-hidden>
+              <FiX />
+            </span>
+          </button>
 
-        <button
-          type="button"
-          className={`pm-hero-btn pm-hero-btn--match${showSentOverlay ? ' is-sent' : ''}${matchBusy ? ' is-busy' : ''}${!canLike ? ' is-exhausted' : ''}`}
-          disabled={actionsLocked || showSentOverlay || !canLike}
-          onClick={onMatchRequest}
-        >
-          <span className="pm-hero-btn__icon" aria-hidden>
-            {matchBusy ? (
-              <span className="pm-hero-btn__spinner" />
-            ) : showSentOverlay ? (
-              <FiCheck />
-            ) : (
-              <FiHeart />
-            )}
-          </span>
-          <span className="pm-hero-btn__label">
-            {matchBusy
-              ? 'Gönderiliyor…'
-              : showSentOverlay
-                ? 'Gönderildi'
-                : !canLike
-                  ? 'Beğeni hakkın bitti'
-                  : 'Eşleşme isteği'}
-          </span>
-        </button>
+          <button
+            type="button"
+            className="pm-hero-btn pm-hero-btn--super"
+            disabled={actionsLocked}
+            onClick={onSuperLikeClick}
+            aria-label={`Süper beğeni · ${SUPER_LIKE_GEM_COST} elmas`}
+          >
+            <span className="pm-hero-btn__icon" aria-hidden>
+              <FiStar />
+            </span>
+          </button>
 
-        <button
-          type="button"
-          className={`pm-hero-btn pm-hero-btn--invite${isPremium ? '' : ' is-locked'}`}
-          disabled={actionsLocked}
-          onClick={onInviteClick}
-        >
-          <span className="pm-hero-btn__icon" aria-hidden>
-            <LuGamepad2 />
-            {!isPremium ? <FiLock className="pm-hero-btn__lock" /> : null}
-          </span>
-          <span className="pm-hero-btn__label">Oyuna Davet Et</span>
-        </button>
+          <div
+            className={`pm-hero-like${(matchBusy || showSentOverlay) && sentOverlayVariant === 'match' ? ' is-burst' : ''}`}
+          >
+            {isPremium && canUndo ? (
+              <button type="button" className="pm-like-undo" aria-label="Geri al" onClick={onUndo}>
+                <LuRotateCcw aria-hidden />
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={`pm-hero-btn pm-hero-btn--match${showSentOverlay ? ' is-sent' : ''}${matchBusy ? ' is-busy' : ''}${!canLike ? ' is-exhausted' : ''}`}
+              disabled={actionsLocked || showSentOverlay || !canLike}
+              aria-label={
+                matchBusy
+                  ? 'Gönderiliyor'
+                  : showSentOverlay
+                    ? 'Gönderildi'
+                    : !canLike
+                      ? 'Beğeni hakkın bitti'
+                      : 'Beğen'
+              }
+              onClick={onMatchRequest}
+            >
+              <span className="pm-hero-btn__icon" aria-hidden>
+                {matchBusy ? (
+                  <span className="pm-hero-btn__spinner" />
+                ) : showSentOverlay ? (
+                  <FiCheck />
+                ) : (
+                  <FiHeart />
+                )}
+              </span>
+            </button>
+            {(matchBusy || showSentOverlay) && sentOverlayVariant === 'match' ? (
+              <span className="pm-like-burst" aria-hidden>
+                {Array.from({ length: 6 }, (_, i) => (
+                  <i key={i} style={{ '--i': i } as CSSProperties} />
+                ))}
+              </span>
+            ) : null}
+          </div>
 
-        <button
-          type="button"
-          className="pm-hero-btn pm-hero-btn--super"
-          disabled={actionsLocked}
-          onClick={onSuperLikeClick}
-          aria-label={`Süper beğeni gönder · ${SUPER_LIKE_GEM_COST} elmas`}
-        >
-          <span className="pm-hero-btn__icon" aria-hidden>
-            <FiStar />
-          </span>
-          <span className="pm-hero-btn__label">Süper Beğeni</span>
-          <span className="pm-hero-btn__gem-cost">{SUPER_LIKE_GEM_COST} elmas</span>
-        </button>
+          <button
+            type="button"
+            className={`pm-hero-btn pm-hero-btn--invite${isPremium ? '' : ' is-locked'}`}
+            disabled={actionsLocked}
+            aria-label={isPremium ? 'Oyuna davet et' : 'Oyuna davet etmek için Premium gerekir'}
+            onClick={onInviteClick}
+          >
+            <span className="pm-hero-btn__icon" aria-hidden>
+              <LuGamepad2 />
+              {!isPremium ? <FiLock className="pm-hero-btn__lock" /> : null}
+            </span>
+          </button>
+        </div>
       </div>
 
       {lightboxOpen ? (

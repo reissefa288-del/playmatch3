@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { premiumPackages } from './data'
 import { usePremiumSubscription } from './usePremiumSubscription'
 
@@ -16,6 +17,8 @@ const defaultPackageId =
 
 export function usePremiumScreen() {
   const { activatePremium } = usePremiumSubscription()
+  const location = useLocation()
+  const navigate = useNavigate()
   const [selectedPackageId, setSelectedPackageId] = useState(defaultPackageId)
   const [sheet, setSheet] = useState<PremiumSheetKind>(null)
   const [toast, setToast] = useState<PremiumToastPayload | null>(null)
@@ -36,6 +39,14 @@ export function usePremiumScreen() {
     const t = window.setTimeout(dismissToast, 4200)
     return () => window.clearTimeout(t)
   }, [toast, dismissToast])
+
+  useEffect(() => {
+    const notice = (location.state as { notice?: string } | null)?.notice
+    if (!notice) return
+    showToast('Premium almalısın', notice)
+    setSheet('upgrade')
+    navigate(location.pathname, { replace: true, state: null })
+  }, [location.pathname, location.state, navigate, showToast])
 
   const openUpgrade = useCallback(() => setSheet('upgrade'), [])
   const openGift = useCallback(() => setSheet('gift'), [])

@@ -62,24 +62,26 @@
 
 /* Photo viewer chrome */
 .pm-match-photo-ui--aaa .pm-match-photo-ui__count {
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 99px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(6, 10, 36, 0.92);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  border: none;
+  background: rgba(8, 10, 24, 0.4);
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  text-shadow: none;
 }
 
 .pm-match-photo-ui--aaa .pm-match-photo-ui__close,
 .pm-match-photo-ui--aaa .pm-match-photo-ui__nav {
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  background: linear-gradient(
-    145deg,
-    rgba(22, 28, 62, 0.9) 0%,
-    rgba(8, 12, 38, 0.85) 100%
-  );
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(8, 10, 24, 0.42);
+  box-shadow: none;
 }
 
 .pm-match-photo-area--aaa.is-photos-open .pm-match-photo-dots span.is-active {

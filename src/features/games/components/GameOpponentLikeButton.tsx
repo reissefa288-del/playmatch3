@@ -8,6 +8,7 @@ import { isFirestoreUserId } from '../../match/isFirestoreUserId'
 import { sendLikeAndRefresh } from '../../match/matchConnectionsStore'
 import { useMatchConnections } from '../../match/useMatchConnections'
 import { isPremiumFeatureEnabled } from '../../premium/premiumAvailability'
+import { GameLikeShader } from './GameLikeShader'
 
 type GameOpponentLikeButtonProps = {
   playerId: string
@@ -69,27 +70,21 @@ export function GameOpponentLikeButton({ playerId, playerName, className = '' }:
   const { remaining, isUnlimited, canSendLike, limit } = useDailyLikesState()
   const { tryConsumeLike } = useDailyLikesActions()
   const [burst, setBurst] = useState(false)
+  const [gone, setGone] = useState(false)
   const [toast, setToast] = useState<ToastKind>(null)
 
-  const showLiked = alreadyLiked || burst
-  const exhausted = !isUnlimited && !canSendLike && !alreadyLiked
+  const hasQuota = isUnlimited || canSendLike
+  const hideButton = gone || alreadyLiked || (!hasQuota && !burst)
 
   const handleLike = (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     if (burst) return
 
-    if (alreadyLiked) {
-      setBurst(true)
-      setToast('already')
-      window.setTimeout(() => setBurst(false), BURST_MS)
-      window.setTimeout(() => setToast(null), 2400)
-      return
-    }
+    if (alreadyLiked || !hasQuota) return
 
     void (async () => {
       if (!(await tryConsumeLike())) {
-        setToast('limit')
-        window.setTimeout(() => setToast(null), 3200)
+        setGone(true)
         return
       }
 
@@ -107,48 +102,32 @@ export function GameOpponentLikeButton({ playerId, playerName, className = '' }:
 
       setBurst(true)
       setToast('sent')
-      window.setTimeout(() => setBurst(false), BURST_MS)
-      window.setTimeout(() => setToast(null), 2600)
+      window.setTimeout(() => {
+        setBurst(false)
+        setGone(true)
+        setToast(null)
+      }, BURST_MS)
     })()
   }
 
-  const quotaLabel = isUnlimited ? '∞' : String(remaining)
+  if (hideButton && !burst && toast !== 'sent') return null
 
   return (
     <div className={`pm-game-opponent-like ${className}`.trim()}>
+      {hideButton ? null : (
       <button
         type="button"
-        className={[
-          'pm-game-opponent-like__btn',
-          showLiked ? 'is-liked' : '',
-          isUnlimited ? 'is-premium' : '',
-          exhausted ? 'is-exhausted' : '',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        aria-label={
-          alreadyLiked
-            ? `${playerName} beğenildi`
-            : exhausted
-              ? 'Günlük beğeni hakkın bitti'
-              : `${playerName} beğen · ${isUnlimited ? 'sınırsız' : `${remaining}/${limit} hak`}`
-        }
-        disabled={burst || exhausted}
+        className={['pm-game-opponent-like__btn', isUnlimited ? 'is-premium' : ''].filter(Boolean).join(' ')}
+        aria-label={`${playerName} beğen · ${isUnlimited ? 'sınırsız' : `${remaining}/${limit} hak`}`}
+        disabled={burst}
         onClick={handleLike}
-       
-       
-       
       >
-        <span className="pm-game-opponent-like__btn-shine" aria-hidden />
+        <GameLikeShader />
         <span className="pm-game-opponent-like__icon-wrap" aria-hidden>
           <IoHeart className="pm-game-opponent-like__icon" />
         </span>
       </button>
-      {!alreadyLiked && !exhausted ? (
-        <span className="pm-game-opponent-like__quota" aria-hidden>
-          {quotaLabel}
-        </span>
-      ) : null}
+      )}
 
       <>
         {burst ? (

@@ -1,5 +1,6 @@
-import { FiHeart } from 'react-icons/fi'
+import likesHeart from '../assets/likes-heart.png'
 import { DAILY_LIKES_LIMIT } from '../../../shared/dailyLikes'
+import { LikesNeonShader } from './LikesNeonShader'
 
 type MatchLikesQuotaProps = {
   remaining: number
@@ -22,12 +23,11 @@ export function MatchLikesQuota({
       className={`pm-match-likes-ribbon${isLow ? ' is-low' : ''}${isEmpty ? ' is-empty' : ''}${isUnlimited ? ' is-unlimited' : ''}`}
       aria-label={isUnlimited ? 'Premium: sınırsız beğeni' : `Günlük beğeni hakkı: ${remaining} / ${limit}`}
     >
-      <div className="pm-match-likes-ribbon__glow" aria-hidden />
-      <div className="pm-match-likes-ribbon__ring" aria-hidden />
+      <LikesNeonShader />
 
       <div className="pm-match-likes-ribbon__row">
         <span className="pm-match-likes-ribbon__icon" aria-hidden>
-          <FiHeart />
+          <img src={likesHeart} alt="" />
         </span>
 
         <div className="pm-match-likes-ribbon__copy">
@@ -63,10 +63,7 @@ export function MatchLikesQuota({
         aria-valuemin={0}
         aria-valuemax={limit}
       >
-        <div
-          className="pm-match-likes-ribbon__fill"
-          style={{ width: `${pct}%` }}
-        />
+        <div className="pm-match-likes-ribbon__fill" style={{ width: `${pct}%` }} />
       </div>
     </section>
   )

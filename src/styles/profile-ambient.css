@@ -64,8 +64,7 @@
 @media (prefers-reduced-motion: reduce) {
   .pm-tab-panel#pm-tab-profile::before,
   .pm-app-shell--profile .pm-ambient-orb,
-  .pm-app-shell--profile .pm-ambient-particle,
-  .pm-app-shell--profile .pm-ambient-streak {
+  .pm-app-shell--profile .pm-ambient-particle {
     animation: none;
   }
 }

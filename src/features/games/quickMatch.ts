@@ -1,9 +1,10 @@
 import type { MatchProfile } from '../match/data'
 import { fetchDiscoverProfiles } from '../match/firestoreMatch'
 import { isFirebaseConfigured } from '../auth/firebaseApp'
-import { fakePortraitForGender } from '../../shared/fakePortraits'
+import { fakePortraitForGender, fakePortraitFrames } from '../../shared/fakePortraits'
 import { readCachedUserProfile } from '../profile/userProfileStore'
 import type { FakePortraitGender } from '../../shared/fakePortraits'
+import { createGameTestBotOpponent, shouldUseGameTestBot } from './gameTestBot'
 
 export type QuickMatchGame = {
   id: string
@@ -97,14 +98,8 @@ function createBotOpponent(gender: FakePortraitGender): MatchProfile {
     location: 'PlayMeet Bot',
     tags: [{ id: 'bot', label: 'Bot', icon: 'gamepad' }],
     favoriteGames: [{ id: 'duel', label: 'Duel', emoji: '⚔️' }],
-    bio: 'Hızlı düello için bot rakip.',
-    photos: [
-      {
-        id: 'bot-1',
-        src: fakePortraitForGender(gender),
-        objectPosition: '50% 12%',
-      },
-    ],
+    bio: 'Hızlı bir maça varım.',
+    photos: fakePortraitFrames(gender, `bot-${gender}`),
   }
 }
 
@@ -116,6 +111,10 @@ export async function buildQuickMatchAsync(
   const opponentGender = resolveOpponentGender(userGender)
   const fixedGame = resolveQuickMatchGame(gameId)
   const game = fixedGame ?? pickRandom(QUICK_MATCH_GAMES)
+
+  if (shouldUseGameTestBot()) {
+    return { opponent: createGameTestBotOpponent(opponentGender), game }
+  }
 
   if (viewerUid && isFirebaseConfigured()) {
     const pool = await fetchDiscoverProfiles(viewerUid, opponentGender)
@@ -132,7 +131,10 @@ export function buildQuickMatch(userGender?: FakePortraitGender, gameId?: string
   const opponentGender = resolveOpponentGender(userGender)
   const fixedGame = resolveQuickMatchGame(gameId)
   const game = fixedGame ?? pickRandom(QUICK_MATCH_GAMES)
-  return { opponent: createBotOpponent(opponentGender), game }
+  const opponent = shouldUseGameTestBot()
+    ? createGameTestBotOpponent(opponentGender)
+    : createBotOpponent(opponentGender)
+  return { opponent, game }
 }
 
 export function persistQuickMatchSession(result: QuickMatchResult) {

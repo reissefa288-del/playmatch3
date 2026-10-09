@@ -1,6 +1,6 @@
 import { FiHeart, FiHome, FiMessageCircle, FiUser } from 'react-icons/fi'
-import { PiCrownSimpleFill } from 'react-icons/pi'
 import { LuGamepad2 } from 'react-icons/lu'
+import { PiCrownSimpleFill } from 'react-icons/pi'
 import { isPremiumFeatureEnabled } from '../premium/premiumAvailability'
 import type { BottomNavItem } from './types'
 

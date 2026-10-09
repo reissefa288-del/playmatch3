@@ -19,6 +19,7 @@ import {
   subscribeVenuePresence,
   watchVenuePresence,
 } from '../home/checkInPresence'
+import { noteCrossing } from './crossingsStore'
 import type { MatchDiscoverActions, MatchDiscoverState, MatchToastPayload } from './matchDiscoverTypes'
 import type { MatchProfile } from './data'
 import type { MatchGenderFilter } from './types'
@@ -167,6 +168,12 @@ export function useMatchDiscover(
   }, [cursor, gender, hasMore, index, pool.length, poolLoading, uid, venueId])
 
   const current = pool[index] ?? null
+
+  useEffect(() => {
+    if (!current || homeBots || venueId) return
+    noteCrossing(current)
+  }, [current, homeBots, venueId])
+
   const peekLeft = index > 0 ? pool[index - 1]! : null
   const peekRight = index < pool.length - 1 ? pool[index + 1]! : null
   const queueDone = !poolLoading && (pool.length === 0 || index >= pool.length)

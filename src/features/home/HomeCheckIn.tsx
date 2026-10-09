@@ -110,7 +110,6 @@ export function HomeCheckIn() {
     <>
       <div className="pm-checkin">
         <button type="button" className="pm-checkin__bar" onClick={() => setOpen(true)}>
-          <CheckInShader />
           <span className="pm-checkin__mark" aria-hidden>
             <FiNavigation />
           </span>

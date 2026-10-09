@@ -48,6 +48,18 @@ export function fakePortraitSourcesForGender(
   return { webp: pick.webp, avif: pick.avif ?? pick.webp }
 }
 
+const FRAME_POSITIONS = ['50% 12%', '50% 42%', '50% 72%'] as const
+
+/** Aynı portrenin üç kadrajı. Ayrı fotoğraf dosyası yok. */
+export function fakePortraitFrames(gender: FakePortraitGender, idPrefix: string) {
+  const src = fakePortraitForGender(gender)
+  return FRAME_POSITIONS.map((objectPosition, index) => ({
+    id: `${idPrefix}-${index + 1}`,
+    src,
+    objectPosition,
+  }))
+}
+
 /** P12 — thumb + full + blur for responsive PhotoImage */
 export function fakePhotoSetForGender(gender: FakePortraitGender): PhotoSet {
   return gender === 'male' ? MALE_PHOTO : FEMALE_PHOTO

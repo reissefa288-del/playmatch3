@@ -6,6 +6,7 @@ import {
   getGameServerClientConfig,
   isXoxOnlineEnabled,
 } from './gameServerClient'
+import { readQuickMatchSession } from './quickMatch'
 import { applyMove, emptyBoard, getWinner, pickBotMove } from './utils/xoxEngine'
 import type { XoxBoard } from './utils/xoxLogic'
 
@@ -172,7 +173,9 @@ export function useXoxRealtime({ onMatchXp }: UseXoxRealtimeOptions) {
       winner: null,
       status: 'active',
     })
-    const botName = LOCAL_BOT_NAMES[Math.floor(Math.random() * LOCAL_BOT_NAMES.length)]
+    const botName =
+      readQuickMatchSession()?.opponent.name ??
+      LOCAL_BOT_NAMES[Math.floor(Math.random() * LOCAL_BOT_NAMES.length)]
     setIdentity({
       roomId: 'local',
       mySymbol: 'X',

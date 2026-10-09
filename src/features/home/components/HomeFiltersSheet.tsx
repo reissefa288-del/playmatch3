@@ -1,5 +1,6 @@
 import { usePrefersReducedMotion } from '../../../shared/usePrefersReducedMotion'
 import { FiMapPin, FiSliders, FiUsers, FiX } from 'react-icons/fi'
+import { ShopGlassShader } from '../../currency/ShopGlassShader'
 import { HOME_DISTANCE_OPTIONS, HOME_GENDER_OPTIONS } from '../homeFilters'
 import type { HomeFilters } from '../types'
 
@@ -39,6 +40,7 @@ export function HomeFiltersSheet({
         aria-labelledby="pm-home-filters-title"
         style={{ transform: 'translate(-50%, -50%)' }}
       >
+        <ShopGlassShader />
         <header className="pm-home-filters__head">
           <div>
             <FiSliders aria-hidden />

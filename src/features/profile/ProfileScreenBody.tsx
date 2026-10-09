@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import { FiEye, FiLogOut, FiMapPin, FiSettings, FiTrash2 } from 'react-icons/fi'
 import { DeleteAccountFlow } from '../moderation/components/ModerationFlow'
 import { useAuthSession } from '../auth/useAuthSession'
-import { MdVerified } from 'react-icons/md'
 import { PiCrownSimpleFill } from 'react-icons/pi'
 import { Navbar } from '../home/components/Navbar'
 import { AmbientParticles } from '../home/components/AmbientParticles'
@@ -181,9 +180,7 @@ export function ProfileScreenBody() {
             <div className="pm-profile-hero-card__shade" aria-hidden />
             <div className="pm-profile-hero-card__content">
               <div className="pm-profile-hero-card__meta">
-                <h1>
-                  {displayName} <MdVerified aria-label="Doğrulanmış" />
-                </h1>
+                <h1>{displayName}</h1>
                 {isPremiumActive ? (
                   <p className="pm-profile-premium-chip">
                     <PiCrownSimpleFill aria-hidden />
@@ -206,7 +203,11 @@ export function ProfileScreenBody() {
                   <FiEye aria-hidden />
                   Profili Gör
                 </button>
-                <button type="button" onClick={togglePhotoEditor}>
+                <button
+                  type="button"
+                  className={isEditorOpen ? 'is-open' : undefined}
+                  onClick={togglePhotoEditor}
+                >
                   <FiSettings aria-hidden />
                   Düzenle
                 </button>
@@ -332,7 +333,7 @@ export function ProfileScreenBody() {
         name={displayName}
         location="İstanbul, Türkiye"
         isPremium={isPremiumActive}
-        verified
+        verified={false}
       />
     </>
   )

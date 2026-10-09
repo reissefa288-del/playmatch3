@@ -1,24 +1,106 @@
-/* Keşif kartı — Geç · Eşleşme · Davet (3’lü şerit) */
+/* Keşif kartı — Tinder düzeni: beyaz daire, renkli ikon, yazısız */
 
-.pm-hero-card__actions {
+.pm-hero-card .pm-hero-card__actions {
   flex: 0 0 auto;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  padding: 14px 10px 16px;
-  border-top: 1px solid rgba(100, 150, 255, 0.16);
-  background:
-    linear-gradient(180deg, rgba(10, 16, 42, 0.5) 0%, rgba(4, 8, 26, 0.98) 100%),
-    rgba(5, 7, 24, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 6px 16px 18px;
+  border-top: 0;
+  background: transparent;
   box-sizing: border-box;
 }
 
-.pm-hero-card__actions--spread {
-  align-items: stretch;
+.pm-hero-card__action-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.pm-hero-card .pm-hero-card__actions {
+  position: relative;
+  z-index: 9;
+}
+
+.pm-hero-like {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.pm-like-undo {
+  position: absolute;
+  top: -4px;
+  left: -8px;
+  z-index: 3;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #f5a524;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 6px 14px rgba(0, 0, 0, 0.16);
+  cursor: pointer;
+}
+
+.pm-like-undo svg {
+  width: 15px;
+  height: 15px;
+}
+
+.pm-like-undo:active {
+  transform: scale(0.92);
+}
+
+.pm-like-burst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.pm-like-burst i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: #ff4b6a;
+  animation: pm-like-pop 0.7s ease-out forwards;
+  animation-delay: calc(var(--i) * 0.03s);
+}
+
+.pm-hero-like.is-burst .pm-hero-btn--match {
+  animation: pm-like-btn-pop 0.42s ease;
+}
+
+@keyframes pm-like-pop {
+  0% {
+    opacity: 1;
+    transform: rotate(calc(var(--i) * 60deg)) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(calc(var(--i) * 60deg)) translateY(-36px) scale(0.4);
+  }
+}
+
+@keyframes pm-like-btn-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.12); }
+  100% { transform: scale(1); }
 }
 
 .pm-hero-card__invite-hint {
-  grid-column: 1 / -1;
   margin: 0 0 2px;
   padding: 10px 12px;
   border-radius: 12px;
@@ -108,158 +190,95 @@
   }
 }
 
-/* —— Base button —— */
-.pm-hero-card__actions--spread .pm-hero-btn {
-  width: 100%;
-}
-
+/* —— Beyaz daireler —— */
 .pm-hero-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  min-width: 0;
-  min-height: 56px;
-  padding: 8px 4px;
-  border-radius: 14px;
-  border: 1px solid transparent;
-  font-family: inherit;
-  font-size: 9px;
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: 0.02em;
-  color: #eef2ff;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #fff;
+  color: #3a3a3a;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 8px 18px rgba(0, 0, 0, 0.16);
   -webkit-tap-highlight-color: transparent;
-  transition:
-    transform 0.22s var(--pm-ease-spring, cubic-bezier(0.34, 1.4, 0.64, 1)),
-    box-shadow 0.28s ease,
-    border-color 0.28s ease,
-    opacity 0.2s ease;
-}
-
-.pm-hero-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, transparent 48%);
-  pointer-events: none;
-  opacity: 0.85;
+  transition: transform 0.16s ease, opacity 0.16s ease;
 }
 
 .pm-hero-btn:not(:disabled):active {
-  transform: scale(0.96);
+  transform: scale(0.92);
 }
 
 .pm-hero-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.65;
+  cursor: default;
+  opacity: 0.4;
 }
 
 .pm-hero-btn__icon {
-  position: relative;
-  z-index: 1;
   display: grid;
   place-items: center;
-  font-size: 20px;
+  font-size: 26px;
   line-height: 1;
 }
 
-.pm-hero-btn__label {
-  position: relative;
-  z-index: 1;
-  display: block;
-  max-width: 100%;
-  text-align: center;
-  line-height: 1.25;
-  word-break: keep-all;
-  overflow-wrap: normal;
+.pm-hero-btn__icon svg {
+  stroke-width: 2.25;
 }
 
-/* Geç */
 .pm-hero-btn--pass {
-  border-color: rgba(130, 150, 210, 0.38);
-  background:
-    linear-gradient(165deg, rgba(22, 28, 58, 0.95) 0%, rgba(12, 16, 40, 0.98) 100%);
-  color: #c8d4f8;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.28),
-    0 6px 16px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  color: #ff4458;
 }
 
-.pm-hero-btn--pass:not(:disabled):hover {
-  border-color: rgba(170, 190, 240, 0.5);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.25),
-    0 8px 20px rgba(0, 0, 0, 0.32),
-    0 0 18px rgba(100, 130, 220, 0.12);
+.pm-hero-btn--super {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  color: #2f9dff;
 }
 
-/* Eşleşme isteği */
+.pm-hero-btn--super .pm-hero-btn__icon {
+  font-size: 20px;
+}
+
+.pm-hero-btn--super .pm-hero-btn__icon svg {
+  fill: rgba(47, 157, 255, 0.16);
+}
+
 .pm-hero-btn--match {
-  min-height: 58px;
-  border-color: rgba(255, 100, 200, 0.55);
-  background:
-    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(255, 120, 220, 0.45), transparent 55%),
-    linear-gradient(155deg, rgba(255, 70, 180, 0.35) 0%, rgba(120, 50, 220, 0.28) 50%, rgba(40, 80, 200, 0.22) 100%),
-    linear-gradient(180deg, rgba(50, 12, 48, 0.95) 0%, rgba(28, 8, 42, 0.98) 100%);
-  color: #fff;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 0 28px rgba(255, 60, 180, 0.4),
-    0 0 40px rgba(90, 120, 255, 0.2),
-    0 8px 22px rgba(0, 0, 0, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  width: 68px;
+  height: 68px;
+  min-width: 68px;
+  min-height: 68px;
+  color: #1ed18e;
 }
 
 .pm-hero-btn--match .pm-hero-btn__icon {
-  font-size: 22px;
-  color: #ffe8f8;
-  filter: drop-shadow(0 0 8px rgba(255, 100, 200, 0.6));
-}
-
-.pm-hero-btn--match .pm-hero-btn__label {
-  font-size: 11px;
-  letter-spacing: 0.01em;
-}
-
-.pm-hero-btn--match:not(:disabled):hover {
-  border-color: rgba(255, 140, 220, 0.75);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.14),
-    0 0 36px rgba(255, 70, 180, 0.55),
-    0 0 48px rgba(100, 140, 255, 0.28),
-    0 10px 26px rgba(0, 0, 0, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  font-size: 32px;
 }
 
 .pm-hero-btn--match.is-sent {
-  border-color: rgba(0, 241, 164, 0.55);
-  background:
-    radial-gradient(ellipse 80% 70% at 50% 0%, rgba(0, 241, 164, 0.35), transparent 55%),
-    linear-gradient(165deg, rgba(8, 48, 42, 0.95) 0%, rgba(6, 28, 52, 0.98) 100%);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 0 24px rgba(0, 241, 164, 0.35),
-    0 8px 20px rgba(0, 0, 0, 0.3);
+  color: #1ed18e;
 }
 
-.pm-hero-btn--match.is-sent .pm-hero-btn__icon {
-  color: #b8ffe8;
-  filter: drop-shadow(0 0 8px rgba(0, 241, 164, 0.5));
+.pm-hero-btn--match.is-exhausted {
+  color: #b7b7b7;
 }
 
 .pm-hero-btn__spinner {
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  border-top-color: #fff;
+  border: 2px solid rgba(30, 209, 142, 0.25);
+  border-top-color: #1ed18e;
   animation: pm-hero-btn-spin 0.65s linear infinite;
 }
 
@@ -269,110 +288,33 @@
   }
 }
 
-/* Oyuna davet */
 .pm-hero-btn--invite {
-  border-color: rgba(70, 150, 255, 0.45);
-  background:
-    linear-gradient(165deg, rgba(12, 32, 62, 0.95) 0%, rgba(8, 18, 48, 0.98) 100%);
-  color: #b8dcff;
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.28),
-    0 6px 16px rgba(0, 0, 0, 0.28),
-    0 0 14px rgba(60, 140, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  color: #7b61ff;
 }
 
 .pm-hero-btn--invite .pm-hero-btn__icon {
   position: relative;
-  font-size: 19px;
-  color: #7ec8ff;
+  font-size: 24px;
 }
 
 .pm-hero-btn--invite.is-locked {
-  opacity: 0.82;
-}
-
-.pm-hero-btn--invite:not(.is-locked) {
-  opacity: 1;
-}
-
-.pm-hero-btn--invite:not(.is-locked):hover {
-  border-color: rgba(100, 190, 255, 0.62);
-  box-shadow:
-    0 0 0 1px rgba(0, 0, 0, 0.28),
-    0 8px 20px rgba(0, 0, 0, 0.32),
-    0 0 22px rgba(60, 160, 255, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.pm-hero-btn--invite.is-locked:not(:disabled):hover {
-  border-color: rgba(100, 170, 255, 0.55);
-}
-
-/* Süper beğeni */
-.pm-hero-btn--super {
-  border-color: rgba(255, 210, 80, 0.62);
-  background:
-    radial-gradient(ellipse 90% 80% at 50% 0%, rgba(255, 210, 80, 0.28), transparent 55%),
-    linear-gradient(165deg, rgba(62, 42, 8, 0.96) 0%, rgba(24, 16, 4, 0.98) 100%);
-  color: #ffe8a8;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 0 22px rgba(255, 200, 60, 0.28),
-    0 6px 16px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.pm-hero-btn--super .pm-hero-btn__icon {
-  font-size: 18px;
-  color: #ffd54a;
-  filter: drop-shadow(0 0 10px rgba(255, 210, 80, 0.75));
-}
-
-.pm-hero-btn--super .pm-hero-btn__icon svg {
-  fill: rgba(255, 213, 74, 0.28);
-}
-
-.pm-hero-btn--super:not(:disabled):hover {
-  border-color: rgba(255, 230, 120, 0.78);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.1),
-    0 0 28px rgba(255, 210, 80, 0.38),
-    0 8px 20px rgba(0, 0, 0, 0.32),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12);
-}
-
-.pm-hero-btn__gem-cost {
-  position: relative;
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 6px;
-  border-radius: 999px;
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  color: #fff8dc;
-  background: rgba(255, 200, 60, 0.18);
-  border: 1px solid rgba(255, 210, 80, 0.35);
-  white-space: nowrap;
+  opacity: 0.72;
 }
 
 .pm-hero-btn__lock {
   position: absolute;
-  right: -5px;
-  bottom: -4px;
-  width: 14px;
-  height: 14px;
+  right: -2px;
+  bottom: -2px;
+  width: 16px;
+  height: 16px;
   padding: 2px;
   border-radius: 50%;
-  font-size: 8px;
-  color: #d0e4ff;
-  background: rgba(6, 12, 34, 0.95);
-  border: 1px solid rgba(120, 170, 255, 0.5);
+  font-size: 9px;
+  color: #5c657a;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
   box-sizing: border-box;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 @media (prefers-reduced-motion: reduce) {

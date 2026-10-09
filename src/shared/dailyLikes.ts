@@ -1,4 +1,4 @@
-export const DAILY_LIKES_LIMIT = 10
+export const DAILY_LIKES_LIMIT = 20
 
 export const DAILY_LIKES_STORAGE_KEY = 'pm-daily-likes-quota'
 

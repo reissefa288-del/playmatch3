@@ -222,19 +222,16 @@
 }
 
 .pm-filter-wrap .pm-filter-bar {
-  justify-content: flex-start;
+  justify-content: stretch;
   width: 100%;
-  padding-inline: 2px;
+  padding-inline: 0;
 }
 
 .pm-filter-bar {
   flex: 0 0 auto;
   flex-wrap: nowrap;
   gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  overflow: hidden;
   padding-bottom: 2px;
   min-height: 44px;
 }
@@ -244,30 +241,32 @@
 }
 
 .pm-filter-chip {
-  flex: 0 0 auto;
+  flex: 1 1 0;
+  min-width: 0;
   height: 42px;
   min-height: 42px;
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.13);
   background: rgba(5, 8, 26, 0.72);
   color: rgba(255, 255, 255, 0.62);
-  padding: 0 14px;
-  gap: 6px;
+  padding: 0 10px;
+  gap: 4px;
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .pm-filter-chip.is-active {
-  border-color: rgba(0, 241, 164, 0.5);
+  border-color: rgba(255, 255, 255, 0.72);
 }
 
 .pm-filter-chip.is-distance {
-  min-width: 128px;
-  padding: 0 14px;
-  gap: 6px;
-  letter-spacing: 0.01em;
+  min-width: 0;
+  padding: 0 10px;
+  gap: 4px;
+  letter-spacing: 0;
 }
 
 .pm-filter-chip__prefix {
@@ -279,7 +278,9 @@
 }
 
 .pm-filter-chip__label {
-  flex-shrink: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pm-filter-chip.is-distance .pm-filter-chip__label {
@@ -288,14 +289,15 @@
   color: inherit;
 }
 
-.pm-filter-chip.is-distance svg:last-of-type {
+.pm-filter-chip > svg:last-child {
   margin-left: auto;
   flex-shrink: 0;
   opacity: 0.75;
 }
 
 .pm-filter-chip > span:last-of-type {
-  flex-shrink: 0;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .pm-online-dot {
@@ -305,23 +307,11 @@
   min-height: 8px;
   border-radius: 50%;
   background: #00f1a4;
-  box-shadow: 0 0 9px #00f1a4;
   flex-shrink: 0;
 }
 
 .pm-filter-refresh {
-  flex: 0 0 auto;
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  min-height: 42px;
-  justify-content: center;
-  border-radius: 50%;
-  border: 1px solid rgba(138, 77, 255, 0.45);
-  background: rgba(6, 12, 34, 0.75);
-  color: #9f9be5;
-  font-size: 16px;
-  cursor: pointer;
+  display: none;
 }
 
 /* --- Live status strip (video: 247 oyuncu aktif · 3 kişi bekliyor) -------- */

@@ -75,8 +75,8 @@
   z-index: 2;
   padding: 14px 14px 16px;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: stretch;
   gap: 12px;
 }
 
@@ -98,10 +98,6 @@
     0 0 18px rgba(255, 75, 190, 0.35);
 }
 
-.pm-profile-hero-card__meta h1 svg {
-  color: #39beff;
-  filter: drop-shadow(0 0 10px rgba(57, 190, 255, 0.75));
-}
 
 .pm-profile-premium-chip,
 .pm-profile-location {
@@ -140,37 +136,37 @@
   text-shadow: 0 1px 8px rgba(0, 0, 0, 0.45);
 }
 
+.pm-profile-hero-card__meta .pm-profile-location {
+  margin: 0 0 0 48px;
+  vertical-align: middle;
+}
+
 .pm-profile-hero-actions {
-  flex-shrink: 0;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
-  align-items: stretch;
 }
 
 .pm-profile-hero-actions button {
-  border: 1px solid rgba(135, 165, 255, 0.38);
-  background: rgba(8, 12, 40, 0.88);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: #f1f4ff;
-  border-radius: 14px;
-  min-height: 50px;
-  min-width: 78px;
-  padding: 8px 10px;
-  font-size: 0.7rem;
-  font-weight: 700;
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(8, 10, 28, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  color: #f7f8fc;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
   display: inline-flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  text-align: center;
+  gap: 6px;
   cursor: pointer;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    transform 0.2s ease;
 }
 
 .pm-profile-hero-actions button:disabled {
@@ -179,22 +175,18 @@
 }
 
 .pm-profile-hero-actions__preview {
-  border-color: rgba(100, 200, 255, 0.45) !important;
-  background: linear-gradient(
-    160deg,
-    rgba(20, 50, 120, 0.9) 0%,
-    rgba(12, 20, 56, 0.92) 100%
-  ) !important;
-  box-shadow: 0 0 16px rgba(70, 160, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.28);
 }
 
-.pm-profile-hero-actions__preview:hover:not(:disabled) {
-  border-color: rgba(130, 220, 255, 0.55) !important;
-  transform: translateY(-1px);
+.pm-profile-hero-actions button.is-open {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.34);
 }
 
 .pm-profile-hero-actions button svg {
-  font-size: 1rem;
+  font-size: 15px;
+  flex: 0 0 auto;
 }
 
 /* Profil önizleme — Tinder tarzı fotoğraf gezgini */
@@ -471,13 +463,8 @@
   }
 
   .pm-profile-hero-card__content {
-    padding: 12px 10px 14px;
-    gap: 8px;
-  }
-
-  .pm-profile-hero-actions button {
-    min-width: 68px;
-    min-height: 46px;
+    padding: 12px 12px 14px;
+    gap: 10px;
   }
 
   .pm-profile-hero-card__meta h1 {

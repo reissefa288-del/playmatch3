@@ -192,10 +192,8 @@
 }
 
 .pm-match-action.is-disabled {
-  opacity: 0.38;
-  filter: grayscale(0.35);
+  opacity: 0.4;
   pointer-events: none;
-  animation: none;
 }
 
 .pm-match-action.is-disabled::before,

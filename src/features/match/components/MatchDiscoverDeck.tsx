@@ -2,11 +2,11 @@ import { lazy, memo, Suspense, useState, useSyncExternalStore } from 'react'
 import { ModerationFlow } from '../../moderation/components/ModerationFlow'
 import { DAILY_LIKES_LIMIT } from '../data'
 import type { MatchDiscoverActions, MatchDiscoverState } from '../matchDiscoverTypes'
+import { CrossedToday } from '../CrossedScreen'
 import { MatchActionRow } from './MatchActionRow'
 import { MatchProfileCard } from './MatchProfileCard'
 import { MatchToast } from './MatchToast'
 import { CheckInFeed } from '../../home/CheckInFeed'
-import { CheckInShader } from '../../home/CheckInShader'
 import { HomeCheckIn, useCheckedInPlace } from '../../home/HomeCheckIn'
 import {
   getVenuePresenceServerSnapshot,
@@ -44,7 +44,6 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
       <div className="pm-match-discover">
         <HomeCheckIn />
         <div className="pm-checkin-stage">
-          <CheckInShader />
           <CheckInFeed people={here} youAt={getCheckInCheckedInAt()} />
         </div>
         <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
@@ -75,9 +74,12 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
           </p>
         </div>
         {atPlace ? null : (
-          <Suspense fallback={null}>
-            <MatchBoostPanel onNotify={actions.notify} />
-          </Suspense>
+          <>
+            {showCheckIn ? null : <CrossedToday />}
+            <Suspense fallback={null}>
+              <MatchBoostPanel onNotify={actions.notify} />
+            </Suspense>
+          </>
         )}
         <MatchToast toast={state.toast} onDismiss={actions.dismissToast} />
       </div>
@@ -117,6 +119,7 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
             beğeni hakkı seni bekliyor.
           </p>
         </div>
+        {showCheckIn ? null : <CrossedToday />}
         <Suspense fallback={null}>
           <MatchBoostPanel onNotify={actions.notify} />
         </Suspense>
@@ -162,7 +165,7 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
         dailyLimit={state.dailyLimit}
         isUnlimited={state.isUnlimited}
       />
-      {showCheckIn ? <HomeCheckIn /> : null}
+      {showCheckIn ? <HomeCheckIn /> : <CrossedToday />}
       <Suspense fallback={null}>
         <MatchBoostPanel onNotify={actions.notify} />
       </Suspense>

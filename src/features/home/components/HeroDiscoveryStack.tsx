@@ -1,9 +1,10 @@
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useRef, useState, useSyncExternalStore } from 'react'
 import { FiRefreshCw, FiUsers } from 'react-icons/fi'
 import { DAILY_LIKES_LIMIT } from '../../../shared/dailyLikes'
 import { useManagedTimers } from '../../../shared/useManagedTimers'
 import { formatBalance, useGemBalanceActions, useGemBalanceState } from '../../currency/GemBalanceProvider'
-import { useDailyLikesActions, useDailyLikesState } from '../../likes/useDailyLikes'
+import { refundCachedDailyLike } from '../../likes/dailyLikesCache'
+import { notifyDailyLikesChanged, useDailyLikesActions, useDailyLikesState } from '../../likes/useDailyLikes'
 import { MatchLikesQuota } from '../../match/components/MatchLikesQuota'
 import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
 import { heroDiscoveryQueue, HERO_DISCOVERY_DEMO_LABEL } from '../data'
@@ -16,6 +17,8 @@ import {
   markHeroExitingPhase,
   markHeroSentPhase,
   resetHeroStack,
+  rewindHeroStack,
+  setHeroStackPhase,
   subscribeHeroStack,
 } from '../heroDiscoveryStackStore'
 import { HeroPlayerCard } from './HeroPlayerCard'
@@ -32,6 +35,13 @@ export function HeroDiscoveryStack() {
   const { spend } = useGemBalanceActions()
   const { balance } = useGemBalanceState()
   const timers = useManagedTimers()
+  const trail = useRef<{ consumedLike: boolean }[]>([])
+  const [undoCount, setUndoCount] = useState(0)
+
+  const pushTrail = useCallback((consumedLike: boolean) => {
+    trail.current.push({ consumedLike })
+    setUndoCount(trail.current.length)
+  }, [])
 
   const { index, phase, exitMode, sentVariant } = stack
   const current = heroDiscoveryQueue[index]
@@ -53,31 +63,50 @@ export function HeroDiscoveryStack() {
     if (!current || phase !== 'idle' || !canLike) return
     void (async () => {
       if (!(await tryConsumeLike())) return
+      pushTrail(true)
       beginHeroMatchFlow()
       timers.schedule(() => {
         markHeroSentPhase()
         scheduleExit(EXIT_MS)
       }, 380)
     })()
-  }, [canLike, current, phase, scheduleExit, timers, tryConsumeLike])
+  }, [canLike, current, phase, pushTrail, scheduleExit, timers, tryConsumeLike])
 
   const handleSuperLike = useCallback(() => {
     if (!current || phase !== 'idle') return
+    pushTrail(false)
     beginHeroSuperLikeFlow()
     timers.schedule(() => {
       markHeroSentPhase()
       scheduleExit(EXIT_MS)
     }, 380)
-  }, [current, phase, scheduleExit, timers])
+  }, [current, phase, pushTrail, scheduleExit, timers])
 
   const handlePass = useCallback(() => {
     if (!current || phase !== 'idle') return
+    pushTrail(false)
     beginHeroPassFlow()
     timers.schedule(advanceHeroStackIndex, PASS_EXIT_MS)
-  }, [current, phase, timers])
+  }, [current, phase, pushTrail, timers])
+
+  const handleUndo = useCallback(() => {
+    if (!isPremiumActive) return
+    const last = trail.current.pop()
+    if (!last) return
+    setUndoCount(trail.current.length)
+    timers.clearAll()
+    if (phase === 'idle') rewindHeroStack()
+    else setHeroStackPhase('idle')
+    if (last.consumedLike) {
+      refundCachedDailyLike()
+      notifyDailyLikesChanged()
+    }
+  }, [isPremiumActive, phase, timers])
 
   const resetQueue = useCallback(() => {
     timers.clearAll()
+    trail.current = []
+    setUndoCount(0)
     resetHeroStack()
   }, [timers])
 
@@ -125,6 +154,8 @@ export function HeroDiscoveryStack() {
               onMatchRequest={handleMatchRequest}
               onPass={handlePass}
               onSuperLike={handleSuperLike}
+              canUndo={isPremiumActive && undoCount > 0}
+              onUndo={handleUndo}
             />
           </div>
         ) : (
