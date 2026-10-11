@@ -8,4 +8,6 @@ export type AppNotification = {
   timeLabel: string
   read: boolean
   avatarInitial?: string
+  avatarSrc?: string
+  avatarPosition?: string
 }

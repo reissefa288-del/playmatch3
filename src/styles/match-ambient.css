@@ -1,7 +1,7 @@
 /* Match — tam ekran mavi / pembe atmosfer */
 
 .pm-tab-panel#pm-tab-match {
-  background: #050818;
+  background: #060818;
 }
 
 .pm-tab-panel#pm-tab-match::before {
@@ -11,12 +11,35 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 130% 85% at 5% 0%, rgba(40, 148, 255, 0.48), transparent 50%),
-    radial-gradient(ellipse 120% 80% at 100% 12%, rgba(255, 60, 200, 0.42), transparent 48%),
-    radial-gradient(ellipse 110% 70% at 50% 100%, rgba(130, 70, 255, 0.32), transparent 46%),
-    radial-gradient(ellipse 90% 55% at 25% 60%, rgba(50, 130, 255, 0.18), transparent 42%),
-    linear-gradient(165deg, #0a1238 0%, #050818 42%, #12081c 100%);
-  animation: pm-match-bg-drift 20s ease-in-out infinite alternate;
+    radial-gradient(ellipse 140% 90% at 0% 0%, rgba(40, 148, 255, 0.5), transparent 52%),
+    radial-gradient(ellipse 130% 85% at 100% 8%, rgba(255, 60, 200, 0.45), transparent 50%),
+    radial-gradient(ellipse 120% 75% at 50% 100%, rgba(120, 80, 255, 0.35), transparent 48%),
+    radial-gradient(ellipse 100% 70% at 20% 55%, rgba(50, 130, 255, 0.22), transparent 45%),
+    radial-gradient(ellipse 90% 65% at 85% 65%, rgba(255, 90, 180, 0.2), transparent 42%),
+    linear-gradient(165deg, #0c1438 0%, #060818 38%, #140a22 72%, #060818 100%);
+  animation: pm-match-bg-drift 18s ease-in-out infinite alternate;
+}
+
+.pm-app-shell--match > .pm-match-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 78% 70% at 0% 18%, rgba(18, 72, 168, 0.72), transparent 62%),
+    radial-gradient(ellipse 74% 68% at 100% 28%, rgba(176, 28, 96, 0.62), transparent 60%),
+    #090818;
+}
+
+.pm-match-atmosphere canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pm-match-atmosphere.is-fallback canvas {
+  display: none;
 }
 
 .pm-app-shell--match {

@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
+import { AmbientParticles } from '../home/components/AmbientParticles'
 
 export function PremiumComingSoon() {
   return (
     <div className="pm-app-shell pm-app-shell--premium">
       <div className="pm-artboard">
+        <AmbientParticles />
         <main className="pm-premium pm-premium--soon">
           <div className="pm-premium-soon">
             <p className="pm-premium-soon__eyebrow">Yakında</p>

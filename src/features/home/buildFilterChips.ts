@@ -1,4 +1,3 @@
-import { FiUsers } from 'react-icons/fi'
 import { HOME_GENDER_OPTIONS } from './homeFilters'
 import type { FilterItem, HomeFilters } from './types'
 
@@ -11,6 +10,6 @@ export function buildFilterChips(filters: HomeFilters): FilterItem[] {
   return [
     { id: 'distance', label: `0–${filters.maxDistanceKm} km` },
     { id: 'online', label: 'Çevrimiçi', active: filters.onlineOnly },
-    { id: 'gender', label: genderLabel, icon: FiUsers },
+    { id: 'gender', label: genderLabel },
   ]
 }

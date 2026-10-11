@@ -20,6 +20,28 @@
   animation: pm-home-bg-drift 18s ease-in-out infinite alternate;
 }
 
+.pm-app-shell--home > .pm-home-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 78% 70% at 0% 18%, rgba(18, 72, 168, 0.72), transparent 62%),
+    radial-gradient(ellipse 74% 68% at 100% 28%, rgba(176, 28, 96, 0.62), transparent 60%),
+    #090818;
+}
+
+.pm-home-atmosphere.is-fallback canvas {
+  display: none;
+}
+
+.pm-home-atmosphere canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .pm-app-shell--home {
   background: transparent;
 }
@@ -180,5 +202,194 @@
   .pm-ambient-orb,
   .pm-ambient-particle {
     animation: none;
+  }
+}
+
+/* Ana sayfa — kart, filtre ve alt menü. Diğer sekmeler aynı kalır. */
+
+.pm-app-shell--home .pm-match-hero-card {
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.48),
+    0 0 22px rgba(40, 120, 255, 0.08),
+    0 0 18px rgba(255, 79, 203, 0.06);
+}
+
+.pm-app-shell--home .pm-match-hero-card__ring {
+  padding: 2px;
+  opacity: 0.48;
+}
+
+.pm-app-shell--home .pm-match-hero-card__glow {
+  opacity: 0.28;
+}
+
+.pm-app-shell--home .pm-match-portrait-bloom {
+  opacity: 0.32;
+}
+
+.pm-app-shell--home .pm-match-photo-area .pm-match-portrait-vignette {
+  background: linear-gradient(
+    180deg,
+    rgba(7, 11, 36, 0.06) 0%,
+    transparent 20%,
+    transparent 48%,
+    rgba(7, 11, 36, 0.38) 76%,
+    rgba(7, 11, 36, 0.86) 100%
+  );
+}
+
+.pm-app-shell--home .pm-location__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 0;
+}
+
+.pm-app-shell--home .pm-location__title-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.pm-app-shell--home .pm-location__cut {
+  display: block;
+  height: 34px;
+  width: auto;
+  max-width: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.pm-app-shell--home .pm-filter-bar {
+  overflow: visible;
+}
+
+.pm-app-shell--home .pm-filter-chip {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(7, 11, 36, 0.5);
+}
+
+.pm-app-shell--home .pm-filter-chip.is-active {
+  border-color: rgba(40, 120, 255, 0.28);
+  box-shadow: none;
+}
+
+.pm-app-shell--home .pm-filter-chip.is-distance,
+.pm-app-shell--home .pm-filter-chip.is-online,
+.pm-app-shell--home .pm-filter-chip.is-gender {
+  border: 1px solid transparent;
+  border-radius: 21px;
+  color: #f7f8fc;
+  background:
+    linear-gradient(105deg, var(--fill-hi), var(--fill-mid) 50%, var(--fill-lo)) padding-box,
+    linear-gradient(105deg, var(--rim-hi), var(--rim-mid) 52%, var(--rim-lo)) border-box;
+  box-shadow:
+    inset 0 0 14px var(--inner),
+    0 0 6px var(--rim-glow);
+}
+
+.pm-app-shell--home .pm-filter-chip.is-distance {
+  --rim-hi: #8fd4ff;
+  --rim-mid: #3d8cff;
+  --rim-lo: #3156ea;
+  --rim-glow: rgba(61, 120, 255, 0.22);
+  --fill-hi: #16305a;
+  --fill-mid: #10182e;
+  --fill-lo: #15285a;
+  --inner: rgba(70, 140, 255, 0.22);
+}
+
+.pm-app-shell--home .pm-filter-chip.is-online {
+  --rim-hi: #3ad8d0;
+  --rim-mid: #5b78ff;
+  --rim-lo: #8d46ff;
+  --rim-glow: rgba(120, 80, 255, 0.2);
+  --fill-hi: #0f3338;
+  --fill-mid: #12162e;
+  --fill-lo: #221448;
+  --inner: rgba(110, 80, 255, 0.2);
+}
+
+.pm-app-shell--home .pm-filter-chip.is-gender {
+  --rim-hi: #b7c4ff;
+  --rim-mid: #7d86f2;
+  --rim-lo: #5a56e0;
+  --rim-glow: rgba(100, 110, 230, 0.2);
+  --fill-hi: #16182e;
+  --fill-mid: #10121e;
+  --fill-lo: #14162c;
+  --inner: rgba(100, 110, 230, 0.14);
+}
+
+.pm-app-shell--home .pm-filter-pin {
+  filter: drop-shadow(0 0 3px rgba(90, 170, 255, 0.4));
+}
+
+.pm-app-shell--home .pm-filter-people {
+  filter: drop-shadow(0 0 3px rgba(110, 120, 240, 0.35));
+}
+
+.pm-app-shell--home .pm-filter-chip.is-distance > svg:last-child {
+  color: #c5dcff;
+  opacity: 0.92;
+}
+
+.pm-app-shell--home .pm-filter-chip.is-online > svg:last-child {
+  color: #d4c8ff;
+  opacity: 0.92;
+}
+
+.pm-app-shell--home .pm-filter-chip.is-gender > svg:last-child {
+  color: #d6defe;
+  opacity: 0.92;
+}
+
+.pm-app-shell--home .pm-filter-chip.is-online .pm-online-dot {
+  box-shadow: 0 0 4px rgba(0, 241, 164, 0.4);
+}
+
+.pm-nav-dock.pm-app-shell--home .pm-bottom-nav {
+  background: rgba(7, 11, 36, 0.72);
+  backdrop-filter: blur(18px) saturate(1.15);
+  -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.pm-nav-dock.pm-app-shell--home .pm-bottom-nav__item:not(.is-active) {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.pm-nav-dock.pm-app-shell--home .pm-bottom-nav__item:not(.is-active) .pm-bottom-nav__icon {
+  color: rgba(255, 255, 255, 0.46);
+  filter: none;
+}
+
+.pm-nav-dock.pm-app-shell--home .pm-bottom-nav__item:not(.is-active) .pm-bottom-nav__label {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.pm-nav-dock.pm-app-shell--home .pm-bottom-nav__item.is-active .pm-bottom-nav__icon {
+  color: #ff4fcb;
+  filter: drop-shadow(0 0 6px rgba(40, 120, 255, 0.4));
+}
+
+@media (max-width: 360px) {
+  .pm-app-shell--home .pm-home {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .pm-app-shell--home .pm-filter-bar {
+    gap: 6px;
+  }
+
+  .pm-app-shell--home .pm-filter-chip {
+    padding: 0 6px;
   }
 }

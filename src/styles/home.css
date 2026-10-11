@@ -1,4 +1,4 @@
-/* -------------------------------------------------------------------------- */
+﻿/* -------------------------------------------------------------------------- */
 /* PlayMeet Home — tab-specific layout (base artboard: navigation.css)      */
 /* No viewport-height scaling. No flex/grid compression. Overflow = scroll.  */
 /* -------------------------------------------------------------------------- */
@@ -14,7 +14,7 @@
 
 /* Premium kartı + alt içerik dock alanının üstünde kalsın */
 .pm-app-shell--home .pm-home {
-  padding-bottom: 20px;
+  padding-bottom: 28px;
 }
 
 .pm-app-shell--home .pm-premium-unlock {
@@ -49,7 +49,6 @@
 .pm-location button,
 .pm-filter-bar,
 .pm-filter-chip,
-.pm-filter-large,
 .pm-pill,
 .pm-icon-button,
 .pm-hero-card__actions,
@@ -183,33 +182,6 @@
   text-overflow: ellipsis;
 }
 
-.pm-location .pm-filter-large {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  height: 36px;
-  min-height: 36px;
-  margin: 0;
-  padding: 0 12px 0 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.06);
-  color: rgba(255, 255, 255, 0.62);
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 1;
-  gap: 6px;
-  cursor: pointer;
-  box-shadow: none;
-}
-
-.pm-location .pm-filter-large svg {
-  font-size: 16px;
-  color: currentColor;
-  flex-shrink: 0;
-}
-
 /* --- Filter --------------------------------------------------------------- */
 
 .pm-filter-wrap {
@@ -231,7 +203,7 @@
   flex: 0 0 auto;
   flex-wrap: nowrap;
   gap: 8px;
-  overflow: hidden;
+  overflow: visible;
   padding-bottom: 2px;
   min-height: 44px;
 }
@@ -241,7 +213,8 @@
 }
 
 .pm-filter-chip {
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  width: 100%;
   min-width: 0;
   height: 42px;
   min-height: 42px;
@@ -265,8 +238,23 @@
 .pm-filter-chip.is-distance {
   min-width: 0;
   padding: 0 10px;
-  gap: 4px;
+  gap: 6px;
   letter-spacing: 0;
+  border-color: transparent;
+}
+
+.pm-filter-pin {
+  width: 13px;
+  height: 17px;
+  flex-shrink: 0;
+  display: block;
+}
+
+.pm-filter-people {
+  width: 18px;
+  height: 15px;
+  flex-shrink: 0;
+  display: block;
 }
 
 .pm-filter-chip__prefix {
@@ -298,6 +286,63 @@
 .pm-filter-chip > span:last-of-type {
   flex-shrink: 1;
   min-width: 0;
+}
+
+.pm-filter-chip-slot {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+}
+
+.pm-filter-chip > svg:last-child {
+  transition: transform 160ms ease;
+}
+
+.pm-filter-chip.is-open > svg:last-child {
+  transform: rotate(180deg);
+}
+
+.pm-filter-menu__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  cursor: default;
+}
+
+.pm-filter-menu {
+  position: absolute;
+  z-index: 41;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #0c1020;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+}
+
+.pm-filter-menu button {
+  width: 100%;
+  height: 36px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: #f7f8fc;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.pm-filter-menu button.is-selected {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .pm-online-dot {
@@ -1081,13 +1126,13 @@
   min-height: 72px;
   padding: 8px 14px 8px 8px;
   border-radius: 20px;
-  border: 1px solid rgba(150, 130, 220, 0.45);
+  border: 1px solid rgba(90, 160, 255, 0.4);
   background: #0c1028;
   color: #f7f8fc;
   box-shadow:
     0 10px 28px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(190, 170, 255, 0.22),
-    0 0 0 1px rgba(160, 120, 220, 0.22);
+    inset 0 1px 0 rgba(140, 190, 255, 0.22),
+    0 0 0 1px rgba(255, 80, 170, 0.16);
 }
 
 .pm-checkin__bar > svg,
@@ -1103,18 +1148,18 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  color: #f4f0ff;
-  border: 1px solid rgba(190, 170, 255, 0.55);
-  background: radial-gradient(circle, rgba(120, 80, 220, 0.4), rgba(12, 10, 32, 0.2) 70%);
+  color: #f7f8fc;
+  border: 1px solid rgba(120, 180, 255, 0.55);
+  background: radial-gradient(circle, rgba(40, 130, 255, 0.42), rgba(12, 10, 32, 0.2) 70%);
   box-shadow:
-    0 0 16px rgba(120, 80, 255, 0.4),
-    inset 0 0 10px rgba(255, 120, 200, 0.16);
+    0 0 16px rgba(40, 140, 255, 0.35),
+    inset 0 0 10px rgba(255, 80, 170, 0.16);
 }
 
 .pm-checkin__mark svg {
   width: 22px;
   height: 22px;
-  filter: drop-shadow(0 0 6px rgba(200, 180, 255, 0.8));
+  filter: drop-shadow(0 0 6px rgba(120, 180, 255, 0.8));
 }
 
 .pm-checkin__mark--sheet {

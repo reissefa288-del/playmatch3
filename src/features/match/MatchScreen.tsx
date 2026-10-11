@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { AmbientParticles } from '../home/components/AmbientParticles'
 import { MatchScreenBody } from './MatchScreenBody'
 import { MatchScreenShell } from './MatchScreenShell'
 import type { MatchTabId } from './data'
@@ -13,6 +14,7 @@ export function MatchScreen() {
     <div className="pm-app-shell pm-app-shell--match">
       <div className="pm-artboard">
         <main className="pm-match">
+          <AmbientParticles />
           <MatchScreenShell tab={tab} onTabChange={setTab} filters={filters} />
           <MatchScreenBody tab={tab} filters={filters} />
         </main>

@@ -41,13 +41,13 @@ export function CurrencyPurchaseSheet({ kind, onClose }: CurrencyPurchaseSheetPr
       <div className="pm-currency-shop__viewport pm-sheet-viewport-enter">
         <div
           className={`pm-currency-shop pm-currency-shop--premium pm-currency-shop--aaa${
-            reduceMotion ? '' : ' pm-sheet-panel-enter'
-          }`}
+            kind === 'gems' ? ' pm-currency-shop--gems' : ''
+          }${reduceMotion ? '' : ' pm-sheet-panel-enter'}`}
           role="dialog"
           aria-modal="true"
           aria-labelledby="pm-currency-shop-title"
         >
-          {kind === 'gems' ? <ShopGlassShader /> : null}
+          {kind === 'gems' ? <ShopGlassShader tone="violet" /> : null}
           <span className="pm-currency-shop__ambient" aria-hidden />
           <span className="pm-currency-shop__aura" aria-hidden />
           <span className="pm-currency-shop__particles" aria-hidden>

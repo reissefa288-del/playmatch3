@@ -1,6 +1,5 @@
 import '../../styles/match-bundle.css'
 import { lazy, Suspense } from 'react'
-import { AmbientParticles } from '../home/components/AmbientParticles'
 import { type MatchTabId } from './data'
 import { MatchDiscoverDeck } from './components/MatchDiscoverDeck'
 import { MatchMatchesList } from './components/MatchMatchesList'
@@ -28,7 +27,6 @@ export function MatchScreenBody({ tab, filters }: MatchScreenBodyProps) {
 
   return (
     <>
-      <AmbientParticles />
       {tab === 'discover' ? (
         <MatchDiscoverDeck state={discoverState} actions={discoverActions} />
       ) : (

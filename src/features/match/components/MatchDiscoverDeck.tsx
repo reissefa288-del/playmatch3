@@ -140,9 +140,12 @@ export const MatchDiscoverDeck = memo(function MatchDiscoverDeck({
       <MatchProfileCard
         key={state.current.id}
         profile={state.current}
-        peekLeftName={state.peekLeft?.name}
-        peekRightName={state.peekRight?.name}
+        nextProfile={state.peekRight}
         onOpenModeration={() => setModerationOpen(true)}
+        onPass={actions.pass}
+        onLike={actions.like}
+        canLike={state.canLike}
+        canAct={state.canAct}
       />
       <ModerationFlow
         open={moderationOpen}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { DEFAULT_HOME_FILTERS } from './homeFilters'
 import type { HomeFilters } from './types'
 
@@ -16,33 +16,6 @@ function readStored(): HomeFilters {
 
 export function useHomeFilters() {
   const [applied, setApplied] = useState<HomeFilters>(readStored)
-  const [draft, setDraft] = useState<HomeFilters>(applied)
-  const [open, setOpen] = useState(false)
-
-  useEffect(() => {
-    if (open) setDraft(applied)
-  }, [open, applied])
-
-  const openSheet = useCallback(() => setOpen(true), [])
-  const closeSheet = useCallback(() => setOpen(false), [])
-
-  const patchDraft = useCallback((patch: Partial<HomeFilters>) => {
-    setDraft((prev) => ({ ...prev, ...patch }))
-  }, [])
-
-  const applyDraft = useCallback(() => {
-    setApplied(draft)
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(draft))
-    } catch {
-      /* ignore */
-    }
-    setOpen(false)
-  }, [draft])
-
-  const resetDraft = useCallback(() => {
-    setDraft(DEFAULT_HOME_FILTERS)
-  }, [])
 
   const toggleOnlineQuick = useCallback(() => {
     setApplied((prev) => {
@@ -56,16 +29,22 @@ export function useHomeFilters() {
     })
   }, [])
 
+  const applyQuick = useCallback((patch: Partial<HomeFilters>) => {
+    setApplied((prev) => {
+      const next = { ...prev, ...patch }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
+      } catch {
+        /* ignore */
+      }
+      return next
+    })
+  }, [])
+
   return {
     applied,
-    draft,
-    open,
-    openSheet,
-    closeSheet,
-    patchDraft,
-    applyDraft,
-    resetDraft,
     toggleOnlineQuick,
+    applyQuick,
   }
 }
 

@@ -20,6 +20,28 @@
   animation: pm-chat-bg-drift 18s ease-in-out infinite alternate;
 }
 
+.pm-app-shell--chat > .pm-chat-atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 78% 70% at 0% 18%, rgba(18, 72, 168, 0.72), transparent 62%),
+    radial-gradient(ellipse 74% 68% at 100% 28%, rgba(176, 28, 96, 0.62), transparent 60%),
+    #090818;
+}
+
+.pm-chat-atmosphere canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pm-chat-atmosphere.is-fallback canvas {
+  display: none;
+}
+
 .pm-app-shell--chat {
   background: transparent;
 }

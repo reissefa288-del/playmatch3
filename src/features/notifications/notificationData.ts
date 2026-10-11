@@ -1,4 +1,7 @@
 import type { AppNotification } from './types'
+import { FAKE_PORTRAIT_FEMALE, FAKE_PORTRAIT_MALE } from '../../shared/fakePortraits'
+import denizPortrait from './assets/deniz.jpg'
+import laraPortrait from './assets/lara.jpg'
 
 /** Geçici sahte liste. Canlı veri gelince kaldırılacak. */
 export const initialNotifications: AppNotification[] = [
@@ -10,6 +13,8 @@ export const initialNotifications: AppNotification[] = [
     timeLabel: '2 dk',
     read: false,
     avatarInitial: 'E',
+    avatarSrc: FAKE_PORTRAIT_FEMALE,
+    avatarPosition: '50% 16%',
   },
   {
     id: 'fake-match',
@@ -19,6 +24,8 @@ export const initialNotifications: AppNotification[] = [
     timeLabel: '18 dk',
     read: false,
     avatarInitial: 'D',
+    avatarSrc: denizPortrait,
+    avatarPosition: '50% 28%',
   },
   {
     id: 'fake-game',
@@ -28,6 +35,8 @@ export const initialNotifications: AppNotification[] = [
     timeLabel: '1 sa',
     read: false,
     avatarInitial: 'L',
+    avatarSrc: laraPortrait,
+    avatarPosition: '42% 32%',
   },
   {
     id: 'fake-message',
@@ -37,5 +46,7 @@ export const initialNotifications: AppNotification[] = [
     timeLabel: 'Dün',
     read: true,
     avatarInitial: 'M',
+    avatarSrc: FAKE_PORTRAIT_MALE,
+    avatarPosition: '50% 12%',
   },
 ]

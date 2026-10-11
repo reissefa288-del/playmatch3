@@ -11,6 +11,7 @@ const FRAG = `
 precision highp float;
 uniform vec2 uRes;
 uniform float uTime;
+uniform float uTone;
 
 float hash21(vec2 p) {
   p = fract(p * vec2(123.34, 456.21));
@@ -49,9 +50,9 @@ void main() {
   vec2 uv = gl_FragCoord.xy / uRes;
   vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / max(uRes.y, 1.0);
 
-  vec3 deep = vec3(0.027, 0.043, 0.133);
-  vec3 mid = vec3(0.063, 0.094, 0.235);
-  vec3 shallow = vec3(0.16, 0.17, 0.4);
+  vec3 deep = mix(vec3(0.027, 0.043, 0.133), vec3(0.024, 0.031, 0.094), uTone);
+  vec3 mid = mix(vec3(0.063, 0.094, 0.235), vec3(0.027, 0.043, 0.133), uTone);
+  vec3 shallow = mix(vec3(0.16, 0.17, 0.40), vec3(0.071, 0.047, 0.188), uTone);
   vec3 foam = vec3(0.78, 0.74, 0.98);
 
   float depth = smoothstep(0.0, 0.92, uv.y);
@@ -70,7 +71,8 @@ void main() {
 
   vec2 drift = vec2(sin(uTime * 0.18), cos(uTime * 0.14)) * 0.05;
   col += vec3(1.0, 0.31, 0.7) * glow(uv, vec2(0.5, 0.9) + drift, 0.5) * 0.12;
-  col += vec3(0.24, 0.47, 1.0) * glow(uv, vec2(0.84, 0.76) - drift, 0.46) * 0.1;
+  vec3 cool = mix(vec3(0.24, 0.47, 1.0), vec3(0.63, 0.31, 1.0), uTone);
+  col += cool * glow(uv, vec2(0.84, 0.76) - drift, 0.46) * 0.1;
 
   vec2 fineCell = floor(gl_FragCoord.xy / 7.0);
   vec2 fineLocal = fract(gl_FragCoord.xy / 7.0) - 0.5;
@@ -96,8 +98,13 @@ void main() {
 }
 `
 
-export function ShopGlassShader() {
+type ShopGlassShaderProps = {
+  tone?: 'navy' | 'violet'
+}
+
+export function ShopGlassShader({ tone = 'navy' }: ShopGlassShaderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const toneId = tone === 'violet' ? 1 : 0
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -140,6 +147,8 @@ export function ShopGlassShader() {
 
     const uRes = gl.getUniformLocation(program, 'uRes')
     const uTime = gl.getUniformLocation(program, 'uTime')
+    const uTone = gl.getUniformLocation(program, 'uTone')
+    gl.uniform1f(uTone, toneId)
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     let frame = 0
     let running = true
@@ -196,7 +205,7 @@ export function ShopGlassShader() {
       gl.deleteShader(fs)
       gl.deleteBuffer(buffer)
     }
-  }, [])
+  }, [toneId])
 
   return (
     <span className="pm-currency-shop__glass" aria-hidden>

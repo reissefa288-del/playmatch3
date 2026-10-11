@@ -93,6 +93,16 @@
   overflow: hidden;
 }
 
+.pm-currency-shop--gems {
+  border-color: rgba(180, 120, 255, 0.45);
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.55),
+    0 0 56px rgba(160, 80, 255, 0.2);
+  background:
+    radial-gradient(ellipse 90% 50% at 50% 0%, rgba(255, 60, 180, 0.16), transparent 58%),
+    linear-gradient(165deg, #120c30 0%, #070b22 55%, #060818 100%);
+}
+
 .pm-currency-shop__glass {
   position: absolute;
   inset: 0;

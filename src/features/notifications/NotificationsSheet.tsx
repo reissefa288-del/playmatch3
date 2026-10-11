@@ -1,25 +1,8 @@
 import { useEffect } from 'react'
+import { FiBell, FiTrash2, FiX } from 'react-icons/fi'
 import { usePrefersReducedMotion } from '../../shared/usePrefersReducedMotion'
-import { FiBell, FiHeart, FiMessageCircle, FiTrash2, FiUsers, FiX, FiZap } from 'react-icons/fi'
-import { LuGamepad2 } from 'react-icons/lu'
 import { ShopGlassShader } from '../currency/ShopGlassShader'
-import type { AppNotification, NotificationKind } from './types'
-
-const kindIcon: Record<NotificationKind, typeof FiHeart> = {
-  match: FiUsers,
-  like: FiHeart,
-  game: LuGamepad2,
-  message: FiMessageCircle,
-  system: FiZap,
-}
-
-const kindLabel: Record<NotificationKind, string> = {
-  match: 'Eşleşme',
-  like: 'Beğeni',
-  game: 'Davet',
-  message: 'Mesaj',
-  system: 'Sistem',
-}
+import type { AppNotification } from './types'
 
 type NotificationsSheetProps = {
   open: boolean
@@ -61,7 +44,7 @@ export function NotificationsSheet({
         aria-labelledby="pm-notifications-title"
         style={{ transform: 'translate(-50%, -50%)' }}
       >
-        <ShopGlassShader />
+        <ShopGlassShader tone="violet" />
         <header className="pm-notifications__head">
           <div className="pm-notifications__head-brand">
             <span className="pm-notifications__bell" aria-hidden>
@@ -91,9 +74,7 @@ export function NotificationsSheet({
               <p>Eşleşme, beğeni ve davet burada durur.</p>
             </li>
           ) : (
-            items.map((item) => {
-              const Icon = kindIcon[item.kind]
-              return (
+            items.map((item) => (
                 <li
                   key={item.id}
                   className={`pm-notifications__card${item.read ? '' : ' is-unread'}`}
@@ -102,18 +83,22 @@ export function NotificationsSheet({
                   <button type="button" className="pm-notifications__item" onClick={() => onItemAction(item)}>
                     <span className="pm-notifications__accent" aria-hidden />
                     <span className="pm-notifications__avatar">
-                      <span className="pm-notifications__initial">{item.avatarInitial ?? '•'}</span>
-                      <span className="pm-notifications__kind-icon" aria-hidden>
-                        <Icon />
-                      </span>
-                      {!item.read ? <span className="pm-notifications__dot" aria-hidden /> : null}
+                      {item.avatarSrc ? (
+                        <img
+                          className="pm-notifications__photo"
+                          src={item.avatarSrc}
+                          alt=""
+                          style={{ objectPosition: item.avatarPosition ?? '50% 20%' }}
+                        />
+                      ) : (
+                        <span className="pm-notifications__initial">{item.avatarInitial ?? '•'}</span>
+                      )}
                     </span>
                     <span className="pm-notifications__copy">
                       <span className="pm-notifications__meta">
-                        <span className="pm-notifications__pill">{kindLabel[item.kind]}</span>
+                        <strong>{item.title}</strong>
                         <small>{item.timeLabel}</small>
                       </span>
-                      <strong>{item.title}</strong>
                       <span className="pm-notifications__body">{item.body}</span>
                     </span>
                   </button>
@@ -126,8 +111,7 @@ export function NotificationsSheet({
                     <FiTrash2 aria-hidden />
                   </button>
                 </li>
-              )
-            })
+            ))
           )}
         </ul>
       </section>
