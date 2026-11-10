@@ -1,0 +1,184 @@
+.pm-neon-shell {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  color: #f7f8fc;
+  touch-action: none;
+}
+
+.pm-neon-back {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 14px;
+  color: #fff;
+  background: rgba(8, 10, 28, 0.72);
+}
+
+.pm-neon-hud {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  padding: 58px 10px 8px;
+}
+
+.pm-neon-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 92px;
+  padding: 6px 12px;
+  border-radius: 16px;
+  background: rgba(8, 10, 28, 0.72);
+}
+
+.pm-neon-center span {
+  color: #d7e7ff;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.pm-neon-center strong {
+  font-size: 18px;
+}
+
+.pm-neon-center .is-speed {
+  color: #7dffb2;
+  font-size: 14px;
+}
+
+.pm-neon-plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px;
+  border-radius: 16px;
+  background: rgba(8, 10, 28, 0.78);
+}
+
+.pm-neon-plate strong,
+.pm-neon-plate span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pm-neon-avatar {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 14px;
+  border: 2px solid #62cfff;
+  font-weight: 800;
+}
+
+.pm-neon-plate.is-pink .pm-neon-avatar {
+  border-color: #ff2d8f;
+}
+
+.pm-neon-lives {
+  display: flex;
+  gap: 4px;
+}
+
+.pm-neon-lives i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.25);
+  transform: rotate(45deg);
+}
+
+.pm-neon-lives i.is-on {
+  background: #62cfff;
+}
+
+.pm-neon-plate.is-pink .pm-neon-lives i.is-on {
+  background: #ff5ad1;
+}
+
+.pm-neon-split {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  height: calc(100dvh - 210px);
+  min-height: 320px;
+}
+
+.pm-neon-lane {
+  position: relative;
+  flex: 1;
+}
+
+.pm-neon-lane.is-cyan {
+  background: linear-gradient(180deg, rgba(47, 107, 255, 0.42), rgba(18, 54, 200, 0.72));
+}
+
+.pm-neon-lane.is-pink {
+  background: linear-gradient(180deg, rgba(255, 45, 143, 0.42), rgba(122, 20, 104, 0.72));
+}
+
+.pm-neon-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.pm-neon-panel {
+  position: absolute;
+  z-index: 4;
+  left: 50%;
+  top: 46%;
+  display: flex;
+  width: min(360px, calc(100% - 32px));
+  transform: translate(-50%, -50%);
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(5, 8, 20, 0.88);
+  text-align: center;
+}
+
+.pm-neon-panel h1 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.pm-neon-panel p {
+  margin: 0;
+}
+
+.pm-neon-panel form {
+  display: flex;
+  gap: 8px;
+}
+
+.pm-neon-panel input,
+.pm-neon-panel button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font: inherit;
+}
+
+.pm-neon-panel input {
+  width: 96px;
+  text-align: center;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.pm-neon-panel button {
+  flex: 1;
+  color: #fff;
+  background: #ff2d8f;
+}

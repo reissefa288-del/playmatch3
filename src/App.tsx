@@ -56,7 +56,7 @@ function DevPreviewHomeBootstrap() {
     if (!shouldDevPreviewJumpToHome() || jumped.current) return
     ensureDevAutoHomeSession()
     jumped.current = true
-    if (location.pathname !== '/') {
+    if (location.pathname === '/welcome' || location.pathname === '/onboarding') {
       navigate('/', { replace: true })
     }
   }, [location.pathname, navigate])

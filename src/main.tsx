@@ -7,9 +7,7 @@ import './index.css'
 import App from './App.tsx'
 import { ensureDevAutoHomeSession } from './features/auth/devPreviewHome'
 
-if (import.meta.env.DEV) {
-  ensureDevAutoHomeSession()
-}
+ensureDevAutoHomeSession()
 
 if (import.meta.env.PROD) {
   const scheduleMonitoring = () => {

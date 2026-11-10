@@ -1,4 +1,5 @@
 import cors from 'cors'
+import { attachNeonBrick } from './neonBrickRooms.js'
 import express from 'express'
 import { createServer } from 'node:http'
 import { customAlphabet } from 'nanoid'
@@ -583,6 +584,11 @@ function getWinner(board) {
   }
   return null
 }
+
+attachNeonBrick(io, {
+  protocolVersion: PROTOCOL_VERSION,
+  makeCode: () => makeId().slice(0, 4),
+})
 
 httpServer.listen(PORT, () => {
   console.log(`Game server listening on http://localhost:${PORT}`)

@@ -5,7 +5,6 @@ import { useManagedTimers } from '../../../shared/useManagedTimers'
 import { formatBalance, useGemBalanceActions, useGemBalanceState } from '../../currency/GemBalanceProvider'
 import { refundCachedDailyLike } from '../../likes/dailyLikesCache'
 import { notifyDailyLikesChanged, useDailyLikesActions, useDailyLikesState } from '../../likes/useDailyLikes'
-import { MatchLikesQuota } from '../../match/components/MatchLikesQuota'
 import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
 import { heroDiscoveryQueue, HERO_DISCOVERY_DEMO_LABEL } from '../data'
 import {
@@ -128,10 +127,6 @@ export function HeroDiscoveryStack() {
       <p className="pm-hero-demo-label" role="status">
         {HERO_DISCOVERY_DEMO_LABEL}
       </p>
-      {!exhausted ? (
-        <MatchLikesQuota remaining={remaining} limit={DAILY_LIKES_LIMIT} isUnlimited={isUnlimited} />
-      ) : null}
-
       <div className="pm-hero-stack__stage">
         {showPeek && next ? (
           <div className="pm-hero-stack__peek" aria-hidden>

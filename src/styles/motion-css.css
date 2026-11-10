@@ -26,17 +26,6 @@
   }
 }
 
-@keyframes pm-modal-enter-notif {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -52%) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
 @keyframes pm-sheet-panel-enter {
   from {
     opacity: 0;
@@ -193,10 +182,6 @@
   animation: pm-modal-enter 0.38s var(--pm-ease-flagship) both;
 }
 
-.pm-sheet-modal-enter--notif {
-  animation: pm-modal-enter-notif 0.38s var(--pm-ease-flagship) both;
-}
-
 .pm-sheet-panel-enter {
   animation: pm-sheet-panel-enter 0.4s var(--pm-ease-flagship) both;
 }
@@ -268,7 +253,6 @@
   .pm-sheet-backdrop-enter,
   .pm-sheet-viewport-enter,
   .pm-sheet-modal-enter,
-  .pm-sheet-modal-enter--notif,
   .pm-sheet-panel-enter,
   .pm-sheet-slide-up-enter,
   .pm-stack-overlay-enter,

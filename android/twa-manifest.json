@@ -1,6 +1,6 @@
 {
   "packageId": "app.playmeet.twa",
-  "host": "playmeet.app",
+  "host": "playmeet-prod-1bbda.web.app",
   "name": "PlayMeet",
   "launcherName": "PlayMeet",
   "display": "standalone",
@@ -13,24 +13,33 @@
   "backgroundColor": "#060818",
   "enableNotifications": true,
   "startUrl": "/",
-  "iconUrl": "https://playmeet.app/icons/icon-512.png",
-  "maskableIconUrl": "https://playmeet.app/icons/icon-maskable-512.png",
+  "iconUrl": "https://playmeet-prod-1bbda.web.app/icons/icon-512.png",
+  "maskableIconUrl": "https://playmeet-prod-1bbda.web.app/icons/icon-maskable-512.png",
   "splashScreenFadeOutDuration": 300,
-  "appVersionName": "1.0.0",
-  "appVersionCode": 1,
+  "signingKey": {
+    "path": "C:\\Users\\farec\\Desktop\\PlayMeet\\android\\playmeet-upload.keystore",
+    "alias": "playmeet"
+  },
+  "appVersionName": "1.0.3",
+  "appVersionCode": 6,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://playmeet.app/manifest.webmanifest",
-  "fallbackType": "customtabs",
+  "webManifestUrl": "https://playmeet-prod-1bbda.web.app/manifest.webmanifest",
+  "fallbackType": "webview",
   "features": {},
   "alphaDependencies": {
     "enabled": false
   },
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 24,
   "orientation": "portrait",
   "fingerprints": [
     "A1:D2:A4:FC:3B:39:7B:77:5E:6E:FA:E9:DB:64:C6:E2:6B:3C:54:0E:99:31:36:5A:F0:EC:5D:9D:BD:AD:24:BA"
   ],
-  "additionalTrustedOrigins": []
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "displayOverride": [],
+  "appVersion": "1.0.3"
 }

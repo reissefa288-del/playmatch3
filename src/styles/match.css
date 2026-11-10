@@ -62,30 +62,14 @@
 }
 
 .pm-match-hero-card {
-  transform-style: preserve-3d;
+  transform-style: flat;
   animation: pm-match-card-float 9s var(--pm-ease-luxe) infinite alternate;
 }
 
+/* AAA ::before already draws the animated rim — this layer must not paint a fill.
+   Broken mask-composite:add was washing the whole portrait with the conic gradient. */
 .pm-match-hero-card__ring {
-  background:
-    conic-gradient(
-      from 200deg,
-      rgba(80, 210, 255, 1),
-      rgba(210, 110, 255, 0.9),
-      rgba(255, 90, 190, 1),
-      rgba(130, 170, 255, 0.95),
-      rgba(80, 210, 255, 1)
-    );
-  opacity: 0.72;
-  filter: blur(0.15px);
-  animation: pm-match-ring-pulse 5s ease-in-out infinite alternate;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  padding: 3px;
-  -webkit-mask:
-    linear-gradient(#fff 0 0) content-box,
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
+  display: none;
 }
 
 .pm-match-hero-card__glow {
@@ -117,10 +101,10 @@
   inset: -8%;
   z-index: 1;
   background:
-    radial-gradient(ellipse 55% 45% at 50% 35%, rgba(255, 100, 200, 0.12), transparent 62%),
-    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(40, 80, 200, 0.2), transparent 55%);
-  mix-blend-mode: screen;
-  opacity: 0.7;
+    radial-gradient(ellipse 55% 45% at 50% 35%, rgba(255, 100, 200, 0.06), transparent 62%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(40, 80, 200, 0.1), transparent 55%);
+  mix-blend-mode: soft-light;
+  opacity: 0.35;
 }
 
 .pm-match-portrait-vignette {
@@ -128,7 +112,8 @@
   position: absolute;
   inset: 0;
   z-index: 2;
-  box-shadow: inset 0 -120px 80px rgba(4, 6, 22, 0.85);
+  /* Soft bottom fade only — heavy inset shadow was crushing the portrait */
+  box-shadow: none;
 }
 
 .pm-match-online-dot {
@@ -277,11 +262,9 @@
 @keyframes pm-match-ring-pulse {
   0% {
     opacity: 0.55;
-    filter: blur(0.4px) hue-rotate(0deg);
   }
   100% {
     opacity: 0.82;
-    filter: blur(0.1px) hue-rotate(22deg);
   }
 }
 

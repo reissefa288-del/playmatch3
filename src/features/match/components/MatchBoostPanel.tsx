@@ -1,10 +1,12 @@
 import { memo, useCallback } from 'react'
-import { FiZap } from 'react-icons/fi'
+import boostBg from '../assets/boost-bg.webp'
+import boostBolt from '../assets/boost-bolt.png'
+import boostCta from '../assets/boost-cta.png'
+import boostStreaks from '../assets/boost-streaks.png'
+import elmasIcon from '../../../reference/opt/thumb/elmas.webp'
 import { useGemBalanceActions, useGemBalanceState, formatBalance } from '../../currency/GemBalanceProvider'
 import type { MatchToastPayload } from '../useMatchDiscover'
 import { useMatchBoost } from '../useMatchBoost'
-
-const SPARKS = [0, 1, 2, 3, 4, 5] as const
 
 type MatchBoostPanelProps = {
   onNotify?: (
@@ -21,7 +23,7 @@ function boostPanelPropsEqual(prev: MatchBoostPanelProps, next: MatchBoostPanelP
 function MatchBoostPanelInner({ onNotify }: MatchBoostPanelProps) {
   const { spend } = useGemBalanceActions()
   const { balance } = useGemBalanceState()
-  const { isActive, remainingLabel, progress, activate, cost, durationMinutes } =
+  const { isActive, remainingLabel, progress, activate, cost, durationLabel } =
     useMatchBoost()
 
   const handleBoost = useCallback(() => {
@@ -45,82 +47,88 @@ function MatchBoostPanelInner({ onNotify }: MatchBoostPanelProps) {
     onNotify?.(
       'Boost aktif!',
       'success',
-      `${durationMinutes} dk boyunca profilin daha fazla kişiye gösterilecek`,
+      `${durationLabel} boyunca profilin daha fazla kişiye gösterilecek`,
     )
   }, [
     activate,
     balance,
     cost,
-    durationMinutes,
+    durationLabel,
     isActive,
     onNotify,
     spend,
   ])
 
   return (
-    <section
+    <button
+      type="button"
       className={`pm-match-boost${isActive ? ' is-active' : ''}`}
-      aria-label="Boost"
+      disabled={isActive}
+      aria-disabled={isActive}
+      aria-label={
+        isActive
+          ? `Boost aktif, ${remainingLabel} kaldı`
+          : `Eşleşme şansını artır, ${cost} elmas, ${durationLabel}`
+      }
+      onClick={handleBoost}
     >
-      <div className="pm-match-boost-shimmer" aria-hidden />
+      <img
+        className="pm-match-boost__bg"
+        src={boostBg}
+        alt=""
+        width={1080}
+        height={270}
+        draggable={false}
+        aria-hidden
+      />
+      <img
+        className="pm-match-boost__streaks"
+        src={boostStreaks}
+        alt=""
+        width={1024}
+        height={256}
+        draggable={false}
+        aria-hidden
+      />
+      <span className="pm-match-boost__bloom" aria-hidden />
       <span className="pm-match-boost__rim" aria-hidden />
-
+      <span className="pm-match-boost__hairline" aria-hidden />
+      <span className="pm-match-boost__sheen" aria-hidden />
+      <span className="pm-match-boost__inner">
+        <span className="pm-match-boost__icon-wrap" aria-hidden>
+          <img
+            className="pm-match-boost__icon"
+            src={boostBolt}
+            alt=""
+            width={128}
+            height={128}
+            draggable={false}
+          />
+        </span>
+        <span className="pm-match-boost__text">
+          <span className="pm-match-boost__title">
+            Eşleşme
+            <span className="pm-match-boost__title-accent">Şansını Artır!</span>
+          </span>
+          <span className="pm-match-boost__note">
+            Daha fazla kişi
+            <br />
+            seni görsün · {cost} elmas · {durationLabel}
+          </span>
+        </span>
+        <span className="pm-match-boost__cta" aria-hidden>
+          <img className="pm-match-boost__cta-art" src={boostCta} alt="" width={384} height={114} draggable={false} />
+          <img className="pm-match-boost__gem" src={elmasIcon} alt="" width={16} height={16} draggable={false} />
+          BOOST ET · {cost} ELMAS
+        </span>
+      </span>
       {isActive ? (
-        <>
-          <span className="pm-match-boost__aura pm-match-boost__aura--a" aria-hidden />
-          <span className="pm-match-boost__aura pm-match-boost__aura--b" aria-hidden />
-          <span className="pm-match-boost__scan" aria-hidden />
-        </>
+        <span className="pm-match-boost__live" aria-hidden>
+          AKTİF · {remainingLabel}
+        </span>
       ) : null}
-
-      <div className="pm-match-boost__inner">
-        <div className="pm-match-boost__icon-wrap">
-          {isActive ? (
-            <div className="pm-match-boost__sparks" aria-hidden>
-              {SPARKS.map((i) => (
-                <span key={i} className={`pm-match-boost__spark pm-match-boost__spark--${i}`} />
-              ))}
-            </div>
-          ) : null}
-          <div className="pm-match-boost__icon">
-            <span>
-              <FiZap aria-hidden />
-            </span>
-          </div>
-        </div>
-
-        <p className="pm-match-boost__text">
-          {isActive ? (
-            <>
-              <strong>Boost aktif</strong>
-              Profilin öne çıkıyor · {remainingLabel} kaldı
-            </>
-          ) : (
-            <>
-              <strong>Eşleşme Şansını Artır!</strong>
-              Daha fazla kişi seni görsün · {cost} elmas · {durationMinutes} dk
-            </>
-          )}
-        </p>
-
-        <button
-          type="button"
-          className="pm-match-boost__cta"
-          disabled={isActive}
-          aria-disabled={isActive}
-          aria-label={
-            isActive
-              ? `Boost aktif, ${remainingLabel} kaldı`
-              : `Boost et, ${cost} elmas`
-          }
-          onClick={handleBoost}
-        >
-          {isActive ? `Aktif · ${remainingLabel}` : `Boost Et · ${cost} elmas`}
-        </button>
-      </div>
-
       {isActive ? (
-        <div
+        <span
           className="pm-match-boost__progress-track"
           role="progressbar"
           aria-valuenow={Math.round(progress * 100)}
@@ -132,9 +140,9 @@ function MatchBoostPanelInner({ onNotify }: MatchBoostPanelProps) {
             className="pm-match-boost__progress-fill"
             style={{ transform: `scaleX(${progress})` }}
           />
-        </div>
+        </span>
       ) : null}
-    </section>
+    </button>
   )
 }
 

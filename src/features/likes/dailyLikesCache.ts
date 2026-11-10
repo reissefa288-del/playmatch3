@@ -48,26 +48,36 @@ export function readCachedDailyLikesUsed(): number {
   return cachedUsed
 }
 
-/** ADIM 4.3 — sunucu kotası (CF) veya local fallback (firebase yok / CF kapalı) */
-export async function tryConsumeDailyLike(uid: string | null): Promise<boolean> {
-  if (!uid) return false
-  if (isPremiumActiveFromCache()) return true
+/** Yerel kotayı hemen düşürür. Sunucu onayı ayrıca beklenir. */
+export function reserveDailyLike(uid: string | null): 'ok' | 'premium' | 'blocked' {
+  if (!uid) return 'blocked'
+  if (isPremiumActiveFromCache()) return 'premium'
 
   ensureDay()
-  if (cachedUsed >= DAILY_LIKES_LIMIT) return false
-
-  if (isFirebaseConfigured()) {
-    const result = await tryServerConsumeDailyLike()
-    if (result === 'limit') return false
-    if (result === 'ok') {
-      cachedUsed = await readFirestoreDailyLikes(uid)
-      return true
-    }
-  }
+  if (cachedUsed >= DAILY_LIKES_LIMIT) return 'blocked'
 
   cachedUsed += 1
   writeDailyLikesQuota({ day: cachedDay, used: cachedUsed })
+  return 'ok'
+}
+
+/** ADIM 4.3 — sunucu kotası (CF) veya local fallback (firebase yok / CF kapalı) */
+export async function confirmReservedDailyLike(uid: string | null): Promise<boolean> {
+  if (!uid || isPremiumActiveFromCache() || !isFirebaseConfigured()) return true
+
+  const result = await tryServerConsumeDailyLike()
+  if (result === 'limit') {
+    refundCachedDailyLike()
+    return false
+  }
+
   return true
+}
+
+export async function tryConsumeDailyLike(uid: string | null): Promise<boolean> {
+  const reserved = reserveDailyLike(uid)
+  if (reserved === 'blocked') return false
+  return confirmReservedDailyLike(uid)
 }
 
 /** Yerel sayaç. Sunucu kotası bir sonraki okumada yeniden hizalanır. */

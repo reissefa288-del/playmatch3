@@ -32,7 +32,8 @@ npm run play:preflight-console
 
 | Bölüm | Ne yap |
 |-------|--------|
-| **Privacy policy** | `https://<HOST>/legal/gizlilik-politikasi` |
+| **Privacy policy** | `https://playmeet-prod-1bbda.web.app/legal/gizlilik-politikasi/` |
+| **CSAE / Child Safety Standards** | `https://playmeet-prod-1bbda.web.app/legal/csae/` |
 | **App access** | Tüm işlevler erişilebilir / test hesabı gerekirse not ekle |
 | **Ads** | Hayır (reklam yok) |
 | **Content rating** | IARC anketi — `DATA_SAFETY.md` + `STORE_LISTING.tr.md` Content rating tablosu |

@@ -446,20 +446,6 @@
   100% { opacity: 0; transform: rotate(calc(var(--i) * 36deg)) translateY(-28px) scale(0.2); }
 }
 
-.pm-match-likes-ribbon.is-unlimited {
-  border-color: rgba(255, 200, 74, 0.35);
-}
-
-.pm-match-likes-ribbon.is-unlimited .pm-match-likes-ribbon__fill {
-  background: linear-gradient(90deg, #ffc84a, #ff8ec4);
-}
-
-.pm-match-likes-ribbon__num.is-infinity {
-  font-size: 1.15em;
-  color: #ffd76a;
-  text-shadow: 0 0 12px rgba(255, 200, 74, 0.45);
-}
-
 @media (prefers-reduced-motion: reduce) {
   .pm-game-opponent-like__btn,
   .pm-game-opponent-like__btn.is-premium {

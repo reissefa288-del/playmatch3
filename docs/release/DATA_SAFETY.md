@@ -80,13 +80,16 @@ Saklanabilir: eşleşme/mesaj kayıtları (yasal saklama; anonim), reports (mode
 
 **18 yaş ve üzeri** — çocuklara yönelik değil.
 
-## Gizlilik politikası URL
+## Gizlilik politikası URL (Play Console)
+
+Play Console → Policy → App content → Privacy policy:
 
 ```
-https://playmeet.app/legal/gizlilik-politikasi
+https://playmeet-prod-1bbda.web.app/legal/gizlilik-politikasi/
 ```
 
-(Domain deploy sonrası güncelleyin.)
+Statik HTML: `public/legal/gizlilik-politikasi/index.html` (JS/CSS kırılsa bile açılır).  
+Özel domain kullanırsanız: `https://playmeet.app/legal/gizlilik-politikasi/`
 
 ## Destek e-posta
 

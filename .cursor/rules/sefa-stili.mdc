@@ -1,0 +1,16 @@
+---
+description: Sefa Stili — how to build PlayMeet game backgrounds when the user says Sefa Stili
+alwaysApply: true
+---
+
+# Sefa Stili
+
+When the user says "Sefa Stili", build the background this way. Ocean Kingdom (Poseidon hall) and the Aztec temple plate are the reference.
+
+- Draw the scene yourself as a stylized 3D mobile-game illustration. Smooth forms, soft light, readable depth. Do not use a photo or a flat low-poly substitute.
+- The base plate stays still. Do not sway, pan, or zoom the plate.
+- Depth comes from separate layered assets drawn on top of the plate: banners, flames, mist, light, and other objects that belong in that scene.
+- Those layers move. Banners sway from their top edge. Flames flicker. The moon or key light pulses. Mist drifts. The plate does not.
+- Portrait 9:16. Keep the center clear for the game board, the top clear for the scoreboard, and the bottom clear for navigation.
+- Match the illustration. Do not stick on gray boxes, white bars, or clip-art that fights the plate.
+- Generate a few distinct plates when the user asks to choose, then build only the one they pick.

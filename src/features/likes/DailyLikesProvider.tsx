@@ -9,9 +9,10 @@ import {
 } from 'react'
 import { useAuthSession } from '../auth/useAuthSession'
 import {
+  confirmReservedDailyLike,
   hydrateDailyLikesCache,
+  reserveDailyLike,
   resetDailyLikesCache,
-  tryConsumeDailyLike,
 } from './dailyLikesCache'
 import {
   getDailyLikesSyncSnapshot,
@@ -41,9 +42,13 @@ export function DailyLikesProvider({ children }: { children: ReactNode }) {
   }, [uid])
 
   const tryConsumeLike = useCallback(async () => {
-    const ok = await tryConsumeDailyLike(uid)
-    if (ok) notifyDailyLikesSyncChanged()
-    return ok
+    const reserved = reserveDailyLike(uid)
+    if (reserved === 'blocked') return false
+    if (reserved === 'ok') notifyDailyLikesSyncChanged()
+    void confirmReservedDailyLike(uid).then((confirmed) => {
+      if (!confirmed) notifyDailyLikesSyncChanged()
+    })
+    return true
   }, [uid])
 
   const actionsValue = useMemo(() => ({ tryConsumeLike }), [tryConsumeLike])

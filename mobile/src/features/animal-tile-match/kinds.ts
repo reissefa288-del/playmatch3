@@ -1,0 +1,26 @@
+export const tileKinds = [
+  'fox',
+  'penguin',
+  'clover',
+  'rabbit',
+  'bear',
+  'owl',
+  'whale',
+  'strawberry',
+  'frog',
+  'leaf',
+  'mushroom',
+  'star',
+  'turtle',
+  'squirrel',
+  'carrot',
+  'pig',
+  'panda',
+  'acorn',
+  'bee',
+  'cherries',
+  'cat',
+  'moon',
+] as const;
+
+export type TileKind = (typeof tileKinds)[number];

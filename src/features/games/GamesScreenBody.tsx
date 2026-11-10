@@ -27,6 +27,10 @@ export function GamesPopularCatalog() {
     (game: GamesMiniCard) => {
       if (game.isMore) return
       addXp(xp)
+      if (game.id === 'neon-brick') {
+        navigate('/games/neon-brick')
+        return
+      }
       navigate(quickMatchPath(game.id))
     },
     [addXp, navigate, xp],
@@ -97,6 +101,10 @@ export function GamesScreenBody() {
     (game: GamesMiniCard, xp: number) => {
       if (game.isMore) return
       addXp(xp)
+      if (game.id === 'neon-brick') {
+        navigate('/games/neon-brick')
+        return
+      }
       openQuickMatchForGame(game.id)
     },
     [addXp, openQuickMatchForGame],

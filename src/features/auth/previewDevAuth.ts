@@ -12,10 +12,22 @@ export function isPreviewDevAuth(): boolean {
 }
 
 /**
- * Geliştirme: kayıtlı kullanıcı gibi doğrudan ana ekran (production'da kapalı).
- * Kapatmak için .env → VITE_DEV_AUTO_HOME=false
+ * Production / store: kayıt / welcome yok → doğrudan ana ekran (misafir oturum).
+ * Kapatmak için .env → VITE_GUEST_HOME=false
+ */
+export function shouldGuestAutoHome(): boolean {
+  if (import.meta.env.VITE_GUEST_HOME === 'false') return false
+  if (import.meta.env.VITE_GUEST_HOME === 'true') return true
+  return Boolean(import.meta.env.PROD)
+}
+
+/**
+ * Kayıtlı kullanıcı gibi doğrudan ana ekran.
+ * DEV: localhost / preview. PROD: misafir auto-home (VITE_GUEST_HOME).
+ * Kapatmak için .env → VITE_DEV_AUTO_HOME=false (yalnızca DEV) veya VITE_GUEST_HOME=false
  */
 export function shouldDevAutoRegisteredHome(): boolean {
+  if (shouldGuestAutoHome()) return true
   if (!import.meta.env.DEV) return false
   if (import.meta.env.VITE_DEV_AUTO_HOME === 'false') return false
   if (import.meta.env.VITE_DEV_AUTO_HOME === 'true') return true
@@ -27,7 +39,7 @@ export function shouldDevAutoRegisteredHome(): boolean {
   return false
 }
 
-/** Auth + profil localStorage; Firestore/API yok (önizleme / dev auto-home). */
+/** Auth + profil localStorage; Firestore/API yok (önizleme / guest / dev auto-home). */
 export function preferLocalDevPersistence(): boolean {
   return !isFirebaseConfigured() || isPreviewDevAuth() || shouldDevAutoRegisteredHome()
 }

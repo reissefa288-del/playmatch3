@@ -1,4 +1,4 @@
-/* Navbar üst şeridi — ortak chip yüzeyi + elmas parlaması + bildirim */
+/* Navbar üst şeridi — elmas */
 
 .pm-navbar {
   --pm-nav-chip-h: 40px;
@@ -27,21 +27,18 @@
   gap: 8px;
 }
 
-/* Ortak yüzey: elmas, zil */
-.pm-currency-nav__item.is-gems,
-.pm-icon-button--bell {
+/* Ortak yüzey: elmas */
+.pm-currency-nav__item.is-gems {
   border: var(--pm-nav-chip-border);
   background: var(--pm-nav-chip-bg);
   box-shadow: var(--pm-nav-chip-shadow);
 }
 
-.pm-currency-nav__item.is-gems,
-.pm-icon-button--bell {
+.pm-currency-nav__item.is-gems {
   position: relative;
 }
 
-.pm-currency-nav__item.is-gems::before,
-.pm-icon-button--bell::before {
+.pm-currency-nav__item.is-gems::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -50,8 +47,7 @@
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 42%);
 }
 
-.pm-currency-nav__item.is-gems::after,
-.pm-icon-button--bell::after {
+.pm-currency-nav__item.is-gems::after {
   content: '';
   position: absolute;
   left: 10%;
@@ -144,79 +140,4 @@
 
 .pm-currency-nav__item.is-gems:hover .pm-currency-nav__plus {
   background: rgba(255, 255, 255, 0.1);
-}
-
-/* —— Bildirim (elmas pill ile aynı koyu chip) —— */
-.pm-navbar__right .pm-icon-button.pm-icon-button--bell {
-  flex: 0 0 auto;
-  width: var(--pm-nav-chip-h);
-  height: var(--pm-nav-chip-h);
-  min-width: var(--pm-nav-chip-h);
-  min-height: var(--pm-nav-chip-h);
-  border-radius: var(--pm-nav-chip-radius);
-  border: var(--pm-nav-chip-border);
-  background: var(--pm-nav-chip-bg);
-  box-shadow: var(--pm-nav-chip-shadow);
-  color: #e8ecff;
-  font-size: 18px;
-  display: grid;
-  place-items: center;
-  overflow: visible;
-  position: relative;
-  transition:
-    border-color 0.25s ease,
-    box-shadow 0.25s ease,
-    color 0.2s ease;
-}
-
-.pm-navbar__right .pm-icon-button.pm-icon-button--bell > svg {
-  position: relative;
-  z-index: 1;
-  display: block;
-  flex-shrink: 0;
-}
-
-.pm-navbar__right .pm-icon-button.pm-icon-button--bell:hover {
-  border-color: rgba(255, 255, 255, 0.065);
-  color: #fff;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.4),
-    0 0 18px rgba(100, 140, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.pm-navbar__right .pm-icon-button.pm-icon-button--bell.is-open {
-  border-color: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  box-shadow:
-    0 4px 20px rgba(0, 0, 0, 0.4),
-    0 0 18px rgba(100, 140, 255, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
-
-.pm-icon-button--bell .pm-badge {
-  right: 3px;
-  top: 3px;
-  min-width: 17px;
-  height: 17px;
-  font-size: 9px;
-  border: 1.5px solid rgba(8, 10, 28, 0.95);
-  z-index: 2;
-  animation: pm-bell-badge-pulse 2.5s ease-in-out infinite;
-}
-
-@keyframes pm-bell-badge-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 8px rgba(255, 42, 133, 0.5);
-  }
-  50% {
-    box-shadow: 0 0 14px rgba(255, 42, 133, 0.85);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pm-icon-button--bell .pm-badge {
-    animation: none;
-  }
 }

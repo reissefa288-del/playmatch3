@@ -45,27 +45,6 @@
   min-width: 0;
 }
 
-.pm-app-shell--nearby .pm-navbar__right .pm-icon-button.pm-icon-button--bell {
-  flex-shrink: 0;
-  width: var(--pm-nav-chip-h);
-  height: var(--pm-nav-chip-h);
-  min-width: var(--pm-nav-chip-h);
-  min-height: var(--pm-nav-chip-h);
-  display: grid;
-  place-items: center;
-  overflow: visible;
-}
-
-.pm-app-shell--nearby .pm-navbar__right .pm-icon-button.pm-icon-button--bell > svg {
-  position: relative;
-  z-index: 1;
-  display: block;
-}
-
-.pm-app-shell--nearby .pm-navbar__right .pm-icon-button.pm-icon-button--bell .pm-badge {
-  z-index: 2;
-}
-
 .pm-nearby-screen__back {
   position: relative;
   z-index: 12;

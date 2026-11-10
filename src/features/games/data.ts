@@ -271,6 +271,7 @@ export type GamesMiniCard = {
   artKind:
     | 'bubble-shooter'
     | 'brick-break'
+    | 'neon-brick'
     | 'block-duel'
     | 'pong'
     | 'pong-duel'
@@ -316,6 +317,15 @@ export const popularGamesCards: GamesMiniCard[] = [
     badge: 'Duel',
     players: '1120',
     color: 'is-blue',
+  },
+  {
+    id: 'neon-brick',
+    title: 'NEON BRICK',
+    icon: FiGrid,
+    artKind: 'neon-brick',
+    badge: '1v1',
+    players: 'Yeni',
+    color: 'is-pink',
   },
   {
     id: 'block-duel',

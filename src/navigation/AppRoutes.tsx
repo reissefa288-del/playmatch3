@@ -13,6 +13,7 @@ const MessageScreen = lazyNamed(() => import('../features/chat/MessageScreen'), 
 const NearbyPlayersScreen = lazyNamed(() => import('../features/home/NearbyPlayersScreen'), 'NearbyPlayersScreen')
 const QuickMatchScreen = lazyNamed(() => import('../features/games/QuickMatchScreen'), 'QuickMatchScreen')
 const XoxGameScreen = lazyNamed(() => import('../features/games/XoxGameScreen'), 'XoxGameScreen')
+const NeonBrickScreen = lazyNamed(() => import('../features/games/neon-brick/NeonBrickScreen'), 'NeonBrickScreen')
 const BrickBreakScreen = lazyNamed(() => import('../features/games/BrickBreakScreen'), 'BrickBreakScreen')
 const BubbleShooterScreen = lazyNamed(() => import('../features/games/BubbleShooterScreen'), 'BubbleShooterScreen')
 const BlockDuelScreen = lazyNamed(() => import('../features/games/BlockDuelScreen'), 'BlockDuelScreen')
@@ -49,6 +50,7 @@ const NEARBY_PATH = /^\/nearby$/
 const QUICK_MATCH_PATH = /^\/games\/quick-match$/
 const XOX_PATH = /^\/games\/xox$/
 const BRICK_PATH = /^\/games\/brick-break$/
+const NEON_BRICK_PATH = /^\/games\/neon-brick$/
 const BUBBLE_PATH = /^\/games\/bubble-shooter$/
 const BLOCK_PATH = /^\/games\/block-duel$/
 const MEMORY_PATH = /^\/games\/memory-duel$/
@@ -77,6 +79,7 @@ export function AppRoutes() {
   const isQuickMatch = QUICK_MATCH_PATH.test(path)
   const isXox = XOX_PATH.test(path)
   const isBrick = BRICK_PATH.test(path)
+  const isNeonBrick = NEON_BRICK_PATH.test(path)
   const isBubble = BUBBLE_PATH.test(path)
   const isBlock = BLOCK_PATH.test(path)
   const isMemory = MEMORY_PATH.test(path)
@@ -102,6 +105,7 @@ export function AppRoutes() {
     isQuickMatch ||
     isXox ||
     isBrick ||
+    isNeonBrick ||
     isBubble ||
     isBlock ||
     isMemory ||
@@ -166,6 +170,14 @@ export function AppRoutes() {
                 element={
                   <LazyStackRoute>
                     <XoxGameScreen />
+                  </LazyStackRoute>
+                }
+              />
+              <Route
+                path="/games/neon-brick"
+                element={
+                  <LazyStackRoute>
+                    <NeonBrickScreen />
                   </LazyStackRoute>
                 }
               />

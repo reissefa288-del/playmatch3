@@ -4,8 +4,13 @@ import { useRuntimeActive } from '../../shared/useRuntimeActive'
 const STORAGE_KEY = 'pm-match-boost-until'
 
 export const BOOST_GEM_COST = 35
-export const BOOST_DURATION_MS = 60 * 60 * 1000
+export const BOOST_DURATION_MS = 10 * 1000
 export const BOOST_DURATION_MINUTES = BOOST_DURATION_MS / 60_000
+
+function formatDuration(ms: number): string {
+  if (ms < 60_000) return `${Math.max(1, Math.round(ms / 1000))} sn`
+  return `${Math.round(ms / 60_000)} dk`
+}
 
 function readBoostUntil(): number | null {
   try {
@@ -73,5 +78,6 @@ export function useMatchBoost() {
     activate,
     cost: BOOST_GEM_COST,
     durationMinutes: BOOST_DURATION_MINUTES,
+    durationLabel: formatDuration(BOOST_DURATION_MS),
   }
 }

@@ -51,7 +51,7 @@ PlayMeet — oyna, tanış, buluşmaya hazırlan.
 | Alan | Değer |
 |------|-------|
 | E-posta | `destek@playmeet.app` |
-| Gizlilik politikası URL | `https://<HOST>/legal/gizlilik-politikasi` |
+| Gizlilik politikası URL | `https://playmeet-prod-1bbda.web.app/legal/gizlilik-politikasi/` |
 | Web sitesi (opsiyonel) | `https://<HOST>` |
 
 `<HOST>` → `android/twa-host.json` içindeki domain (ör. `playmeet.app` veya `proje-id.web.app`).
@@ -61,8 +61,8 @@ PlayMeet — oyna, tanış, buluşmaya hazırlan.
 | Asset | Dosya / not |
 |-------|-------------|
 | Uygulama simgesi 512×512 | `store-assets/play-store-icon-512.png` |
-| Feature graphic 1024×500 | `store-assets/feature-graphic.png` (sen oluştur) |
-| Telefon ekran görüntüsü | `store-assets/screenshots/phone-*.png` min 2 adet |
+| Feature graphic 1024×500 | `store-assets/feature-graphic.png` |
+| Telefon ekran görüntüsü | `store-assets/screenshots/phone-01-home.png`, `phone-02-match.png`, `phone-03-games.png` |
 
 ## Content rating (IARC) — özet cevaplar
 

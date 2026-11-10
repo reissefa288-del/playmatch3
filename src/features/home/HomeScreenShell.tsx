@@ -1,6 +1,5 @@
 import '../../styles/home-hero.css'
 import { useMemo } from 'react'
-import nearbyTitle from './assets/nearby-title.png'
 import { FilterBar } from './components/FilterBar'
 import { Navbar } from './components/Navbar'
 import { buildFilterChips } from './buildFilterChips'
@@ -22,7 +21,6 @@ export function HomeScreenShell({ filters }: HomeScreenShellProps) {
       <section className="pm-location">
         <div className="pm-location__head">
           <h1 className="pm-location__title-text">Yakındaki Oyuncular</h1>
-          <img className="pm-location__cut" src={nearbyTitle} alt="" />
         </div>
       </section>
 

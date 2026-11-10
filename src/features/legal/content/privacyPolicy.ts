@@ -4,22 +4,24 @@ export const privacyPolicy: LegalDocument = {
   id: 'privacy',
   title: 'Gizlilik Politikası',
   subtitle: 'Kişisel verilerinizin korunması ve KVKK aydınlatması',
-  updatedAt: '2 Haziran 2026',
+  updatedAt: '18 Ekim 2026',
   sections: [
     {
       id: 'controller',
       title: '1. Veri Sorumlusu',
       paragraphs: [
+        'Bu Gizlilik Politikası, Google Play’de yayınlanan PlayMeet uygulaması (paket adı: app.playmeet.twa) ile web sürümü için geçerlidir.',
         '6698 sayılı Kişisel Verilerin Korunması Kanunu (“KVKK”) kapsamında veri sorumlusu PlayMeet’tir.',
         'Kişisel verileriniz; hizmet sunumu, güvenlik, yasal yükümlülükler ve meşru menfaatlerimiz doğrultusunda aşağıda açıklanan ilkelere uygun işlenir.',
-        'İletişim: destek@playmeet.app',
+        'Gizlilik iletişimi: destek@playmeet.app',
       ],
     },
     {
       id: 'scope',
       title: '2. Kapsam',
       paragraphs: [
-        'Bu politika; PlayMeet mobil uygulaması, web sürümü ve bunlara bağlı hizmetleri kullanırken toplanan kişisel verileri kapsar. Uygulamayı kullanarak bu politikayı okuduğunuzu kabul etmiş olursunuz.',
+        'Bu politika; PlayMeet Android (Trusted Web Activity), web uygulaması ve bunlara bağlı bulut hizmetlerini kullanırken erişilen, toplanan, kullanılan ve paylaşılan kişisel ve cihaz verilerini kapsar.',
+        'Uygulamayı veya hizmeti kullanarak bu politikayı okuduğunuzu kabul etmiş olursunuz.',
       ],
     },
     {
@@ -67,15 +69,16 @@ export const privacyPolicy: LegalDocument = {
     },
     {
       id: 'sharing',
-      title: '6. Verilerin Aktarımı',
+      title: '6. Verilerin Aktarımı ve Üçüncü Taraflar',
       paragraphs: [
-        'Verileriniz yalnızca gerekli olduğu ölçüde ve uygun güvenlik önlemleriyle paylaşılır:',
+        'Verilerinizi satmayız. Yalnızca hizmetin çalışması için gerekli olduğu ölçüde ve güvenlik önlemleriyle paylaşırız:',
       ],
       bullets: [
-        'Google: OAuth ile giriş hizmeti (Google Gizlilik Politikası geçerlidir)',
-        'Bulut barındırma ve veritabanı sağlayıcıları',
-        'Ödeme altyapısı sağlayıcıları (App Store, Google Play vb.)',
-        'Analitik, çökme raporlama ve bildirim hizmeti sağlayıcıları',
+        'Google Firebase Authentication: Google ile giriş (ad, e-posta, profil fotoğrafı, kullanıcı kimliği)',
+        'Google Cloud Firestore / Firebase Storage / Firebase Hosting: profil, mesaj, fotoğraf ve uygulama verilerinin barındırılması',
+        'Google Play: uygulama dağıtımı ve (açılırsa) uygulama içi satın alma / abonelik işlemleri',
+        'Firebase App Check ve güvenlik servisleri: kötüye kullanım ve bot koruması',
+        'Sentry veya benzeri hata izleme (yapılandırılmışsa): çökme ve teşhis verileri',
         'Hukuki zorunluluk hâlinde yetkili kamu kurum ve kuruluşları',
       ],
     },
@@ -128,32 +131,40 @@ export const privacyPolicy: LegalDocument = {
       ],
     },
     {
-      id: 'children',
-      title: '12. Çocukların Gizliliği',
+      id: 'account-deletion',
+      title: '12. Hesap ve Veri Silme',
       paragraphs: [
-        'PlayMeet 18 yaş altına yönelik değildir. Bilerek reşit olmayanlardan veri toplamayız. Böyle bir durum fark edilirse ilgili veriler silinir ve hesap kapatılır.',
+        'PlayMeet hesap oluşturmayı destekler. Hesabınızı ve ilişkili kişisel verilerinizi silmek için uygulama içinde Profil → Hesap → Hesabımı Sil yolunu kullanabilir veya destek@playmeet.app adresine yazabilirsiniz.',
+        'Silme talebi üzerine Google hesap oturumunuz, kullanıcı profiliniz, yüklediğiniz fotoğraflar, gönderdiğiniz beğeniler, engellemeler ve ilgili hesap verileri silinir veya kimliksizleştirilir. Yasal saklama zorunluluğu olan moderasyon/güvenlik kayıtları gerekli süre boyunca tutulabilir; bunlar hesap dondurma yerine kalıcı silme sürecinin parçasıdır.',
+      ],
+    },
+    {
+      id: 'children',
+      title: '13. Çocukların Gizliliği',
+      paragraphs: [
+        'PlayMeet yalnızca 18 yaş ve üzeri kullanıcılara yöneliktir; çocuklara yönelik bir uygulama değildir. Bilerek reşit olmayanlardan veri toplamayız. Böyle bir durum fark edilirse ilgili veriler silinir ve hesap kapatılır.',
       ],
     },
     {
       id: 'cookies',
-      title: '13. Çerezler ve Yerel Depolama',
+      title: '14. Çerezler ve Yerel Depolama',
       paragraphs: [
-        'Web sürümünde oturum ve tercihlerinizi hatırlamak için çerezler kullanılabilir. Mobil uygulamada benzer amaçla yerel depolama (localStorage, cihaz hafızası) kullanılabilir. Tarayıcı ayarlarından çerezleri yönetebilirsiniz; bazı özellikler devre dışı kalabilir.',
+        'Web sürümünde oturum ve tercihlerinizi hatırlamak için çerezler kullanılabilir. Android TWA / mobil web görünümünde benzer amaçla yerel depolama (localStorage, cihaz hafızası) kullanılabilir. Tarayıcı ayarlarından çerezleri yönetebilirsiniz; bazı özellikler devre dışı kalabilir.',
       ],
     },
     {
       id: 'changes',
-      title: '14. Politika Değişiklikleri',
+      title: '15. Politika Değişiklikleri',
       paragraphs: [
-        'Bu Gizlilik Politikası güncellenebilir. Önemli değişiklikler uygulama içi bildirim veya e-posta ile duyurulur. Güncel sürüm her zaman uygulama içinden erişilebilir olacaktır.',
+        'Bu Gizlilik Politikası güncellenebilir. Önemli değişiklikler uygulama içi bildirim veya e-posta ile duyurulur. Güncel sürüm her zaman uygulama içinden ve genel erişilebilir URL üzerinden okunabilir olacaktır.',
       ],
     },
     {
       id: 'contact',
-      title: '15. İletişim',
+      title: '16. İletişim',
       paragraphs: [
         'Gizlilik ve kişisel verileriniz hakkında: destek@playmeet.app',
-        'PlayMeet — Türkiye',
+        'Uygulama: PlayMeet (app.playmeet.twa) — Türkiye',
       ],
     },
   ],

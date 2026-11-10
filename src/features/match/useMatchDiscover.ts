@@ -67,7 +67,8 @@ export function useMatchDiscover(
   const [index, setIndex] = useState(0)
   const [history, setHistory] = useState<HistoryEntry[]>([])
   const [toast, setToast] = useState<MatchToastPayload | null>(null)
-  const [acting, setActing] = useState(false)
+  const [acting] = useState(false)
+  const likeLock = useRef(false)
   const toastId = useRef(0)
   const prevGender = useRef(gender)
   const loadGen = useRef(0)
@@ -205,7 +206,7 @@ export function useMatchDiscover(
   }, [acting, advance, current])
 
   const like = useCallback(() => {
-    if (!current || acting || !uid) return
+    if (!current || likeLock.current || !uid) return
     if (!isUnlimited && remaining <= 0) {
       showToast(
         'Beğeni hakkın bitti',
@@ -215,30 +216,32 @@ export function useMatchDiscover(
       return
     }
 
-    setActing(true)
+    const profile = current
+    likeLock.current = true
     void (async () => {
-      if (!(await tryConsumeLike())) {
-        showToast('Beğeni hakkın bitti', 'warn', `Yarın ${DAILY_LIKES_LIMIT} yeni hak tanımlanacak`)
-        setActing(false)
-        return
-      }
-
       try {
-        if (!isGameTestBotPlayerId(current.id)) {
-          const result = await sendLikeAndRefresh(uid, current.id, 'discover')
-          if (result.matched) {
-            showToast('Eşleşme!', 'premium', `${current.name} ile eşleştiniz`)
-          }
+        if (!(await tryConsumeLike())) {
+          showToast('Beğeni hakkın bitti', 'warn', `Yarın ${DAILY_LIKES_LIMIT} yeni hak tanımlanacak`)
+          return
         }
-        advance({ profileId: current.id, action: 'like', consumedLike: true })
-      } catch {
-        showToast('Beğeni gönderilemedi', 'warn', 'Bağlantını kontrol edip tekrar dene.')
+
+        advance({ profileId: profile.id, action: 'like', consumedLike: true })
+        if (!isGameTestBotPlayerId(profile.id)) {
+          void sendLikeAndRefresh(uid, profile.id, 'discover')
+            .then((result) => {
+              if (result.matched) {
+                showToast('Eşleşme!', 'premium', `${profile.name} ile eşleştiniz`)
+              }
+            })
+            .catch(() => {
+              showToast('Beğeni gönderilemedi', 'warn', 'Bağlantını kontrol edip tekrar dene.')
+            })
+        }
       } finally {
-        setActing(false)
+        likeLock.current = false
       }
     })()
   }, [
-    acting,
     advance,
     current,
     isUnlimited,

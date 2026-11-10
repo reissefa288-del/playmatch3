@@ -85,6 +85,7 @@ function pair(full: string, thumb: string, fullAvif?: string, thumbAvif?: string
 const GAME_ART_BY_KIND: Record<string, ArtPair> = {
   'bubble-shooter': pair(bubbleArtFull, bubbleArtThumb, bubbleArtFullAvif, bubbleArtThumbAvif),
   'brick-break': pair(brickArtFull, brickArtThumb, brickArtFullAvif, brickArtThumbAvif),
+  'neon-brick': pair(brickArtFull, brickArtThumb, brickArtFullAvif, brickArtThumbAvif),
   'block-duel': pair(blockArtFull, blockArtThumb, blockArtFullAvif, blockArtThumbAvif),
   xox: pair(xoxArtFull, xoxArtThumb, xoxArtFullAvif, xoxArtThumbAvif),
   memory: pair(memoryArtFull, memoryArtThumb, memoryArtFullAvif, memoryArtThumbAvif),
@@ -110,6 +111,7 @@ const GAME_ART_BY_KIND: Record<string, ArtPair> = {
 const GAME_ART_BY_ID: Record<string, ArtPair> = {
   'bubble-shooter-duel': pair(bubbleArtFull, bubbleArtThumb, bubbleArtFullAvif, bubbleArtThumbAvif),
   'brick-break-duel': pair(brickArtFull, brickArtThumb, brickArtFullAvif, brickArtThumbAvif),
+  'neon-brick': pair(brickArtFull, brickArtThumb, brickArtFullAvif, brickArtThumbAvif),
   'block-duel': pair(blockArtFull, blockArtThumb, blockArtFullAvif, blockArtThumbAvif),
   xox: pair(xoxArtFull, xoxArtThumb, xoxArtFullAvif, xoxArtThumbAvif),
   'memory-duel': pair(memoryArtFull, memoryArtThumb, memoryArtFullAvif, memoryArtThumbAvif),

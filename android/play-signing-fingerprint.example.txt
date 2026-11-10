@@ -1,0 +1,10 @@
+# Play Console → Setup (Kurulum) → App signing (Uygulama imzalama)
+# "App signing key certificate" altındaki SHA-256 certificate fingerprint değerini
+# bu dosyaya tek satır olarak yapıştır (AA:BB:... formatı).
+# Sonra:
+#   copy android\play-signing-fingerprint.example.txt android\play-signing-fingerprint.txt
+#   (içeriği düzenle)
+#   npm run twa:apply-fingerprint -- --fingerprint <upload-sha> 
+#   (veya upload-fingerprint.txt + play-signing-fingerprint.txt ile otomatik birleşir)
+#
+REPLACE_WITH_PLAY_APP_SIGNING_SHA256

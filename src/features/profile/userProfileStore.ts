@@ -123,18 +123,22 @@ function describeProfileSaveError(error: unknown): string {
 
 let loadGeneration = 0
 
-/** Cursor önizleme — onboarding atlanmış demo profil (yalnızca DEV + localStorage). */
-export function seedDevPreviewCompleteProfile(uid: string, email: string): void {
+/** Onboarding atlanmış demo / misafir profil (localStorage). */
+export function seedDevPreviewCompleteProfile(
+  uid: string,
+  email: string,
+  overrides?: Partial<Pick<UserProfile, 'name' | 'bio'>>,
+): void {
   if (!preferLocalDevPersistence()) return
 
   const profile: UserProfile = {
     ...createEmptyProfile(),
-    name: 'Dev Önizleme',
+    name: overrides?.name ?? 'Dev Önizleme',
     age: 24,
     email,
     matchPreference: 'both',
     interests: ['Gamer', 'Müzik', 'Film', 'Sohbet'],
-    bio: 'Cursor preview geliştirme oturumu',
+    bio: overrides?.bio ?? 'Cursor preview geliştirme oturumu',
     onboardingCompleted: true,
     completedAt: Date.now(),
   }

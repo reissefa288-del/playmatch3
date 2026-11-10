@@ -1,4 +1,4 @@
-﻿/* -------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------- */
 /* PlayMeet Home — tab-specific layout (base artboard: navigation.css)      */
 /* No viewport-height scaling. No flex/grid compression. Overflow = scroll.  */
 /* -------------------------------------------------------------------------- */
@@ -12,9 +12,36 @@
   flex: 0 0 auto;
 }
 
-/* Premium kartı + alt içerik dock alanının üstünde kalsın */
+/* Kart + aksiyonlar alt menünün üstüne kadar uzasın */
 .pm-app-shell--home .pm-home {
-  padding-bottom: 28px;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+}
+
+.pm-app-shell--home .pm-match-hero-card--aaa:has(.pm-match-card-overlay) {
+  /* Alt menüye yapışık (~2–4px) */
+  min-height: calc(100dvh - 264px);
+  max-height: calc(100dvh - 262px);
+}
+
+.pm-app-shell--home .pm-match-card-overlay {
+  padding-bottom: 12px;
+}
+
+.pm-app-shell--home .pm-match-actions-block {
+  position: relative;
+  z-index: 5;
+}
+
+.pm-app-shell--home .pm-match-discover {
+  gap: 10px;
+}
+
+.pm-app-shell--home .pm-match-promo-stack {
+  margin-top: 4px;
+}
+
+.pm-tab-panel#pm-tab-home {
+  scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px));
 }
 
 .pm-app-shell--home .pm-premium-unlock {
@@ -50,7 +77,6 @@
 .pm-filter-bar,
 .pm-filter-chip,
 .pm-pill,
-.pm-icon-button,
 .pm-hero-card__actions,
 .pm-nearby-list header,
 .pm-nearby-card__meta,
@@ -118,40 +144,6 @@
 .pm-pill__plus {
   color: #bbb3de;
   flex-shrink: 0;
-}
-
-.pm-icon-button:not(.pm-icon-button--bell) {
-  flex: 0 0 auto;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  justify-content: center;
-  border-radius: 14px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: #fff;
-  position: relative;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-/* Bell — navbar-tray.css */
-
-.pm-badge {
-  position: absolute;
-  right: -2px;
-  top: -2px;
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
-  border-radius: 50%;
-  font-size: 10px;
-  font-weight: 700;
-  display: grid;
-  place-content: center;
-  background: #ff2a85;
-  box-shadow: 0 0 10px #ff2a85;
 }
 
 /* --- Location ------------------------------------------------------------- */
@@ -1104,6 +1096,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+  overflow: visible;
 }
 
 .pm-checkin__bar,
@@ -1117,49 +1110,314 @@
 
 .pm-checkin__bar {
   position: relative;
-  isolation: isolate;
-  overflow: hidden;
+  display: block;
   flex: 1;
   min-width: 0;
-  justify-content: flex-start;
-  gap: 10px;
-  min-height: 72px;
-  padding: 8px 14px 8px 8px;
+  width: 100%;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
   border-radius: 20px;
-  border: 1px solid rgba(90, 160, 255, 0.4);
-  background: #0c1028;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
   color: #f7f8fc;
-  box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(140, 190, 255, 0.22),
-    0 0 0 1px rgba(255, 80, 170, 0.16);
+  isolation: isolate;
 }
 
-.pm-checkin__bar > svg,
-.pm-checkin__bar > span {
+/* PNG dış çerçevesi kırpılı; tanışma aksiyonlarındaki iç çizgi + rim */
+.pm-checkin__bar--frame {
+  --rim-hi: #8fd4ff;
+  --rim-mid: #3d8cff;
+  --rim-lo: #3156ea;
+  --rim-duration: 10s;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+/* Renkli hairline rim (match action ::before) */
+.pm-checkin__bar--frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 0.6px;
+  background: linear-gradient(
+    135deg,
+    var(--rim-hi),
+    var(--rim-mid),
+    var(--rim-lo),
+    var(--rim-hi)
+  );
+  background-size: 240% 240%;
+  animation: pm-checkin-rim-flow var(--rim-duration) ease infinite;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 6;
+  opacity: 0.8;
+}
+
+/* Beyaz iç çizgi (match action ::after) */
+.pm-checkin__bar--frame::after {
+  content: '';
+  position: absolute;
+  inset: 0.75px;
+  border-radius: inherit;
+  border: 0.75px solid rgba(255, 255, 255, 0.5);
+  box-shadow:
+    inset 0 0 0 0.4px rgba(255, 255, 255, 0.18),
+    0 0 0 0.35px rgba(255, 255, 255, 0.1);
+  pointer-events: none;
+  z-index: 7;
+}
+
+.pm-checkin__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 3;
+  overflow: hidden;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.14) 48%,
+    transparent 58%
+  );
+  background-size: 220% 100%;
+  animation: pm-checkin-sheen 7.5s ease-in-out infinite;
+  mix-blend-mode: soft-light;
+  opacity: 0.85;
+}
+
+@keyframes pm-checkin-sheen {
+  0%,
+  100% {
+    background-position: 120% 0;
+  }
+  50% {
+    background-position: -20% 0;
+  }
+}
+
+@keyframes pm-checkin-rim-flow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.pm-checkin__stage {
+  position: relative;
+  display: block;
+  z-index: 1;
+  transform: scale(1.055);
+  transform-origin: center;
+}
+
+.pm-checkin__art {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: inherit;
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: none;
+  mask-image: none;
   position: relative;
   z-index: 1;
 }
 
-.pm-checkin__mark {
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  color: #f7f8fc;
-  border: 1px solid rgba(120, 180, 255, 0.55);
-  background: radial-gradient(circle, rgba(40, 130, 255, 0.42), rgba(12, 10, 32, 0.2) 70%);
-  box-shadow:
-    0 0 16px rgba(40, 140, 255, 0.35),
-    inset 0 0 10px rgba(255, 80, 170, 0.16);
+.pm-checkin__place {
+  position: absolute;
+  left: 22.5%;
+  top: 54%;
+  z-index: 8;
+  max-width: 42%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgba(170, 220, 235, 0.95);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.75);
+  pointer-events: none;
 }
 
-.pm-checkin__mark svg {
-  width: 22px;
-  height: 22px;
-  filter: drop-shadow(0 0 6px rgba(120, 180, 255, 0.8));
+.pm-checkin__orb-base {
+  position: absolute;
+  left: 7px;
+  right: 7px;
+  bottom: 1px;
+  height: 16px;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at 50% 50%, rgba(176, 130, 255, 0.7), rgba(120, 70, 220, 0.08) 68%, transparent 74%);
+  box-shadow: 0 0 14px rgba(150, 100, 240, 0.35);
+}
+
+.pm-checkin__orb-glass {
+  position: absolute;
+  top: 0;
+  left: 2px;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 196, 255, 0.42);
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.28), transparent 26%),
+    radial-gradient(circle at 50% 62%, rgba(126, 78, 214, 0.42), rgba(28, 16, 58, 0.82) 74%);
+  box-shadow:
+    inset 0 -10px 16px rgba(92, 48, 170, 0.28),
+    0 8px 16px rgba(20, 8, 48, 0.28);
+}
+
+.pm-checkin__orb-glass svg {
+  display: block;
+  filter: drop-shadow(0 4px 6px rgba(70, 30, 140, 0.35));
+}
+
+.pm-checkin__radar {
+  position: relative;
+  flex: 0 0 auto;
+  display: block;
+  width: 62px;
+  height: 64px;
+  margin-right: 0;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(40, 170, 255, 0.35));
+}
+
+.pm-checkin-wave {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: block;
+  pointer-events: none;
+}
+
+.pm-checkin-wave canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.pm-checkin__pin-shadow {
+  position: absolute;
+  left: 73.4%;
+  top: 61%;
+  z-index: 3;
+  width: 6.4%;
+  height: 14%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(40, 210, 190, 0.42), transparent 70%);
+  pointer-events: none;
+  animation: pm-checkin-shadow 3.6s ease-in-out infinite;
+}
+
+.pm-checkin__pin {
+  position: absolute;
+  left: 72.06%;
+  top: 15.1%;
+  z-index: 4;
+  display: block;
+  width: 8.79%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 6px 8px rgba(0, 20, 30, 0.35));
+  animation: pm-checkin-pin 3.6s ease-in-out infinite;
+}
+
+.pm-checkin__person {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1px solid rgba(214, 196, 255, 0.45);
+  background: rgba(54, 28, 104, 0.82);
+  color: #efe7ff;
+  box-shadow: 0 0 8px rgba(150, 100, 240, 0.35);
+}
+
+.pm-checkin__person svg {
+  width: 9px;
+  height: 9px;
+}
+
+.pm-checkin__person--a { left: 1px; top: 31px; }
+.pm-checkin__person--b { left: 32px; bottom: 1px; }
+.pm-checkin__person--c { right: 0; top: 27px; }
+
+@keyframes pm-checkin-pin {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-11%);
+  }
+}
+
+@keyframes pm-checkin-shadow {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: scale(0.78);
+    opacity: 0.32;
+  }
+}
+
+@keyframes pm-checkin-ambient {
+  0% {
+    background-position: 0% 50%, 100% 50%, 0% 50%;
+    opacity: 0.72;
+  }
+  100% {
+    background-position: 8% 54%, 92% 46%, 100% 50%;
+    opacity: 1;
+  }
+}
+
+@keyframes pm-checkin-rim {
+  0% {
+    background-position: 0% 50%;
+    opacity: 0.58;
+  }
+  100% {
+    background-position: 100% 50%;
+    opacity: 0.82;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-checkin__sheen,
+  .pm-checkin__pin,
+  .pm-checkin__pin-shadow,
+  .pm-checkin__bar--frame::before {
+    animation: none;
+  }
 }
 
 .pm-checkin__mark--sheet {
@@ -1184,7 +1442,8 @@
 }
 
 .pm-checkin__copy strong,
-.pm-checkin__copy small {
+.pm-checkin__copy small,
+.pm-checkin__meta {
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1192,9 +1451,11 @@
 }
 
 .pm-checkin__copy strong {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1.2;
+  font-family: Outfit, Inter, system-ui, sans-serif !important;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.35px;
+  line-height: 1.15;
   color: #f7f8fc;
 }
 
@@ -1202,12 +1463,28 @@
   font-size: 13px;
   font-weight: 500;
   line-height: 1.3;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(180, 196, 230, 0.78);
+}
+
+.pm-checkin__meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 1px;
+  font-size: 11px;
+  letter-spacing: -0.1px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgba(214, 196, 255, 0.78);
+}
+
+.pm-checkin__meta svg {
+  flex: 0 0 auto;
 }
 
 .pm-checkin__go {
-  flex: 0 0 auto;
-  color: rgba(255, 255, 255, 0.62);
+  display: none;
 }
 
 

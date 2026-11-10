@@ -1,13 +1,11 @@
 import { useState, type CSSProperties, type ReactNode } from 'react'
-import { useNavigate } from 'react-router-dom'
 import actionUndo from '../assets/action-undo.png'
 import actionPass from '../assets/action-pass.png'
 import actionLike from '../assets/action-like.png'
 import actionInvite from '../assets/action-invite.png'
 import actionSuper from '../assets/action-super.png'
-import { usePremiumSubscriptionState } from '../../premium/usePremiumSubscription'
 import { DAILY_LIKES_LIMIT } from '../data'
-import { MatchLikesQuota } from './MatchLikesQuota'
+import { ActionRimShader, type ActionRimTone } from './ActionRimShader'
 
 type MatchActionRowProps = {
   onUndo: () => void
@@ -20,7 +18,6 @@ type MatchActionRowProps = {
   canAct: boolean
   likesRemaining: number
   dailyLimit?: number
-  isUnlimited?: boolean
 }
 
 export function MatchActionRow({
@@ -34,17 +31,10 @@ export function MatchActionRow({
   canAct,
   likesRemaining,
   dailyLimit = DAILY_LIKES_LIMIT,
-  isUnlimited = false,
 }: MatchActionRowProps) {
-  const navigate = useNavigate()
-  const { active: isPremium } = usePremiumSubscriptionState()
   const [burst, setBurst] = useState(false)
 
   const handleUndo = () => {
-    if (!isPremium) {
-      navigate('/premium', { state: { notice: 'Geri almak için Premium almalısın.' } })
-      return
-    }
     if (canUndo) onUndo()
   }
 
@@ -56,63 +46,56 @@ export function MatchActionRow({
   }
 
   return (
-    <div
-      className="pm-match-actions-block"
-     
-     
-     
-    >
-      <MatchLikesQuota remaining={likesRemaining} limit={dailyLimit} isUnlimited={isUnlimited} />
-      <div className="pm-match-actions">
-      <ActionCircle
-        label={isPremium ? 'Geri al' : 'Geri almak için Premium al'}
-        variant="muted"
-        icon={<img src={actionUndo} alt="" />}
-        onClick={handleUndo}
-        disabled={isPremium ? !canUndo : false}
-      />
-      <ActionCircle
-        label="Geç"
-        variant="pass"
-        icon={<img src={actionPass} alt="" />}
-        onClick={onPass}
-        disabled={!canAct}
-      />
-      <div className={`pm-match-action-like-slot${burst ? ' is-burst' : ''}`}>
+    <div className="pm-match-actions-block">
+      <div className="pm-match-actions pm-match-actions--glass">
         <ActionCircle
-          label={
-            canLike
-              ? `Eşleşme isteği gönder (${likesRemaining}/${dailyLimit})`
-              : 'Beğeni hakkın bitti'
-          }
-          variant="match"
-          large
-          icon={<img src={actionLike} alt="" />}
-          onClick={handleLike}
-          disabled={!canAct || !canLike}
+          label="Geri al"
+          variant="muted"
+          icon={<img src={actionUndo} alt="" width={512} height={512} draggable={false} />}
+          onClick={handleUndo}
         />
-        {burst ? (
-          <span className="pm-like-burst" aria-hidden>
-            {Array.from({ length: 6 }, (_, i) => (
-              <i key={i} style={{ '--i': i } as CSSProperties} />
-            ))}
-          </span>
-        ) : null}
-      </div>
-      <ActionCircle
-        label="Oyuna davet et"
-        variant="invite"
-        icon={<img src={actionInvite} alt="" />}
-        onClick={onInvite}
-        disabled={!canAct}
-      />
-      <ActionCircle
-        label="Süper beğeni"
-        variant="super"
-        icon={<img src={actionSuper} alt="" />}
-        onClick={onSuperLike}
-        disabled={!canAct}
-      />
+        <ActionCircle
+          label="Geç"
+          variant="pass"
+          icon={<img src={actionPass} alt="" width={512} height={512} draggable={false} />}
+          onClick={onPass}
+          disabled={!canAct}
+        />
+        <div className={`pm-match-action-like-slot${burst ? ' is-burst' : ''}`}>
+          <ActionCircle
+            label={
+              canLike
+                ? `Eşleşme isteği gönder (${likesRemaining}/${dailyLimit})`
+                : 'Beğeni hakkın bitti'
+            }
+            variant="match"
+            large
+            icon={<img src={actionLike} alt="" width={512} height={512} draggable={false} />}
+            onClick={handleLike}
+            disabled={!canAct || !canLike}
+          />
+          {burst ? (
+            <span className="pm-like-burst" aria-hidden>
+              {Array.from({ length: 6 }, (_, i) => (
+                <i key={i} style={{ '--i': i } as CSSProperties} />
+              ))}
+            </span>
+          ) : null}
+        </div>
+        <ActionCircle
+          label="Oyuna davet et"
+          variant="invite"
+          icon={<img src={actionInvite} alt="" width={512} height={512} draggable={false} />}
+          onClick={onInvite}
+          disabled={!canAct}
+        />
+        <ActionCircle
+          label="Süper beğeni"
+          variant="super"
+          icon={<img src={actionSuper} alt="" width={512} height={512} draggable={false} />}
+          onClick={onSuperLike}
+          disabled={!canAct}
+        />
       </div>
     </div>
   )
@@ -136,6 +119,7 @@ function ActionCircle({
   onClick,
 }: ActionCircleProps) {
   const isLarge = large || variant === 'match'
+  const tone = variant as ActionRimTone
   const variantClass =
     variant === 'pass'
       ? 'pm-match-action--pass'
@@ -145,7 +129,9 @@ function ActionCircle({
           ? 'pm-match-action--super'
           : variant === 'muted'
             ? 'pm-match-action--muted'
-            : ''
+            : variant === 'match'
+              ? 'pm-match-action--match'
+              : ''
 
   return (
     <button
@@ -155,10 +141,8 @@ function ActionCircle({
       disabled={disabled}
       onClick={onClick}
       className={`pm-match-action ${isLarge ? 'pm-match-action--lg' : 'pm-match-action--sm'} ${variantClass}${disabled ? ' is-disabled' : ''}`}
-     
-     
-     
     >
+      <ActionRimShader tone={tone} large={isLarge} />
       <span className="pm-match-action__icon" aria-hidden>
         {icon}
       </span>
